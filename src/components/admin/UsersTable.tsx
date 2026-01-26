@@ -4,19 +4,26 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Loader2, Search, Edit2, X, UserCog, Check } from 'lucide-react';
+import { Loader2, Search, Edit2, X, UserCog, Check, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { UserProfile } from '@/types';
 
-export function UsersTable() {
+export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
   const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [selectedQrUser, setSelectedQrUser] = useState<UserProfile | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserProfile['role'] | ''>('');
   const [updating, setUpdating] = useState(false);
+  const [origin, setOrigin] = useState('');
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -56,6 +63,10 @@ export function UsersTable() {
   const closeModal = () => {
       setSelectedUser(null);
       setSelectedRole('');
+  };
+
+  const closeQrModal = () => {
+      setSelectedQrUser(null);
   };
 
   const saveRole = async () => {
@@ -105,16 +116,26 @@ export function UsersTable() {
         <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-500 font-medium">
                 <tr>
+                    <th className="p-4">QR</th>
                     <th className="p-4">ID</th>
                     <th className="p-4">Nombre</th>
                     <th className="p-4">Grado</th>
                     <th className="p-4">Rol</th>
-                    <th className="p-4 text-right">Acciones</th>
+                    {!readOnly && <th className="p-4 text-right">Acciones</th>}
                 </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
                 {users.map(user => (
                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="p-4">
+                            <button
+                                onClick={() => setSelectedQrUser(user)}
+                                className="p-2 bg-gray-50 hover:bg-[#DBF227]/20 text-gray-400 hover:text-[#373737] rounded-lg transition-colors border border-gray-200"
+                                title="Ver código QR"
+                            >
+                                <QrCode className="h-5 w-5" />
+                            </button>
+                        </td>
                         <td className="p-4 font-mono text-gray-600 font-medium">{user.short_id}</td>
                         <td className="p-4 text-[#373737] font-semibold">{user.first_name} {user.last_name}</td>
                         <td className="p-4 text-gray-500">{user.degree}</td>
@@ -123,16 +144,18 @@ export function UsersTable() {
                                 {user.role}
                             </span>
                         </td>
-                        <td className="p-4 text-right">
-                            <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={() => openModal(user)}
-                                className="text-gray-400 hover:text-[#373737] hover:bg-gray-100"
-                            >
-                                <Edit2 className="h-4 w-4" />
-                            </Button>
-                        </td>
+                        {!readOnly && (
+                            <td className="p-4 text-right">
+                                <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    onClick={() => openModal(user)}
+                                    className="text-gray-400 hover:text-[#373737] hover:bg-gray-100"
+                                >
+                                    <Edit2 className="h-4 w-4" />
+                                </Button>
+                            </td>
+                        )}
                     </tr>
                 ))}
             </tbody>
@@ -216,6 +239,60 @@ export function UsersTable() {
                       <Button variant="ghost" onClick={closeModal} className="flex-1 text-gray-500">Cancelar</Button>
                       <Button onClick={saveRole} disabled={updating} className="flex-1 bg-[#373737] text-white hover:bg-black">
                           {updating ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : 'Confirmar Cambio'}
+                      </Button>
+                  </div>
+              </div>
+          </div>
+      )}
+
+      {/* QR Code Modal */}
+      {selectedQrUser && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+                  <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                      <h3 className="font-bold text-[#373737] flex items-center gap-2">
+                         <QrCode className="h-4 w-4" />
+                         Código de Acceso
+                      </h3>
+                      <button onClick={closeQrModal} className="text-gray-400 hover:text-red-500 transition-colors p-1 hover:bg-white rounded-full">
+                          <X className="h-5 w-5" />
+                      </button>
+                  </div>
+                  
+                  <div className="p-8 flex flex-col items-center text-center space-y-6">
+                      
+                      {/* User Info */}
+                      <div className="space-y-2">
+                          <div className="h-16 w-16 rounded-full bg-[#DBF227]/20 flex items-center justify-center text-[#373737] font-bold text-2xl mx-auto mb-3">
+                              {selectedQrUser.first_name.charAt(0)}{selectedQrUser.last_name.charAt(0)}
+                          </div>
+                          <h4 className="text-xl font-bold text-[#373737] leading-tight">
+                              {selectedQrUser.first_name} {selectedQrUser.last_name}
+                          </h4>
+                          <p className="text-sm text-gray-500 font-medium">
+                              {selectedQrUser.degree} • <span className="capitalize">{selectedQrUser.role}</span>
+                          </p>
+                      </div>
+
+                      {/* QR Code */}
+                      <div className="p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                           <QRCodeSVG 
+                                value={`${origin}/?code=${selectedQrUser.short_id}`}
+                                size={180}
+                                level="M"
+                                className="text-[#373737]"
+                            />
+                      </div>
+
+                      <div className="space-y-1">
+                          <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Código Personal</p>
+                          <p className="font-mono text-2xl font-bold text-[#373737] tracking-widest">{selectedQrUser.short_id}</p>
+                      </div>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 border-t border-gray-100">
+                      <Button onClick={closeQrModal} className="w-full bg-[#373737] text-white hover:bg-black">
+                          Cerrar
                       </Button>
                   </div>
               </div>

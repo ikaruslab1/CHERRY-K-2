@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -40,16 +40,40 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
+    watch,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
+
+  // Load from LocalStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("register_form_data");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        reset(parsed);
+      } catch (e) {
+        console.error("Error loading saved form data", e);
+      }
+    }
+  }, [reset]);
+
+  // Save to LocalStorage
+  useEffect(() => {
+    const subscription = watch((value) => {
+      localStorage.setItem("register_form_data", JSON.stringify(value));
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
       const result = await registerUser(data);
       if (result.success && result.data) {
+        localStorage.removeItem("register_form_data"); // Clear saved data
         setSuccessData({
           id: result.data.short_id,
           name: `${data.firstName} ${data.lastName}`,

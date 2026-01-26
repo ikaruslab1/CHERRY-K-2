@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Correct for App Router
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation'; // Correct for App Router
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { loginWithId } from '@/app/actions';
@@ -13,6 +13,21 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  useEffect(() => {
+    const codeParam = searchParams.get('code');
+    if (codeParam) {
+      setShortId(codeParam.toUpperCase());
+    } else {
+        const savedId = localStorage.getItem('login_short_id');
+        if (savedId) setShortId(savedId);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    localStorage.setItem('login_short_id', shortId);
+  }, [shortId]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,9 +73,9 @@ export function LoginForm() {
           <label className="text-sm font-bold text-[#373737] ml-1">ID de Acceso</label>
           <Input 
             value={shortId}
-            onChange={(e) => setShortId(e.target.value)}
+            onChange={(e) => setShortId(e.target.value.toUpperCase())}
             placeholder="Pega tu código aquí (Ej. CK2-X9Z1)" 
-            className="text-center font-mono text-base xs:text-lg uppercase tracking-widest text-[#373737] bg-white border-2 border-gray-100 focus-visible:border-[#DBF227] h-16 rounded-2xl"
+            className="text-center font-mono text-base xs:text-lg uppercase tracking-widest text-[#373737] bg-white border-2 border-gray-100 focus-visible:border-[#DBF227] h-12 xs:h-14 md:h-16 rounded-2xl"
           />
           {error && <p className="text-red-500 text-sm font-medium text-center">{error}</p>}
       </div>

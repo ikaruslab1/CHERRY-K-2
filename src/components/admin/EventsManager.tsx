@@ -77,26 +77,26 @@ export function EventsManager() {
       </div>
 
       {isCreating && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300 relative">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300 relative max-h-[90vh] flex flex-col">
                 
                 {/* Progress Bar Detail */}
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
                     <div className="h-full bg-[#DBF227] w-1/3 rounded-r-full" />
                 </div>
 
-                <div className="p-8 pt-10">
-                    <div className="mb-8">
-                        <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">Paso 1/2</span>
-                        <h2 className="text-3xl font-bold text-[#373737] mt-2 leading-tight">
+                <div className="p-5 xs:p-6 md:p-8 pt-6 xs:pt-8 md:pt-10">
+                    <div className="mb-6 xs:mb-8">
+                        <span className="text-gray-400 text-[10px] xs:text-xs font-bold uppercase tracking-wider">Paso 1/2</span>
+                        <h2 className="text-2xl xs:text-3xl font-bold text-[#373737] mt-1 xs:mt-2 leading-tight">
                             {isEditing ? 'Editar Evento' : 'Crear Nuevo Evento'}
                         </h2>
-                        <p className="text-gray-500 mt-2 text-sm">
+                        <p className="text-gray-500 mt-1 xs:mt-2 text-xs xs:text-sm">
                             Llena los detalles para agregar una actividad a la agenda oficial.
                         </p>
                     </div>
 
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 overflow-y-auto max-h-[60vh] px-1 -mx-1">
                         
                         {/* Type Selection Pills */}
                         <div className="space-y-3">
@@ -135,7 +135,7 @@ export function EventsManager() {
                             <label className="text-sm font-bold text-[#373737]">Descripción:</label>
                              <textarea 
                                 {...register('description')}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent transition-all bg-gray-50/50 min-h-[100px] resize-none"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent transition-all bg-gray-50/50 min-h-[80px] sm:min-h-[100px] resize-none"
                                 placeholder="Breve descripción de la actividad..."
                             />
                          </div>
@@ -160,17 +160,17 @@ export function EventsManager() {
                              </div>
                         </div>
 
-                        <div className="pt-6 flex justify-between items-center border-t border-gray-100 mt-8">
+                        <div className="pt-6 flex flex-col-reverse xs:flex-row justify-between items-center border-t border-gray-100 mt-8 gap-3 xs:gap-0">
                             <button 
                                 type="button"
                                 onClick={() => setIsCreating(false)}
-                                className="px-6 py-3 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                                className="w-full xs:w-auto px-6 py-3 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                             >
                                 Cancelar
                             </button>
                              <button 
                                 type="submit"
-                                className="px-8 py-3 rounded-xl text-sm font-bold bg-[#DBF227] text-[#373737] hover:bg-[#d4e626] hover:shadow-lg hover:shadow-[#DBF227]/20 transition-all transform hover:-translate-y-0.5"
+                                className="w-full xs:w-auto px-8 py-3 rounded-xl text-sm font-bold bg-[#DBF227] text-[#373737] hover:bg-[#d4e626] hover:shadow-lg hover:shadow-[#DBF227]/20 transition-all transform hover:-translate-y-0.5"
                             >
                                 {isEditing ? 'Guardar Cambios' : 'Crear Evento'}
                             </button>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { getDegreeAbbreviation } from '@/utils/degreeHelper';
+import { Printer, Link, Check } from 'lucide-react';
 
 interface ProfileCardProps {
   profile: {
@@ -17,6 +18,8 @@ interface ProfileCardProps {
 
 export function ProfileCard({ profile }: ProfileCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [showCopied, setShowCopied] = useState(false);
+  
   const degreeAbbr = getDegreeAbbreviation(profile.degree, profile.gender);
   const fullName = `${degreeAbbr} ${profile.first_name} ${profile.last_name}`;
   
@@ -27,79 +30,179 @@ export function ProfileCard({ profile }: ProfileCardProps) {
     rol: profile.role
   });
 
-  return (
-    <div 
-      className="relative w-full max-w-[18rem] xs:max-w-xs sm:max-w-sm mx-auto aspect-[9/16] [perspective:1000px] cursor-pointer group"
-      onClick={() => setIsFlipped(!isFlipped)}
-    >
-      {/* 3D Wrapper */}
-      <div className={`relative w-full h-full transition-all duration-700 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
-        
-        {/* Front Face */}
-        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-white rounded-[2rem] xs:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col">
-            
-            {/* Header - Accent Color with slow animation */}
-            <div className="relative h-[22%] bg-[#DBF227] flex flex-col items-center justify-center p-4 xs:p-6 overflow-hidden">
-                {/* Animated Background Effect */}
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-[gradient_8s_ease_infinite]" />
-                
-                <span className="relative text-[#373737] text-[10px] font-black uppercase tracking-[0.25em] mb-1 opacity-80">ID de Acceso</span>
-                <h2 className="relative text-[#373737] text-3xl xs:text-4xl font-mono font-black tracking-widest drop-shadow-sm">{profile.short_id}</h2>
-            </div>
+  const handlePrint = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.print();
+  };
 
-            {/* Body */}
-            <div className="flex-1 flex flex-col items-center justify-center p-6 xs:p-8 space-y-4 xs:space-y-6 bg-white relative">
-                
-                <div className="text-center space-y-1">
-                    <h3 className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">Semana del Diseño</h3>
-                </div>
-                
-                <div className="text-center space-y-1">
-                    <h1 className="text-[#373737] text-xl xs:text-2xl font-bold leading-tight">
-                        <span className="text-2xl xs:text-3xl font-medium text-gray-600 block mb-1">{degreeAbbr} {profile.first_name} {profile.last_name}</span>
-                    </h1>
-                </div>
+  const handleCopyLink = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const link = `${window.location.origin}/?code=${profile.short_id}`;
+    navigator.clipboard.writeText(link);
+    setShowCopied(true);
+    setTimeout(() => setShowCopied(false), 2000);
+  };
 
-                <div className="p-3 bg-white border-2 border-dashed border-gray-100 rounded-2xl shadow-sm">
-                    <QRCodeSVG 
-                        value={qrData} 
-                        size={160}
-                        level="H"
-                        includeMargin={false}
-                        className="w-full h-auto"
-                    />
-                </div>
-
-                <span className="px-6 py-2 rounded-full bg-[#373737] text-white text-[10px] font-bold tracking-[0.2em] uppercase shadow-lg shadow-[#373737]/20">
-                    {profile.role}
-                </span>
-            </div>
-
-            {/* Footer */}
-            <div className="pb-8 pt-2 px-8 text-center space-y-2">
-                <div className="w-12 h-1 bg-gray-100 mx-auto rounded-full mb-2" />
-                <p className="text-[#373737] text-[10px] font-bold uppercase tracking-wider leading-relaxed">
-                    Facultad de Estudios Superiores Acatlán <br /> <span className="text-gray-400 text-[10px] font-medium tracking-widest uppercase"> Licenciatura en Diseño Gráfico</span>
-                </p>
-            </div>
-        </div>
-
-        {/* Back Face */}
-        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-[#DBF227] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col items-center justify-center p-8 text-center">
-             <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-[gradient_8s_ease_infinite] opacity-50" />
-             
-             <div className="relative z-10 space-y-6">
-                <div className="w-20 h-20 border-4 border-[#373737] rounded-full flex items-center justify-center mx-auto mb-4">
-                     <div className="w-10 h-10 bg-[#373737] rounded-full animate-bounce" />
-                </div>
-                <h2 className="text-[#373737] text-5xl font-black uppercase tracking-widest leading-tight drop-shadow-sm">
-                    Semana<br />del<br />Diseño
-                </h2>
-                <div className="w-16 h-1 bg-[#373737] mx-auto rounded-full mt-6" />
-             </div>
-        </div>
-
+  // Reusable Front Face Content
+  const FrontFaceContent = (
+    <div className="flex flex-col h-full w-full bg-white select-none">
+      {/* Header - Accent Color - Safe Zone Top */}
+      <div className="relative shrink-0 bg-[#DBF227] flex flex-col items-center justify-center pt-8 pb-6 px-4 overflow-hidden">
+          {/* Animated Background Effect */}
+          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-[gradient_8s_ease_infinite]" />
+          
+          <div className="relative z-10 flex flex-col items-center">
+            <span className="text-[#373737] text-[10px] xs:text-[11px] font-black uppercase tracking-[0.25em] mb-1 opacity-80">ID de Acceso</span>
+            <h2 className="text-[#373737] text-3xl xs:text-4xl font-mono font-black tracking-widest drop-shadow-sm">{profile.short_id}</h2>
+          </div>
       </div>
+
+      {/* Main Content Body - Flexible Space */}
+      <div className="flex-1 flex flex-col items-center justify-between px-6 py-4 w-full min-h-0">
+          
+          {/* Title Section */}
+          <div className="flex flex-col items-center justify-center space-y-2 mt-2">
+              <h3 className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">Semana del Diseño</h3>
+              <h1 className="text-[#373737] text-center leading-tight">
+                  <span className="block text-xl xs:text-2xl font-bold text-gray-700">
+                    {degreeAbbr} {profile.first_name}
+                  </span>
+                  <span className="block text-lg xs:text-xl font-medium text-gray-500 mt-1">
+                    {profile.last_name}
+                  </span>
+              </h1>
+          </div>
+
+          {/* QR Section - Guaranteed Padding */}
+          <div className="relative my-2 p-3 bg-white border-2 border-dashed border-gray-200 rounded-2xl shadow-sm shrink-0">
+              <QRCodeSVG 
+                  value={qrData} 
+                  size={140}
+                  level="H"
+                  includeMargin={false}
+                  className="w-[140px] h-[140px] object-contain"
+              />
+          </div>
+
+          {/* Role Badge */}
+          <span className="shrink-0 px-8 py-2 rounded-full bg-[#373737] text-white text-[10px] font-bold tracking-[0.2em] uppercase shadow-lg shadow-[#373737]/20 mb-2">
+              {profile.role}
+          </span>
+      </div>
+
+      {/* Footer - Safe Zone Bottom */}
+      <div className="shrink-0 pb-8 pt-2 px-6 text-center">
+          <div className="w-12 h-1.5 bg-gray-100 mx-auto rounded-full mb-3" />
+          <div className="space-y-1">
+            <p className="text-[#373737] text-[9px] font-bold uppercase tracking-wider leading-relaxed">
+                Facultad de Estudios Superiores Acatlán
+            </p>
+            <p className="text-gray-400 text-[8px] font-medium tracking-widest uppercase">
+                Licenciatura en Diseño Gráfico
+            </p>
+          </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col items-center gap-6 w-full max-w-[18rem] xs:max-w-xs sm:max-w-sm mx-auto">
+      <div 
+        className="relative w-full aspect-[9/16] [perspective:1000px] cursor-pointer group print:hidden"
+        onClick={() => setIsFlipped(!isFlipped)}
+      >
+        {/* 3D Wrapper */}
+        <div className={`relative w-full h-full transition-all duration-700 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
+          
+          {/* Front Face */}
+          <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-white rounded-[2rem] xs:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col">
+              {FrontFaceContent}
+          </div>
+
+          {/* Back Face */}
+          <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-[#DBF227] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col items-center justify-center p-8 text-center">
+               <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-[gradient_8s_ease_infinite] opacity-50" />
+               
+               <div className="relative z-10 space-y-6">
+                  <div className="w-20 h-20 border-4 border-[#373737] rounded-full flex items-center justify-center mx-auto mb-4">
+                       <div className="w-10 h-10 bg-[#373737] rounded-full animate-bounce" />
+                  </div>
+                  <h2 className="text-[#373737] text-5xl font-black uppercase tracking-widest leading-tight drop-shadow-sm">
+                      Semana<br />del<br />Diseño
+                  </h2>
+                  <div className="w-16 h-1 bg-[#373737] mx-auto rounded-full mt-6" />
+               </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex items-center gap-3 print:hidden animate-in slide-in-from-bottom-2 fade-in duration-500">
+        <button 
+          onClick={handlePrint}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-100 shadow-sm text-gray-500 hover:text-[#373737] hover:border-[#373737] hover:bg-gray-50 transition-all active:scale-95 text-xs font-bold uppercase tracking-wider"
+        >
+          <Printer className="w-4 h-4" />
+          <span>Imprimir</span>
+        </button>
+        
+        <button 
+          onClick={handleCopyLink}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-100 shadow-sm text-gray-500 hover:text-[#373737] hover:border-[#373737] hover:bg-gray-50 transition-all active:scale-95 text-xs font-bold uppercase tracking-wider"
+        >
+          {showCopied ? <Check className="w-4 h-4 text-green-500" /> : <Link className="w-4 h-4" />}
+          <span>{showCopied ? 'Copiado' : 'Copiar Acceso'}</span>
+        </button>
+      </div>
+
+      {/* Print View Only - Hidden normally, visible on print */}
+      <div id="print-container" className="hidden fixed inset-0 z-[9999] bg-white items-center justify-center h-screen w-screen p-0 m-0">
+         <div className="print-card w-[320px] h-[569px] border border-gray-200 rounded-[2.5rem] overflow-hidden flex flex-col shadow-none bg-white relative">
+            {FrontFaceContent}
+         </div>
+      </div>
+      
+      {/* Global Print Styles to Hide everything else */}
+      <style jsx global>{`
+        @media print {
+          /* Hide everything by default */
+          body > * {
+            visibility: hidden;
+          }
+          
+          /* Show only the print container and its children */
+          #print-container, 
+          #print-container * {
+            visibility: visible;
+          }
+
+          /* Position the print container */
+          #print-container {
+            display: flex !important;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            align-items: center;
+            justify-content: center;
+          }
+
+          /* Force background graphics */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+          
+          /* Hide non-printable elements explicitly */
+          .print-hidden, .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

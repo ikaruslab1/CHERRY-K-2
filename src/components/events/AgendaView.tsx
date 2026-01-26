@@ -93,16 +93,17 @@ export function AgendaView() {
     }
   };
 
-  if (loading) {
+  // Removed blocking loader
+  /*if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
         <Loader2 className="h-8 w-8 animate-spin text-[#DBF227]" />
       </div>
     );
-  }
+  }*/
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6 animate-in fade-in duration-700">
       <h2 className="text-xl xs:text-2xl font-bold flex items-center gap-2 text-[#373737]">
         <Calendar className="h-5 w-5 xs:h-6 xs:w-6" />
         Agenda del Evento

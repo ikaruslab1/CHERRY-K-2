@@ -42,19 +42,21 @@ export function UserProfileView() {
     loadProfile();
   }, []);
 
-  if (loading) {
+  // Removed blocking loader to allow immediate smooth rendering
+  /*if (loading) {
     return (
       <div className="flex items-center justify-center p-12 text-[#373737]">
         <Loader2 className="h-8 w-8 animate-spin text-[#DBF227]" />
       </div>
     );
-  }
+  }*/
 
-  if (!profile) return null;
+  if (!profile && !loading) return null; // Only return null if done loading and no profile (error case)
 
+  // Use a slight fade-in for the content itself if desired, or rely on parent
   return (
-    <div className="flex justify-center items-center py-8">
-        <ProfileCard profile={profile} />
+    <div className="flex justify-center items-center py-8 animate-in fade-in duration-700">
+        {profile ? <ProfileCard profile={profile} /> : null}
     </div>
   );
 }
