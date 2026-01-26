@@ -77,8 +77,7 @@ export const attendanceService = {
             .insert({
                 user_id: userId,
                 event_id: activityId,
-                scanned_at: new Date().toISOString(),
-                status: 'present'
+                scanned_at: new Date().toISOString()
             });
 
         if (error) {
