@@ -10,6 +10,7 @@ interface ProfileCardProps {
     last_name: string;
     degree: string;
     gender: string;
+    role: string;
   };
 }
 
@@ -21,22 +22,22 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   const qrData = JSON.stringify({
     id: profile.short_id,
     nombre: fullName,
-    grado: profile.degree
+    rol: profile.role
   });
 
   return (
-    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 flex flex-col items-center space-y-6 shadow-2xl max-w-sm w-full mx-auto relative overflow-hidden group hover:border-white/20 transition-all duration-300">
+    <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center space-y-6 shadow-xl max-w-sm w-full mx-auto relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
       
-      {/* Decorative Gradient Blob */}
-      <div className="absolute -top-20 -right-20 w-40 h-40 bg-indigo-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/30 transition-all" />
-      <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl group-hover:bg-purple-500/30 transition-all" />
+      {/* Decorative Minimalist Elements */}
+      <div className="absolute top-0 right-0 w-24 h-24 bg-[#DBF227]/10 rounded-bl-full" />
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-gray-100 rounded-tr-full" />
 
       <div className="text-center space-y-1 relative z-10">
-        <p className="text-slate-400 text-sm uppercase tracking-widest font-medium">Identidad Digital</p>
-        <h2 className="text-4xl font-mono font-bold text-white tracking-widest">{profile.short_id}</h2>
+        <p className="text-gray-400 text-sm uppercase tracking-widest font-medium">Identidad Digital</p>
+        <h2 className="text-4xl font-mono font-bold text-[#373737] tracking-widest">{profile.short_id}</h2>
       </div>
 
-      <div className="p-4 bg-white rounded-xl shadow-lg relative z-10">
+      <div className="p-4 bg-white rounded-xl shadow-inner border border-gray-100 relative z-10">
         <QRCodeSVG 
             value={qrData} 
             size={200}
@@ -47,8 +48,8 @@ export function ProfileCard({ profile }: ProfileCardProps) {
       </div>
 
       <div className="text-center space-y-1 relative z-10">
-        <p className="text-white text-xl font-semibold">{fullName}</p>
-        <p className="text-slate-400 text-sm">{profile.degree}</p>
+        <p className="text-[#373737] text-xl font-semibold">{fullName}</p>
+        <div className='flex items-center justify-center'><p className="text-gray-700 text-sm uppercase tracking-widest bg-[#DBF227]/50 px-6 py-1 rounded-full font-medium">{profile.role}</p></div>
       </div>
 
     </div>

@@ -1,17 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { UsersTable } from '@/components/admin/UsersTable';
 import { EventsManager } from '@/components/admin/EventsManager';
-import { Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { UserProfileView } from '@/components/profile/UserProfileView';
+import { AgendaView } from '@/components/events/AgendaView';
+import { LogOut, Loader2 } from 'lucide-react';
 
 export default function AdminPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'users' | 'events'>('users');
+  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events'>(
+      (searchParams.get('tab') as any) || 'profile'
+  );
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -38,39 +42,87 @@ export default function AdminPage() {
     checkAuth();
   }, [router]);
 
+  const handleSignOut = async () => {
+      await supabase.auth.signOut();
+      router.push('/');
+  };
+
   if (loading) {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <div className="min-h-screen flex items-center justify-center bg-white text-[#373737]">
+          <Loader2 className="h-8 w-8 animate-spin text-red-500" />
         </div>
       );
   }
 
   return (
-    <main className="min-h-screen p-8 bg-slate-950 text-white">
+    <main className="min-h-screen p-8 bg-gray-50 text-[#373737]">
       <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">Panel de Administración</h1>
-            <Button variant="ghost" onClick={() => router.push('/profile')}>Volver al Perfil</Button>
+        {/* Header with Pills & Actions */}
+        <div className="flex justify-between items-center bg-white p-2 pl-4 rounded-2xl border border-gray-200 shadow-sm sticky top-4 z-50">
+            
+            {/* Tabs & Pills */}
+            <div className="flex items-center space-x-1 bg-gray-100 p-1 rounded-xl overflow-x-auto">
+                <button 
+                    onClick={() => setActiveTab('profile')}
+                    className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
+                        activeTab === 'profile' 
+                        ? 'bg-white text-[#373737] shadow-sm' 
+                        : 'text-gray-500 hover:text-[#373737]'
+                    }`}
+                >
+                    Mi Perfil
+                </button>
+                <button 
+                    onClick={() => setActiveTab('agenda')}
+                    className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
+                        activeTab === 'agenda' 
+                        ? 'bg-white text-[#373737] shadow-sm' 
+                        : 'text-gray-500 hover:text-[#373737]'
+                    }`}
+                >
+                    Agenda
+                </button>
+                <button 
+                    onClick={() => setActiveTab('users')}
+                    className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
+                        activeTab === 'users' 
+                        ? 'bg-white text-[#373737] shadow-sm' 
+                        : 'text-gray-500 hover:text-[#373737]'
+                    }`}
+                >
+                    Usuarios
+                </button>
+                <button 
+                    onClick={() => setActiveTab('events')}
+                    className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
+                        activeTab === 'events' 
+                        ? 'bg-white text-[#373737] shadow-sm' 
+                        : 'text-gray-500 hover:text-[#373737]'
+                    }`}
+                >
+                    Gestión Eventos
+                </button>
+            </div>
+
+            {/* Right Actions */}
+            <div className="flex items-center gap-4 pr-4">
+                 <button 
+                    onClick={handleSignOut}
+                    className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full group flex items-center gap-2"
+                    title="Cerrar Sesión"
+                 >
+                    <span className="text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap hidden sm:block">Cerrar Sesión</span>
+                    <LogOut className="h-5 w-5" />
+                 </button>
+            </div>
         </div>
 
-        <div className="flex gap-4 border-b border-white/10 pb-4">
-            <button 
-                onClick={() => setActiveTab('users')}
-                className={`px-4 py-2 rounded-lg transition-all ${activeTab === 'users' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
-            >
-                Usuarios
-            </button>
-            <button 
-                onClick={() => setActiveTab('events')}
-                className={`px-4 py-2 rounded-lg transition-all ${activeTab === 'events' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
-            >
-                Eventos
-            </button>
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 min-h-[500px]">
-            {activeTab === 'users' ? <UsersTable /> : <EventsManager />}
+        <div key={activeTab} className="bg-white border border-gray-200 rounded-2xl p-6 min-h-[500px] shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {activeTab === 'profile' && <UserProfileView />}
+            {activeTab === 'agenda' && <AgendaView />}
+            {activeTab === 'users' && <UsersTable />}
+            {activeTab === 'events' && <EventsManager />}
         </div>
       </div>
     </main>

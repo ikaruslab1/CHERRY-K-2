@@ -110,9 +110,9 @@ CREATE POLICY "Admins full access profiles" ON profiles
   );
 
 -- Events:
--- Public read (authenticated users)
+-- Public read (anyone can view events, including anonymous users)
 CREATE POLICY "Events public read" ON events
-  FOR SELECT TO authenticated USING (true);
+  FOR SELECT USING (true);
 
 -- Admins manage events
 CREATE POLICY "Admins manage events" ON events

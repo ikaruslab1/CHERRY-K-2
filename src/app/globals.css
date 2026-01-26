@@ -2,12 +2,26 @@
 @plugin "tailwindcss-animate";
 
 :root {
-  --background: #0f172a;
-  --foreground: #f8fafc;
+  --background: #ffffff;
+  --foreground: #373737;
+
+  --primary: #373737;
+  --primary-foreground: #ffffff;
+
+  --accent: #dbf227;
+  --accent-foreground: #373737;
+
+  --muted: #f4f4f5;
+  --muted-foreground: #737373;
+
+  --border: #e4e4e7;
 }
 
 body {
-  background: radial-gradient(circle at top center, #1e293b, #0f172a);
+  background-color: var(--background);
   color: var(--foreground);
   min-height: 100vh;
+  font-feature-settings:
+    "rlig" 1,
+    "calt" 1;
 }

@@ -54,15 +54,15 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleLogin} className="space-y-4 w-full text-left">
-      <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-200">ID de Acceso</label>
+      <div className="space-y-4">
+          <label className="text-sm font-bold text-[#373737] ml-1">ID de Acceso</label>
           <Input 
             value={shortId}
             onChange={(e) => setShortId(e.target.value)}
-            placeholder="Ej. CK2-X9Z1" 
-            className="text-center font-mono text-lg uppercase tracking-widest"
+            placeholder="Pega tu código aquí (Ej. CK2-X9Z1)" 
+            className="text-center font-mono text-lg uppercase tracking-widest text-[#373737] bg-white border-2 border-gray-100 focus-visible:border-[#DBF227] h-16 rounded-2xl"
           />
-          {error && <p className="text-red-400 text-xs">{error}</p>}
+          {error && <p className="text-red-500 text-sm font-medium text-center">{error}</p>}
       </div>
 
       <Button type="submit" disabled={isLoading} className="w-full mt-6" size="lg">
