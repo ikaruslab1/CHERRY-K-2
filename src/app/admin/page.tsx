@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { UsersTable } from '@/components/admin/UsersTable';
@@ -9,7 +9,7 @@ import { UserProfileView } from '@/components/profile/UserProfileView';
 import { AgendaView } from '@/components/events/AgendaView';
 import { LogOut, Loader2 } from 'lucide-react';
 
-export default function AdminPage() {
+function AdminContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -126,5 +126,17 @@ export default function AdminPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center bg-white text-[#373737]">
+          <Loader2 className="h-8 w-8 animate-spin text-red-500" />
+        </div>
+      }>
+      <AdminContent />
+    </Suspense>
   );
 }
