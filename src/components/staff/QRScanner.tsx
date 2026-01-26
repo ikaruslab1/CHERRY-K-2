@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { supabase } from '@/lib/supabase';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
@@ -16,6 +16,13 @@ export function QRScanner({ eventId, onSuccess }: QRScannerProps) {
   const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [scannedProfile, setScannedProfile] = useState<{name: string, degree: string} | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+     supabase.auth.getUser().then(({ data }) => {
+         if (data.user) setCurrentUserId(data.user.id);
+     });
+  }, []);
 
   const handleScan = async (detectedCodes: any[]) => {
     if (status === 'processing' || status === 'success' || status === 'error') return;
@@ -53,12 +60,14 @@ export function QRScanner({ eventId, onSuccess }: QRScannerProps) {
       setScannedProfile({ name: `${profile.first_name} ${profile.last_name}`, degree: profile.degree });
 
       // 3. Register Attendance
+      if (!currentUserId) throw new Error("Sesión no válida");
+      
       const { error: attendanceError } = await supabase
         .from('attendance')
         .insert({
           user_id: profile.id,
           event_id: eventId,
-          scanned_by: (await supabase.auth.getUser()).data.user?.id
+          scanned_by: currentUserId
         });
 
       if (attendanceError) {

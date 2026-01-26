@@ -45,13 +45,13 @@ export default function AttendanceView() { // Default export for import ease
     }, []);
 
     return (
-        <div className="max-w-md mx-auto p-0 space-y-6">
+        <div className="w-full max-w-sm xs:max-w-md md:max-w-lg xl:max-w-xl mx-auto p-0 xs:p-4 space-y-6 md:space-y-8">
             
             {/* Header / Selector Section */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
+            <div className="bg-white p-6 xs:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-4 md:space-y-5">
                 <div>
-                    <h2 className="text-xl font-black text-[#373737]">Control de Asistencia</h2>
-                    <p className="text-sm text-gray-500">Escanea el código QR de los asistentes.</p>
+                    <h2 className="text-xl md:text-2xl font-black text-[#373737]">Control de Asistencia</h2>
+                    <p className="text-sm md:text-base text-gray-500">Escanea el código QR de los asistentes.</p>
                 </div>
 
                 <div className="space-y-2">

@@ -5,14 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Calendar, MapPin, CheckCircle2, Loader2 } from 'lucide-react';
 
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  date: string;
-  type: string;
-}
+import { Event } from '@/types';
 
 export function AgendaView() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -25,37 +18,46 @@ export function AgendaView() {
     const loadData = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        
+        let eventsQuery = supabase
+          .from('events')
+          .select('id, title, description, location, date, type')
+          .order('date', { ascending: true });
+
+        if (!user) {
+          const { data: eventsData } = await eventsQuery;
+          setEvents(eventsData || []);
+          setLoading(false);
+          return;
+        }
+
         setUserId(user.id);
 
-        // Fetch Events
-        const { data: eventsData } = await supabase
-          .from('events')
-          .select('*')
-          .order('date', { ascending: true });
-        setEvents(eventsData || []);
+        const [eventsResponse, attendanceResponse, interestsResponse] = await Promise.all([
+          eventsQuery,
+          supabase
+            .from('attendance')
+            .select('event_id')
+            .eq('user_id', user.id),
+          supabase
+            .from('event_interests')
+            .select('event_id')
+            .eq('user_id', user.id)
+        ]);
 
-        // Fetch Attendance
-        const { data: attendanceData } = await supabase
-          .from('attendance')
-          .select('event_id')
-          .eq('user_id', user.id);
-        if (attendanceData) {
-          setAttendance(new Set(attendanceData.map(a => a.event_id)));
+        if (eventsResponse.data) setEvents(eventsResponse.data);
+        
+        if (attendanceResponse.data) {
+          setAttendance(new Set(attendanceResponse.data.map(a => a.event_id)));
         }
 
-        // Fetch Interests
-        const { data: interestsData } = await supabase
-          .from('event_interests')
-          .select('event_id')
-          .eq('user_id', user.id);
-        if (interestsData) {
-          setInterests(new Set(interestsData.map(i => i.event_id)));
+        if (interestsResponse.data) {
+          setInterests(new Set(interestsResponse.data.map(i => i.event_id)));
         }
 
-        setLoading(false);
       } catch (error) {
         console.error('Error loading agenda:', error);
+      } finally {
         setLoading(false);
       }
     };
@@ -101,8 +103,8 @@ export function AgendaView() {
 
   return (
     <section className="space-y-6">
-      <h2 className="text-2xl font-bold flex items-center gap-2 text-[#373737]">
-        <Calendar className="h-6 w-6" />
+      <h2 className="text-xl xs:text-2xl font-bold flex items-center gap-2 text-[#373737]">
+        <Calendar className="h-5 w-5 xs:h-6 xs:w-6" />
         Agenda del Evento
       </h2>
       
@@ -115,7 +117,7 @@ export function AgendaView() {
             const isInterested = interests.has(event.id);
 
             return (
-              <div key={event.id} className="bg-white rounded-xl p-6 transition-all group">
+              <div key={event.id} className="bg-white rounded-xl p-4 xs:p-5 md:p-6 transition-all group">
                 <div className="flex justify-between items-start mb-4">
                   <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full font-medium border border-gray-200">
                     {event.type}

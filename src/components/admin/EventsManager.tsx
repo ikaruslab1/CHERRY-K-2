@@ -140,8 +140,8 @@ export function EventsManager() {
                             />
                          </div>
 
-                        {/* Location & Date */}
-                        <div className="grid grid-cols-2 gap-4">
+                {/* Location & Date */}
+                        <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
                              <div className="space-y-2">
                                 <label className="text-sm font-bold text-[#373737]">Ubicación:</label>
                                  <input 
@@ -183,8 +183,8 @@ export function EventsManager() {
 
       <div className="grid grid-cols-1 gap-4">
           {events.map(event => (
-              <div key={event.id} className="bg-white p-5 rounded-2xl flex justify-between items-center group transition-all">
-                  <div>
+              <div key={event.id} className="bg-white p-5 rounded-2xl flex flex-col xs:flex-row justify-between items-start xs:items-center group transition-all gap-4 xs:gap-0">
+                  <div className="w-full xs:w-auto">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2 py-1 rounded-md">{event.type}</span>
                         <span className="text-xs text-gray-400">{new Date(event.date).toLocaleDateString([], {weekday: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>

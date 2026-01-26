@@ -60,7 +60,7 @@ export function LoginForm() {
             value={shortId}
             onChange={(e) => setShortId(e.target.value)}
             placeholder="Pega tu código aquí (Ej. CK2-X9Z1)" 
-            className="text-center font-mono text-lg uppercase tracking-widest text-[#373737] bg-white border-2 border-gray-100 focus-visible:border-[#DBF227] h-16 rounded-2xl"
+            className="text-center font-mono text-base xs:text-lg uppercase tracking-widest text-[#373737] bg-white border-2 border-gray-100 focus-visible:border-[#DBF227] h-16 rounded-2xl"
           />
           {error && <p className="text-red-500 text-sm font-medium text-center">{error}</p>}
       </div>

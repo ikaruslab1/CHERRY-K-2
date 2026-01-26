@@ -5,13 +5,10 @@ import { supabase } from '@/lib/supabase';
 import { QRScanner } from '@/components/staff/QRScanner';
 import { Loader2 } from 'lucide-react';
 
-interface Event {
-  id: string;
-  title: string;
-}
+import { Event } from '@/types';
 
 export function StaffScannerView() {
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<Pick<Event, 'id' | 'title'>[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
@@ -36,8 +33,8 @@ export function StaffScannerView() {
   }
 
   return (
-      <div className="max-w-md mx-auto space-y-6">
-        <h2 className="text-2xl font-bold text-center text-[#373737]">Scanner de Asistencia</h2>
+      <div className="w-full max-w-sm xs:max-w-md md:max-w-lg mx-auto space-y-6 px-4 xs:px-0">
+        <h2 className="text-xl xs:text-2xl md:text-3xl font-bold text-center text-[#373737]">Scanner de Asistencia</h2>
         
         <div className="space-y-2">
             <label className="text-sm font-medium text-gray-500">Seleccionar Evento</label>

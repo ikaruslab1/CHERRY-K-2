@@ -6,43 +6,47 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Loader2, Search, Edit2, X, UserCog, Check } from 'lucide-react';
 
-interface UserProfile {
-  id: string;
-  first_name: string;
-  last_name: string;
-  short_id: string;
-  degree: string;
-  role: string;
-  email?: string; // Add other fields if available
-}
+import { useDebounce } from '@/hooks/useDebounce';
+import { UserProfile } from '@/types';
 
 export function UsersTable() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 500);
   const [loading, setLoading] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [selectedRole, setSelectedRole] = useState<string>('');
+  const [selectedRole, setSelectedRole] = useState<UserProfile['role'] | ''>('');
   const [updating, setUpdating] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
-    let query = supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      let query = supabase
+        .from('profiles')
+        .select('id, first_name, last_name, short_id, degree, role')
+        .order('created_at', { ascending: false });
 
-    if (search) {
-      query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,short_id.ilike.%${search}%`);
+      if (debouncedSearch) {
+        query = query.or(`first_name.ilike.%${debouncedSearch}%,last_name.ilike.%${debouncedSearch}%,short_id.ilike.%${debouncedSearch}%`);
+      }
+
+      const { data, error } = await query.limit(50);
+      
+      if (error) {
+        console.error('Error fetching users:', error);
+      } else {
+      setUsers((data as unknown as UserProfile[]) || []);
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+    } finally {
+      setLoading(false);
     }
-
-    const { data } = await query.limit(50);
-    setUsers(data || []);
-    setLoading(false);
   };
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [debouncedSearch]);
 
   const openModal = (user: UserProfile) => {
       setSelectedUser(user);
@@ -64,7 +68,7 @@ export function UsersTable() {
       .eq('id', selectedUser.id);
 
     if (!error) {
-      setUsers(users.map(u => u.id === selectedUser.id ? { ...u, role: selectedRole } : u));
+      setUsers(users.map(u => u.id === selectedUser.id ? { ...u, role: selectedRole as UserProfile['role'] } : u));
       closeModal();
     } else {
         alert("Error actualizando rol");
@@ -82,7 +86,7 @@ export function UsersTable() {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-4">
+      <div className="flex flex-col xs:flex-row gap-4">
         <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input 
@@ -92,12 +96,12 @@ export function UsersTable() {
                 className="pl-10 bg-white border-gray-200 text-[#373737] focus:ring-[#DBF227]"
             />
         </div>
-        <Button onClick={fetchUsers} disabled={loading} className="bg-[#373737] text-white hover:bg-black">
+        <Button onClick={fetchUsers} disabled={loading} className="bg-[#373737] text-white hover:bg-black w-full xs:w-auto">
             {loading ? <Loader2 className="animate-spin h-4 w-4" /> : 'Buscar'}
         </Button>
       </div>
 
-      <div className="rounded-xl overflow-hidden bg-white">
+      <div className="rounded-xl overflow-hidden overflow-x-auto bg-white border border-gray-100 shadow-sm">
         <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-500 font-medium">
                 <tr>
@@ -177,7 +181,7 @@ export function UsersTable() {
                       <div className="space-y-3">
                           <label className="text-sm font-bold text-[#373737]">Seleccionar nuevo rol:</label>
                           <div className="grid grid-cols-1 gap-2">
-                              {['user', 'staff', 'admin'].map((role) => (
+                              {(['user', 'staff', 'admin'] as UserProfile['role'][]).map((role) => (
                                   <button
                                       key={role}
                                       onClick={() => setSelectedRole(role)}

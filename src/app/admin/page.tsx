@@ -57,10 +57,10 @@ function AdminContent() {
   }
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50 text-[#373737]">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <main className="min-h-screen p-4 xs:p-6 md:p-8 bg-gray-50 text-[#373737]">
+      <div className="max-w-6xl mx-auto space-y-6 xs:space-y-8">
         {/* Header with Pills & Actions */}
-        <div className="relative flex justify-center items-center bg-white/80 backdrop-blur-sm p-2 rounded-2xl sticky top-4 z-50">
+        <div className="relative flex flex-col md:flex-row justify-center items-center bg-white/80 backdrop-blur-sm p-2 rounded-2xl sticky top-4 z-50 gap-4 md:gap-0">
             
             {/* Tabs & Pills */}
             <div className="flex items-center space-x-1 bg-gray-100/50 p-1 rounded-xl overflow-x-auto">
@@ -118,7 +118,7 @@ function AdminContent() {
             </div>
 
             {/* Right Actions - Absolute Positioned */}
-            <div className="absolute right-2 flex items-center gap-4">
+            <div className="w-full md:w-auto md:absolute md:right-2 flex justify-end md:justify-start items-center gap-4">
                  <button 
                     onClick={handleSignOut}
                     className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full group flex items-center gap-2"

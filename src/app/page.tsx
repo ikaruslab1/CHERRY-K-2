@@ -9,14 +9,14 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'register' | 'login'>('login');
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+    <main className="min-h-screen flex flex-col items-center justify-center p-4 xs:p-6 sm:p-8 md:p-12 relative overflow-hidden">
 
-      <div className="w-full max-w-sm space-y-10 z-10">
-        <div className="text-center space-y-4">
-            <h1 className="text-5xl font-extrabold tracking-tight text-[#373737] leading-tight">
+      <div className="w-full xs:max-w-md sm:max-w-md md:max-w-lg space-y-8 xs:space-y-10 z-10 transition-all duration-300">
+        <div className="text-center space-y-3 xs:space-y-4">
+            <h1 className="text-4xl xs:text-5xl md:text-6xl font-extrabold tracking-tight text-[#373737] leading-tight">
                 Bienvenido <br/> de vuelta
             </h1>
-            <p className="text-gray-400 text-lg">Inicia sesión o crea tu cuenta</p>
+            <p className="text-gray-400 text-base xs:text-lg md:text-xl">Inicia sesión o crea tu cuenta</p>
         </div>
 
         <div className="flex bg-gray-100 p-1.5 rounded-2xl w-fit mx-auto">

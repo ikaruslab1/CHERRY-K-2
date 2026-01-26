@@ -107,7 +107,7 @@ export function RegisterForm() {
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-5 w-full text-left"
     >
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label className="text-sm font-bold text-[#373737] ml-1">Nombre</label>
           <Input {...register("firstName")} placeholder="Ej. Juan" className="rounded-xl border-0 bg-gray-50 focus:bg-white transition-all h-12" />
@@ -124,7 +124,7 @@ export function RegisterForm() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label className="text-sm font-bold text-[#373737] ml-1">
             Grado Académico
@@ -134,10 +134,10 @@ export function RegisterForm() {
             className="flex h-12 w-full rounded-xl border-0 bg-gray-50 px-3 py-2 text-sm text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:bg-white transition-all"
           >
             <option value="">Seleccionar...</option>
+            <option value="Especialidad">Especialidad</option>
             <option value="Licenciatura">Licenciatura</option>
             <option value="Maestría">Maestría</option>
             <option value="Doctorado">Doctorado</option>
-            <option value="Especialidad">Especialidad</option>
           </select>
           {errors.degree && (
             <p className="text-red-500 text-xs ml-1">{errors.degree.message}</p>

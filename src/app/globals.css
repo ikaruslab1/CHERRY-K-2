@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
 
+@theme {
+  --breakpoint-xs: 480px;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #373737;
