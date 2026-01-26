@@ -183,7 +183,7 @@ export function EventsManager() {
 
       <div className="grid grid-cols-1 gap-4">
           {events.map(event => (
-              <div key={event.id} className="bg-white p-5 rounded-2xl flex justify-between items-center group hover:shadow-md transition-all border border-gray-100">
+              <div key={event.id} className="bg-white p-5 rounded-2xl flex justify-between items-center group transition-all">
                   <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2 py-1 rounded-md">{event.type}</span>

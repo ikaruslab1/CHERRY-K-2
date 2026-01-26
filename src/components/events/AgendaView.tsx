@@ -115,7 +115,7 @@ export function AgendaView() {
             const isInterested = interests.has(event.id);
 
             return (
-              <div key={event.id} className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all group">
+              <div key={event.id} className="bg-white rounded-xl p-6 transition-all group">
                 <div className="flex justify-between items-start mb-4">
                   <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full font-medium border border-gray-200">
                     {event.type}

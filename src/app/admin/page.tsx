@@ -7,13 +7,14 @@ import { UsersTable } from '@/components/admin/UsersTable';
 import { EventsManager } from '@/components/admin/EventsManager';
 import { UserProfileView } from '@/components/profile/UserProfileView';
 import { AgendaView } from '@/components/events/AgendaView';
-import { LogOut, Loader2 } from 'lucide-react';
+import AttendanceView from '@/views/admin/AttendanceView';
+import { LogOut, Loader2, QrCode } from 'lucide-react';
 
 function AdminContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events'>(
+  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance'>(
       (searchParams.get('tab') as any) || 'profile'
   );
 
@@ -59,10 +60,10 @@ function AdminContent() {
     <main className="min-h-screen p-8 bg-gray-50 text-[#373737]">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header with Pills & Actions */}
-        <div className="flex justify-between items-center bg-white p-2 pl-4 rounded-2xl border border-gray-200 shadow-sm sticky top-4 z-50">
+        <div className="relative flex justify-center items-center bg-white/80 backdrop-blur-sm p-2 rounded-2xl sticky top-4 z-50">
             
             {/* Tabs & Pills */}
-            <div className="flex items-center space-x-1 bg-gray-100 p-1 rounded-xl overflow-x-auto">
+            <div className="flex items-center space-x-1 bg-gray-100/50 p-1 rounded-xl overflow-x-auto">
                 <button 
                     onClick={() => setActiveTab('profile')}
                     className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
@@ -103,10 +104,21 @@ function AdminContent() {
                 >
                     Gestión Eventos
                 </button>
+                <button 
+                    onClick={() => setActiveTab('attendance')}
+                    className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${
+                        activeTab === 'attendance' 
+                        ? 'bg-white text-[#373737] shadow-sm' 
+                        : 'text-gray-500 hover:text-[#373737]'
+                    }`}
+                >
+                    <QrCode className="h-4 w-4" />
+                    Asistencia
+                </button>
             </div>
 
-            {/* Right Actions */}
-            <div className="flex items-center gap-4 pr-4">
+            {/* Right Actions - Absolute Positioned */}
+            <div className="absolute right-2 flex items-center gap-4">
                  <button 
                     onClick={handleSignOut}
                     className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-full group flex items-center gap-2"
@@ -118,11 +130,12 @@ function AdminContent() {
             </div>
         </div>
 
-        <div key={activeTab} className="bg-white border border-gray-200 rounded-2xl p-6 min-h-[500px] shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div key={activeTab} className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
             {activeTab === 'profile' && <UserProfileView />}
             {activeTab === 'agenda' && <AgendaView />}
             {activeTab === 'users' && <UsersTable />}
             {activeTab === 'events' && <EventsManager />}
+            {activeTab === 'attendance' && <AttendanceView />}
         </div>
       </div>
     </main>

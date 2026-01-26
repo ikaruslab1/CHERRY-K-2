@@ -97,7 +97,7 @@ export function UsersTable() {
         </Button>
       </div>
 
-      <div className="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-white">
+      <div className="rounded-xl overflow-hidden bg-white">
         <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-500 font-medium">
                 <tr>

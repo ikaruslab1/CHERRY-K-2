@@ -55,7 +55,7 @@ export function StaffScannerView() {
         </div>
 
         {selectedEventId ? (
-            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+            <div className="p-0">
                 <QRScanner eventId={selectedEventId} />
             </div>
         ) : (
