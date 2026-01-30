@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { ProfileCard } from '@/components/profile/ProfileCard';
-import { Loader2 } from 'lucide-react';
+import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 
 interface Profile {
   id: string;
@@ -43,13 +43,9 @@ export function UserProfileView() {
   }, []);
 
   // Removed blocking loader to allow immediate smooth rendering
-  /*if (loading) {
-    return (
-      <div className="flex items-center justify-center p-12 text-[#373737]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#DBF227]" />
-      </div>
-    );
-  }*/
+  if (loading) {
+    return <ContentPlaceholder type="card" />;
+  }
 
   if (!profile && !loading) return null; // Only return null if done loading and no profile (error case)
 

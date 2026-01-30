@@ -5,6 +5,14 @@ export interface Event {
   location: string;
   date: string;
   type: string;
+  image_url?: string;
+  speaker_id?: string | null;
+  speaker?: {
+    first_name: string;
+    last_name: string;
+    degree?: string;
+  };
+  tags?: string[];
 }
 
 export interface UserProfile {
@@ -13,7 +21,7 @@ export interface UserProfile {
   last_name: string;
   short_id: string;
   degree: string;
-  role: 'user' | 'staff' | 'admin';
+  role: 'user' | 'staff' | 'admin' | 'ponente';
   email?: string;
   created_at?: string;
 }

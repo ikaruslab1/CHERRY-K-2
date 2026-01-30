@@ -9,12 +9,13 @@ import { QRCodeSVG } from 'qrcode.react';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { UserProfile } from '@/types';
+import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 
 export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [selectedQrUser, setSelectedQrUser] = useState<UserProfile | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserProfile['role'] | ''>('');
@@ -30,7 +31,7 @@ export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
     try {
       let query = supabase
         .from('profiles')
-        .select('id, first_name, last_name, short_id, degree, role')
+        .select('id, first_name, last_name, short_id, degree, role, email')
         .order('created_at', { ascending: false });
 
       if (debouncedSearch) {
@@ -91,6 +92,7 @@ export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
       switch(role) {
           case 'admin': return 'bg-purple-100 text-purple-700 border-purple-200';
           case 'staff': return 'bg-blue-100 text-blue-700 border-blue-200';
+          case 'ponente': return 'bg-amber-100 text-amber-700 border-amber-200';
           default: return 'bg-gray-100 text-gray-600 border-gray-200';
       }
   };
@@ -113,57 +115,65 @@ export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
       </div>
 
       <div className="rounded-xl overflow-hidden overflow-x-auto bg-white border border-gray-100 shadow-sm">
-        <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-500 font-medium">
-                <tr>
-                    <th className="p-4">QR</th>
-                    <th className="p-4">ID</th>
-                    <th className="p-4">Nombre</th>
-                    <th className="p-4">Grado</th>
-                    <th className="p-4">Rol</th>
-                    {!readOnly && <th className="p-4 text-right">Acciones</th>}
-                </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-                {users.map(user => (
-                    <tr key={user.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="p-4">
-                            <button
-                                onClick={() => setSelectedQrUser(user)}
-                                className="p-2 bg-gray-50 hover:bg-[#DBF227]/20 text-gray-400 hover:text-[#373737] rounded-lg transition-colors border border-gray-200"
-                                title="Ver código QR"
-                            >
-                                <QrCode className="h-5 w-5" />
-                            </button>
-                        </td>
-                        <td className="p-4 font-mono text-gray-600 font-medium">{user.short_id}</td>
-                        <td className="p-4 text-[#373737] font-semibold">{user.first_name} {user.last_name}</td>
-                        <td className="p-4 text-gray-500">{user.degree}</td>
-                        <td className="p-4">
-                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${getRoleBadgeClasses(user.role)} capitalize`}>
-                                {user.role}
-                            </span>
-                        </td>
-                        {!readOnly && (
-                            <td className="p-4 text-right">
-                                <Button 
-                                    size="sm" 
-                                    variant="ghost" 
-                                    onClick={() => openModal(user)}
-                                    className="text-gray-400 hover:text-[#373737] hover:bg-gray-100"
-                                >
-                                    <Edit2 className="h-4 w-4" />
-                                </Button>
-                            </td>
-                        )}
+        {loading && users.length === 0 ? (
+           <div className="p-4">
+               <ContentPlaceholder type="table" />
+           </div>
+        ) : (
+        <>
+            <table className="w-full text-sm text-left">
+                <thead className="bg-gray-50 text-gray-500 font-medium">
+                    <tr>
+                        <th className="p-4">QR</th>
+                        <th className="p-4">ID</th>
+                        <th className="p-4">Nombre</th>
+                        <th className="p-4">Grado</th>
+                        <th className="p-4">Rol</th>
+                        {!readOnly && <th className="p-4 text-right">Acciones</th>}
                     </tr>
-                ))}
-            </tbody>
-        </table>
-        {users.length === 0 && !loading && (
-            <div className="p-8 text-center text-gray-400">
-                No se encontraron usuarios.
-            </div>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                    {users.map(user => (
+                        <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="p-4">
+                                <button
+                                    onClick={() => setSelectedQrUser(user)}
+                                    className="p-2 bg-gray-50 hover:bg-[#DBF227]/20 text-gray-400 hover:text-[#373737] rounded-lg transition-colors border border-gray-200"
+                                    title="Ver código QR"
+                                >
+                                    <QrCode className="h-5 w-5" />
+                                </button>
+                            </td>
+                            <td className="p-4 font-mono text-gray-600 font-medium">{user.short_id}</td>
+                            <td className="p-4 text-[#373737] font-semibold">{user.first_name} {user.last_name}</td>
+                            <td className="p-4 text-gray-500">{user.degree}</td>
+                            <td className="p-4">
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${getRoleBadgeClasses(user.role)} capitalize`}>
+                                    {user.role}
+                                </span>
+                            </td>
+                            {!readOnly && (
+                                <td className="p-4 text-right">
+                                    <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        onClick={() => openModal(user)}
+                                        className="text-gray-400 hover:text-[#373737] hover:bg-gray-100"
+                                    >
+                                        <Edit2 className="h-4 w-4" />
+                                    </Button>
+                                </td>
+                            )}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            {users.length === 0 && !loading && (
+                <div className="p-8 text-center text-gray-400">
+                    No se encontraron usuarios.
+                </div>
+            )}
+        </>
         )}
       </div>
 
@@ -197,6 +207,11 @@ export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
                                   <span>•</span>
                                   <span>{selectedUser.degree}</span>
                               </div>
+                              {selectedUser.email && (
+                                  <div className="text-xs text-gray-400 mt-1">
+                                      {selectedUser.email}
+                                  </div>
+                              )}
                           </div>
                       </div>
 
@@ -204,7 +219,7 @@ export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
                       <div className="space-y-3">
                           <label className="text-sm font-bold text-[#373737]">Seleccionar nuevo rol:</label>
                           <div className="grid grid-cols-1 gap-2">
-                              {(['user', 'staff', 'admin'] as UserProfile['role'][]).map((role) => (
+                              {(['user', 'ponente', 'staff', 'admin'] as UserProfile['role'][]).map((role) => (
                                   <button
                                       key={role}
                                       onClick={() => setSelectedRole(role)}
@@ -216,10 +231,11 @@ export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
                                   >
                                       <div className="flex flex-col items-start">
                                           <span className="font-semibold text-sm capitalize text-[#373737]">
-                                              {role === 'user' ? 'Beneficiario' : role}
+                                              {role === 'user' ? 'Usuario' : role}
                                           </span>
                                           <span className="text-xs text-gray-400">
                                               {role === 'user' && 'Acceso estándar a perfil y agenda.'}
+                                              {role === 'ponente' && 'Mismos permisos que usuario. Rol distintivo.'}
                                               {role === 'staff' && 'Puede escanear QRs y ver agenda.'}
                                               {role === 'admin' && 'Control total del sistema.'}
                                           </span>

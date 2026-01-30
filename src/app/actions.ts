@@ -100,3 +100,50 @@ export async function loginWithId(shortId: string) {
   }
 }
 
+
+export async function checkEmailForRecovery(email: string) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .select('email')
+      .ilike('email', email)
+      .single();
+
+    if (error || !data) {
+      return { success: false, error: "Correo no encontrado en nuestros registros" };
+    }
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: "Error al verificar el correo" };
+  }
+}
+
+export async function verifyRecoveredUser(email: string, phone: string) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('profiles')
+      .select('short_id, phone')
+      .ilike('email', email)
+      .single();
+
+    if (error || !data) {
+        // Email should exist as checked in previous step, but just in case
+      return { success: false, error: "Registro no encontrado" };
+    }
+
+    // Normalize phones for comparison (remove spaces, dashes, parentheses)
+    const dbPhone = (data.phone || '').replace(/\D/g, '');
+    const inputPhone = phone.replace(/\D/g, '');
+
+    // Check last 10 digits to be safe if country code is involved, or exact match if 10 digits
+    // The prompt asks for 10 digits validation.
+    if (dbPhone !== inputPhone) {
+        return { success: false, error: "El número de celular no coincide con el correo proporcionado" };
+    }
+
+    return { success: true, short_id: data.short_id };
+
+  } catch (err: any) {
+    return { success: false, error: "Error al verificar datos" };
+  }
+}

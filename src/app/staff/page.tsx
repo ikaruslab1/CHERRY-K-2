@@ -84,7 +84,7 @@ export default function StaffPage() {
                 <div className={`${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex flex-col md:flex-row gap-2 md:gap-1 w-full md:w-auto animate-in slide-in-from-top-2 md:animate-none duration-200`}>
                     <button 
                         onClick={() => { setActiveTab('agenda'); setIsMobileMenuOpen(false); }}
-                        className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto ${
+                        className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto flex justify-center items-center ${
                             activeTab === 'agenda' 
                             ? 'bg-white text-[#373737] shadow-sm' 
                             : 'text-gray-500 hover:text-[#373737]'
