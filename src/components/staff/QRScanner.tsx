@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/Button';
 
 interface QRScannerProps {
   eventId: string;
+  durationDays?: number;
   onSuccess?: () => void;
 }
 
-export function QRScanner({ eventId, onSuccess }: QRScannerProps) {
+export function QRScanner({ eventId, durationDays = 1, onSuccess }: QRScannerProps) {
   const [lastScanned, setLastScanned] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -59,7 +60,31 @@ export function QRScanner({ eventId, onSuccess }: QRScannerProps) {
 
       setScannedProfile({ name: `${profile.first_name} ${profile.last_name}`, degree: profile.degree });
 
-      // 3. Register Attendance
+      // 3. Check Existing Attendance Count
+      const { count: attendanceCount, error: countError } = await supabase
+        .from('attendance')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', profile.id)
+        .eq('event_id', eventId);
+
+      if (countError) throw countError;
+
+      const currentCount = attendanceCount || 0;
+      const targetDuration = Number(durationDays) || 1;
+
+      // Allow scanning if we haven't reached the target OR if we just reached it (to account for the current scan effectively being the first of the day?? No, attendanceCount is DB count).
+      // actually, we want to allow scanning up to N times.
+      // If currentCount is 0. Scan allowed. -> 1.
+      // If currentCount is 1. Duration 2. Scan allowed. -> 2.
+      // If currentCount is 2. Duration 2. Blocked.
+
+      if (currentCount >= targetDuration) {
+          setMessage(`Usuario ya tiene ${currentCount}/${targetDuration} asistencias registradas.`);
+          setStatus('error');
+          return;
+      }
+
+      // 4. Register Attendance
       if (!currentUserId) throw new Error("Sesión no válida");
       
       const { error: attendanceError } = await supabase
@@ -71,16 +96,18 @@ export function QRScanner({ eventId, onSuccess }: QRScannerProps) {
         });
 
       if (attendanceError) {
-        if (attendanceError.code === '23505') { // Unique constraint
-            setMessage("Este usuario ya registró asistencia.");
-            setStatus('error');
-            return;
+        // Fallback for unique constraint if it wasn't dropped properly
+        if (attendanceError.code === '23505') { 
+             setMessage(`Asistencia ya registrada.`);
+             setStatus('error');
+             return;
         }
         throw attendanceError;
       }
 
       setStatus('success');
-      setMessage("Asistencia registrada.");
+      // Show progress in message
+      setMessage(`Asistencia ${currentCount + 1}/${targetDuration} registrada.`);
       if (onSuccess) onSuccess();
 
     } catch (err: any) {

@@ -11,8 +11,11 @@ export interface Event {
     first_name: string;
     last_name: string;
     degree?: string;
+    gender?: string;
   };
   tags?: string[];
+  gives_certificate?: boolean;
+  duration_days?: number;
 }
 
 export interface UserProfile {

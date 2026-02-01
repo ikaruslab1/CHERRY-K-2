@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { Event } from '@/types';
 
 export function StaffScannerView() {
-  const [events, setEvents] = useState<Pick<Event, 'id' | 'title'>[]>([]);
+  const [events, setEvents] = useState<Pick<Event, 'id' | 'title' | 'duration_days'>[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
@@ -16,7 +16,7 @@ export function StaffScannerView() {
     const fetchEvents = async () => {
         const { data: eventsData } = await supabase
             .from('events')
-            .select('id, title')
+            .select('id, title, duration_days')
             .order('date', { ascending: true });
         
         setEvents(eventsData || []);
@@ -53,7 +53,11 @@ export function StaffScannerView() {
 
         {selectedEventId ? (
             <div className="p-0">
-                <QRScanner eventId={selectedEventId} />
+                <QRScanner 
+                    key={selectedEventId}
+                    eventId={selectedEventId} 
+                    durationDays={events.find(e => e.id === selectedEventId)?.duration_days || 1}
+                />
             </div>
         ) : (
             <p className="text-center text-gray-500">Selecciona un evento para comenzar.</p>

@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Trash, Edit, Plus, X } from 'lucide-react';
+import { Trash, Edit, Plus, X, Search, ChevronDown, Check } from 'lucide-react';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { Controller } from 'react-hook-form';
@@ -18,10 +18,14 @@ export function EventsManager() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState<Event | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [eventType, setEventType] = useState('Conferencia magistral');
+  const [eventType, setEventType] = useState('Conferencia Magistral');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const { register, handleSubmit, reset, setValue, control, watch } = useForm<Event>();
+  
+  // Custom Speaker Select State
+  const [speakerSearch, setSpeakerSearch] = useState('');
+  const [isSpeakerOpen, setIsSpeakerOpen] = useState(false);
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -62,9 +66,10 @@ export function EventsManager() {
     setIsCreating(false);
     setIsCreating(false);
     reset();
-    setEventType('Conferencia magistral');
+    setEventType('Conferencia Magistral');
     setTags([]);
     setTagInput('');
+    setSpeakerSearch(''); // Reset speaker search
     fetchEvents();
   };
 
@@ -82,11 +87,13 @@ export function EventsManager() {
       setValue('description', event.description || '');
       setValue('location', event.location || '');
       setValue('date', event.date ? new Date(event.date).toISOString().slice(0, 16) : '');
-      setValue('type', event.type || 'Conferencia magistral');
+      setValue('type', event.type || 'Conferencia Magistral');
       setValue('speaker_id', event.speaker_id || '');
-      setEventType(event.type || 'Conferencia magistral');
+      setEventType(event.type || 'Conferencia Magistral');
       setTags(event.tags || []);
       setValue('image_url', event.image_url || '');
+      setValue('gives_certificate', event.gives_certificate || false);
+      setValue('duration_days', event.duration_days || 1);
   };
 
   const addTag = (e?: React.KeyboardEvent | React.MouseEvent) => {
@@ -109,7 +116,7 @@ export function EventsManager() {
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-bold text-[#373737]">Agenda del Evento</h3>
       <div className="flex justify-between items-center">
-        <Button onClick={() => { setIsCreating(true); setIsEditing(null); reset(); setEventType('Conferencia magistral'); setTags([]); }} className="bg-[#373737] text-white hover:bg-black">
+        <Button onClick={() => { setIsCreating(true); setIsEditing(null); reset(); setEventType('Conferencia Magistral'); setTags([]); }} className="bg-[#373737] text-white hover:bg-black">
             <Plus className="mr-2 h-4 w-4" /> Nuevo Evento
         </Button>
       </div>
@@ -126,7 +133,6 @@ export function EventsManager() {
 
                 <div className="p-5 xs:p-6 md:p-8 pt-6 xs:pt-8 md:pt-10">
                     <div className="mb-6 xs:mb-8">
-                        <span className="text-gray-400 text-[10px] xs:text-xs font-bold uppercase tracking-wider">Paso 1/2</span>
                         <h2 className="text-2xl xs:text-3xl font-bold text-[#373737] mt-1 xs:mt-2 leading-tight">
                             {isEditing ? 'Editar Evento' : 'Crear Nuevo Evento'}
                         </h2>
@@ -142,20 +148,14 @@ export function EventsManager() {
                             <label className="text-sm font-bold text-[#373737]">Tipo de Actividad:</label>
                             <div className="flex flex-col gap-3">
                                 <div className="flex flex-wrap gap-2">
-                                    {['Conferencia magistral', 'Charla', 'Taller', 'Otro'].map(type => {
-                                        const predefined = ['Conferencia magistral', 'Charla', 'Taller'];
-                                        const isSelected = type === 'Otro' 
-                                            ? !predefined.includes(eventType) 
-                                            : eventType === type;
+                                    {['Conferencia Magistral', 'Conferencia', 'Ponencia', 'Taller', 'Actividad'].map(type => {
+                                        const isSelected = eventType === type;
                                         
                                         return (
                                             <button
                                                 key={type}
                                                 type="button"
-                                                onClick={() => {
-                                                    if (type === 'Otro') setEventType('');
-                                                    else setEventType(type);
-                                                }}
+                                                onClick={() => setEventType(type)}
                                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
                                                     isSelected 
                                                     ? 'bg-[#DBF227]/20 border-[#DBF227] text-[#373737]' 
@@ -168,15 +168,6 @@ export function EventsManager() {
                                         );
                                     })}
                                 </div>
-                                {['Conferencia magistral', 'Charla', 'Taller'].includes(eventType) ? null : (
-                                    <input 
-                                        type="text"
-                                        value={eventType || ''}
-                                        onChange={(e) => setEventType(e.target.value)}
-                                        placeholder="Escribe el tipo de actividad..."
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent transition-all bg-gray-50/50 animate-in fade-in slide-in-from-top-2"
-                                    />
-                                )}
                             </div>
                         </div>
 
@@ -280,20 +271,152 @@ export function EventsManager() {
                              </div>
                         </div>
 
-                        {/* Speaker Selection */}
+                        {/* Duration */}
                         <div className="space-y-2">
+                             <label className="text-sm font-bold text-[#373737]">Duración (Días):</label>
+                             <input 
+                                {...register('duration_days', { valueAsNumber: true, min: 1 })}
+                                type="number"
+                                min="1"
+                                defaultValue={1}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent bg-gray-50/50"
+                            />
+                        </div>
+
+                         {/* Certificate Switch */}
+                         <div className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${watch('gives_certificate') ? 'bg-[#DBF227]/20 border-[#DBF227]' : 'bg-gray-50/50 border-gray-100 hover:border-gray-200'}`}>
+                            <div className="flex-1">
+                                <label className="text-sm font-bold text-[#373737] block">Dar constancia</label>
+                                <p className={`text-xs transition-colors ${watch('gives_certificate') ? 'text-gray-600' : 'text-gray-400'}`}>Activar si este evento otorga constancia de participación.</p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input 
+                                    type="checkbox" 
+                                    {...register('gives_certificate')} 
+                                    className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#DBF227]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#DBF227]"></div>
+                            </label>
+                        </div>
+
+                        {/* Speaker Selection (Custom Combobox) */}
+                        <div className="space-y-2 relative">
                             <label className="text-sm font-bold text-[#373737]">Ponente:</label>
-                            <select
-                                {...register('speaker_id')}
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent bg-gray-50/50 appearance-none"
-                            >
-                                <option value="">Seleccionar Ponente (Opcional)</option>
-                                {users.map(user => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.role === 'ponente' ? '🎤 ' : ''} {user.first_name} {user.last_name} ({user.email})
-                                    </option>
-                                ))}
-                            </select>
+                            <div className="relative">
+                                <div className="relative">
+                                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <input
+                                        type="text"
+                                        value={isSpeakerOpen ? speakerSearch : (users.find(u => u.id === watch('speaker_id')) ? `${users.find(u => u.id === watch('speaker_id'))?.first_name} ${users.find(u => u.id === watch('speaker_id'))?.last_name}` : '')}
+                                        placeholder="Buscar ponente..."
+                                        className="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent bg-gray-50/50 transition-all"
+                                        onFocus={() => {
+                                            const currentId = watch('speaker_id');
+                                            const user = users.find(u => u.id === currentId);
+                                            setSpeakerSearch(user ? `${user.first_name} ${user.last_name}` : '');
+                                            setIsSpeakerOpen(true);
+                                        }}
+                                        onChange={(e) => {
+                                            setSpeakerSearch(e.target.value);
+                                            setIsSpeakerOpen(true);
+                                        }}
+                                        onBlur={() => {
+                                            // Small delay to allow click event on options to fire
+                                            setTimeout(() => setIsSpeakerOpen(false), 200);
+                                        }}
+                                    />
+                                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+                                         {watch('speaker_id') && (
+                                            <button 
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setValue('speaker_id', '');
+                                                    setSpeakerSearch('');
+                                                }}
+                                                className="p-1 hover:bg-gray-200 rounded-full text-gray-400"
+                                            >
+                                                <X className="h-3 w-3" />
+                                            </button>
+                                         )}
+                                        <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${isSpeakerOpen ? 'rotate-180' : ''}`} />
+                                    </div>
+                                </div>
+
+                                {isSpeakerOpen && (
+                                    <div className="absolute z-20 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-2xl max-h-[300px] overflow-y-auto animate-in fade-in slide-in-from-top-2">
+                                        {(() => {
+                                            const lowerQuery = speakerSearch.toLowerCase();
+                                            const filtered = users.filter(u => 
+                                                `${u.first_name} ${u.last_name}`.toLowerCase().includes(lowerQuery) || 
+                                                u.email?.toLowerCase().includes(lowerQuery)
+                                            );
+                                            
+                                            // Split into Ponentes and Others
+                                            const ponentes = filtered.filter(u => u.role === 'ponente');
+                                            const others = filtered.filter(u => u.role !== 'ponente');
+                                            
+                                            if (filtered.length === 0) {
+                                                return <div className="p-4 text-center text-sm text-gray-400">No se encontraron usuarios.</div>;
+                                            }
+
+                                            return (
+                                                <div className="py-2">
+                                                    {ponentes.length > 0 && (
+                                                        <div>
+                                                            <div className="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50 sticky top-0 backdrop-blur-sm">Ponentes</div>
+                                                            {ponentes.map(user => (
+                                                                <div 
+                                                                    key={user.id}
+                                                                    onMouseDown={() => {
+                                                                        setValue('speaker_id', user.id);
+                                                                        setSpeakerSearch('');
+                                                                        setIsSpeakerOpen(false);
+                                                                    }}
+                                                                    className={`px-4 py-3 hover:bg-[#DBF227]/10 cursor-pointer flex items-center justify-between group transition-colors ${watch('speaker_id') === user.id ? 'bg-[#DBF227]/5' : ''}`}
+                                                                >
+                                                                    <div>
+                                                                        <div className="font-bold text-[#373737] text-sm group-hover:text-black">{user.first_name} {user.last_name}</div>
+                                                                        <div className="text-xs text-gray-400">{user.email}</div>
+                                                                    </div>
+                                                                    {watch('speaker_id') === user.id && <Check className="h-4 w-4 text-[#aacc00]" />}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    {ponentes.length > 0 && others.length > 0 && (
+                                                        <div className="h-px bg-gray-100 my-2 mx-4" />
+                                                    )}
+
+                                                    {others.length > 0 && (
+                                                        <div>
+                                                            {ponentes.length > 0 && <div className="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50 sticky top-0 backdrop-blur-sm">Otros Asistentes</div>}
+                                                            {others.map(user => (
+                                                                <div 
+                                                                    key={user.id}
+                                                                    onMouseDown={() => {
+                                                                        setValue('speaker_id', user.id);
+                                                                        setSpeakerSearch('');
+                                                                        setIsSpeakerOpen(false);
+                                                                    }}
+                                                                     className={`px-4 py-3 hover:bg-[#DBF227]/10 cursor-pointer flex items-center justify-between group transition-colors ${watch('speaker_id') === user.id ? 'bg-[#DBF227]/5' : ''}`}
+                                                                >
+                                                                    <div>
+                                                                        <div className="font-bold text-[#373737] text-sm group-hover:text-black">{user.first_name} {user.last_name}</div>
+                                                                        <div className="text-xs text-gray-400">{user.email}</div>
+                                                                    </div>
+                                                                     {watch('speaker_id') === user.id && <Check className="h-4 w-4 text-[#aacc00]" />}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })()}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="pt-6 flex flex-col-reverse xs:flex-row justify-between items-center border-t border-gray-100 mt-8 gap-3 xs:gap-0">

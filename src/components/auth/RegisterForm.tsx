@@ -16,7 +16,7 @@ const formSchema = z
     degree: z.enum(["Licenciatura", "Maestría", "Doctorado", "Especialidad"], {
       message: "Seleccione un grado académico",
     }),
-    gender: z.enum(["Masculino", "Femenino", "Otro"], {
+    gender: z.enum(["Masculino", "Femenino", "Neutro"], {
       message: "Seleccione un género",
     }),
     email: z.string().email("Email inválido"),
@@ -176,7 +176,7 @@ export function RegisterForm() {
             <option value="">Seleccionar...</option>
             <option value="Masculino">Masculino</option>
             <option value="Femenino">Femenino</option>
-            <option value="Otro">Otro</option>
+            <option value="Neutro">Neutro</option>
           </select>
           {errors.gender && (
             <p className="text-red-500 text-xs ml-1">{errors.gender.message}</p>

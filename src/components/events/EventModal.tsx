@@ -99,12 +99,32 @@ export function EventModal({
                         {eventDate.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')}
                     </span>
                     <span className="text-xl font-bold leading-none">
-                        {eventDate.getDate()}
+                        {(() => {
+                          const duration = event.duration_days || 1;
+                          if (duration > 1) {
+                            const endDate = new Date(eventDate);
+                            endDate.setDate(eventDate.getDate() + (duration - 1));
+                            return `${eventDate.getDate()} - ${endDate.getDate()}`;
+                          }
+                          return eventDate.getDate();
+                        })()}
                     </span>
                 </div>
                 <div className="flex flex-col">
                      <span className="text-sm font-medium text-white/90">
-                        {eventDate.toLocaleDateString('es-ES', { weekday: 'long' })}
+                        {(() => {
+                          const duration = event.duration_days || 1;
+                          const startDay = eventDate.toLocaleDateString('es-ES', { weekday: 'long' });
+                          
+                          if (duration > 1) {
+                            const endDate = new Date(eventDate);
+                            endDate.setDate(eventDate.getDate() + (duration - 1));
+                            const endDay = endDate.toLocaleDateString('es-ES', { weekday: 'long' });
+                            return `${startDay} - ${endDay}`;
+                          }
+                          
+                          return startDay;
+                        })()}
                      </span>
                      <span className="text-xs text-white/70 flex items-center gap-1">
                         <Clock className="w-3 h-3" />
@@ -163,7 +183,25 @@ export function EventModal({
                    <div className="flex items-start gap-3">
                         <User className="h-5 w-5 text-gray-400 shrink-0 mt-0.5" />
                         <div>
-                            <h4 className="text-sm font-bold text-[#373737]">Ponente</h4>
+                            <h4 className="text-sm font-bold text-[#373737]">
+                              {(() => {
+                                const type = event.type || '';
+                                const gender = event.speaker?.gender || 'Neutro';
+                                
+                                if (type === 'Taller') return 'Tallerista';
+                                if (type === 'Conferencia') return 'Conferencista';
+                                if (type === 'Conferencia Magistral') return 'Conferencista Magistral';
+                                if (type === 'Ponencia') return 'Ponente';
+                                
+                                if (type === 'Actividad') {
+                                  if (gender === 'Masculino') return 'Encargado';
+                                  if (gender === 'Femenino') return 'Encargada';
+                                  return 'Encargade';
+                                }
+                                
+                                return 'Ponente'; // Default fallback
+                              })()}
+                            </h4>
                             <p className="text-sm text-gray-600">
                                  {getDegreeAbbr(event.speaker.degree)} {event.speaker.first_name} {event.speaker.last_name}
                             </p>

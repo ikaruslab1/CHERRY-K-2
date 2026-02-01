@@ -10,7 +10,7 @@ import { EventModal } from './EventModal';
 
 export function AgendaView() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [attendance, setAttendance] = useState<Set<string>>(new Set());
+  const [attendance, setAttendance] = useState<Record<string, number>>({});
   const [interests, setInterests] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -33,9 +33,9 @@ export function AgendaView() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         
-        let eventsQuery = supabase
+          let eventsQuery = supabase
           .from('events')
-          .select('id, title, description, location, date, type, tags, image_url, speaker:profiles!speaker_id(first_name, last_name, degree)')
+          .select('id, title, description, location, date, type, tags, image_url, gives_certificate, duration_days, speaker:profiles!speaker_id(first_name, last_name, degree, gender)')
           .order('date', { ascending: true });
 
         if (!user) {
@@ -72,7 +72,11 @@ export function AgendaView() {
         }
         
         if (attendanceResponse.data) {
-          setAttendance(new Set(attendanceResponse.data.map(a => a.event_id)));
+          const counts: Record<string, number> = {};
+          attendanceResponse.data.forEach((a: any) => {
+              counts[a.event_id] = (counts[a.event_id] || 0) + 1;
+          });
+          setAttendance(counts);
         }
 
         if (interestsResponse.data) {
@@ -160,7 +164,9 @@ export function AgendaView() {
         <div className="flex flex-col gap-4">
           {filteredEvents.map((event) => {
             const eventDate = new Date(event.date);
-            const isAttended = attendance.has(event.id);
+            const attendanceCount = attendance[event.id] || 0;
+            const duration = event.duration_days || 1;
+            const isAttended = attendanceCount >= duration;
             const isInterested = interests.has(event.id);
 
             // Determine styles based on status
@@ -225,7 +231,22 @@ export function AgendaView() {
                   </div>
 
                   {/* Date & Time */}
-                  <div className="flex shrink-0 flex-row items-center gap-4 text-xs font-medium uppercase tracking-wide text-gray-400 sm:flex-col sm:items-end sm:gap-1">
+                    <div className="flex shrink-0 flex-row items-center gap-4 text-xs font-medium uppercase tracking-wide text-gray-400 sm:flex-col sm:items-end sm:gap-1">
+                    {/* Progress Bar for Multi-day Events */}
+                    {duration > 1 && attendanceCount > 0 && (
+                        <div className="w-full sm:w-24 flex flex-col items-end gap-1 mb-2">
+                             <div className="text-[10px] font-bold text-[#373737] normal-case">
+                                {attendanceCount}/{duration} Asistencias
+                             </div>
+                             <div className="h-1.5 w-24 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                                 <div 
+                                    className="h-full bg-[#DBF227] transition-all duration-500" 
+                                    style={{ width: `${Math.min((attendanceCount / duration) * 100, 100)}%` }}
+                                 />
+                             </div>
+                        </div>
+                    )}
+
                     <div className="flex items-center gap-1.5">
                       <Calendar className="h-4 w-4" />
                       <span>
@@ -251,7 +272,7 @@ export function AgendaView() {
         event={selectedEvent}
         isOpen={!!selectedEvent}
         onClose={() => setSelectedEvent(null)}
-        isAttended={selectedEvent ? attendance.has(selectedEvent.id) : false}
+        isAttended={selectedEvent ? (attendance[selectedEvent.id] || 0) >= (selectedEvent.duration_days || 1) : false}
         isInterested={selectedEvent ? interests.has(selectedEvent.id) : false}
         onToggleInterest={toggleInterest}
       />

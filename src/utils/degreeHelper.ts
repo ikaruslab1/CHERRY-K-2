@@ -1,5 +1,5 @@
 export type Degree = "Licenciatura" | "Maestría" | "Doctorado" | "Especialidad";
-export type Gender = "Masculino" | "Femenino" | "Otro";
+export type Gender = "Masculino" | "Femenino" | "Neutro";
 
 export const getDegreeAbbreviation = (degree: string, gender: string): string => {
   const normalizedDegree = degree.toLowerCase();
