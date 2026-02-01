@@ -70,16 +70,14 @@ export function QRScanner({ eventId, durationDays = 1, onSuccess }: QRScannerPro
       if (countError) throw countError;
 
       const currentCount = attendanceCount || 0;
-      const targetDuration = Number(durationDays) || 1;
+      // Force integer parsing
+      const targetDuration = parseInt(String(durationDays || '1'), 10);
 
-      // Allow scanning if we haven't reached the target OR if we just reached it (to account for the current scan effectively being the first of the day?? No, attendanceCount is DB count).
-      // actually, we want to allow scanning up to N times.
-      // If currentCount is 0. Scan allowed. -> 1.
-      // If currentCount is 1. Duration 2. Scan allowed. -> 2.
-      // If currentCount is 2. Duration 2. Blocked.
+      // Debug log (remove in prod if needed, but useful now)
+      console.log(`Scanning: Current ${currentCount}, Target ${targetDuration}, ID ${profile.id}, Event ${eventId}`);
 
       if (currentCount >= targetDuration) {
-          setMessage(`Usuario ya tiene ${currentCount}/${targetDuration} asistencias registradas.`);
+          setMessage(`Límite alcanzado: ${currentCount}/${targetDuration} asistencias.`);
           setStatus('error');
           return;
       }
@@ -96,9 +94,10 @@ export function QRScanner({ eventId, durationDays = 1, onSuccess }: QRScannerPro
         });
 
       if (attendanceError) {
-        // Fallback for unique constraint if it wasn't dropped properly
+        // Fallback for unique constraint
         if (attendanceError.code === '23505') { 
-             setMessage(`Asistencia ya registrada.`);
+             // This might happen if user scans twice in RAPID succession
+             setMessage(`Ya registrado (${currentCount + 1}/${targetDuration}).`);
              setStatus('error');
              return;
         }

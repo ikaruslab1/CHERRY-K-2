@@ -26,14 +26,11 @@ export function useAttendanceScanner({ activityId, onSuccess }: UseAttendanceSca
     }, []);
 
     const playSound = useCallback((type: 'beep' | 'success' | 'error') => {
-        // Implementación simple con osciladores si no hay assets, o usar assets si existen
-        // Usar objetos Audio nativos apuntando a assets/sounds/
-        const audio = new Audio();
-        if (type === 'beep') audio.src = '/assets/sounds/scan-beep.mp3';
-        else if (type === 'success') audio.src = '/assets/sounds/success-chime.mp3';
-        // Fallback simple si no carga (opcional, o confiar en que el archivo existe)
-        
-        audio.play().catch(e => console.log("Audio play failed (interaction needed?):", e));
+        // Audio files disabled to prevent errors if assets are missing
+        // const audio = new Audio();
+        // if (type === 'beep') audio.src = '/assets/sounds/scan-beep.mp3';
+        // else if (type === 'success') audio.src = '/assets/sounds/success-chime.mp3';
+        // audio.play().catch(e => console.log("Audio play failed (interaction needed?):", e));
     }, []);
 
     const handleScan = useCallback(async (data: string) => {

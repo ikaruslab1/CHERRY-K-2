@@ -60,17 +60,8 @@ export const attendanceService = {
    */
   async confirmAttendance(userId: string, activityId: string): Promise<{ success: boolean; message: string }> {
     try {
-        // Verificar si ya existe el registro para evitar duplicados (opcional, pero recomendado)
-        const { data: existing } = await supabase
-            .from('attendance')
-            .select('id')
-            .eq('user_id', userId)
-            .eq('event_id', activityId)
-            .single();
-
-        if (existing) {
-            return { success: false, message: 'El usuario ya ha registrado su asistencia para este evento.' };
-        }
+        // Se ha eliminado la restricción de registro único para permitir múltiples asistencias (ej. eventos de varios días)
+        // Validation logic removed per user request
 
         const { error } = await supabase
             .from('attendance')
