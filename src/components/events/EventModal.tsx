@@ -13,6 +13,7 @@ interface EventModalProps {
   isAttended: boolean;
   isInterested: boolean;
   onToggleInterest: (eventId: string) => void;
+  hideActionButtons?: boolean;
 }
 
 // Helper to abbreviate degrees
@@ -35,7 +36,8 @@ export function EventModal({
   onClose, 
   isAttended, 
   isInterested,
-  onToggleInterest 
+  onToggleInterest,
+  hideActionButtons
 }: EventModalProps) {
   const [show, setShow] = useState(isOpen);
 
@@ -212,6 +214,7 @@ export function EventModal({
         </div>
 
          {/* Fixed Footer for Action */}
+         {!hideActionButtons && (
          <div className="p-4 border-t border-gray-100 bg-white shrink-0">
             {isAttended ? (
               <div className="w-full py-3 px-4 text-sm font-bold text-[#373737] bg-[#DBF227]/20 border border-[#DBF227] rounded-xl flex items-center justify-center gap-2 cursor-default">
@@ -232,6 +235,7 @@ export function EventModal({
               </Button>
             )}
         </div>
+        )}
       </div>
     </div>
   );

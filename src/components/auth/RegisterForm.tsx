@@ -13,7 +13,7 @@ const formSchema = z
   .object({
     firstName: z.string().min(2, "El nombre es requerido"),
     lastName: z.string().min(2, "El apellido es requerido"),
-    degree: z.enum(["Licenciatura", "Maestría", "Doctorado", "Especialidad"], {
+    degree: z.enum(["Licenciatura", "Maestría", "Doctorado", "Especialidad", "Estudiante", "Profesor"], {
       message: "Seleccione un grado académico",
     }),
     gender: z.enum(["Masculino", "Femenino", "Neutro"], {
@@ -158,10 +158,14 @@ export function RegisterForm() {
             className="flex h-12 w-full rounded-xl border-0 bg-gray-50 px-3 py-2 text-sm text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:bg-white transition-all"
           >
             <option value="">Seleccionar...</option>
-            <option value="Especialidad">Especialidad</option>
+            <option value="Estudiante">Estudiante</option>
             <option value="Licenciatura">Licenciatura</option>
+            <option value="Especialidad">Especialidad</option>
             <option value="Maestría">Maestría</option>
             <option value="Doctorado">Doctorado</option>
+            <option value="Profesor">Profesor</option>
+            
+            
           </select>
           {errors.degree && (
             <p className="text-red-500 text-xs ml-1">{errors.degree.message}</p>

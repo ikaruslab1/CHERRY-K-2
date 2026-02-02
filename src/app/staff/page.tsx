@@ -6,13 +6,14 @@ import { supabase } from '@/lib/supabase';
 import { UserProfileView } from '@/components/profile/UserProfileView';
 import { AgendaView } from '@/components/events/AgendaView';
 import StaffAttendanceView from '@/views/staff/AttendanceView';
+import { CertificatesView } from '@/components/profile/CertificatesView';
 import { UsersTable } from '@/components/admin/UsersTable';
 import { LogOut, Loader2, QrCode, ChevronDown, ChevronUp, Users } from 'lucide-react';
 
 export default function StaffPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'scanner'>('scanner');
+  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'scanner' | 'constancias'>('scanner');
   const [authorized, setAuthorized] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -93,6 +94,16 @@ export default function StaffPage() {
                         Agenda
                     </button>
                     <button 
+                        onClick={() => { setActiveTab('constancias'); setIsMobileMenuOpen(false); }}
+                        className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto flex justify-center items-center ${
+                            activeTab === 'constancias' 
+                            ? 'bg-white text-[#373737] shadow-sm' 
+                            : 'text-gray-500 hover:text-[#373737]'
+                        }`}
+                    >
+                        Constancias
+                    </button>
+                    <button 
                         onClick={() => { setActiveTab('scanner'); setIsMobileMenuOpen(false); }}
                         className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap flex items-center justify-center gap-2 w-full md:w-auto ${
                             activeTab === 'scanner' 
@@ -133,6 +144,7 @@ export default function StaffPage() {
         <div key={activeTab} className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
              {activeTab === 'profile' && <UserProfileView />}
              {activeTab === 'agenda' && <AgendaView />}
+             {activeTab === 'constancias' && <CertificatesView />}
              {activeTab === 'users' && <UsersTable readOnly />}
              {activeTab === 'scanner' && <StaffAttendanceView />}
         </div>

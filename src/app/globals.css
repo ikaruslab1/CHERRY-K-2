@@ -67,3 +67,44 @@ body {
 h1, h2, h3, h4, h5, h6 {
   text-wrap: balance;
 }
+
+@media print {
+  @page { 
+    margin: 0; 
+    size: letter landscape; 
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background: white;
+  }
+
+  /* Use visibility hidden on everything to preserve layout context but hide content */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Make the print area and all its children visible */
+  #certificate-print-area,
+  #certificate-print-area * {
+    visibility: visible;
+  }
+
+  #certificate-print-area {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 279.4mm;
+    height: 215.9mm;
+    z-index: 9999;
+    margin: 0;
+    padding: 0;
+    background: white;
+    /* Ensure no overflow clipping from parents affects this fixed element */
+    overflow: visible;
+  }
+}

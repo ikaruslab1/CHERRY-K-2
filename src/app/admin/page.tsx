@@ -8,13 +8,14 @@ import { EventsManager } from '@/components/admin/EventsManager';
 import { UserProfileView } from '@/components/profile/UserProfileView';
 import { AgendaView } from '@/components/events/AgendaView';
 import AttendanceView from '@/views/admin/AttendanceView';
+import { CertificatesView } from '@/components/profile/CertificatesView';
 import { LogOut, Loader2, QrCode, ChevronDown, ChevronUp } from 'lucide-react';
 
 function AdminContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance'>(
+  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'constancias'>(
       (searchParams.get('tab') as any) || 'profile'
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -110,6 +111,16 @@ function AdminContent() {
                         Agenda
                     </button>
                     <button 
+                        onClick={() => { setActiveTab('constancias'); setIsMobileMenuOpen(false); }}
+                        className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto flex justify-center md:inline-block ${
+                            activeTab === 'constancias' 
+                            ? 'bg-white text-[#373737] shadow-sm' 
+                            : 'text-gray-500 hover:text-[#373737]'
+                        }`}
+                    >
+                        Constancias
+                    </button>
+                    <button 
                         onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }}
                         className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto flex justify-center md:inline-block ${
                             activeTab === 'users' 
@@ -159,6 +170,7 @@ function AdminContent() {
         <div key={activeTab} className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
             {activeTab === 'profile' && <UserProfileView />}
             {activeTab === 'agenda' && <AgendaView />}
+            {activeTab === 'constancias' && <CertificatesView />}
             {activeTab === 'users' && <UsersTable />}
             {activeTab === 'events' && <EventsManager />}
             {activeTab === 'attendance' && <AttendanceView />}

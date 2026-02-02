@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Calendar, Clock, Tag, CheckCircle2, Search } from 'lucide-react';
+import { Calendar, Clock, Tag, CheckCircle2, Search, Medal } from 'lucide-react';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 
 import { Event } from '@/types';
@@ -204,6 +204,13 @@ export function AgendaView() {
                        <span className="inline-flex items-center rounded-md border border-gray-200 bg-white/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500 backdrop-blur-sm">
                         {event.type}
                       </span>
+                      
+                      {event.gives_certificate && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-200/10 border border-gray-200/50 px-2.5 py-1 text-[10px] font-bold text-[#373737] shadow-sm">
+                            <Medal className="h-3 w-3" /> Otorga constancia
+                        </span>
+                      )}
+
                       {/* Search Match Tags */}
                       {event.tags && event.tags.length > 0 && searchQuery && (
                           <>
@@ -250,7 +257,26 @@ export function AgendaView() {
                     <div className="flex items-center gap-1.5">
                       <Calendar className="h-4 w-4" />
                       <span>
-                        {eventDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+                        {(() => {
+                           // Standard format: "mié. 25 oct." or similar depending on browser
+                           const startStr = eventDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+                           
+                           if (duration > 1) {
+                               const endDate = new Date(eventDate);
+                               endDate.setDate(eventDate.getDate() + (duration - 1));
+                               
+                               const startDayStr = eventDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+                               const endDayStr = endDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+                               const monthStr = eventDate.toLocaleDateString('es-ES', { month: 'short' });
+                               
+                               // Handle same month vs different month if needed, but per request "Mar 3 - Jue 4, FEB"
+                               // Let's assume same month for simplicity or just append the month of start date
+                               // Format: "mar 3 - jue 4, feb"
+                               return `${startDayStr} - ${endDayStr}, ${monthStr}`;
+                           }
+                           
+                           return startStr;
+                        })()}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">

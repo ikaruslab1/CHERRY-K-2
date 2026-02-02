@@ -1,4 +1,4 @@
-export type Degree = "Licenciatura" | "Maestría" | "Doctorado" | "Especialidad";
+export type Degree = "Licenciatura" | "Maestría" | "Doctorado" | "Especialidad" | "Estudiante" | "Profesor";
 export type Gender = "Masculino" | "Femenino" | "Neutro";
 
 export const getDegreeAbbreviation = (degree: string, gender: string): string => {
@@ -15,6 +15,10 @@ export const getDegreeAbbreviation = (degree: string, gender: string): string =>
       return normalizedGender === "femenino" ? "Dra." : "Dr.";
     case "especialidad":
         return normalizedGender === "femenino" ? "Esp." : "Esp.";
+    case "profesor":
+        return normalizedGender === "femenino" ? "Profa." : "Prof.";
+    case "estudiante":
+        return "";
     default:
       return "";
   }

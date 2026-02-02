@@ -9,15 +9,18 @@ import { AgendaView } from '@/components/events/AgendaView';
 import { UsersTable } from '@/components/admin/UsersTable';
 import { EventsManager } from '@/components/admin/EventsManager';
 import AttendanceView from '@/views/admin/AttendanceView';
+import { ParticipationView } from '@/components/profile/ParticipationView';
 import { LogOut, Loader2, QrCode, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { CertificatesView } from '@/components/profile/CertificatesView';
 
 export default function ProfilePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'participation' | 'constancias'>('profile');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
+  const [isPonente, setIsPonente] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -39,6 +42,8 @@ export default function ProfilePage() {
            setIsAdmin(true);
         } else if (profile?.role === 'staff') {
            setIsStaff(true);
+        } else if (profile?.role === 'ponente') {
+           setIsPonente(true);
         }
 
         setLoading(false);
@@ -109,6 +114,30 @@ export default function ProfilePage() {
                         Agenda
                     </button>
 
+                    <button 
+                        onClick={() => { setActiveTab('constancias'); setIsMobileMenuOpen(false); }}
+                        className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto ${
+                            activeTab === 'constancias' 
+                            ? 'bg-white text-[#373737] shadow-sm' 
+                            : 'text-gray-500 hover:text-[#373737]'
+                        }`}
+                    >
+                        Constancias
+                    </button>
+
+                    {isPonente && (
+                         <button 
+                            onClick={() => { setActiveTab('participation'); setIsMobileMenuOpen(false); }}
+                            className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto ${
+                                activeTab === 'participation' 
+                                ? 'bg-white text-[#373737] shadow-sm' 
+                                : 'text-gray-500 hover:text-[#373737]'
+                            }`}
+                        >
+                            Participación
+                        </button>
+                    )}
+
                     {(isAdmin || isStaff) && (
                         <button 
                             onClick={() => { setActiveTab('attendance'); setIsMobileMenuOpen(false); }}
@@ -166,6 +195,8 @@ export default function ProfilePage() {
         <div key={activeTab} className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
              {activeTab === 'profile' && <UserProfileView />}
              {activeTab === 'agenda' && <AgendaView />}
+             {activeTab === 'constancias' && <CertificatesView />}
+             {isPonente && activeTab === 'participation' && <ParticipationView />}
              {(isAdmin || isStaff) && activeTab === 'attendance' && <AttendanceView />}
              {isAdmin && activeTab === 'users' && <UsersTable />}
              {isAdmin && activeTab === 'events' && <EventsManager />}

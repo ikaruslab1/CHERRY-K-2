@@ -23,6 +23,21 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   const degreeAbbr = getDegreeAbbreviation(profile.degree, profile.gender);
   const fullName = `${degreeAbbr} ${profile.first_name} ${profile.last_name}`;
   
+  const getRoleTheme = (role: string) => {
+    switch (role?.toLowerCase()) {
+      case 'ponente':
+        return { bg: '#278BF2', text: '#FFFFFF', name: 'Ponente' };
+      case 'staff':
+        return { bg: '#F23527', text: '#FFFFFF', name: 'Staff' };
+      case 'admin':
+        return { bg: '#373737', text: '#FFFFFF', name: 'Administrador' };
+      default:
+        return { bg: '#DBF227', text: '#373737', name: 'Asistente' };
+    }
+  };
+
+  const { bg: themeColor, text: themeTextColor, name: roleName } = getRoleTheme(profile.role);
+  
   // JSON data for QR
   const qrData = JSON.stringify({
     id: profile.short_id,
@@ -47,13 +62,27 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   const FrontFaceContent = (
     <div className="flex flex-col h-full w-full bg-white select-none">
       {/* Header - Accent Color - Safe Zone Top */}
-      <div className="relative shrink-0 bg-[#DBF227] flex flex-col items-center justify-center pt-8 pb-6 px-4 overflow-hidden">
+      {/* Header - Accent Color - Safe Zone Top */}
+      <div 
+        className="relative shrink-0 flex flex-col items-center justify-center pt-8 pb-6 px-4 overflow-hidden transition-colors duration-300"
+        style={{ backgroundColor: themeColor }}
+      >
           {/* Animated Background Effect */}
           <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-[gradient_8s_ease_infinite]" />
           
           <div className="relative z-10 flex flex-col items-center">
-            <span className="text-[#373737] text-[10px] xs:text-[11px] font-black uppercase tracking-[0.25em] mb-1 opacity-80">ID de Acceso</span>
-            <h2 className="text-[#373737] text-3xl xs:text-4xl font-mono font-black tracking-widest drop-shadow-sm">{profile.short_id}</h2>
+            <span 
+              className="text-[10px] xs:text-[11px] font-black uppercase tracking-[0.25em] mb-1 opacity-80"
+              style={{ color: themeTextColor }}
+            >
+              ID de Acceso
+            </span>
+            <h2 
+              className="text-3xl xs:text-4xl font-mono font-black tracking-widest drop-shadow-sm"
+              style={{ color: themeTextColor }}
+            >
+              {profile.short_id}
+            </h2>
           </div>
       </div>
 
@@ -85,8 +114,12 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           </div>
 
           {/* Role Badge */}
-          <span className="shrink-0 px-8 py-2 rounded-full bg-[#373737] text-white text-[10px] font-bold tracking-[0.2em] uppercase shadow-lg shadow-[#373737]/20 mb-2">
-              {profile.role}
+          {/* Role Badge */}
+          <span 
+            className="shrink-0 px-8 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase shadow-lg shadow-black/5 mb-2 transition-colors duration-300"
+            style={{ backgroundColor: themeColor, color: themeTextColor }}
+          >
+              {roleName}
           </span>
       </div>
 
@@ -120,17 +153,33 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           </div>
 
           {/* Back Face */}
-          <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-[#DBF227] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col items-center justify-center p-8 text-center">
-               <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-[gradient_8s_ease_infinite] opacity-50" />
+          {/* Back Face */}
+          <div 
+            className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col items-center justify-center p-8 text-center transition-colors duration-300"
+            style={{ backgroundColor: themeColor }}
+          >
+               <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-[gradient_8s_ease_infinite]" />
                
                <div className="relative z-10 space-y-6">
-                  <div className="w-20 h-20 border-4 border-[#373737] rounded-full flex items-center justify-center mx-auto mb-4">
-                       <div className="w-10 h-10 bg-[#373737] rounded-full animate-bounce" />
+                  <div 
+                    className="w-20 h-20 border-4 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{ borderColor: themeTextColor }}
+                  >
+                       <div 
+                        className="w-10 h-10 rounded-full animate-bounce"
+                        style={{ backgroundColor: themeTextColor }} 
+                       />
                   </div>
-                  <h2 className="text-[#373737] text-5xl font-black uppercase tracking-widest leading-tight drop-shadow-sm">
+                  <h2 
+                    className="text-5xl font-black uppercase tracking-widest leading-tight drop-shadow-sm"
+                    style={{ color: themeTextColor }}
+                  >
                       Semana<br />del<br />Diseño
                   </h2>
-                  <div className="w-16 h-1 bg-[#373737] mx-auto rounded-full mt-6" />
+                  <div 
+                    className="w-16 h-1 mx-auto rounded-full mt-6"
+                    style={{ backgroundColor: themeTextColor }}
+                  />
                </div>
           </div>
 
