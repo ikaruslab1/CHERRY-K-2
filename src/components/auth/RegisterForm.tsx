@@ -6,22 +6,51 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { registerUser } from "@/app/actions"; // We will create this
+import { registerUser } from "@/app/actions";
 import { Loader2, CheckCircle } from "lucide-react";
+
+// Helper for Title Case
+const toTitleCase = (str: string) => {
+  return str.replace(
+    /\w\S*/g,
+    (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+  );
+};
 
 const formSchema = z
   .object({
-    firstName: z.string().min(2, "El nombre es requerido"),
-    lastName: z.string().min(2, "El apellido es requerido"),
-    degree: z.enum(["Licenciatura", "Maestría", "Doctorado", "Especialidad", "Estudiante", "Profesor"], {
-      message: "Seleccione un grado académico",
-    }),
+    firstName: z.string().min(1, "El nombre es obligatorio"),
+    lastName: z
+      .string()
+      .min(1, "El apellido es obligatorio")
+      .refine((val) => val.trim().split(/\s+/).length >= 2, {
+        message: "Debe ingresar al menos dos apellidos (paterno y materno)",
+      }),
+    degree: z.enum(
+      [
+        "Licenciatura",
+        "Maestría",
+        "Doctorado",
+        "Especialidad",
+        "Estudiante",
+        "Profesor",
+      ],
+      {
+        message: "Seleccione un grado académico",
+      }
+    ),
     gender: z.enum(["Masculino", "Femenino", "Neutro"], {
       message: "Seleccione un género",
     }),
-    email: z.string().email("Email inválido"),
-    confirmEmail: z.string().email("Email inválido"),
-    phone: z.string().min(10, "El teléfono debe tener 10 dígitos"),
+    email: z.string().min(1, "El email es obligatorio").email("Email inválido"),
+    confirmEmail: z
+      .string()
+      .min(1, "Confirme su email")
+      .email("Email inválido"),
+    phone: z
+      .string()
+      .min(1, "El teléfono es obligatorio")
+      .regex(/^\d{10}$/, "El teléfono debe ser de 10 dígitos y sin lada"),
   })
   .refine((data) => data.email === data.confirmEmail, {
     message: "Los correos no coinciden",
@@ -42,6 +71,7 @@ export function RegisterForm() {
     handleSubmit,
     watch,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -70,13 +100,21 @@ export function RegisterForm() {
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
+
+    // Auto-formatting to Title Case
+    const formattedData = {
+      ...data,
+      firstName: toTitleCase(data.firstName),
+      lastName: toTitleCase(data.lastName),
+    };
+
     try {
-      const result = await registerUser(data);
+      const result = await registerUser(formattedData);
       if (result.success && result.data) {
         localStorage.removeItem("register_form_data"); // Clear saved data
         setSuccessData({
           id: result.data.short_id,
-          name: `${data.firstName} ${data.lastName}`,
+          name: `${formattedData.firstName} ${formattedData.lastName}`,
         });
       } else {
         alert("Error al registrar: " + result.error);
@@ -86,6 +124,15 @@ export function RegisterForm() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleBlur = (
+    e: React.FocusEvent<HTMLInputElement>,
+    field: "firstName" | "lastName",
+    registerOnBlur: React.FocusEventHandler<HTMLInputElement>
+  ) => {
+    registerOnBlur(e);
+    setValue(field, toTitleCase(e.target.value), { shouldValidate: true });
   };
 
   if (successData) {
@@ -126,6 +173,10 @@ export function RegisterForm() {
     );
   }
 
+  // Extract register properties for manual onBlur handling
+  const firstNameReg = register("firstName");
+  const lastNameReg = register("lastName");
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -133,17 +184,43 @@ export function RegisterForm() {
     >
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <label className="text-sm font-bold text-[#373737] ml-1">Nombre</label>
-          <Input {...register("firstName")} placeholder="Ej. Juan" className="rounded-xl border-0 bg-gray-50 focus:bg-white transition-all h-12" />
+          <label className="text-sm font-bold text-[#373737] ml-1">
+            Nombre <span className="text-red-500">*</span>
+          </label>
+          <Input
+            {...firstNameReg}
+            onBlur={(e) =>
+              handleBlur(e, "firstName", firstNameReg.onBlur)
+            }
+            placeholder="Ej. Juan"
+            className={`rounded-xl border bg-gray-50 focus:bg-white transition-all h-12 ${
+              errors.firstName ? "border-red-500 bg-red-50" : "border-gray-200"
+            }`}
+          />
           {errors.firstName && (
-            <p className="text-red-500 text-xs ml-1">{errors.firstName.message}</p>
+            <p className="text-red-500 text-xs ml-1">
+              {errors.firstName.message}
+            </p>
           )}
         </div>
         <div className="space-y-1.5">
-          <label className="text-sm font-bold text-[#373737] ml-1">Apellido</label>
-          <Input {...register("lastName")} placeholder="Ej. Pérez" className="rounded-xl border-0 bg-gray-50 focus:bg-white transition-all h-12" />
+          <label className="text-sm font-bold text-[#373737] ml-1">
+            Apellidos <span className="text-red-500">*</span>
+          </label>
+          <Input
+            {...lastNameReg}
+            onBlur={(e) =>
+              handleBlur(e, "lastName", lastNameReg.onBlur)
+            }
+            placeholder="Ej. Pérez López"
+            className={`rounded-xl border bg-gray-50 focus:bg-white transition-all h-12 ${
+              errors.lastName ? "border-red-500 bg-red-50" : "border-gray-200"
+            }`}
+          />
           {errors.lastName && (
-            <p className="text-red-500 text-xs ml-1">{errors.lastName.message}</p>
+            <p className="text-red-500 text-xs ml-1">
+              {errors.lastName.message}
+            </p>
           )}
         </div>
       </div>
@@ -151,11 +228,13 @@ export function RegisterForm() {
       <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label className="text-sm font-bold text-[#373737] ml-1">
-            Grado Académico
+            Grado Académico <span className="text-red-500">*</span>
           </label>
           <select
             {...register("degree")}
-            className="flex h-12 w-full rounded-xl border-0 bg-gray-50 px-3 py-2 text-sm text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:bg-white transition-all"
+            className={`flex h-12 w-full rounded-xl border bg-gray-50 px-3 py-2 text-sm text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:bg-white transition-all ${
+              errors.degree ? "border-red-500 bg-red-50" : "border-gray-200"
+            }`}
           >
             <option value="">Seleccionar...</option>
             <option value="Estudiante">Estudiante</option>
@@ -164,18 +243,20 @@ export function RegisterForm() {
             <option value="Maestría">Maestría</option>
             <option value="Doctorado">Doctorado</option>
             <option value="Profesor">Profesor</option>
-            
-            
           </select>
           {errors.degree && (
             <p className="text-red-500 text-xs ml-1">{errors.degree.message}</p>
           )}
         </div>
         <div className="space-y-1.5">
-          <label className="text-sm font-bold text-[#373737] ml-1">Género</label>
+          <label className="text-sm font-bold text-[#373737] ml-1">
+            Género <span className="text-red-500">*</span>
+          </label>
           <select
             {...register("gender")}
-            className="flex h-12 w-full rounded-xl border-0 bg-gray-50 px-3 py-2 text-sm text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:bg-white transition-all"
+            className={`flex h-12 w-full rounded-xl border bg-gray-50 px-3 py-2 text-sm text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:bg-white transition-all ${
+              errors.gender ? "border-red-500 bg-red-50" : "border-gray-200"
+            }`}
           >
             <option value="">Seleccionar...</option>
             <option value="Masculino">Masculino</option>
@@ -189,12 +270,16 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-sm font-bold text-[#373737] ml-1">Email</label>
+        <label className="text-sm font-bold text-[#373737] ml-1">
+          Email <span className="text-red-500">*</span>
+        </label>
         <Input
           {...register("email")}
           type="email"
           placeholder="juan@ejemplo.com"
-          className="rounded-xl border-0 bg-gray-50 focus:bg-white transition-all h-12"
+          className={`rounded-xl border bg-gray-50 focus:bg-white transition-all h-12 ${
+            errors.email ? "border-red-500 bg-red-50" : "border-gray-200"
+          }`}
         />
         {errors.email && (
           <p className="text-red-500 text-xs ml-1">{errors.email.message}</p>
@@ -203,22 +288,37 @@ export function RegisterForm() {
 
       <div className="space-y-1.5">
         <label className="text-sm font-bold text-[#373737] ml-1">
-          Confirmar Email
+          Confirmar Email <span className="text-red-500">*</span>
         </label>
         <Input
           {...register("confirmEmail")}
           type="email"
-          placeholder="juan@ejemplo.com"
-          className="rounded-xl border-0 bg-gray-50 focus:bg-white transition-all h-12"
+          placeholder="juan@example.com"
+          className={`rounded-xl border bg-gray-50 focus:bg-white transition-all h-12 ${
+            errors.confirmEmail
+              ? "border-red-500 bg-red-50"
+              : "border-gray-200"
+          }`}
         />
         {errors.confirmEmail && (
-          <p className="text-red-500 text-xs ml-1">{errors.confirmEmail.message}</p>
+          <p className="text-red-500 text-xs ml-1">
+            {errors.confirmEmail.message}
+          </p>
         )}
       </div>
 
       <div className="space-y-1.5">
-        <label className="text-sm font-bold text-[#373737] ml-1">Teléfono</label>
-        <Input {...register("phone")} type="tel" placeholder="55 1234 5678" className="rounded-xl border-0 bg-gray-50 focus:bg-white transition-all h-12" />
+        <label className="text-sm font-bold text-[#373737] ml-1">
+          Teléfono <span className="text-red-500">*</span>
+        </label>
+        <Input
+          {...register("phone")}
+          type="tel"
+          placeholder="Minimo 10 digitos. Sin lada."
+          className={`rounded-xl border bg-gray-50 focus:bg-white transition-all h-12 ${
+            errors.phone ? "border-red-500 bg-red-50" : "border-gray-200"
+          }`}
+        />
         {errors.phone && (
           <p className="text-red-500 text-xs ml-1">{errors.phone.message}</p>
         )}
@@ -241,3 +341,4 @@ export function RegisterForm() {
     </form>
   );
 }
+

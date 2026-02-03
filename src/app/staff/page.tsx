@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useRoleAuth } from '@/hooks/useRoleAuth';
 import { UserProfileView } from '@/components/profile/UserProfileView';
 import { AgendaView } from '@/components/events/AgendaView';
 import StaffAttendanceView from '@/views/staff/AttendanceView';
@@ -12,43 +13,16 @@ import { LogOut, Loader2, QrCode, ChevronDown, ChevronUp, Users } from 'lucide-r
 
 export default function StaffPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const { loading, isAuthorized } = useRoleAuth(['staff', 'admin']);
   const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'scanner' | 'constancias'>('scanner');
-  const [authorized, setAuthorized] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/');
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-      
-      if (!profile || (profile.role !== 'staff' && profile.role !== 'admin')) {
-        router.push('/profile');
-        return;
-      }
-
-      setAuthorized(true);
-      setLoading(false);
-    };
-
-    checkAuth();
-  }, [router]);
 
   const handleSignOut = async () => {
       await supabase.auth.signOut();
       router.push('/');
   };
 
-  if (!authorized) return null;
+  if (loading || !isAuthorized) return null;
 
   return (
     <main className="min-h-screen p-8 bg-gray-50 text-[#373737]">

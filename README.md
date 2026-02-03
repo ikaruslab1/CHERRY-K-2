@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cherry K 2
 
-## Getting Started
+Sistema integral de gestión de eventos, asistencia y control de usuarios, desarrollado con tecnologías web modernas.
 
-First, run the development server:
+## 📋 Descripción
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Este proyecto es una plataforma web diseñada para administrar eventos, controlar la asistencia mediante códigos QR y gestionar la emisión de constancias. Cuenta con un sistema de roles (Administrador, Staff, Usuario/Ponente) que permite adaptar la interfaz y funcionalidades según el tipo de usuario.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Características Principales
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Gestión de Eventos:** Visualización de agenda, creación y edición de eventos.
+- **Control de Asistencia:** Escaneo de códigos QR para registrar la asistencia de los participantes.
+- **Gestión de Usuarios:** Registro, autenticación y perfiles de usuario.
+- **Constancias:** Generación y visualización de certificados de participación.
+- **Roles y Permisos:**
+  - **Admin:** Control total del sistema, gestión de eventos y usuarios.
+  - **Staff:** Herramientas optimizadas para el registro de asistencia en sitio.
+  - **Usuario/Ponente:** Acceso a agenda personal, perfil y descarga de constancias.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Tecnologías Utilizadas
 
-## Learn More
+Este proyecto utiliza un stack moderno y eficiente:
 
-To learn more about Next.js, take a look at the following resources:
+- **Frontend:** [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/)
+- **Lenguaje:** [TypeScript](https://www.typescriptlang.org/)
+- **Estilos:** [Tailwind CSS 4](https://tailwindcss.com/)
+- **Backend & Autenticación:** [Supabase](https://supabase.com/)
+- **Formularios:** React Hook Form + Zod
+- **Iconos:** Lucide React
+- **Utilidades:** QR Code Scanner/Generator
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ⚙️ Instalación y Configuración
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Sigue estos pasos para ejecutar el proyecto en tu entorno local:
 
-## Deploy on Vercel
+1.  **Clonar el repositorio:**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    ```bash
+    git clone <URL_DEL_REPOSITORIO>
+    cd cherry-k-2
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2.  **Instalar dependencias:**
+
+    ```bash
+    npm install
+    # o
+    pnpm install
+    # o
+    yarn install
+    ```
+
+3.  **Configurar variables de entorno:**
+
+    Crea un archivo `.env.local` en la raíz del proyecto y agrega las credenciales de tu proyecto Supabase:
+
+    ```env
+    NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_clave_anon_de_supabase
+    ```
+
+4.  **Ejecutar el servidor de desarrollo:**
+
+    ```bash
+    npm run dev
+    ```
+
+    Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
+
+## 📂 Estructura del Proyecto
+
+El código fuente se encuentra organizado principalmente en `src`:
+
+- `src/app/`: Define las rutas de la aplicación utilizando el App Router de Next.js (`admin`, `staff`, `profile`, etc.).
+- `src/components/`: Contiene los componentes de React organizados por funcionalidad:
+  - `auth`: Formularios de autenticación.
+  - `events`: Componentes de agenda y gestión de eventos.
+  - `attendance`: Lógica y UI para el escáner de asistencia.
+  - `ui`: Componentes base reutilizables.
+- `src/services/`: Lógica de interacción con la base de datos (Supabase).
+- `src/types/`: Definiciones de tipos e interfaces TypeScript.
+
+## 🤝 Contribución
+
+Para mantener la calidad del código, por favor considera las siguientes buenas prácticas:
+
+- Tipado estricto con TypeScript.
+- Uso de componentes funcionales y Hooks.
+- Diseño responsivo y accesible utilizando Tailwind CSS.
+
+## 📄 Licencia
+
+Propiedad exclusiva. Todos los derechos reservados.

@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Calendar, Clock, Tag, CheckCircle2, Search, Medal } from 'lucide-react';
+import { Calendar, Search, Star, CheckCircle2 } from 'lucide-react';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 
 import { Event } from '@/types';
 import { EventModal } from './EventModal';
+import { AgendaItem } from './AgendaItem';
 
 export function AgendaView() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -161,135 +162,86 @@ export function AgendaView() {
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
-          {filteredEvents.map((event) => {
-            const eventDate = new Date(event.date);
-            const attendanceCount = attendance[event.id] || 0;
-            const duration = event.duration_days || 1;
-            const isAttended = attendanceCount >= duration;
-            const isInterested = interests.has(event.id);
+        <div className="flex flex-col gap-8">
+          {(() => {
+            const interestedEvents: Event[] = [];
+            const attendedEvents: Event[] = [];
+            const otherEvents: Event[] = [];
 
-            // Determine styles based on status
-            // Priority: Attended > Interested > Default
-            let gradientStyles = "from-gray-100/50 via-white to-white";
-            let borderStyle = "bg-gray-200";
-            
-            if (isAttended) {
-               gradientStyles = "from-[#DBF227]/30 via-white/80 to-white";
-               borderStyle = "bg-[#DBF227]";
-            } else if (isInterested) {
-               gradientStyles = "from-[#373737]/15 via-white/80 to-white";
-               borderStyle = "bg-[#373737]";
-            }
+            filteredEvents.forEach((event) => {
+              const attendanceCount = attendance[event.id] || 0;
+              const duration = event.duration_days || 1;
+              const isAttended = attendanceCount >= duration;
+              const isInterested = interests.has(event.id);
+
+              if (isAttended) {
+                attendedEvents.push(event);
+              } else if (isInterested) {
+                interestedEvents.push(event);
+              } else {
+                otherEvents.push(event);
+              }
+            });
+
+            const renderEventList = (eventsList: Event[]) => (
+              <div className="flex flex-col gap-4">
+                {eventsList.map((event) => {
+                  const attendanceCount = attendance[event.id] || 0;
+                  const duration = event.duration_days || 1;
+                  const isAttended = attendanceCount >= duration;
+                  const isInterested = interests.has(event.id);
+                  
+                  return (
+                    <AgendaItem
+                      key={event.id}
+                      event={event}
+                      attendanceCount={attendanceCount}
+                      isAttended={isAttended}
+                      isInterested={isInterested}
+                      searchQuery={searchQuery}
+                      onClick={setSelectedEvent}
+                    />
+                  );
+                })}
+              </div>
+            );
 
             return (
-              <button 
-                key={event.id} 
-                onClick={() => setSelectedEvent(event)}
-                className="group relative w-full overflow-hidden rounded-2xl border border-gray-100 bg-white text-left shadow-sm transition-all hover:border-gray-200 hover:shadow-md"
-              >
-                {/* Left Indicator Strip */}
-                <div className={`absolute bottom-0 left-0 top-0 w-1.5 ${borderStyle} transition-colors`} />
-                
-                {/* Gradient Background */}
-                <div className={`absolute inset-0 bg-gradient-to-r ${gradientStyles} opacity-100 transition-all`} />
-                
-                {/* Content Container */}
-                <div className="relative flex flex-col gap-3 p-5 pl-7 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                  
-                  {/* Main Info */}
-                  <div className="flex flex-1 flex-col items-start gap-2">
-                    {/* Tags & Status */}
-                    <div className="flex flex-wrap items-center gap-2">
-                       <span className="inline-flex items-center rounded-md border border-gray-200 bg-white/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500 backdrop-blur-sm">
-                        {event.type}
-                      </span>
-                      
-                      {event.gives_certificate && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-200/10 border border-gray-200/50 px-2.5 py-1 text-[10px] font-bold text-[#373737] shadow-sm">
-                            <Medal className="h-3 w-3" /> Otorga constancia
-                        </span>
-                      )}
-
-                      {/* Search Match Tags */}
-                      {event.tags && event.tags.length > 0 && searchQuery && (
-                          <>
-                           {event.tags
-                                .filter(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-                                .map(tag => (
-                                    <span key={tag} className="inline-flex items-center rounded-md bg-[#DBF227]/20 border border-[#DBF227]/30 px-2 py-0.5 text-[10px] font-bold text-[#373737]">
-                                        <Tag className="w-3 h-3 mr-1 opacity-50"/> {tag}
-                                    </span>
-                                ))
-                           }
-                          </>
-                      )}
-                      {isAttended && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#DBF227] px-2.5 py-1 text-[10px] font-bold text-[#373737] shadow-sm">
-                          <CheckCircle2 className="h-3 w-3" /> Asistido
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="line-clamp-2 text-lg font-bold leading-snug text-[#373737] transition-colors group-hover:text-black">
-                      {event.title}
+              <>
+                {interestedEvents.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-[#373737] flex items-center gap-2">
+                       <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                       De tu interés
                     </h3>
+                    {renderEventList(interestedEvents)}
                   </div>
+                )}
 
-                  {/* Date & Time */}
-                    <div className="flex shrink-0 flex-row items-center gap-4 text-xs font-medium uppercase tracking-wide text-gray-400 sm:flex-col sm:items-end sm:gap-1">
-                    {/* Progress Bar for Multi-day Events */}
-                    {duration > 1 && attendanceCount > 0 && (
-                        <div className="w-full sm:w-24 flex flex-col items-end gap-1 mb-2">
-                             <div className="text-[10px] font-bold text-[#373737] normal-case">
-                                {attendanceCount}/{duration} Asistencias
-                             </div>
-                             <div className="h-1.5 w-24 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
-                                 <div 
-                                    className="h-full bg-[#DBF227] transition-all duration-500" 
-                                    style={{ width: `${Math.min((attendanceCount / duration) * 100, 100)}%` }}
-                                 />
-                             </div>
-                        </div>
+                {attendedEvents.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-[#373737] flex items-center gap-2">
+                       <CheckCircle2 className="h-5 w-5 text-green-500" />
+                       Completados
+                    </h3>
+                    {renderEventList(attendedEvents)}
+                  </div>
+                )}
+
+                {otherEvents.length > 0 && (
+                  <div className="space-y-3">
+                    {(interestedEvents.length > 0 || attendedEvents.length > 0) && (
+                      <h3 className="text-lg font-semibold text-[#373737] flex items-center gap-2">
+                         <Calendar className="h-5 w-5 text-gray-400" />
+                         Todos los eventos
+                      </h3>
                     )}
-
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4" />
-                      <span>
-                        {(() => {
-                           // Standard format: "mié. 25 oct." or similar depending on browser
-                           const startStr = eventDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-                           
-                           if (duration > 1) {
-                               const endDate = new Date(eventDate);
-                               endDate.setDate(eventDate.getDate() + (duration - 1));
-                               
-                               const startDayStr = eventDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
-                               const endDayStr = endDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
-                               const monthStr = eventDate.toLocaleDateString('es-ES', { month: 'short' });
-                               
-                               // Handle same month vs different month if needed, but per request "Mar 3 - Jue 4, FEB"
-                               // Let's assume same month for simplicity or just append the month of start date
-                               // Format: "mar 3 - jue 4, feb"
-                               return `${startDayStr} - ${endDayStr}, ${monthStr}`;
-                           }
-                           
-                           return startStr;
-                        })()}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-4 w-4" />
-                      <span>
-                        {eventDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
+                    {renderEventList(otherEvents)}
                   </div>
-                </div>
-              </button>
+                )}
+              </>
             );
-          })}
+          })()}
         </div>
       )}
 
