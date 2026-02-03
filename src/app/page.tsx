@@ -9,7 +9,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'register' | 'login'>('login');
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center py-12 px-4 xs:px-6 sm:px-8 md:p-12 relative bg-gradient-to-br from-gray-50 via-white to-gray-100 animate-gradient-xy">
+    <main className="min-h-screen flex flex-col items-center justify-center py-12 px-4 xs:px-6 sm:px-8 md:p-12 relative bg-gradient-to-br from-gray-50 via-white to-gray-100 animate-gradient-xy overflow-x-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-[20%] -right-[10%] w-[70vh] h-[70vh] rounded-full bg-[#DBF227]/5 blur-3xl" />
@@ -53,7 +53,7 @@ export default function Home() {
             </button>
         </div>
 
-        <div className="relative min-h-[400px]">
+        <div className="relative min-h-[400px] overflow-hidden">
             <div className={cn(
                 "transition-all duration-500 ease-in-out absolute w-full",
                 activeTab === 'login' 

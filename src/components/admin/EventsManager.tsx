@@ -56,21 +56,41 @@ export function EventsManager() {
   }, [eventType, setValue]);
 
   const onSubmit = async (data: any) => {
-    const eventData = { ...data, tags };
-    if (isEditing) {
-        await supabase.from('events').update(eventData).eq('id', isEditing.id);
-    } else {
-        await supabase.from('events').insert(eventData);
+    try {
+        const eventData = {
+            title: data.title,
+            description: data.description,
+            location: data.location,
+            date: data.date,
+            type: eventType,
+            speaker_id: watch('speaker_id') || null,
+            image_url: data.image_url || null,
+            duration_days: data.duration_days,
+            gives_certificate: data.gives_certificate,
+            tags
+        };
+
+        if (isEditing) {
+            const { error } = await supabase.from('events').update(eventData).eq('id', isEditing.id);
+            if (error) throw error;
+        } else {
+            const { error } = await supabase.from('events').insert(eventData);
+            if (error) throw error;
+        }
+
+        setIsEditing(null);
+        setIsCreating(false);
+        reset();
+        setEventType('Conferencia Magistral');
+        setValue('speaker_id', '');
+        setTags([]);
+        setTagInput('');
+        setSpeakerSearch(''); // Reset speaker search
+        fetchEvents();
+    } catch (error: any) {
+        console.error('Error saving event:', error);
+        alert('Error al guardar el evento: ' + (error.message || 'Verifica los datos'));
     }
-    setIsEditing(null);
-    setIsCreating(false);
-    setIsCreating(false);
-    reset();
-    setEventType('Conferencia Magistral');
-    setTags([]);
-    setTagInput('');
-    setSpeakerSearch(''); // Reset speaker search
-    fetchEvents();
   };
 
   const deleteEvent = async (id: string) => {
