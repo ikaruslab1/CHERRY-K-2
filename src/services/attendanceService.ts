@@ -86,10 +86,11 @@ export const attendanceService = {
   /**
    * Obtiene eventos activos para el selector (utilidad extra para el dropdown)
    */
-  async getActiveEvents() {
+  async getActiveEvents(conferenceId: string) {
     const { data, error } = await supabase
         .from('events')
         .select('id, title, type, date')
+        .eq('conference_id', conferenceId)
         .order('date', { ascending: true });
     
     if (error) return [];

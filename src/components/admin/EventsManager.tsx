@@ -7,6 +7,7 @@ import { Trash, Edit, Plus } from 'lucide-react';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 import { Event, UserProfile } from '@/types';
 import { EventForm } from '@/components/admin/EventForm';
+import { useConference } from '@/context/ConferenceContext';
 
 export function EventsManager() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -14,10 +15,16 @@ export function EventsManager() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState<Event | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const { currentConference } = useConference();
 
   const fetchEvents = async () => {
+    if (!currentConference) return;
     setLoading(true);
-    const { data } = await supabase.from('events').select('*').order('date');
+    const { data } = await supabase
+        .from('events')
+        .select('*')
+        .eq('conference_id', currentConference.id)
+        .order('date');
     setEvents((data as Event[]) || []);
     setLoading(false);
   };
@@ -37,9 +44,13 @@ export function EventsManager() {
   useEffect(() => {
     fetchEvents();
     fetchUsers();
-  }, []);
+  }, [currentConference]);
 
   const onSubmit = async (data: any) => {
+    if (!currentConference) {
+        alert("Error de sesión: No hay congreso seleccionado.");
+        return;
+    }
     try {
         const eventData = {
             title: data.title,
@@ -51,7 +62,8 @@ export function EventsManager() {
             image_url: data.image_url || null,
             duration_days: data.duration_days,
             gives_certificate: data.gives_certificate,
-            tags: data.tags
+            tags: data.tags,
+            conference_id: currentConference?.id
         };
 
         if (isEditing) {
@@ -95,7 +107,7 @@ export function EventsManager() {
       </div>
 
       {isCreating && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6 bg-black/50 animate-in fade-in duration-300">
             <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-300 relative max-h-[90vh] flex flex-col">
                 
                 {/* Progress Bar Detail */}

@@ -137,7 +137,7 @@ export function QRScanner({ eventId, durationDays = 1, onSuccess }: QRScannerPro
         
         {/* Overlay States */}
         {status !== 'idle' && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-6 text-center animate-in fade-in duration-200">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 p-6 text-center animate-in fade-in duration-200">
                 {status === 'processing' && (
                     <>
                         <Loader2 className="h-12 w-12 text-indigo-500 animate-spin mb-4" />

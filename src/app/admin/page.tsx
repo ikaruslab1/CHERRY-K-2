@@ -4,9 +4,9 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase';
-import { AdminNav } from '@/components/admin/AdminNav';
+import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { useRoleAuth } from '@/hooks/useRoleAuth';
-import { Loader2 } from 'lucide-react';
+import { Loader2, User, Calendar, FileText, QrCode, Users, Settings } from 'lucide-react';
 
 const UsersTable = dynamic(() => import('@/components/admin/UsersTable').then(mod => mod.UsersTable), {
     loading: () => <LoadingSpinner />,
@@ -44,7 +44,7 @@ function AdminContent() {
     const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'constancias'>(
         (searchParams.get('tab') as any) || 'profile'
     );
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
@@ -53,16 +53,25 @@ function AdminContent() {
 
     if (loading || !isAuthorized) return null;
 
+    const navItems = [
+        { id: 'profile', label: 'Mi Perfil', icon: <User className="w-5 h-5" />, show: true },
+        { id: 'agenda', label: 'Agenda', icon: <Calendar className="w-5 h-5" />, show: true },
+        { id: 'constancias', label: 'Constancias', icon: <FileText className="w-5 h-5" />, show: true },
+        { id: 'attendance', label: 'Asistencia', icon: <QrCode className="w-5 h-5" />, show: true },
+        { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: true },
+        { id: 'events', label: 'Gestión Eventos', icon: <Settings className="w-5 h-5" />, show: true },
+    ];
+
     return (
         <main className="min-h-screen p-4 xs:p-6 md:p-8 bg-gray-50 text-[#373737]">
-            <div className="max-w-6xl mx-auto space-y-6 xs:space-y-8">
-                <AdminNav 
-                    activeTab={activeTab} 
-                    setActiveTab={setActiveTab} 
-                    isMobileMenuOpen={isMobileMenuOpen} 
-                    setIsMobileMenuOpen={setIsMobileMenuOpen} 
-                    handleSignOut={handleSignOut} 
-                />
+            <ResponsiveNav 
+                items={navItems}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                handleSignOut={handleSignOut}
+            />
+
+            <div className="max-w-6xl mx-auto space-y-6 xs:space-y-8 mt-12 md:mt-0">
 
                 <div className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {activeTab === 'profile' && <UserProfileView />}

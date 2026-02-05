@@ -56,13 +56,13 @@ export function EventModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" style={{ zIndex: 9999 }}>
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300" 
+        className="absolute inset-0 bg-black/60 transition-opacity duration-300" 
         onClick={onClose}
       />
       
       {/* Modal Card */}
       <div 
-        className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-lg glass-card rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
       >
         
         {/* Header Image Area - Fixed Height */}
@@ -81,14 +81,14 @@ export function EventModal({
           {/* Close Button */}
           <button 
             onClick={onClose}
-            className="absolute top-4 left-4 p-2 bg-black/20 text-white rounded-full hover:bg-black/40 transition-colors backdrop-blur-md z-10"
+            className="absolute top-4 left-4 p-2 bg-white text-[#373737] rounded-full hover:bg-gray-100 transition-colors shadow-md z-10 border border-gray-100"
           >
             <X className="h-5 w-5" />
           </button>
 
           {/* Type Tag */}
           <div className="absolute top-4 right-4 z-10">
-            <span className="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm">
+            <span className="px-3 py-1 bg-white text-[#373737] border border-gray-100 text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm">
               {event.type}
             </span>
           </div>
@@ -96,11 +96,11 @@ export function EventModal({
            {/* Date Overlay - Bottom Left of Image */}
            <div className="absolute bottom-4 left-6 text-white z-10">
              <div className="flex items-center gap-2">
-                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-3 py-1.5 flex flex-col items-center justify-center min-w-[3.5rem]">
-                    <span className="text-[10px] uppercase font-bold text-white/80">
+                <div className="bg-white border border-gray-100 shadow-sm rounded-lg px-3 py-1.5 flex flex-col items-center justify-center min-w-[3.5rem]">
+                    <span className="text-[10px] uppercase font-bold text-gray-500">
                         {eventDate.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')}
                     </span>
-                    <span className="text-xl font-bold leading-none">
+                    <span className="text-xl font-bold leading-none text-[#373737]">
                         {(() => {
                           const duration = event.duration_days || 1;
                           if (duration > 1) {
@@ -170,7 +170,7 @@ export function EventModal({
           </div>
           
            {/* Information Section */}
-           <div className="pt-4 border-t border-gray-100 space-y-4">
+           <div className="pt-4 border-t border-gray-200/50 space-y-4">
                {/* Location */}
                <div className="flex items-start gap-3">
                     <MapPin className="h-5 w-5 text-gray-400 shrink-0 mt-0.5" />
@@ -215,7 +215,7 @@ export function EventModal({
 
          {/* Fixed Footer for Action */}
          {!hideActionButtons && (
-         <div className="p-4 border-t border-gray-100 bg-white shrink-0">
+          <div className="p-4 border-t border-gray-200 bg-white shrink-0">
             {isAttended ? (
               <div className="w-full py-3 px-4 text-sm font-bold text-[#373737] bg-[#DBF227]/20 border border-[#DBF227] rounded-xl flex items-center justify-center gap-2 cursor-default">
                 <CheckCircle2 className="h-4 w-4 text-[#373737]" />
@@ -227,8 +227,8 @@ export function EventModal({
                   variant={isInterested ? "secondary" : "primary"}
                   className={`w-full py-6 text-base font-semibold shadow-md hover:shadow-lg transition-all active:scale-[0.98] rounded-xl ${
                     isInterested 
-                      ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
-                      : 'bg-[#373737] hover:bg-[#222] text-white'
+                      ? 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200' 
+                      : 'bg-[#373737] hover:bg-[#222] text-white shadow-xl shadow-black/10'
                   }`}
               >
                   {isInterested ? "Ya no me interesa" : "Me interesa asistir"}

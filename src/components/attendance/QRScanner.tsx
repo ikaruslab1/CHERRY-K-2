@@ -56,7 +56,7 @@ export function QRScanner({ onScan, onError, paused }: QRScannerProps) {
             </div>
             
             {paused && (
-                <div className="absolute inset-0 z-20 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                <div className="absolute inset-0 z-20 bg-black/80 flex items-center justify-center">
                     <div className="flex flex-col items-center text-white/70">
                         <CameraOff className="h-10 w-10 mb-2 opacity-50" />
                         <span className="text-sm font-medium tracking-wider uppercase">Escáner Pausado</span>

@@ -10,19 +10,25 @@ import { CertificateContent, Certificate } from './CertificateContent';
 import { CertificatePreview } from './CertificatePreview';
 
 
+import { useConference } from '@/context/ConferenceContext';
+
 export function CertificatesView() {
   const [loading, setLoading] = useState(true);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
+  const { currentConference } = useConference();
 
   useEffect(() => {
-    fetchCertificates();
-  }, []);
+    if (currentConference) {
+        fetchCertificates();
+    }
+  }, [currentConference]);
 
   const fetchCertificates = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      if (!currentConference) return;
 
       const { data, error } = await supabase
         .from('attendance')
@@ -37,7 +43,13 @@ export function CertificatesView() {
             location,
             description,
             gives_certificate,
-            duration_days
+            duration_days,
+            conference_id,
+            conferences (
+              title,
+              institution_name,
+              department_name
+            )
           ),
           profiles:user_id (
             first_name,
@@ -48,6 +60,7 @@ export function CertificatesView() {
         `)
         .eq('user_id', user.id)
         .eq('events.gives_certificate', true)
+        .eq('events.conference_id', currentConference.id)
         .not('scanned_at', 'is', null);
 
       if (error) throw error;
@@ -141,7 +154,7 @@ export function CertificatesView() {
 
       {/* Certificate Modal */}
       {selectedCertificate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 overflow-hidden">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl flex flex-col h-[90vh]">
                 
                 {/* Modal Toolbar */}

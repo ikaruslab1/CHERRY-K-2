@@ -43,16 +43,14 @@ export function UserProfileView() {
   }, []);
 
   // Removed blocking loader to allow immediate smooth rendering
-  if (loading) {
-    return <ContentPlaceholder type="card" />;
-  }
-
-  if (!profile && !loading) return null; // Only return null if done loading and no profile (error case)
-
-  // Use a slight fade-in for the content itself if desired, or rely on parent
+  // Use a consistent container for both loading and content to prevent layout shifts
   return (
-    <div className="flex justify-center items-center py-8 animate-in fade-in duration-700">
-        {profile ? <ProfileCard profile={profile} /> : null}
+    <div className="flex justify-center items-center min-h-[calc(100vh-6rem)] w-full py-8 animate-in fade-in duration-700">
+        {loading ? (
+            <ContentPlaceholder type="card" />
+        ) : profile ? (
+            <ProfileCard profile={profile} />
+        ) : null}
     </div>
   );
 }

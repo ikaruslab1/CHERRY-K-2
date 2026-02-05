@@ -14,7 +14,7 @@ export function VerificationModal({ isOpen, participant, isLoading, onConfirm, o
     if (!isOpen || !participant) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 animate-in fade-in duration-200">
             <div className="bg-white rounded-3xl xs:rounded-[2rem] shadow-2xl w-full max-w-sm xs:max-w-md md:max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20">
                 
                 {/* Header Profile Image / Initials */}

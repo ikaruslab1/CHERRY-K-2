@@ -10,9 +10,10 @@ import { UsersTable } from '@/components/admin/UsersTable';
 import { EventsManager } from '@/components/admin/EventsManager';
 import AttendanceView from '@/views/admin/AttendanceView';
 import { ParticipationView } from '@/components/profile/ParticipationView';
-import { LogOut, Loader2, QrCode, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard } from 'lucide-react';
 import { CertificatesView } from '@/components/profile/CertificatesView';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -21,7 +22,8 @@ export default function ProfilePage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
   const [isPonente, setIsPonente] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -44,6 +46,9 @@ export default function ProfilePage() {
            setIsStaff(true);
         } else if (profile?.role === 'ponente') {
            setIsPonente(true);
+        } else if (profile?.role === 'owner') {
+           setIsOwner(true);
+           setIsAdmin(true); // Owner inherits Admin features
         }
 
         setLoading(false);
@@ -70,136 +75,52 @@ export default function ProfilePage() {
     );
   }*/
 
+const navItems = [
+    { id: 'profile', label: 'Mi Perfil', icon: <User className="w-5 h-5" />, show: true },
+    { id: 'agenda', label: 'Agenda', icon: <Calendar className="w-5 h-5" />, show: true },
+    { id: 'constancias', label: 'Constancias', icon: <FileText className="w-5 h-5" />, show: true },
+    { id: 'participation', label: 'Participación', icon: <Mic className="w-5 h-5" />, show: isPonente },
+    { id: 'attendance', label: 'Asistencia', icon: <QrCode className="w-5 h-5" />, show: isAdmin || isStaff },
+    { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: isAdmin },
+    { id: 'events', label: 'Gestión Eventos', icon: <Settings className="w-5 h-5" />, show: isAdmin },
+    { 
+        id: 'owner_link', 
+        label: 'Panel Owner', 
+        icon: <LayoutDashboard className="w-5 h-5" />, 
+        show: isOwner,
+        onClick: () => router.push('/owner') 
+    }
+  ];
+
   return (
     <main className="min-h-screen p-8 bg-gray-50 text-[#373737]">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header with Pills & Actions */}
-        <div className="relative flex flex-col md:flex-row justify-center items-center bg-white/80 backdrop-blur-sm p-2 md:p-2 rounded-2xl sticky top-4 z-50 gap-2 md:gap-0 font-medium shadow-sm border border-gray-100/50">
-            
-            {/* Tabs & Pills */}
-            <div className="flex flex-col md:flex-row items-stretch md:items-center w-full md:w-auto gap-2 md:gap-1 bg-gray-100/50 p-2 md:p-1 rounded-xl transition-all duration-300">
-                
-                {/* Mobile Header: Main Tab + Toggle */}
-                <div className="flex flex-row gap-1 w-full md:w-auto">
-                    <button 
-                        onClick={() => { setActiveTab('profile'); setIsMobileMenuOpen(false); }}
-                        className={`flex-1 md:flex-none px-4 py-2 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-all whitespace-nowrap md:w-auto flex justify-center md:inline-block items-center gap-2 ${
-                            activeTab === 'profile' 
-                            ? 'bg-white text-[#373737] shadow-sm' 
-                            : 'text-gray-500 hover:text-[#373737] bg-white/50 md:bg-transparent'
-                        }`}
-                    >
-                        Mi Perfil
-                    </button>
-                    
-                    <button
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="md:hidden px-3 py-2 rounded-lg text-xs font-semibold bg-white shadow-sm text-[#373737] border border-gray-100 flex items-center justify-center transition-all hover:bg-gray-50 active:scale-95"
-                    >
-                        <span className="sr-only">Ver más</span>
-                        {isMobileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </button>
-                </div>
+      <ResponsiveNav 
+        items={navItems}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        handleSignOut={handleSignOut}
+      />
+      
+      <div className="max-w-4xl mx-auto space-y-8 mt-12 md:mt-0">
 
-                {/* Collapsible Content */}
-                <div className={`${isMobileMenuOpen ? 'flex' : 'hidden'} md:flex flex-col md:flex-row gap-2 md:gap-1 w-full md:w-auto animate-in slide-in-from-top-2 md:animate-none duration-200`}>
-                    <button 
-                        onClick={() => { setActiveTab('agenda'); setIsMobileMenuOpen(false); }}
-                        className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto ${
-                            activeTab === 'agenda' 
-                            ? 'bg-white text-[#373737] shadow-sm' 
-                            : 'text-gray-500 hover:text-[#373737]'
-                        }`}
-                    >
-                        Agenda
-                    </button>
-
-                    <button 
-                        onClick={() => { setActiveTab('constancias'); setIsMobileMenuOpen(false); }}
-                        className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto ${
-                            activeTab === 'constancias' 
-                            ? 'bg-white text-[#373737] shadow-sm' 
-                            : 'text-gray-500 hover:text-[#373737]'
-                        }`}
-                    >
-                        Constancias
-                    </button>
-
-                    {isPonente && (
-                         <button 
-                            onClick={() => { setActiveTab('participation'); setIsMobileMenuOpen(false); }}
-                            className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto ${
-                                activeTab === 'participation' 
-                                ? 'bg-white text-[#373737] shadow-sm' 
-                                : 'text-gray-500 hover:text-[#373737]'
-                            }`}
-                        >
-                            Participación
-                        </button>
-                    )}
-
-                    {(isAdmin || isStaff) && (
-                        <button 
-                            onClick={() => { setActiveTab('attendance'); setIsMobileMenuOpen(false); }}
-                            className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap flex items-center justify-center gap-2 w-full md:w-auto ${
-                                activeTab === 'attendance' 
-                                ? 'bg-white text-[#373737] shadow-sm' 
-                                : 'text-gray-500 hover:text-[#373737]'
-                            }`}
-                        >
-                            <QrCode className="h-4 w-4" />
-                            Asistencia
-                        </button>
-                    )}
-
-                    {isAdmin && (
-                    <>
-                        <button 
-                            onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }}
-                            className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto ${
-                                activeTab === 'users' 
-                                ? 'bg-white text-[#373737] shadow-sm' 
-                                : 'text-gray-500 hover:text-[#373737]'
-                            }`}
-                        >
-                            Usuarios
-                        </button>
-                        <button 
-                            onClick={() => { setActiveTab('events'); setIsMobileMenuOpen(false); }}
-                            className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto ${
-                                activeTab === 'events' 
-                                ? 'bg-white text-[#373737] shadow-sm' 
-                                : 'text-gray-500 hover:text-[#373737]'
-                            }`}
-                        >
-                            Gestión Eventos
-                        </button>
-                    </>
-                    )}
-                </div>
-            </div>
-
-            {/* Right Actions - Absolute Positioned */}
-            <div className="w-full md:w-auto md:absolute md:right-2 flex justify-end md:justify-start items-center gap-4 border-t md:border-t-0 pt-1 md:pt-0 border-gray-100 mt-1 md:mt-0">
-                 <button 
-                    onClick={handleSignOut}
-                    className="text-gray-400 hover:text-red-500 transition-colors p-1.5 md:p-2 hover:bg-red-50 rounded-full group flex items-center gap-2 w-full md:w-auto justify-center md:justify-start"
-                    title="Cerrar Sesión"
-                 >
-                    <span className="text-[10px] md:text-xs font-medium group-hover:opacity-100 transition-opacity whitespace-nowrap block">Cerrar Sesión</span>
-                    <LogOut className="h-4 w-4 md:h-5 md:w-5" />
-                 </button>
-            </div>
-        </div>
-
-        <div key={activeTab} className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
-             {activeTab === 'profile' && <UserProfileView />}
-             {activeTab === 'agenda' && <AgendaView />}
-             {activeTab === 'constancias' && <CertificatesView />}
-             {isPonente && activeTab === 'participation' && <ParticipationView />}
-             {(isAdmin || isStaff) && activeTab === 'attendance' && <AttendanceView />}
-             {isAdmin && activeTab === 'users' && <UsersTable />}
-             {isAdmin && activeTab === 'events' && <EventsManager />}
+        <div className="p-0 min-h-[500px]">
+             <AnimatePresence mode="wait">
+                <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    {activeTab === 'profile' && <UserProfileView />}
+                    {activeTab === 'agenda' && <AgendaView />}
+                    {activeTab === 'constancias' && <CertificatesView />}
+                    {isPonente && activeTab === 'participation' && <ParticipationView />}
+                    {(isAdmin || isStaff) && activeTab === 'attendance' && <AttendanceView />}
+                    {isAdmin && activeTab === 'users' && <UsersTable />}
+                    {isAdmin && activeTab === 'events' && <EventsManager />}
+                </motion.div>
+             </AnimatePresence>
         </div>
       </div>
     </main>

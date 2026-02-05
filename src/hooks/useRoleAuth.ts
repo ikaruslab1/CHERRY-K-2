@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-type AllowedRole = 'admin' | 'staff' | 'ponente' | 'user';
+type AllowedRole = 'admin' | 'staff' | 'ponente' | 'user' | 'owner';
 
 /**
  * Hook para proteger rutas basado en roles.

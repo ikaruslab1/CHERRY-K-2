@@ -6,12 +6,14 @@ import { VerificationModal } from '@/components/attendance/VerificationModal';
 import { useAttendanceScanner } from '@/hooks/useAttendanceScanner';
 import { attendanceService } from '@/services/attendanceService';
 import { Loader2, Calendar, AlertTriangle } from 'lucide-react';
+import { useConference } from '@/context/ConferenceContext';
 import { Event } from '@/types';
 
 export function StaffScannerView() {
     const [events, setEvents] = useState<Pick<Event, 'id' | 'title' | 'duration_days'>[]>([]);
     const [selectedEventId, setSelectedEventId] = useState<string>('');
     const [loadingActivities, setLoadingActivities] = useState(true);
+    const { currentConference } = useConference();
 
     const {
         participant,
@@ -33,17 +35,12 @@ export function StaffScannerView() {
 
     useEffect(() => {
     const fetchEvents = async () => {
+        if (!currentConference) return;
         setLoadingActivities(true);
         // Using existing service method or direct supabase if specific fields needed
         // attendanceService.getActiveEvents returns {id, title, type, date}
-        // StaffScannerView previously used supabase directly for duration_days, but let's stick to service or consistent appraoch.
-        // However, duration_days is not in attendanceService.getActiveEvents currently, but we don't strictly need it for validation anymore since we removed the check.
-        // But checking the previous code, it fetched duration_days. 
-        // Since we are creating a UNIFIED scanner, we can use attendanceService.getActiveEvents() like Admin view.
-        // If duration_days is just for display, we can skip it or add it to service. 
-        // Admin view didn't display duration days. I will stick to what Admin view does to ensure "SAME" experience.
         
-        const evts = await attendanceService.getActiveEvents();
+        const evts = await attendanceService.getActiveEvents(currentConference.id as string);
         // The type returned by getActiveEvents matches what we need mostly. 
         // We can cast or map if needed.
         setEvents(evts as any); 
@@ -56,7 +53,7 @@ export function StaffScannerView() {
         setLoadingActivities(false);
     };
     fetchEvents();
-  }, []);
+  }, [currentConference]);
 
   return (
       <div className="w-full max-w-sm xs:max-w-md md:max-w-lg mx-auto space-y-6 px-4 xs:px-0">
@@ -113,13 +110,13 @@ export function StaffScannerView() {
                     
                     {/* Status Overlay */}
                     {scannerError && (
-                        <div className="absolute bottom-4 left-4 right-4 bg-red-500/90 text-white py-3 px-4 rounded-xl text-sm font-medium text-center backdrop-blur-md animate-in slide-in-from-bottom-2 fade-in">
+                        <div className="absolute bottom-4 left-4 right-4 bg-red-500 text-white py-3 px-4 rounded-xl text-sm font-medium text-center shadow-lg animate-in slide-in-from-bottom-2 fade-in">
                             {scannerError}
                         </div>
                     )}
                         
                     {status === 'processing' && !showModal && (
-                            <div className="absolute inset-0 bg-black/20 flex items-center justify-center backdrop-blur-sm">
+                            <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
                             <Loader2 className="h-10 w-10 text-[#DBF227] animate-spin" />
                             </div>
                     )}

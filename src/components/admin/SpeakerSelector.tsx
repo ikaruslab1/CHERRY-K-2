@@ -90,7 +90,7 @@ export function SpeakerSelector({ users, selectedSpeakerId, onSelect }: SpeakerS
                             <div className="py-2">
                                 {ponentes.length > 0 && (
                                     <div>
-                                        <div className="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50 sticky top-0 backdrop-blur-sm">Ponentes</div>
+                                        <div className="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50 sticky top-0 border-b border-gray-100">Ponentes</div>
                                         {ponentes.map(user => (
                                             <div 
                                                 key={user.id}
@@ -117,7 +117,7 @@ export function SpeakerSelector({ users, selectedSpeakerId, onSelect }: SpeakerS
 
                                 {others.length > 0 && (
                                     <div>
-                                        {ponentes.length > 0 && <div className="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50 sticky top-0 backdrop-blur-sm">Otros Asistentes</div>}
+                                        {ponentes.length > 0 && <div className="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50 sticky top-0 border-b border-gray-100">Otros Asistentes</div>}
                                         {others.map(user => (
                                             <div 
                                                 key={user.id}

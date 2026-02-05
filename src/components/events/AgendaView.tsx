@@ -4,12 +4,16 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Calendar, Search, Star, CheckCircle2 } from 'lucide-react';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
+import { useConference } from '@/context/ConferenceContext';
 
 import { Event } from '@/types';
 import { EventModal } from './EventModal';
 import { AgendaItem } from './AgendaItem';
 
+import { motion, AnimatePresence } from 'framer-motion';
+
 export function AgendaView() {
+  const { currentConference } = useConference();
   const [events, setEvents] = useState<Event[]>([]);
   const [attendance, setAttendance] = useState<Record<string, number>>({});
   const [interests, setInterests] = useState<Set<string>>(new Set());
@@ -32,11 +36,13 @@ export function AgendaView() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        if (!currentConference) return;
         const { data: { user } } = await supabase.auth.getUser();
         
           let eventsQuery = supabase
           .from('events')
           .select('id, title, description, location, date, type, tags, image_url, gives_certificate, duration_days, speaker:profiles!speaker_id(first_name, last_name, degree, gender)')
+          .eq('conference_id', currentConference?.id)
           .order('date', { ascending: true });
 
         if (!user) {
@@ -92,7 +98,7 @@ export function AgendaView() {
     };
 
     loadData();
-  }, []);
+  }, [currentConference]);
 
   const toggleInterest = async (eventId: string) => {
     if (!userId) return;
@@ -126,8 +132,27 @@ export function AgendaView() {
     return <ContentPlaceholder type="grid" count={4} />;
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1 
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { type: "spring", stiffness: 300, damping: 24 }
+    }
+  };
+
   return (
-    <section className="space-y-6 animate-in fade-in duration-700">
+    <section className="space-y-6">
       <div className="flex flex-col gap-4 xs:flex-row xs:items-center xs:justify-between">
         <h2 className="text-xl xs:text-2xl font-bold flex items-center gap-2 text-[#373737]">
           <Calendar className="h-5 w-5 xs:h-6 xs:w-6" />
@@ -150,17 +175,21 @@ export function AgendaView() {
       </div>
       
       {filteredEvents.length === 0 ? (
-        <div className="text-center py-10 rounded-2xl border border-dashed border-gray-200 bg-gray-50/50">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center py-10 rounded-2xl border border-dashed border-gray-300 bg-gray-50"
+        >
           {events.length === 0 ? (
-             <p className="text-gray-400 italic">No hay eventos programados aún.</p>
+             <p className="text-gray-500 italic">No hay eventos programados aún.</p>
           ) : (
              <div className="flex flex-col items-center gap-2">
-                <Search className="h-8 w-8 text-gray-300" />
-                <p className="text-gray-500 font-medium">No se encontraron eventos</p>
-                <p className="text-sm text-gray-400">Intenta con otros términos de búsqueda.</p>
+                <Search className="h-8 w-8 text-gray-400" />
+                <p className="text-gray-600 font-medium">No se encontraron eventos</p>
+                <p className="text-sm text-gray-500">Intenta con otros términos de búsqueda.</p>
              </div>
           )}
-        </div>
+        </motion.div>
       ) : (
         <div className="flex flex-col gap-8">
           {(() => {
@@ -184,52 +213,75 @@ export function AgendaView() {
             });
 
             const renderEventList = (eventsList: Event[]) => (
-              <div className="flex flex-col gap-4">
-                {eventsList.map((event) => {
-                  const attendanceCount = attendance[event.id] || 0;
-                  const duration = event.duration_days || 1;
-                  const isAttended = attendanceCount >= duration;
-                  const isInterested = interests.has(event.id);
-                  
-                  return (
-                    <AgendaItem
-                      key={event.id}
-                      event={event}
-                      attendanceCount={attendanceCount}
-                      isAttended={isAttended}
-                      isInterested={isInterested}
-                      searchQuery={searchQuery}
-                      onClick={setSelectedEvent}
-                    />
-                  );
-                })}
-              </div>
+              <motion.div 
+                className="flex flex-col gap-4"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                <AnimatePresence>
+                  {eventsList.map((event) => {
+                    const attendanceCount = attendance[event.id] || 0;
+                    const duration = event.duration_days || 1;
+                    const isAttended = attendanceCount >= duration;
+                    const isInterested = interests.has(event.id);
+                    
+                    return (
+                      <motion.div key={event.id} variants={itemVariants as any} layout>
+                        <AgendaItem
+                          event={event}
+                          attendanceCount={attendanceCount}
+                          isAttended={isAttended}
+                          isInterested={isInterested}
+                          searchQuery={searchQuery}
+                          onClick={setSelectedEvent}
+                        />
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </motion.div>
             );
 
             return (
               <>
                 {interestedEvents.length > 0 && (
-                  <div className="space-y-3">
+                  <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="space-y-3"
+                  >
                     <h3 className="text-lg font-semibold text-[#373737] flex items-center gap-2">
                        <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
                        De tu interés
                     </h3>
                     {renderEventList(interestedEvents)}
-                  </div>
+                  </motion.div>
                 )}
 
                 {attendedEvents.length > 0 && (
-                  <div className="space-y-3">
+                  <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="space-y-3"
+                  >
                     <h3 className="text-lg font-semibold text-[#373737] flex items-center gap-2">
                        <CheckCircle2 className="h-5 w-5 text-green-500" />
                        Completados
                     </h3>
                     {renderEventList(attendedEvents)}
-                  </div>
+                  </motion.div>
                 )}
 
                 {otherEvents.length > 0 && (
-                  <div className="space-y-3">
+                  <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="space-y-3"
+                  >
                     {(interestedEvents.length > 0 || attendedEvents.length > 0) && (
                       <h3 className="text-lg font-semibold text-[#373737] flex items-center gap-2">
                          <Calendar className="h-5 w-5 text-gray-400" />
@@ -237,7 +289,7 @@ export function AgendaView() {
                       </h3>
                     )}
                     {renderEventList(otherEvents)}
-                  </div>
+                  </motion.div>
                 )}
               </>
             );
@@ -246,14 +298,18 @@ export function AgendaView() {
       )}
 
       {/* Detail Model */}
-      <EventModal 
-        event={selectedEvent}
-        isOpen={!!selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-        isAttended={selectedEvent ? (attendance[selectedEvent.id] || 0) >= (selectedEvent.duration_days || 1) : false}
-        isInterested={selectedEvent ? interests.has(selectedEvent.id) : false}
-        onToggleInterest={toggleInterest}
-      />
+      <AnimatePresence>
+        {selectedEvent && (
+          <EventModal 
+            event={selectedEvent}
+            isOpen={!!selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+            isAttended={selectedEvent ? (attendance[selectedEvent.id] || 0) >= (selectedEvent.duration_days || 1) : false}
+            isInterested={selectedEvent ? interests.has(selectedEvent.id) : false}
+            onToggleInterest={toggleInterest}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }

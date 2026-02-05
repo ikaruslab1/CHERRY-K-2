@@ -5,12 +5,14 @@ import { QRScanner } from '@/components/attendance/QRScanner';
 import { VerificationModal } from '@/components/attendance/VerificationModal';
 import { useAttendanceScanner } from '@/hooks/useAttendanceScanner';
 import { attendanceService } from '@/services/attendanceService';
+import { useConference } from '@/context/ConferenceContext';
 import { Loader2, Calendar, AlertTriangle } from 'lucide-react';
 
 export default function AttendanceView() { // Default export for import ease
     const [activities, setActivities] = useState<{id: string, title: string}[]>([]);
     const [selectedActivity, setSelectedActivity] = useState<string>("");
     const [loadingActivities, setLoadingActivities] = useState(true);
+    const { currentConference } = useConference();
 
     const {
         participant,
@@ -32,8 +34,9 @@ export default function AttendanceView() { // Default export for import ease
 
     useEffect(() => {
         async function loadEvents() {
+            if (!currentConference) return;
             setLoadingActivities(true);
-            const evts = await attendanceService.getActiveEvents();
+            const evts = await attendanceService.getActiveEvents(currentConference.id);
             setActivities(evts);
             if (evts.length > 0) {
                  // Auto-select first if available, or force user to choose
@@ -42,7 +45,7 @@ export default function AttendanceView() { // Default export for import ease
             setLoadingActivities(false);
         }
         loadEvents();
-    }, []);
+    }, [currentConference]);
 
     return (
         <div className="w-full max-w-sm xs:max-w-md md:max-w-lg xl:max-w-xl mx-auto p-0 xs:p-4 space-y-6 md:space-y-8">
@@ -98,13 +101,13 @@ export default function AttendanceView() { // Default export for import ease
                         
                         {/* Status Overlay */}
                         {scannerError && (
-                            <div className="absolute bottom-4 left-4 right-4 bg-red-500/90 text-white py-3 px-4 rounded-xl text-sm font-medium text-center backdrop-blur-md animate-in slide-in-from-bottom-2 fade-in">
+                            <div className="absolute bottom-4 left-4 right-4 bg-red-500 text-white py-3 px-4 rounded-xl text-sm font-medium text-center shadow-lg animate-in slide-in-from-bottom-2 fade-in">
                                 {scannerError}
                             </div>
                         )}
                          
                         {status === 'processing' && !showModal && (
-                             <div className="absolute inset-0 bg-black/20 flex items-center justify-center backdrop-blur-sm">
+                             <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
                                 <Loader2 className="h-10 w-10 text-[#DBF227] animate-spin" />
                              </div>
                         )}

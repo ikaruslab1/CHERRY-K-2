@@ -16,6 +16,7 @@ export interface Event {
   tags?: string[];
   gives_certificate?: boolean;
   duration_days?: number;
+  conference_id: string;
 }
 
 export interface UserProfile {
@@ -24,8 +25,21 @@ export interface UserProfile {
   last_name: string;
   short_id: string;
   degree: string;
-  role: 'user' | 'staff' | 'admin' | 'ponente';
+  role: 'user' | 'staff' | 'admin' | 'ponente' | 'owner';
   email?: string;
+  created_at?: string;
+}
+
+export interface Conference {
+  id: string;
+  title: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  event_type?: string;
+  institution_name?: string;
+  department_name?: string;
   created_at?: string;
 }
 

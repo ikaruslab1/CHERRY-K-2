@@ -37,6 +37,11 @@ interface Certificate {
       type: string;
       location: string;
       description: string;
+      conferences?: {
+          title: string;
+          institution_name: string;
+          department_name: string;
+      }
     };
     profiles: {
         first_name: string;
@@ -56,6 +61,12 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
         });
     };
     
+    const conf = certificate.events.conferences;
+    const accentColor = '#dbf227'; // Hardcoded default
+    const institution = conf?.institution_name || 'FES Acatlán';
+    const department = conf?.department_name || 'UNAM'; // Default fallback
+    const confTitle = conf?.title || 'SEMANA DEL DISEÑO';
+
     return (
         <div 
             style={{ 
@@ -91,12 +102,12 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
                             </defs>
                             <text className="text-[6px] fill-white uppercase tracking-[0.3em]" style={{ fontFamily: 'var(--font-playfair)' }}>
                                 <textPath href="#circlePath" startOffset="0%">
-                                    SEMANA DEL DISEÑO • FES ACATLÁN • UNAM
+                                    {confTitle} • {institution} •
                                 </textPath>
                             </text>
                         </svg>
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <Award className="w-8 h-8 text-[#dbf227] opacity-70" />
+                            <Award className="w-8 h-8 opacity-70" style={{ color: accentColor }} />
                         </div>
                     </div>
                 </div>
@@ -106,7 +117,7 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
                     <h1 className="font-[var(--font-playfair)] text-[85px] font-bold tracking-[0.15em] text-[#c0c0c0] uppercase leading-none mb-2" >
                         CONSTANCIA
                     </h1>
-                    <p className="font-[var(--font-great-vibes)] text-6xl text-[#dbf227] -mt-4 tracking-wide" >
+                    <p className="font-[var(--font-great-vibes)] text-6xl -mt-4 tracking-wide" style={{ color: accentColor }}>
                         de Participación
                     </p>
                 </div>
@@ -117,7 +128,10 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
             <div className="h-[40%] w-full bg-white relative px-12 py-8 flex flex-col">
                 
                 {/* Decorative gradient separator */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#dbf227] to-transparent opacity-60"></div>
+                <div 
+                    className="absolute top-0 left-0 right-0 h-1 opacity-60"
+                    style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }}
+                ></div>
 
                 {/* Content Grid */}
                 <div className="flex-1 flex gap-8 relative z-10">
@@ -152,7 +166,7 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
                         {/* Bottom info */}
                         <div className="text-[15px] text-gray-400 italic leading-none">
                             <p>"Por mi raza hablará el espíritu"</p>
-                            <p>Santa Cruz Acatlán, Estado de México</p>
+                            <p>{institution}, {department}</p>
                         </div>
                     </div>
 
@@ -162,7 +176,7 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
                         {/* Decorative watercolor element (simulated with gradient) */}
                         <div className="absolute -top-4 -right-8 w-48 h-48 rounded-full opacity-20 pointer-events-none" 
                             style={{
-                                background: 'radial-gradient(circle at 30% 40%, #dbf227 0%, #e8e8e8 40%, transparent 70%)',
+                                background: `radial-gradient(circle at 30% 40%, ${accentColor} 0%, #e8e8e8 40%, transparent 70%)`,
                                 filter: 'blur(30px)'
                             }}
                         />

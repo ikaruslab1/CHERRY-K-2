@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Great_Vibes, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
+import { ConferenceProvider } from "@/context/ConferenceContext";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -23,6 +25,8 @@ const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
 });
 
+
+
 export const metadata: Metadata = {
   title: "CHERRY-K-2 | Congreso Internacional",
   description: "Plataforma de Gestión de Asistencia y Eventos",
@@ -38,7 +42,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${greatVibes.variable} ${playfairDisplay.variable} antialiased`}
       >
-        {children}
+        <ConferenceProvider>
+          {children}
+        </ConferenceProvider>
       </body>
     </html>
   );
