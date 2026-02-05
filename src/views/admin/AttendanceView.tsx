@@ -59,9 +59,7 @@ export default function AttendanceView() { // Default export for import ease
 
                 <div className="space-y-1.5 xs:space-y-2">
                     <label className="text-[10px] xs:text-xs font-bold uppercase text-gray-400 tracking-wider">Actividad Actual</label>
-                    {loadingActivities ? (
-                        <div className="h-10 xs:h-12 w-full bg-gray-50 rounded-xl animate-pulse" />
-                    ) : (
+                    {loadingActivities ? null : (
                         <div className="relative">
                             <select
                                 value={selectedActivity}
@@ -106,11 +104,7 @@ export default function AttendanceView() { // Default export for import ease
                             </div>
                         )}
                          
-                        {status === 'processing' && !showModal && (
-                             <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-                                <Loader2 className="h-10 w-10 text-[#DBF227] animate-spin" />
-                             </div>
-                        )}
+
                     </>
                 )}
             </div>

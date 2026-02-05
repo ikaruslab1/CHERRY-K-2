@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Great_Vibes, Playfair_Display } from "next/font/goog
 import "./globals.css";
 
 import { ConferenceProvider } from "@/context/ConferenceContext";
+import { SidebarProvider } from "@/context/SidebarContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,7 +44,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${greatVibes.variable} ${playfairDisplay.variable} antialiased`}
       >
         <ConferenceProvider>
-          {children}
+          <SidebarProvider>
+            {children}
+          </SidebarProvider>
         </ConferenceProvider>
       </body>
     </html>

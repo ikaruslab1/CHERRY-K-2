@@ -14,6 +14,7 @@ import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard
 import { CertificatesView } from '@/components/profile/CertificatesView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
+import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -93,7 +94,7 @@ const navItems = [
   ];
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50 text-[#373737]">
+    <SidebarAwareContainer className="min-h-screen p-8 bg-gray-50 text-[#373737]">
       <ResponsiveNav 
         items={navItems}
         activeTab={activeTab}
@@ -123,6 +124,6 @@ const navItems = [
              </AnimatePresence>
         </div>
       </div>
-    </main>
+    </SidebarAwareContainer>
   );
 }

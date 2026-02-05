@@ -5,6 +5,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { getDegreeAbbreviation } from '@/utils/degreeHelper';
 import { Printer, Link, Check } from 'lucide-react';
 import { useConference } from '@/context/ConferenceContext';
+import { motion } from 'framer-motion';
 
 interface ProfileCardProps {
   profile: {
@@ -166,7 +167,17 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   );
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-[18rem] xs:max-w-xs sm:max-w-sm mx-auto">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.8, y: 50, rotateX: -15 }}
+      animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
+      transition={{ 
+        type: "spring", 
+        stiffness: 200, 
+        damping: 15, 
+        mass: 1
+      }}
+      className="flex flex-col items-center gap-6 w-full max-w-[18rem] xs:max-w-xs sm:max-w-sm mx-auto"
+    >
       <div 
         className="relative w-full aspect-[9/16] [perspective:1000px] cursor-pointer group print:hidden"
         onClick={() => setIsFlipped(!isFlipped)}
@@ -284,6 +295,6 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           }
         }
       `}</style>
-    </div>
+    </motion.div>
   );
 }

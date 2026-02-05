@@ -5,6 +5,7 @@ import { useRoleAuth } from '@/hooks/useRoleAuth';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
+import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
 import { User, LogOut, LayoutDashboard } from 'lucide-react';
 import { Conference } from '@/types';
 import { useConference } from '@/context/ConferenceContext';
@@ -166,7 +167,7 @@ export default function OwnerDashboard() {
   if (!isAuthorized) return <div className="p-8 text-center">Acceso denegado. Se requiere rol Owner.</div>;
 
   return (
-    <div className="min-h-screen bg-muted p-8">
+    <SidebarAwareContainer className="min-h-screen bg-muted p-8">
       <ResponsiveNav 
           items={navItems}
           activeTab="owner"
@@ -300,6 +301,6 @@ export default function OwnerDashboard() {
            ))}
         </div>
       </div>
-    </div>
+    </SidebarAwareContainer>
   );
 }

@@ -6,6 +6,9 @@ import { supabase } from '@/lib/supabase';
 
 type AllowedRole = 'admin' | 'staff' | 'ponente' | 'user' | 'owner';
 
+// Cache simple en memoria para evitar llamadas repetidas en la misma sesión de navegación
+let globalCachedRole: { id: string, role: string } | null = null;
+
 /**
  * Hook para proteger rutas basado en roles.
  * Valida que el usuario esté autenticado y tenga uno de los roles permitidos.
@@ -28,7 +31,20 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
                     return;
                 }
 
-                // 2. Obtener Rol
+                // Optimización: Usar caché si ya tenemos el rol de este usuario
+                if (globalCachedRole && globalCachedRole.id === user.id) {
+                    const role = globalCachedRole.role as AllowedRole;
+                    setUserRole(role);
+                    if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
+                        router.push(redirectTo);
+                        return;
+                    }
+                    setIsAuthorized(true);
+                    setLoading(false);
+                    return;
+                }
+
+                // 2. Obtener Rol (si no está en caché)
                 const { data: profile, error } = await supabase
                     .from('profiles')
                     .select('role')
@@ -42,6 +58,10 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
                 }
 
                 const role = profile.role as AllowedRole;
+                
+                // Guardar en caché
+                globalCachedRole = { id: user.id, role: role };
+                
                 setUserRole(role);
 
                 // 3. Verificar Permisos
@@ -60,7 +80,7 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
         };
 
         checkAuth();
-    }, [router, allowedRoles, redirectTo]);
+    }, [router, JSON.stringify(allowedRoles), redirectTo]);
 
     return { loading, isAuthorized, userRole };
 }

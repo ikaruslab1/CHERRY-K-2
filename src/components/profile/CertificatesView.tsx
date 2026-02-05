@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Loader2, Printer, X, Award } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { motion } from 'framer-motion';
 
 import { CertificateCard } from './CertificateCard';
 import { CertificateContent, Certificate } from './CertificateContent';
@@ -115,16 +116,19 @@ export function CertificatesView() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-[#DBF227]" />
-      </div>
-    );
+  if (loading) {
+    return null;
+  }
   }
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
+      >
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div>
                  <h2 className="text-2xl font-bold text-[#373737]">Mis Constancias</h2>
@@ -150,7 +154,7 @@ export function CertificatesView() {
                 ))}
             </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Certificate Modal */}
       {selectedCertificate && (

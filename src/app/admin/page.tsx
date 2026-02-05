@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
+import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
 import { useRoleAuth } from '@/hooks/useRoleAuth';
 import { Loader2, User, Calendar, FileText, QrCode, Users, Settings } from 'lucide-react';
 
@@ -63,7 +64,7 @@ function AdminContent() {
     ];
 
     return (
-        <main className="min-h-screen p-4 xs:p-6 md:p-8 bg-gray-50 text-[#373737]">
+        <SidebarAwareContainer className="min-h-screen p-4 xs:p-6 md:p-8 bg-gray-50 text-[#373737]">
             <ResponsiveNav 
                 items={navItems}
                 activeTab={activeTab}
@@ -82,7 +83,7 @@ function AdminContent() {
                     {activeTab === 'attendance' && <AttendanceView />}
                 </div>
             </div>
-        </main>
+        </SidebarAwareContainer>
     );
 }
 

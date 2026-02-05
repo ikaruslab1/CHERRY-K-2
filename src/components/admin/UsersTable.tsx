@@ -10,12 +10,13 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { UserProfile } from '@/types';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
+import { useUsers } from '@/hooks/useUsers';
 
-export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
-  const [loading, setLoading] = useState(true);
+  const { users, loading, mutate } = useUsers(debouncedSearch);
+
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [selectedQrUser, setSelectedQrUser] = useState<UserProfile | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserProfile['role'] | ''>('');
@@ -25,36 +26,6 @@ export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
-
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      let query = supabase
-        .from('profiles')
-        .select('id, first_name, last_name, short_id, degree, role, email')
-        .order('created_at', { ascending: false });
-
-      if (debouncedSearch) {
-        query = query.or(`first_name.ilike.%${debouncedSearch}%,last_name.ilike.%${debouncedSearch}%,short_id.ilike.%${debouncedSearch}%`);
-      }
-
-      const { data, error } = await query.limit(50);
-      
-      if (error) {
-        console.error('Error fetching users:', error);
-      } else {
-      setUsers((data as unknown as UserProfile[]) || []);
-      }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, [debouncedSearch]);
 
   const openModal = (user: UserProfile) => {
       setSelectedUser(user);
@@ -80,7 +51,7 @@ export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
       .eq('id', selectedUser.id);
 
     if (!error) {
-      setUsers(users.map(u => u.id === selectedUser.id ? { ...u, role: selectedRole as UserProfile['role'] } : u));
+      mutate();
       closeModal();
     } else {
         alert("Error actualizando rol");
@@ -109,17 +80,13 @@ export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
                 className="pl-10 bg-white border-gray-200 text-[#373737] focus:ring-[#DBF227]"
             />
         </div>
-        <Button onClick={fetchUsers} disabled={loading} className="bg-[#373737] text-white hover:bg-black w-full xs:w-auto">
-            {loading ? <Loader2 className="animate-spin h-4 w-4" /> : 'Buscar'}
+        <Button onClick={() => mutate()} disabled={loading} className="bg-[#373737] text-white hover:bg-black w-full xs:w-auto">
+            {'Buscar'}
         </Button>
       </div>
 
       <div className="rounded-xl overflow-hidden overflow-x-auto bg-white border border-gray-100 shadow-sm">
-        {loading && users.length === 0 ? (
-           <div className="p-4">
-               <ContentPlaceholder type="table" />
-           </div>
-        ) : (
+        {loading && users.length === 0 ? null : (
         <>
             <table className="w-full text-sm text-left">
                 <thead className="bg-gray-50 text-gray-500 font-medium">

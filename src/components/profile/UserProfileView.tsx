@@ -46,9 +46,7 @@ export function UserProfileView() {
   // Use a consistent container for both loading and content to prevent layout shifts
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-6rem)] w-full py-8 animate-in fade-in duration-700">
-        {loading ? (
-            <ContentPlaceholder type="card" />
-        ) : profile ? (
+        {loading ? null : profile ? (
             <ProfileCard profile={profile} />
         ) : null}
     </div>

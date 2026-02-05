@@ -129,7 +129,7 @@ export function AgendaView() {
   };
 
   if (loading) {
-    return <ContentPlaceholder type="grid" count={4} />;
+    return null;
   }
 
   const containerVariants = {
