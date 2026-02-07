@@ -8,7 +8,7 @@ import { Conference } from '@/types';
 interface ConferenceContextType {
   currentConference: Conference | null;
   loading: boolean;
-  selectConference: (conference: Conference) => void;
+  selectConference: (conference: Conference, redirectPath?: string) => void;
   availableConferences: Conference[];
 }
 
@@ -64,10 +64,10 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
     init();
   }, []);
 
-  const selectConference = (conference: Conference) => {
+  const selectConference = (conference: Conference, redirectPath: string = '/profile') => {
     setCurrentConference(conference);
     localStorage.setItem('conference_id', conference.id);
-    router.push('/profile');
+    router.push(redirectPath);
   };
   
   // Navigation Guard

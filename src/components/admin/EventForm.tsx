@@ -30,6 +30,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
             setValue('image_url', initialData.image_url || '');
             setValue('gives_certificate', initialData.gives_certificate || false);
             setValue('duration_days', initialData.duration_days || 1);
+            setValue('certificate_config', initialData.certificate_config || null);
             
             setEventType(initialData.type || 'Conferencia Magistral');
             setTags(initialData.tags || []);
@@ -204,21 +205,25 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                 />
             </div>
 
-             {/* Certificate Switch */}
-             <div className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${watch('gives_certificate') ? 'bg-[#DBF227]/20 border-[#DBF227]' : 'bg-gray-50/50 border-gray-100 hover:border-gray-200'}`}>
-                <div className="flex-1">
-                    <label className="text-sm font-bold text-[#373737] block">Dar constancia</label>
-                    <p className={`text-xs transition-colors ${watch('gives_certificate') ? 'text-gray-600' : 'text-gray-400'}`}>Activar si este evento otorga constancia de participación.</p>
+            {/* Certificate Switch */}
+             <div className="space-y-4">
+                <div className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${watch('gives_certificate') ? 'bg-[#DBF227]/20 border-[#DBF227]' : 'bg-gray-50/50 border-gray-100 hover:border-gray-200'}`}>
+                    <div className="flex-1">
+                        <label className="text-sm font-bold text-[#373737] block">Dar constancia</label>
+                        <p className={`text-xs transition-colors ${watch('gives_certificate') ? 'text-gray-600' : 'text-gray-400'}`}>Activar si este evento otorga constancia de participación.</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                            type="checkbox" 
+                            {...register('gives_certificate')} 
+                            className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#DBF227]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#DBF227]"></div>
+                    </label>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                        type="checkbox" 
-                        {...register('gives_certificate')} 
-                        className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#DBF227]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#DBF227]"></div>
-                </label>
-            </div>
+                
+
+             </div>
 
             {/* Speaker Selection (Custom Combobox) */}
             <SpeakerSelector 
@@ -242,6 +247,8 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                     {isEditing ? 'Guardar Cambios' : 'Crear Evento'}
                 </button>
             </div>
+
+
         </form>
     );
 }

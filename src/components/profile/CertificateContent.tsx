@@ -41,7 +41,32 @@ interface Certificate {
           title: string;
           institution_name: string;
           department_name: string;
-      }
+      };
+      // Certificate config from DB
+      certificate_config?: {
+        mode: 'template_v1' | 'custom_background';
+        background_url?: string;
+        styles?: {
+          text_color: string;
+          accent_color: string; 
+          font_family: string;
+          text_alignment: 'left' | 'center' | 'right';
+          content_vertical_position: string; 
+        };
+        texts?: {
+          attendee: string;
+          speaker: string;
+          staff: string;
+          organizer: string;
+        };
+        signers?: Array<{
+           name: string;
+           role: string;
+           signature_url?: string;
+        }>;
+        show_qr?: boolean;
+        qr_position?: 'bottom-left' | 'bottom-right';
+      } | null;
     };
     profiles: {
         first_name: string;
@@ -65,14 +90,146 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
     };
     
     const conf = certificate.events.conferences;
+    const config = certificate.events.certificate_config;
+
+    // Determine Role
+    const isSpeaker = certificate.isSpeaker;
+    const isStaff = certificate.isStaff;
+    const isOrganizer = certificate.isOrganizer;
+
+    // --- CUSTOM BACKGROUND MODE ---
+    if (config?.mode === 'custom_background') {
+        const styles = config.styles || {
+            text_color: '#000000',
+            accent_color: '#dbf227',
+            font_family: 'sans',
+            text_alignment: 'center',
+            content_vertical_position: '40%'
+        };
+
+        const texts = config.texts || {
+            attendee: `Por su asistencia ${getEventArticle(certificate.events.type)} ${certificate.events.type}`,
+            speaker: `Por impartir la ${certificate.events.type.toLowerCase()}:`,
+            staff: "Por su valiosa participación en la logística del evento:",
+            organizer: "Por su invaluable apoyo y liderazgo en la organización del evento:"
+        };
+
+        const roleText = isSpeaker ? texts.speaker : isStaff ? texts.staff : isOrganizer ? texts.organizer : texts.attendee;
+        
+        // Font selection
+        const fontFamily = styles.font_family === 'serif' ? 'var(--font-playfair)' : 
+                          styles.font_family === 'mono' ? 'var(--font-geist-mono)' : 
+                          'var(--font-geist-sans)'; // Default sans
+        
+        return (
+            <div 
+                style={{ 
+                    width: '279.4mm', 
+                    height: '215.9mm',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    backgroundColor: 'white',
+                    color: styles.text_color,
+                    fontFamily: fontFamily
+                }} 
+                className="certificate-container mx-auto shadow-none print:shadow-none"
+            >
+                {/* Background Image */}
+                {config.background_url && (
+                    <img 
+                        src={config.background_url} 
+                        alt="Certificate Background" 
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            zIndex: 0
+                        }}
+                    />
+                )}
+
+                {/* Content Overlay */}
+                <div 
+                    style={{
+                        position: 'relative',
+                        zIndex: 10,
+                        paddingTop: styles.content_vertical_position,
+                        paddingLeft: '2rem',
+                        paddingRight: '2rem',
+                        textAlign: styles.text_alignment as any,
+                        width: '100%'
+                    }}
+                >
+                    <div style={{ maxWidth: '85%', margin: '0 auto' }}>
+                         {/* Name */}
+                        <h2 style={{ 
+                            fontSize: '2.5rem', 
+                            fontWeight: 'bold', 
+                            marginBottom: '0.5rem',
+                            lineHeight: 1.2
+                        }}>
+                             {getDegreeAbbr(certificate.profiles.degree, certificate.profiles.gender)} {certificate.profiles.first_name} {certificate.profiles.last_name}
+                        </h2>
+
+                        {/* Role Text */}
+                        <p style={{ fontSize: '1.2rem', marginBottom: '0.5rem', opacity: 0.9 }}>
+                            {roleText}
+                        </p>
+
+                        {/* Event Title */}
+                        {certificate.events.title && (
+                             <h3 style={{ 
+                                fontSize: '1.8rem', 
+                                fontWeight: '800', 
+                                textTransform: 'uppercase',
+                                marginBottom: '0.5rem',
+                                color: styles.accent_color // Use accent color for title? Or maybe just text color
+                            }}>
+                                {certificate.events.title}
+                            </h3>
+                        )}
+                        
+                         {/* Date / Location */}
+                        <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>
+                            {formatDate(certificate.events.date)}
+                        </p>
+                    </div>
+                </div>
+
+                {/* QR Code - Optional/Configurable position */}
+                {(config.show_qr !== false) && (
+                    <div style={{
+                        position: 'absolute',
+                        bottom: '25mm',
+                        right: config.qr_position === 'bottom-left' ? undefined : '25mm',
+                        left: config.qr_position === 'bottom-left' ? '25mm' : undefined,
+                        zIndex: 20
+                    }}>
+                         <div className="bg-white p-2 rounded shadow-sm inline-block">
+                            <QRCodeSVG 
+                                value={`https://cherry-k-2.com/verify/${certificate.id}`} 
+                                size={60} 
+                                level="M"
+                                fgColor="#000000"
+                            />
+                        </div>
+                        <div style={{ fontSize: '10px', marginTop: '4px', textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.7)',  padding: '2px', borderRadius: '4px' }}>
+                             ID: {certificate.id.split('-').pop()?.toUpperCase()}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // --- DEFAULT LAYOUT (Original) ---
     const accentColor = '#dbf227'; // Hardcoded default
     const institution = conf?.institution_name || 'FES Acatlán';
     const department = conf?.department_name || 'UNAM'; // Default fallback
     const confTitle = conf?.title || 'SEMANA DEL DISEÑO';
-
-    const isSpeaker = certificate.isSpeaker;
-    const isStaff = certificate.isStaff;
-    const isOrganizer = certificate.isOrganizer;
 
     return (
         <div 

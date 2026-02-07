@@ -30,7 +30,9 @@ export interface Certificate {
           title: string;
           institution_name: string;
           department_name: string;
-      }
+      };
+      
+      certificate_config?: any; 
     };
     profiles: {
         first_name: string;
@@ -88,7 +90,8 @@ export function CertificatesView() {
               title,
               institution_name,
               department_name
-            )
+            ),
+            certificate_config
           ),
           profiles:user_id (
             first_name,

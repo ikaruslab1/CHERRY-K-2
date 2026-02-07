@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
 import { useRoleAuth } from '@/hooks/useRoleAuth';
-import { Loader2, User, Calendar, FileText, QrCode, Users, Settings } from 'lucide-react';
+import { Loader2, User, Calendar, FileText, QrCode, Users, Settings, Award, LayoutDashboard } from 'lucide-react';
 
 const UsersTable = dynamic(() => import('@/components/admin/UsersTable').then(mod => mod.UsersTable), {
     loading: () => <LoadingSpinner />,
@@ -27,6 +27,9 @@ const AttendanceView = dynamic(() => import('@/views/admin/AttendanceView'), {
 const CertificatesView = dynamic(() => import('@/components/profile/CertificatesView').then(mod => mod.CertificatesView), {
     loading: () => <LoadingSpinner />,
 });
+const CertificateDesignView = dynamic(() => import('@/components/admin/CertificateDesignView').then(mod => mod.CertificateDesignView), {
+    loading: () => <LoadingSpinner />,
+});
 
 function LoadingSpinner() {
     return (
@@ -39,10 +42,10 @@ function LoadingSpinner() {
 function AdminContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { loading, isAuthorized, userRole } = useRoleAuth(['admin']);
+    const { loading, isAuthorized, userRole } = useRoleAuth(['admin', 'owner']);
     
     // Initialize state from URL params only once
-    const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'constancias'>(
+    const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'constancias' | 'design-certificates'>(
         (searchParams.get('tab') as any) || 'profile'
     );
 
@@ -55,12 +58,14 @@ function AdminContent() {
     if (loading || !isAuthorized) return null;
 
     const navItems = [
+        { id: 'owner-dashboard', label: 'Volver a Owner', icon: <LayoutDashboard className="w-5 h-5" />, show: userRole === 'owner', onClick: () => router.push('/owner') },
         { id: 'profile', label: 'Mi Perfil', icon: <User className="w-5 h-5" />, show: true },
         { id: 'agenda', label: 'Agenda', icon: <Calendar className="w-5 h-5" />, show: true },
         { id: 'constancias', label: 'Constancias', icon: <FileText className="w-5 h-5" />, show: true },
         { id: 'attendance', label: 'Asistencia', icon: <QrCode className="w-5 h-5" />, show: true },
         { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: true },
         { id: 'events', label: 'Gestión Eventos', icon: <Settings className="w-5 h-5" />, show: true },
+        { id: 'design-certificates', label: 'Diseño Constancias', icon: <Award className="w-5 h-5" />, show: true },
     ];
 
     return (
@@ -81,6 +86,7 @@ function AdminContent() {
                     {activeTab === 'users' && <UsersTable currentUserRole={userRole || undefined} />}
                     {activeTab === 'events' && <EventsManager />}
                     {activeTab === 'attendance' && <AttendanceView />}
+                    {activeTab === 'design-certificates' && <CertificateDesignView />}
                 </div>
             </div>
         </SidebarAwareContainer>

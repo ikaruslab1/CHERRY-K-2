@@ -279,7 +279,7 @@ export default function OwnerDashboard() {
                 </div>
                 <div className="flex gap-3 w-full md:w-auto">
                    <button 
-                      onClick={() => selectConference(conf)}
+                      onClick={() => selectConference(conf, '/admin')}
                       className="flex-1 md:flex-none px-4 py-2 text-sm border border-black/10 rounded hover:bg-black/5 transition font-medium text-center"
                    >
                       Entrar

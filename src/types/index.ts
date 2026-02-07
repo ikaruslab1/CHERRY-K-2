@@ -17,6 +17,30 @@ export interface Event {
   gives_certificate?: boolean;
   duration_days?: number;
   conference_id: string;
+  certificate_config?: {
+    mode: 'template_v1' | 'custom_background';
+    background_url?: string;
+    styles?: {
+      text_color: string;
+      accent_color: string; // Used for "Award" icon and perhaps emphasis text
+      font_family: string;
+      text_alignment: 'left' | 'center' | 'right';
+      content_vertical_position: string; // e.g. "50%"
+    };
+    texts?: {
+      attendee: string;
+      speaker: string;
+      staff: string;
+      organizer: string;
+    };
+    signers?: Array<{
+       name: string;
+       role: string;
+       signature_url?: string;
+    }>;
+    show_qr?: boolean;
+    qr_position?: 'bottom-left' | 'bottom-right';
+  } | null;
 }
 
 export interface UserProfile {
