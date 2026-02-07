@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import { RegisterForm } from '@/components/auth/RegisterForm';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { cn } from '@/lib/utils';
@@ -12,6 +14,19 @@ import { Conference } from '@/types';
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'register' | 'login'>('login');
   const { currentConference, selectConference, availableConferences, loading: confLoading } = useConference(); // Fix: destructure loading as confLoading
+  const router = useRouter(); // Initialize router here
+
+  useEffect(() => {
+      const checkSession = async () => {
+          // Check if we have an active session
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+              router.push('/profile');
+          }
+      };
+      
+      checkSession();
+  }, [router]);
 
   if (confLoading) {
      return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-[#373737]">Cargando...</div>;
