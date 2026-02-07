@@ -1,0 +1,17 @@
+{
+  "name": "CHERRY-K-2 | Congreso Internacional",
+  "short_name": "Cherry-K",
+  "icons": [
+    {
+      "src": "/assets/fesa.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
+}

@@ -5,7 +5,7 @@ import { QRScanner } from '@/components/attendance/QRScanner';
 import { VerificationModal } from '@/components/attendance/VerificationModal';
 import { useAttendanceScanner } from '@/hooks/useAttendanceScanner';
 import { attendanceService } from '@/services/attendanceService';
-import { Loader2, Calendar, AlertTriangle } from 'lucide-react';
+import { Loader2, Calendar, AlertTriangle, Wifi, WifiOff, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { useConference } from '@/context/ConferenceContext';
 import { Event } from '@/types';
 
@@ -19,45 +19,86 @@ export function StaffScannerView() {
         participant,
         isLoading,
         error: scannerError,
+        successMessage,
         showModal,
         status,
         handleScan,
         handleError,
         confirmAttendance,
-        resetScanner
+        resetScanner,
+        isOnline,
+        pendingScans,
+        syncQueue,
+        isSyncing
     } = useAttendanceScanner({ 
         activityId: selectedEventId || null,
         onSuccess: (p) => {
-             // Optional: Show a transient success toast or log
              console.log(`Asistencia confirmada para ${p.first_name}`);
         }
     });
 
     useEffect(() => {
-    const fetchEvents = async () => {
-        if (!currentConference) return;
-        setLoadingActivities(true);
-        // Using existing service method or direct supabase if specific fields needed
-        // attendanceService.getActiveEvents returns {id, title, type, date}
-        
-        const evts = await attendanceService.getActiveEvents(currentConference.id as string);
-        // The type returned by getActiveEvents matches what we need mostly. 
-        // We can cast or map if needed.
-        setEvents(evts as any); 
-        
-        if (evts && evts.length > 0) {
-            // Optional: Auto-select or not. Admin view comments say "Auto-select first if available".
-            // Previous Staff view auto-selected.
-            setSelectedEventId(evts[0].id);
-        }
-        setLoadingActivities(false);
-    };
-    fetchEvents();
-  }, [currentConference]);
+        const fetchEvents = async () => {
+            if (!currentConference) return;
+            setLoadingActivities(true);
+            try {
+                const evts = await attendanceService.getActiveEvents(currentConference.id as string);
+                setEvents(evts as any); 
+                
+                if (evts && evts.length > 0) {
+                    setSelectedEventId(evts[0].id);
+                }
+            } catch (e) {
+                console.error("Failed to load events", e);
+            } finally {
+                setLoadingActivities(false);
+            }
+        };
+        fetchEvents();
+    }, [currentConference]);
 
   return (
-      <div className="w-full max-w-sm xs:max-w-md md:max-w-lg mx-auto space-y-6 px-4 xs:px-0">
-         {/* Header / Selector Section - Styled like Admin */}
+      <div className="w-full max-w-sm xs:max-w-md md:max-w-lg mx-auto space-y-6 px-4 xs:px-0 pb-20">
+         
+         {/* Network Status Banners */}
+         {!isOnline && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+                <div className="bg-amber-100 p-2 rounded-full shrink-0">
+                    <WifiOff className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                    <h3 className="font-semibold text-amber-900 text-sm">Modo Offline Activo</h3>
+                    <p className="text-xs text-amber-700 mt-1">
+                        Las asistencias se guardarán en tu dispositivo. ({pendingScans.length} pendientes)
+                    </p>
+                </div>
+            </div>
+         )}
+
+         {isOnline && pendingScans.length > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                    <div className="bg-blue-100 p-2 rounded-full shrink-0">
+                        <RefreshCw className={`h-5 w-5 text-blue-600 ${isSyncing ? 'animate-spin' : ''}`} />
+                    </div>
+                    <div>
+                        <h3 className="font-semibold text-blue-900 text-sm">Sincronización Pendiente</h3>
+                        <p className="text-xs text-blue-700 mt-1">
+                            {pendingScans.length} escaneos guardados.
+                        </p>
+                    </div>
+                </div>
+                <button 
+                    onClick={() => syncQueue()}
+                    disabled={isSyncing}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                >
+                    {isSyncing ? 'Subiendo...' : 'Sincronizar'}
+                </button>
+            </div>
+         )}
+
+         {/* Header / Selector Section */}
          <div className="bg-white p-5 xs:p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-3 xs:space-y-4 md:space-y-5">
                 <div>
                     <h2 className="text-xl xs:text-2xl md:text-3xl font-bold text-center text-[#373737]">Scanner de Asistencia</h2>
@@ -108,14 +149,21 @@ export function StaffScannerView() {
                         paused={showModal || isLoading}
                     />
                     
-                    {/* Status Overlay */}
+                    {/* Status Overlays */}
                     {scannerError && (
                         <div className="absolute bottom-4 left-4 right-4 bg-red-500 text-white py-3 px-4 rounded-xl text-sm font-medium text-center shadow-lg animate-in slide-in-from-bottom-2 fade-in">
                             {scannerError}
                         </div>
                     )}
+
+                    {successMessage && (
+                        <div className="absolute top-4 left-4 right-4 bg-green-500/90 backdrop-blur-sm text-white py-3 px-4 rounded-xl text-sm font-bold text-center shadow-lg animate-in slide-in-from-top-2 fade-in flex items-center justify-center gap-2">
+                             <CheckCircle2 className="h-5 w-5" />
+                             {successMessage}
+                        </div>
+                    )}
                         
-                    {status === 'processing' && !showModal && (
+                    {status === 'processing' && !showModal && !successMessage && (
                             <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
                             <Loader2 className="h-10 w-10 text-[#DBF227] animate-spin" />
                             </div>

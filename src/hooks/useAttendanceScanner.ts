@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { IParticipant, attendanceService } from '@/services/attendanceService';
+import { useOfflineSync } from './useOfflineSync';
 
 interface UseAttendanceScannerProps {
     activityId: string | null;
@@ -11,9 +12,13 @@ export function useAttendanceScanner({ activityId, onSuccess }: UseAttendanceSca
     const [participant, setParticipant] = useState<IParticipant | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [status, setStatus] = useState<'idle' | 'scanning' | 'processing' | 'verified' | 'error'>('idle');
     
+    // Offline capabilities
+    const { isOnline, saveOfflineScan, pendingScans, syncQueue, isSyncing } = useOfflineSync();
+
     const lastScanRef = useRef<string | null>(null);
     const lastScanTimeRef = useRef<number>(0);
     const audioContextRef = useRef<AudioContext | null>(null);
@@ -26,11 +31,7 @@ export function useAttendanceScanner({ activityId, onSuccess }: UseAttendanceSca
     }, []);
 
     const playSound = useCallback((type: 'beep' | 'success' | 'error') => {
-        // Audio files disabled to prevent errors if assets are missing
-        // const audio = new Audio();
-        // if (type === 'beep') audio.src = '/assets/sounds/scan-beep.mp3';
-        // else if (type === 'success') audio.src = '/assets/sounds/success-chime.mp3';
-        // audio.play().catch(e => console.log("Audio play failed (interaction needed?):", e));
+        // Audio logic
     }, []);
 
     const handleScan = useCallback(async (data: string) => {
@@ -53,39 +54,67 @@ export function useAttendanceScanner({ activityId, onSuccess }: UseAttendanceSca
         setIsLoading(true);
         playSound('beep');
 
-        // Pausar escáner visualmente (manejado por UI consumiendo 'showModal' o 'status')
-        
-        const foundParticipant = await attendanceService.getParticipantByQR(data);
-        
-        setIsLoading(false);
-
-        if (foundParticipant) {
-            setParticipant(foundParticipant);
-            setShowModal(true);
-            setStatus('verified'); // Esperando confirmación manual
-        } else {
-            setError("Participante no encontrado.");
-            setStatus('error');
+        // OFFLINE HANDLING
+        if (!isOnline) {
+            saveOfflineScan(data, activityId);
+            setIsLoading(false);
+            setSuccessMessage("Guardado localmente (Sin conexión)");
+            // playSound('success'); 
+            
+            // Auto reset for fast offline scanning
             setTimeout(() => {
+                setSuccessMessage(null);
                 setStatus('scanning');
-                setError(null);
-            }, 3000);
+                // Don't reset lastScanRef immediately to prevent double scan of same person instantly
+            }, 1500);
+            return;
         }
-    }, [activityId, playSound]);
+
+        // ONLINE HANDLING
+        try {
+            const foundParticipant = await attendanceService.getParticipantByQR(data);
+            
+            setIsLoading(false);
+    
+            if (foundParticipant) {
+                setParticipant(foundParticipant);
+                setShowModal(true);
+                setStatus('verified'); // Esperando confirmación manual
+            } else {
+                setError("Participante no encontrado.");
+                setStatus('error');
+                setTimeout(() => {
+                    setStatus('scanning');
+                    setError(null);
+                }, 3000);
+            }
+        } catch (err) {
+            console.error(err);
+            setIsLoading(false);
+            // If network error, suggest checking connection
+            setError("Error al consultar servidor.");
+            setStatus('error');
+        }
+    }, [activityId, playSound, isOnline, saveOfflineScan]);
 
     const confirmAttendance = async () => {
         if (!participant || !activityId) return;
 
         setIsLoading(true);
-        const result = await attendanceService.confirmAttendance(participant.id, activityId);
-        setIsLoading(false);
-
-        if (result.success) {
-            playSound('success');
-            if (onSuccess) onSuccess(participant);
-            resetScanner();
-        } else {
-            alert(result.message); // O usar un toast state
+        try {
+            const result = await attendanceService.confirmAttendance(participant.id, activityId);
+            setIsLoading(false);
+    
+            if (result.success) {
+                playSound('success');
+                if (onSuccess) onSuccess(participant);
+                resetScanner();
+            } else {
+                alert(result.message); // O usar un toast state
+            }
+        } catch (err) {
+            setIsLoading(false);
+            alert("Error de conexión al confirmar.");
         }
     };
 
@@ -94,6 +123,7 @@ export function useAttendanceScanner({ activityId, onSuccess }: UseAttendanceSca
         setParticipant(null);
         setScannedData(null);
         setError(null);
+        setSuccessMessage(null);
         setStatus('scanning');
         lastScanRef.current = null; // Permitir re-escanear el mismo inmediatamente si se reinicia
     };
@@ -107,12 +137,18 @@ export function useAttendanceScanner({ activityId, onSuccess }: UseAttendanceSca
         participant,
         isLoading,
         error,
+        successMessage,
         showModal,
         status,
         handleScan,
         handleError,
         confirmAttendance,
         resetScanner,
-        setStatus
+        setStatus,
+        // Offline props
+        isOnline,
+        pendingScans,
+        syncQueue,
+        isSyncing
     };
 }

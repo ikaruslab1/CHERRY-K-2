@@ -21,21 +21,39 @@ export function UserProfileView() {
 
   useEffect(() => {
     const loadProfile = async () => {
+      // 1. Load from cache first for offline support
+      const cachedProfile = localStorage.getItem('offline_user_profile');
+      if (cachedProfile) {
+        try {
+          setProfile(JSON.parse(cachedProfile));
+          setLoading(false);
+        } catch (e) {
+          console.error("Failed to parse cached profile", e);
+        }
+      }
+
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data: profileData } = await supabase
+        const { data: profileData, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single();
         
-        setProfile(profileData);
+        if (error) throw error;
+        
+        if (profileData) {
+            setProfile(profileData);
+            // Update cache
+            localStorage.setItem('offline_user_profile', JSON.stringify(profileData));
+        }
         setLoading(false);
       } catch (error) {
-        console.error('Error in loadProfile:', error);
-        setLoading(false);
+        console.error('Error in loadProfile or offline:', error);
+        // If no cache and error, stop loading state
+        setLoading(false); 
       }
     };
 

@@ -31,6 +31,19 @@ const playfairDisplay = Playfair_Display({
 export const metadata: Metadata = {
   title: "CHERRY-K-2 | Congreso Internacional",
   description: "Plataforma de Gestión de Asistencia y Eventos",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Cherry-K",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport = {
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
