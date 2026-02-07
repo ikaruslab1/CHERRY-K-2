@@ -12,9 +12,11 @@ export function usePWAInstall() {
   const [isInstallable, setIsInstallable] = useState(false);
 
   useEffect(() => {
-    // Detect iOS
+    // Detect iOS (iPhone, iPod) and iPad (including those claiming to be Macintosh)
     const userAgent = window.navigator.userAgent.toLowerCase();
-    const ios = /iphone|ipad|ipod/.test(userAgent);
+    const isIphone = /iphone|ipod/.test(userAgent);
+    const isIPad = /ipad/.test(userAgent) || (/macintosh/.test(userAgent) && (navigator.maxTouchPoints > 1));
+    const ios = isIphone || isIPad;
     setIsIOS(ios);
 
     // Detect standalone mode

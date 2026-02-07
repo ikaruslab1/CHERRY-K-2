@@ -24,6 +24,7 @@ export function InstallPWAButton({ collapsed = false }: InstallPWAButtonProps) {
   return (
     <>
       <button 
+        type="button"
         onClick={handleClick}
         className={`flex items-center gap-3 px-4 py-3.5 w-full rounded-xl text-left font-medium transition-all text-[#373737] bg-[#DBF227] hover:bg-[#c9df24] shadow-sm mb-2 ${
           collapsed ? 'justify-center' : ''
@@ -52,14 +53,14 @@ export function InstallPWAButton({ collapsed = false }: InstallPWAButtonProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowIOSInstructions(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999]"
             />
             <motion.div
               initial={{ y: '100%', opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white rounded-t-2xl md:rounded-2xl p-6 z-[61] shadow-2xl w-full md:w-[400px] border border-gray-100"
+              className="fixed bottom-0 left-0 right-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white rounded-t-2xl md:rounded-2xl p-6 z-[10000] shadow-2xl w-full md:w-[400px] border border-gray-100"
             >
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-bold text-[#373737] font-playfair">Instalar en iPhone/iPad</h3>
@@ -79,7 +80,7 @@ export function InstallPWAButton({ collapsed = false }: InstallPWAButtonProps) {
                   <div>
                     <p className="text-sm font-semibold text-[#373737] mb-1">1. Toca el botón "Compartir"</p>
                     <p className="text-xs text-gray-500 leading-relaxed">
-                      Busca el icono <Share className="inline w-3 h-3 text-blue-600"/> en la barra de navegación inferior de Safari.
+                      Busca el icono <Share className="inline w-3 h-3 text-blue-600"/> en la barra de navegación de Safari (inferior o superior).
                     </p>
                   </div>
                 </div>
