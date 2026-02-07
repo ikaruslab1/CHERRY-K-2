@@ -14,22 +14,41 @@ import { Conference } from '@/types';
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'register' | 'login'>('login');
   const { currentConference, selectConference, availableConferences, loading: confLoading } = useConference(); // Fix: destructure loading as confLoading
-  const router = useRouter(); // Initialize router here
+  const router = useRouter(); 
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   useEffect(() => {
       const checkSession = async () => {
-          // Check if we have an active session
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session) {
-              router.push('/profile');
+          try {
+            // Check if we have an active session
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                // If session exists, redirect immediately and DON'T stop loading
+                router.replace('/profile');
+                return;
+            }
+          } catch (error) {
+            console.error('Session check failed', error);
+          } finally {
+            // Only stop loading if NO session found (so we show the login form)
+            // If session was found, we want to keep loading until the redirect happens
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                setIsCheckingSession(false);
+            }
           }
       };
       
       checkSession();
   }, [router]);
 
-  if (confLoading) {
-     return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-[#373737]">Cargando...</div>;
+  if (confLoading || isCheckingSession) {
+     return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-[#373737]">
+        <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin h-8 w-8 border-4 border-gray-200 border-t-[#373737] rounded-full" />
+            <p className="text-sm font-medium text-gray-500 animate-pulse">Iniciando sesión...</p>
+        </div>
+     </div>;
   }
 
   return (
