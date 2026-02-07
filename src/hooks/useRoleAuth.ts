@@ -24,16 +24,37 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                // 1. Verificar Sesión
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
+                // 1. Verificar Sesión (Offline-friendly)
+                // Usamos getSession en lugar de getUser para permitir funcionamiento offline
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                
+                if (sessionError || !session?.user) {
+                    console.warn('No session found or error:', sessionError);
                     router.push('/');
                     return;
                 }
 
-                // Optimización: Usar caché si ya tenemos el rol de este usuario
+                const user = session.user;
+
+                // 2. Optimización: Buscar en caché (Memoria -> LocalStorage -> DB)
+                let role: AllowedRole | null = null;
+                
+                // A) Caché en Memoria
                 if (globalCachedRole && globalCachedRole.id === user.id) {
-                    const role = globalCachedRole.role as AllowedRole;
+                    role = globalCachedRole.role as AllowedRole;
+                } 
+                // B) Caché en LocalStorage (Persistencia Offline)
+                else {
+                    const cachedRoleStr = localStorage.getItem(`user_role_${user.id}`);
+                    if (cachedRoleStr) {
+                        role = cachedRoleStr as AllowedRole;
+                        // Restaurar a memoria
+                        globalCachedRole = { id: user.id, role };
+                    }
+                }
+
+                // C) Si tenemos rol (de memoria o local), validamos y renderizamos
+                if (role) {
                     setUserRole(role);
                     if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
                         router.push(redirectTo);
@@ -41,36 +62,46 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
                     }
                     setIsAuthorized(true);
                     setLoading(false);
-                    return;
+                    
+                    // Opcional: Revalidar en segundo plano si hay conexión
+                    // Para no bloquear la UI, podríamos lanzar una validación silenciosa aquí
                 }
 
-                // 2. Obtener Rol (si no está en caché)
-                const { data: profile, error } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single();
+                // D) Si NO hay rol en caché, consultamos DB (Requiere conexión la primera vez)
+                if (!role) {
+                    const { data: profile, error } = await supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', user.id)
+                        .single();
 
-                if (error || !profile) {
-                    console.error('Error fetching profile role:', error);
-                    router.push('/');
-                    return;
+                    if (error || !profile) {
+                        console.error('Error fetching profile role:', error);
+                        // Si falla y no tenemos rol, solo redirigimos si es un error fatal de autenticación
+                        // Pero si es falta de conexión, tal vez deberíamos mostrar un error en lugar de logout?
+                        // Por seguridad, sin rol no podemos dejar pasar. El usuario DEBE conectarse al menos una vez.
+                        router.push('/');
+                        return;
+                    }
+
+                    role = profile.role as AllowedRole;
+                    
+                    // Guardar en caché y localStorage
+                    globalCachedRole = { id: user.id, role: role };
+                    localStorage.setItem(`user_role_${user.id}`, role);
+                    
+                    setUserRole(role);
                 }
 
-                const role = profile.role as AllowedRole;
-                
-                // Guardar en caché
-                globalCachedRole = { id: user.id, role: role };
-                
-                setUserRole(role);
-
-                // 3. Verificar Permisos
-                if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
-                    router.push(redirectTo); // Redirigir si no tiene el rol
-                    return;
+                // Validación final (en caso de que hayamos obtenido el rol recién ahora)
+                if (loading) { // Solo si no autorizamos arriba
+                    if (allowedRoles.length > 0 && role && !allowedRoles.includes(role)) {
+                        router.push(redirectTo);
+                        return;
+                    }
+                    setIsAuthorized(true);
                 }
 
-                setIsAuthorized(true);
             } catch (error) {
                 console.error('Auth check error:', error);
                 router.push('/');

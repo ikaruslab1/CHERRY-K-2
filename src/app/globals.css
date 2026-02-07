@@ -23,7 +23,8 @@
   /* Solid styling variables replacing glassmorphism */
   --glass-bg: #ffffff;
   --glass-border: #e4e4e7;
-  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --glass-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 @layer utilities {
@@ -32,17 +33,18 @@
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
   }
-  
+
   .glass-card {
     background: #ffffff;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 
   .text-glow {
     text-shadow: none;
   }
 }
-
 
 body {
   background-color: var(--background);
@@ -111,18 +113,13 @@ h6 {
     background: white;
   }
 
-  /* Use visibility hidden on everything to preserve layout context but hide content */
-  body * {
-    visibility: hidden;
+  /* Hide everything by default */
+  body > * {
+    display: none !important;
   }
 
-  /* Make the print area and all its children visible */
-  #certificate-print-area,
-  #certificate-print-area * {
-    visibility: visible;
-  }
-
-  #certificate-print-area {
+  /* Only show the print portal */
+  body > #print-portal {
     display: block !important;
     position: fixed;
     top: 0;
@@ -130,11 +127,27 @@ h6 {
     width: 279.4mm;
     height: 215.9mm;
     z-index: 9999;
-    margin: 0;
-    padding: 0;
+    margin: 0 auto;
     background: white;
-    /* Ensure no overflow clipping from parents affects this fixed element */
     overflow: visible;
+  }
+
+  /* Reset visibility for children of the portal */
+  #print-portal * {
+    visibility: visible;
+    display: block; /* Ensure elements aren't hidden by other styles */
+  }
+
+  /* Flex/Grid adjustments if needed for print layout inside portal */
+  #print-portal .flex {
+    display: flex !important;
+  }
+  #print-portal .grid {
+    display: grid !important;
   }
 }
 
+/* Helper to hide print portal on screen */
+.print-only {
+  display: none;
+}

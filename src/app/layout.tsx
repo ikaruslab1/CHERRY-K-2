@@ -5,6 +5,7 @@ import "./globals.css";
 import { ConferenceProvider } from "@/context/ConferenceContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { SyncWrapper } from "@/components/SyncWrapper";
+import { DevServiceWorkerUnregister } from "@/components/DevServiceWorkerUnregister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -66,6 +67,7 @@ export default function RootLayout({
             <SidebarProvider>
               {children}
             </SidebarProvider>
+            {process.env.NODE_ENV === 'development' && <DevServiceWorkerUnregister />}
           </ConferenceProvider>
         </SyncWrapper>
       </body>

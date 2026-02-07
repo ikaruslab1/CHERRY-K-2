@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '@/lib/supabase';
 import { Loader2, Printer, X, Award } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -116,9 +117,7 @@ export function CertificatesView() {
   };
 
   if (loading) {
-  if (loading) {
     return null;
-  }
   }
 
   return (
@@ -184,10 +183,13 @@ export function CertificatesView() {
                 </div>
             </div>
 
-            {/* PRINT ONLY AREA */}
-            <div id="certificate-print-area" className="hidden">
-                  <CertificateContent certificate={selectedCertificate} />
-            </div>
+            {/* PRINT PORTAL - Renders outside the react root for cleaner printing */}
+            {typeof window !== 'undefined' && createPortal(
+                <div id="print-portal" className="print-only">
+                    <CertificateContent certificate={selectedCertificate} />
+                </div>,
+                document.body
+            )}
         </div>
       )}
     </div>
