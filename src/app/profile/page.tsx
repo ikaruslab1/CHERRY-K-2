@@ -67,15 +67,6 @@ export default function ProfilePage() {
       router.push('/');
   };
 
-  // Removed page blocking loader
-  /*if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white text-[#373737]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#DBF227]" />
-      </div>
-    );
-  }*/
-
 const navItems = [
     { id: 'profile', label: 'Mi Perfil', icon: <User className="w-5 h-5" />, show: true },
     { id: 'agenda', label: 'Agenda', icon: <Calendar className="w-5 h-5" />, show: true },

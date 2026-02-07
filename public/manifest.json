@@ -3,9 +3,9 @@
   "short_name": "Cherry-K",
   "icons": [
     {
-      "src": "/assets/fesa.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/assets/fesa.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],

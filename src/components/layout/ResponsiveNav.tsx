@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Home, LogOut, X, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '@/context/SidebarContext';
+import { InstallPWAButton } from '../ui/InstallPWAButton';
 
 interface NavItem {
     id: string;
@@ -107,6 +108,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
 
                             {/* Footer / Sign Out */}
                             <div className="pt-6 border-t border-gray-100 mt-auto">
+                                <InstallPWAButton />
                                 <button
                                     onClick={handleSignOut}
                                     className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-red-500 hover:bg-red-50 transition-colors font-medium border border-transparent hover:border-red-100"
@@ -199,6 +201,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
 
                 {/* Footer / Sign Out */}
                 <div className="p-4 border-t border-gray-100">
+                    <InstallPWAButton collapsed={isDesktopCollapsed} />
                     <button
                         onClick={handleSignOut}
                         className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-red-500 hover:bg-red-50 transition-colors font-medium border border-transparent hover:border-red-100 ${

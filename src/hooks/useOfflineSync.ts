@@ -32,6 +32,7 @@ export function useOfflineSync() {
     isLoaded.current = true;
 
     // Listeners
+    // Listeners
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
