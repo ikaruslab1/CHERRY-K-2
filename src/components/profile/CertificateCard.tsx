@@ -11,6 +11,7 @@ interface Certificate {
       type: string;
       location: string;
       description: string;
+      [key: string]: any; // Allow other props like conference_id
     };
     profiles: {
         first_name: string;

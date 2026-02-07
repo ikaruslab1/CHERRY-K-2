@@ -25,9 +25,10 @@ export interface UserProfile {
   last_name: string;
   short_id: string;
   degree: string;
-  role: 'user' | 'staff' | 'admin' | 'ponente' | 'owner';
+  role: 'user' | 'staff' | 'admin' | 'ponente' | 'owner' | 'vip';
   email?: string;
   created_at?: string;
+  gender?: string;
 }
 
 export interface Conference {

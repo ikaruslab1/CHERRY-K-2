@@ -49,6 +49,9 @@ interface Certificate {
         degree: string | null;
         gender: string | null;
     }
+    isSpeaker?: boolean;
+    isStaff?: boolean;
+    isOrganizer?: boolean;
 }
 
 export function CertificateContent({ certificate }: { certificate: Certificate }) {
@@ -66,6 +69,10 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
     const institution = conf?.institution_name || 'FES Acatlán';
     const department = conf?.department_name || 'UNAM'; // Default fallback
     const confTitle = conf?.title || 'SEMANA DEL DISEÑO';
+
+    const isSpeaker = certificate.isSpeaker;
+    const isStaff = certificate.isStaff;
+    const isOrganizer = certificate.isOrganizer;
 
     return (
         <div 
@@ -118,7 +125,7 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
                         CONSTANCIA
                     </h1>
                     <p className="font-[var(--font-great-vibes)] text-6xl -mt-4 tracking-wide" style={{ color: accentColor }}>
-                        de Participación
+                        {isSpeaker ? 'de Ponente' : isStaff ? 'de Staff' : isOrganizer ? 'de Organizador' : 'de Participación'}
                     </p>
                 </div>
 
@@ -151,7 +158,14 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
                             </div>
 
                             <p className="text-sm text-gray-600 leading-relaxed mb-2">
-                                Ha completado satisfactoriamente su asistencia {getEventArticle(certificate.events.type)} {certificate.events.type}
+                                {isSpeaker 
+                                    ? <span>Por impartir la {certificate.events.type.toLowerCase()}:</span>
+                                    : isStaff
+                                    ? <span>Por su valiosa participación en la logística del evento:</span>
+                                    : isOrganizer
+                                    ? <span>Por su invaluable apoyo y liderazgo en la organización del evento:</span>
+                                    : <span>Ha completado satisfactoriamente su asistencia {getEventArticle(certificate.events.type)} {certificate.events.type}</span>
+                                }
                             </p>
 
                             <h3 className="text-xl font-black uppercase text-[#1a1a1a] mb-3 tracking-wide" >

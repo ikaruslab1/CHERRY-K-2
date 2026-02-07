@@ -39,7 +39,7 @@ function LoadingSpinner() {
 function AdminContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { loading, isAuthorized } = useRoleAuth(['admin']);
+    const { loading, isAuthorized, userRole } = useRoleAuth(['admin']);
     
     // Initialize state from URL params only once
     const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'constancias'>(
@@ -78,7 +78,7 @@ function AdminContent() {
                     {activeTab === 'profile' && <UserProfileView />}
                     {activeTab === 'agenda' && <AgendaView />}
                     {activeTab === 'constancias' && <CertificatesView />}
-                    {activeTab === 'users' && <UsersTable />}
+                    {activeTab === 'users' && <UsersTable currentUserRole={userRole || undefined} />}
                     {activeTab === 'events' && <EventsManager />}
                     {activeTab === 'attendance' && <AttendanceView />}
                 </div>

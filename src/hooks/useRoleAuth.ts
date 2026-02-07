@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-type AllowedRole = 'admin' | 'staff' | 'ponente' | 'user' | 'owner';
+type AllowedRole = 'admin' | 'staff' | 'ponente' | 'user' | 'owner' | 'vip';
 
 // Cache simple en memoria para evitar llamadas repetidas en la misma sesión de navegación
 let globalCachedRole: { id: string, role: string } | null = null;

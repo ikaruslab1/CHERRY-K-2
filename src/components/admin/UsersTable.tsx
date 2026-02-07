@@ -12,7 +12,7 @@ import { UserProfile } from '@/types';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 import { useUsers } from '@/hooks/useUsers';
 
-  export function UsersTable({ readOnly = false }: { readOnly?: boolean }) {
+  export function UsersTable({ readOnly = false, currentUserRole }: { readOnly?: boolean, currentUserRole?: string }) {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
   const { users, loading, mutate } = useUsers(debouncedSearch);
@@ -64,9 +64,16 @@ import { useUsers } from '@/hooks/useUsers';
           case 'admin': return 'bg-purple-100 text-purple-700 border-purple-200';
           case 'staff': return 'bg-blue-100 text-blue-700 border-blue-200';
           case 'ponente': return 'bg-amber-100 text-amber-700 border-amber-200';
+          case 'owner': return 'bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-100 text-gray-800 border-purple-100';
+          case 'vip': return 'bg-[#F2D027]/20 text-[#8B7814] border-[#F2D027]/30';
           default: return 'bg-gray-100 text-gray-600 border-gray-200';
       }
   };
+
+  const rolesList = (['user', 'vip', 'ponente', 'staff', 'admin', 'owner'] as UserProfile['role'][]).filter(role => {
+      if (role === 'owner' && currentUserRole !== 'owner') return false;
+      return true;
+  });
 
   return (
     <div className="space-y-6">
@@ -116,7 +123,7 @@ import { useUsers } from '@/hooks/useUsers';
                             <td className="p-4 text-gray-500">{user.degree}</td>
                             <td className="p-4">
                                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${getRoleBadgeClasses(user.role)} capitalize`}>
-                                    {user.role}
+                                    {user.role === 'owner' ? 'Desarrollador' : (user.role === 'vip' ? 'VIP' : user.role)}
                                 </span>
                             </td>
                             {!readOnly && (
@@ -186,7 +193,7 @@ import { useUsers } from '@/hooks/useUsers';
                       <div className="space-y-3">
                           <label className="text-sm font-bold text-[#373737]">Seleccionar nuevo rol:</label>
                           <div className="grid grid-cols-1 gap-2">
-                              {(['user', 'ponente', 'staff', 'admin'] as UserProfile['role'][]).map((role) => (
+                                {rolesList.map((role) => (
                                   <button
                                       key={role}
                                       onClick={() => setSelectedRole(role)}
@@ -198,13 +205,15 @@ import { useUsers } from '@/hooks/useUsers';
                                   >
                                       <div className="flex flex-col items-start">
                                           <span className="font-semibold text-sm capitalize text-[#373737]">
-                                              {role === 'user' ? 'Usuario' : role}
+                                              {role === 'user' ? 'Usuario' : (role === 'owner' ? 'Desarrollador' : (role === 'vip' ? 'VIP' : role))}
                                           </span>
                                           <span className="text-xs text-gray-400">
                                               {role === 'user' && 'Acceso estándar a perfil y agenda.'}
+                                              {role === 'vip' && 'Igual a usuario, gafete distintivo.'}
                                               {role === 'ponente' && 'Mismos permisos que usuario. Rol distintivo.'}
                                               {role === 'staff' && 'Puede escanear QRs y ver agenda.'}
                                               {role === 'admin' && 'Control total del sistema.'}
+                                              {role === 'owner' && 'Acceso absoluto + Gestión de conferencias.'}
                                           </span>
                                       </div>
                                       {selectedRole === role && (

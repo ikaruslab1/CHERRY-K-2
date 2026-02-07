@@ -39,6 +39,8 @@ export function ProfileCard({ profile }: ProfileCardProps) {
         return { bg: '#F23527', text: '#FFFFFF', name: 'Staff' };
       case 'admin':
         return { bg: '#373737', text: '#FFFFFF', name: 'Administrador' };
+      case 'vip':
+        return { bg: '#F2D027', text: '#373737', name: 'VIP' };
       case 'owner':
         return { 
           bg: 'linear-gradient(45deg, #FFFFFF, #FFD1FF, #CCEAFF, #FFFFFF, #D1FFEA, #FFFAD1, #FFFFFF)', 

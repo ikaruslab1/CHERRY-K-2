@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
-import { Trash, Edit, Plus } from 'lucide-react';
+import { Trash, Edit, Plus, Eye, Printer, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { CertificateContent, Certificate } from '@/components/profile/CertificateContent';
+import { CertificatePreview } from '@/components/profile/CertificatePreview';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 import { Event, UserProfile } from '@/types';
 import { EventForm } from '@/components/admin/EventForm';
@@ -15,6 +18,7 @@ export function EventsManager() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState<Event | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
   const { currentConference } = useConference();
 
   const fetchEvents = async () => {
@@ -95,6 +99,49 @@ export function EventsManager() {
       setIsCreating(true);
   };
 
+  const handleOpenCertificate = (event: Event) => {
+      if (!event.speaker_id || !currentConference) return;
+      
+      const speaker = users.find(u => u.id === event.speaker_id);
+      if (!speaker) {
+          alert("No se encontró la información del ponente.");
+          return;
+      }
+
+      const cert: Certificate = {
+          id: `SPK-${event.id}`,
+          scanned_at: event.date,
+          events: {
+              ...event,
+              conference_id: currentConference.id, 
+              conferences: {
+                  title: currentConference.title,
+                  institution_name: currentConference.institution_name || 'FES Acatlán',
+                  department_name: currentConference.department_name || 'UNAM' // Fallback
+              }
+          } as any,
+          profiles: {
+              first_name: speaker.first_name,
+              last_name: speaker.last_name,
+              degree: speaker.degree,
+              gender: speaker.gender || null
+          },
+          isSpeaker: true
+      };
+      
+      setSelectedCertificate(cert);
+  };
+
+  const handlePrintCertificate = () => {
+      if (!selectedCertificate) return;
+      const originalTitle = document.title;
+      const certId = selectedCertificate.id.split('-').pop()?.toUpperCase() || selectedCertificate.id;
+      const fullName = `${selectedCertificate.profiles.first_name} ${selectedCertificate.profiles.last_name}`;
+      document.title = `${certId} - ${fullName}`;
+      window.print();
+      document.title = originalTitle;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -156,6 +203,11 @@ export function EventsManager() {
                       </p>
                   </div>
                   <div className="flex gap-2">
+                      {event.speaker_id && (
+                          <Button size="sm" variant="ghost" onClick={() => handleOpenCertificate(event)} className="text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl" title="Ver Constancia de Ponente">
+                              <Eye className="h-4 w-4" />
+                          </Button>
+                      )}
                       <Button size="sm" variant="ghost" onClick={() => startEdit(event)} className="text-gray-400 hover:text-[#373737] hover:bg-gray-100 rounded-xl">
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -168,6 +220,45 @@ export function EventsManager() {
           </>
           )}
       </div>
+
+
+      {/* Certificate Modal */}
+      {selectedCertificate && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-4 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl flex flex-col h-[90vh]">
+                
+                {/* Modal Toolbar */}
+                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
+                    <h3 className="font-semibold text-gray-700">Vista Previa de Constancia (Ponente)</h3>
+                    <div className="flex items-center gap-2">
+                         <Button variant="outline" onClick={handlePrintCertificate} className="gap-2">
+                             <Printer className="h-4 w-4" />
+                             Imprimir
+                         </Button>
+                         <button 
+                            onClick={() => setSelectedCertificate(null)}
+                            className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500"
+                        >
+                             <X className="h-5 w-5" />
+                         </button>
+                    </div>
+                </div>
+
+                {/* Scaled View Area */}
+                <div className="flex-1 overflow-hidden bg-gray-900/90 relative flex items-center justify-center p-4 md:p-8">
+                    <CertificatePreview certificate={selectedCertificate} />
+                </div>
+            </div>
+
+            {/* PRINT PORTAL */}
+            {typeof window !== 'undefined' && createPortal(
+                <div id="print-portal" className="print-only">
+                    <CertificateContent certificate={selectedCertificate} />
+                </div>,
+                document.body
+            )}
+        </div>
+      )}
     </div>
   );
 }

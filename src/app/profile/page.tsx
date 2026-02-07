@@ -24,7 +24,7 @@ export default function ProfilePage() {
   const [isStaff, setIsStaff] = useState(false);
   const [isPonente, setIsPonente] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
-
+  const [userRole, setUserRole] = useState<string>('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -41,6 +41,10 @@ export default function ProfilePage() {
           .eq('id', user.id)
           .single();
         
+        if (profile?.role) {
+            setUserRole(profile.role);
+        }
+
         if (profile?.role === 'admin') {
            setIsAdmin(true);
         } else if (profile?.role === 'staff') {
@@ -49,7 +53,7 @@ export default function ProfilePage() {
            setIsPonente(true);
         } else if (profile?.role === 'owner') {
            setIsOwner(true);
-           setIsAdmin(true); // Owner inherits Admin features
+           setIsAdmin(true);
         }
 
         setLoading(false);
@@ -109,7 +113,7 @@ const navItems = [
                     {activeTab === 'constancias' && <CertificatesView />}
                     {isPonente && activeTab === 'participation' && <ParticipationView />}
                     {(isAdmin || isStaff) && activeTab === 'attendance' && <AttendanceView />}
-                    {isAdmin && activeTab === 'users' && <UsersTable />}
+                    {isAdmin && activeTab === 'users' && <UsersTable currentUserRole={userRole} />}
                     {isAdmin && activeTab === 'events' && <EventsManager />}
                 </motion.div>
              </AnimatePresence>
