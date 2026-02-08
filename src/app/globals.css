@@ -1,153 +1,81 @@
 @import "tailwindcss";
-@plugin "tailwindcss-animate";
 
 @theme {
-  --breakpoint-xs: 480px;
+  --font-geist-sans: var(--font-geist-sans);
+  --font-geist-mono: var(--font-geist-mono);
+  --font-dancing-script: var(--font-dancing-script);
+  --font-playfair: var(--font-playfair);
+  --font-syne: var(--font-syne);
+  --font-manrope: var(--font-manrope);
+  --font-jetbrains: var(--font-jetbrains);
+
+  /* ACID EDITORIAL PALETTE - SWISS EDITION */
+  --color-acid: #D9F528;
+  --color-acid-fg: #000000;
+  --color-void: #050505;
+  --color-chalk: #F2F2F2;
+  --color-surface: #111111;
+  --color-electric: #5E17EB;
+  --color-subtle: #333333;
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #373737;
-
-  --primary: #373737;
-  --primary-foreground: #ffffff;
-
-  --accent: #dbf227;
-  --accent-foreground: #373737;
-
-  --muted: #f4f4f5;
-  --muted-foreground: #737373;
-
-  --border: #e4e4e7;
-
-  /* Solid styling variables replacing glassmorphism */
-  --glass-bg: #ffffff;
-  --glass-border: #e4e4e7;
-  --glass-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  /* Default Theme: Void (Dark) */
+  --background: var(--color-void);
+  --foreground: var(--color-chalk);
+  
+  --primary: var(--color-acid);
+  --primary-foreground: var(--color-acid-fg);
+  
+  --secondary: var(--color-electric);
+  --secondary-foreground: #ffffff;
+  
+  --muted: var(--color-surface);
+  --muted-foreground: #888888;
+  
+  --accent: var(--color-surface);
+  --accent-foreground: var(--color-chalk);
+  
+  --destructive: #EF4444;
+  --destructive-foreground: #ffffff;
+  
+  --border: var(--color-subtle);
+  --input: var(--color-surface);
+  --ring: var(--color-acid);
+  
+  --radius: 0rem; 
 }
 
-@layer utilities {
-  .glass {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-  }
-
-  .glass-card {
-    background: #ffffff;
-    box-shadow:
-      0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  }
-
-  .text-glow {
-    text-shadow: none;
-  }
-}
-
+/* Base Styles */
 body {
   background-color: var(--background);
-  /* Removed mesh gradient, keeping it clean and solid */
   color: var(--foreground);
-  min-height: 100vh;
-  font-feature-settings:
-    "rlig" 1,
-    "calt" 1;
+  /* SWITCH TO GEIST SANS (HELVETICA EQUIVALENT) FOR EVERYTHING */
+  font-family: var(--font-geist-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Acid Grid Texture */
+  background-image: radial-gradient(var(--color-surface) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
 }
 
-/* Custom prose styles for lists since typography plugin is missing */
-.prose ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin: 1em 0;
+/* Typography Hierarchy - Unified Swiss Style */
+h1, h2, h3, h4, h5, h6 {
+  /* Removing Syne, using Geist Sans for clean, uniform strokes */
+  font-family: var(--font-geist-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700; 
+  letter-spacing: -0.03em; /* Tighter tracking for that Swiss look */
 }
 
-.prose ol {
-  list-style-type: decimal;
-  padding-left: 1.5rem;
-  margin: 1em 0;
+/* Utilities / Mono */
+code, pre, kbd, samp, .font-mono {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
 }
 
-.prose li {
-  margin: 0.5em 0;
-}
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient-xy {
-  background-size: 200% 200%;
-  animation: gradient 15s ease infinite;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  text-wrap: balance;
-}
-
-@media print {
-  @page {
-    margin: 0;
-    size: letter landscape;
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    background: white;
-  }
-
-  /* Hide everything by default */
-  body > * {
-    display: none !important;
-  }
-
-  /* Only show the print portal */
-  body > #print-portal {
-    display: block !important;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 279.4mm;
-    height: 215.9mm;
-    z-index: 9999;
-    margin: 0 auto;
-    background: white;
-    overflow: visible;
-  }
-
-  /* Reset visibility for children of the portal */
-  #print-portal * {
-    visibility: visible;
-    display: block; /* Ensure elements aren't hidden by other styles */
-  }
-
-  /* Flex/Grid adjustments if needed for print layout inside portal */
-  #print-portal .flex {
-    display: flex !important;
-  }
-  #print-portal .grid {
-    display: grid !important;
-  }
-}
-
-/* Helper to hide print portal on screen */
-.print-only {
-  display: none;
+/* Selection Color */
+::selection {
+  background-color: var(--color-acid);
+  color: var(--color-acid-fg);
 }

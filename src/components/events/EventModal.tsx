@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/Button';
 import { Event } from '@/types';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface EventModalProps {
   event: Event | null;
@@ -39,204 +41,191 @@ export function EventModal({
   onToggleInterest,
   hideActionButtons
 }: EventModalProps) {
-  const [show, setShow] = useState(isOpen);
 
-
-  useEffect(() => {
-    setShow(isOpen);
-  }, [isOpen]);
-
-
-
-  if (!event || !show) return null;
+  if (!event) return null;
 
   const eventDate = new Date(event.date);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" style={{ zIndex: 9999 }}>
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-6">
+      
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 transition-opacity duration-300" 
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
         onClick={onClose}
       />
       
-      {/* Modal Card */}
-      <div 
-        className="relative w-full max-w-lg glass-card rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
+      {/* Modal Card - Light Theme (Swiss Style) */}
+      <motion.div 
+        initial={{ y: "100%", opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: "100%", opacity: 0 }}
+        transition={{ type: "spring", damping: 25, stiffness: 300 }}
+        className="relative w-full max-w-2xl bg-white shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[85vh] overflow-hidden rounded-none"
       >
         
-        {/* Header Image Area - Fixed Height */}
-        <div className="relative h-40 shrink-0 bg-[#1a1a2e]">
+        {/* Header Image Area - Full Clarity */}
+        <div className="relative h-64 shrink-0 bg-gray-100">
           <Image 
             src={event.image_url || "/assets/event-header.png"}
             alt="Event Header"
             fill
-            className="object-cover opacity-90"
+            className="object-cover"
             priority
             unoptimized={!!event.image_url}
-            sizes="(max-width: 640px) 100vw, 520px"
+            sizes="(max-width: 640px) 100vw, 600px"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+          {/* Subtle Gradient from bottom for text readability if needed, but keeping it clean for visible image */}
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent"></div>
 
-          {/* Close Button */}
-          <button 
-            onClick={onClose}
-            className="absolute top-4 left-4 p-2 bg-white text-[#373737] rounded-full hover:bg-gray-100 transition-colors shadow-md z-10 border border-gray-100"
-          >
-            <X className="h-5 w-5" />
-          </button>
-
-          {/* Type Tag */}
-          <div className="absolute top-4 right-4 z-10">
-            <span className="px-3 py-1 bg-white text-[#373737] border border-gray-100 text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm">
+          {/* Type Badge (Top Right) */}
+          <div className="absolute top-4 right-4 z-20">
+            <div className="bg-white text-black border border-gray-200 text-xs font-bold uppercase tracking-widest px-4 py-2 shadow-sm">
               {event.type}
-            </span>
+            </div>
           </div>
           
-           {/* Date Overlay - Bottom Left of Image */}
-           <div className="absolute bottom-4 left-6 text-white z-10">
-             <div className="flex items-center gap-2">
-                <div className="bg-white border border-gray-100 shadow-sm rounded-lg px-3 py-1.5 flex flex-col items-center justify-center min-w-[3.5rem]">
-                    <span className="text-[10px] uppercase font-bold text-gray-500">
-                        {eventDate.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')}
-                    </span>
-                    <span className="text-xl font-bold leading-none text-[#373737]">
-                        {(() => {
-                          const duration = event.duration_days || 1;
-                          if (duration > 1) {
+           {/* Close Button (Top Left) */}
+           <motion.button 
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={onClose}
+            className="absolute top-4 left-4 p-2 bg-white text-black hover:bg-black hover:text-white transition-colors z-20 rounded-full shadow-lg"
+          >
+            <X className="h-5 w-5" />
+          </motion.button>
+          
+           {/* Date Block - floating over image */}
+           <div className="absolute bottom-4 left-6 z-20 flex items-end gap-4">
+              <div className="flex flex-col bg-white p-3 shadow-lg min-w-[80px] text-center border-t-4 border-[var(--color-electric)]">
+                 <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-0.5">
+                    {eventDate.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')}
+                 </span>
+                 <span className="text-3xl font-bold text-black tracking-tighter leading-none font-geist-sans">
+                    {(() => {
+                        const duration = event.duration_days || 1;
+                        if (duration > 1) {
                             const endDate = new Date(eventDate);
                             endDate.setDate(eventDate.getDate() + (duration - 1));
-                            return `${eventDate.getDate()} - ${endDate.getDate()}`;
-                          }
-                          return eventDate.getDate();
-                        })()}
-                    </span>
-                </div>
-                <div className="flex flex-col">
-                     <span className="text-sm font-medium text-white/90">
-                        {(() => {
-                          const duration = event.duration_days || 1;
-                          const startDay = eventDate.toLocaleDateString('es-ES', { weekday: 'long' });
-                          
-                          if (duration > 1) {
-                            const endDate = new Date(eventDate);
-                            endDate.setDate(eventDate.getDate() + (duration - 1));
-                            const endDay = endDate.toLocaleDateString('es-ES', { weekday: 'long' });
-                            return `${startDay} - ${endDay}`;
-                          }
-                          
-                          return startDay;
-                        })()}
-                     </span>
-                     <span className="text-xs text-white/70 flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                         {eventDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                     </span>
-                </div>
-             </div>
+                            return `${eventDate.getDate()}-${endDate.getDate()}`;
+                        }
+                        return eventDate.getDate();
+                    })()}
+                 </span>
+              </div>
            </div>
-
-
         </div>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+        {/* Content Body - White Background, Black Text */}
+        <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar bg-white">
           
-          {/* Header Section: Title & Tags */}
-          <div className="space-y-3">
-             <h2 className="text-2xl font-bold text-[#373737] leading-tight">
+          {/* Title & Tags */}
+          <div className="space-y-4">
+             <h2 className="text-3xl md:text-4xl font-bold text-black leading-[0.95] tracking-tight uppercase">
                {event.title}
              </h2>
 
-            {/* Tags */}
             {event.tags && event.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                 {event.tags.map(tag => (
-                    <span key={tag} className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded-md border border-gray-200">
-                    #{tag}
+                    <span key={tag} className="text-[10px] font-bold text-gray-500 bg-gray-100 px-3 py-1 uppercase tracking-widest border border-gray-200 hover:bg-[var(--color-acid)] hover:text-black hover:border-transparent transition-colors">
+                      #{tag}
                     </span>
                 ))}
                 </div>
             )}
           </div>
 
-          {/* Description */}
-          <div className="space-y-2">
-            <h4 className="text-sm font-bold text-[#373737]">Acerca del evento</h4>
-            <div 
-                className="text-gray-600 text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-1"
-                dangerouslySetInnerHTML={{ __html: event.description }}
-            />
-          </div>
-          
-           {/* Information Section */}
-           <div className="pt-4 border-t border-gray-200/50 space-y-4">
+          <div className="h-px w-full bg-gray-100" />
+
+          {/* Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                {/* Location */}
-               <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-gray-400 shrink-0 mt-0.5" />
+               <div className="flex gap-4 group">
+                    <div className="p-3 bg-gray-50 text-black border border-gray-100 h-fit">
+                        <MapPin className="h-5 w-5" />
+                    </div>
                     <div>
-                        <h4 className="text-sm font-bold text-[#373737]">Ubicación</h4>
-                        <p className="text-sm text-gray-600">{event.location}</p>
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Ubicación</h4>
+                        <p className="text-base text-black font-medium group-hover:underline decoration-[var(--color-acid)] decoration-2 underline-offset-4 transition-all">
+                            {event.location}
+                        </p>
                     </div>
                </div>
 
                {/* Speaker */}
                {event.speaker && (
-                   <div className="flex items-start gap-3">
-                        <User className="h-5 w-5 text-gray-400 shrink-0 mt-0.5" />
+                   <div className="flex gap-4">
+                        <div className="p-3 bg-gray-50 text-black border border-gray-100 h-fit">
+                            <User className="h-5 w-5" />
+                        </div>
                         <div>
-                            <h4 className="text-sm font-bold text-[#373737]">
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
                               {(() => {
                                 const type = event.type || '';
-                                const gender = event.speaker?.gender || 'Neutro';
-                                
-                                if (type === 'Taller') return 'Tallerista';
-                                if (type === 'Conferencia') return 'Conferencista';
-                                if (type === 'Conferencia Magistral') return 'Conferencista Magistral';
-                                if (type === 'Ponencia') return 'Ponente';
-                                
-                                if (type === 'Actividad') {
-                                  if (gender === 'Masculino') return 'Encargado';
-                                  if (gender === 'Femenino') return 'Encargada';
-                                  return 'Encargade';
-                                }
-                                
-                                return 'Ponente'; // Default fallback
+                                return type === 'Taller' ? 'Tallerista' : 'Speaker';
                               })()}
                             </h4>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-base text-black font-medium">
                                  {getDegreeAbbr(event.speaker.degree)} {event.speaker.first_name} {event.speaker.last_name}
                             </p>
                         </div>
                    </div>
                 )}
-           </div>
+                
+                {/* Time */}
+                <div className="flex gap-4">
+                    <div className="p-3 bg-gray-50 text-black border border-gray-100 h-fit">
+                        <Clock className="h-5 w-5" />
+                    </div>
+                    <div>
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Horario</h4>
+                        <p className="text-base text-black font-medium">
+                            {eventDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                    </div>
+                </div>
+          </div>
+
+          <div className="h-px w-full bg-gray-100" />
+
+          {/* Description */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Sobre la actividad</h4>
+            <div 
+                className="text-gray-600 text-base leading-relaxed prose prose-neutral max-w-none font-geist-sans"
+                dangerouslySetInnerHTML={{ __html: event.description }}
+            />
+          </div>
+          
         </div>
 
-         {/* Fixed Footer for Action */}
+         {/* Fixed Footer - White */}
          {!hideActionButtons && (
-          <div className="p-4 border-t border-gray-200 bg-white shrink-0">
+          <div className="p-6 border-t border-gray-100 bg-white sticky bottom-0 z-10">
             {isAttended ? (
-              <div className="w-full py-3 px-4 text-sm font-bold text-[#373737] bg-[#DBF227]/20 border border-[#DBF227] rounded-xl flex items-center justify-center gap-2 cursor-default">
-                <CheckCircle2 className="h-4 w-4 text-[#373737]" />
+              <div className="w-full py-4 text-sm font-bold text-black bg-gray-100 border border-gray-200 flex items-center justify-center gap-3 uppercase tracking-widest cursor-default">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
                 Asistencia confirmada
               </div>
             ) : (
               <Button 
                   onClick={() => onToggleInterest(event.id)}
-                  variant={isInterested ? "secondary" : "primary"}
-                  className={`w-full py-6 text-base font-semibold shadow-md hover:shadow-lg transition-all active:scale-[0.98] rounded-xl ${
+                  className={`w-full h-14 text-sm tracking-[0.15em] uppercase font-bold transition-all ${
                     isInterested 
-                      ? 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200' 
-                      : 'bg-[#373737] hover:bg-[#222] text-white shadow-xl shadow-black/10'
+                      ? "bg-white text-red-500 border-2 border-red-100 hover:bg-red-50 hover:border-red-200"
+                      : "bg-black text-white hover:bg-[var(--color-electric)] hover:shadow-xl"
                   }`}
               >
-                  {isInterested ? "Ya no me interesa" : "Me interesa asistir"}
+                  {isInterested ? "Remover de mi agenda" : "Me interesa asistir"}
               </Button>
             )}
         </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

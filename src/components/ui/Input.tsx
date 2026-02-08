@@ -4,14 +4,26 @@ import { cn } from '@/lib/utils';
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, type, ...props }, ref) => {
     return (
       <input
-        ref={ref}
+        type={type}
         className={cn(
-          "flex h-12 w-full rounded-xl bg-white border border-gray-200 px-4 py-3 text-sm text-[#373737] ring-offset-white transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DBF227] focus-visible:bg-white disabled:cursor-not-allowed disabled:opacity-50 hover:bg-gray-50",
+          // Base
+          "flex h-12 w-full bg-[var(--color-surface)] px-4 py-2 text-sm ring-offset-black file:border-0 file:bg-transparent file:text-sm file:font-medium",
+          // Text
+          "text-[var(--color-chalk)] placeholder:text-gray-600",
+          // Borders & Shape (Acid Editorial: Sharp, Bottom Border emphasis or flat block)
+          "rounded-none border-b-2 border-[var(--color-subtle)] focus-visible:border-[var(--color-acid)]",
+          // Clean up standard borders
+          "border-t-0 border-x-0", 
+          // Interaction
+          "focus-visible:outline-none focus-visible:bg-[#1a1a1a] transition-colors duration-300",
+          // Disabled
+          "disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
+        ref={ref}
         {...props}
       />
     );
