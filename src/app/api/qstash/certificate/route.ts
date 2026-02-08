@@ -1,11 +1,46 @@
-import { verifySignatureAppRouter } from "@upstash/qstash/dist/nextjs";
+import { Receiver } from "@upstash/qstash";
 import { NextResponse } from "next/server";
 import { sendPushToUser } from "@/lib/notifications";
 
-async function handler(req: Request) {
+export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { userId, title, body: messageBody, url } = body;
+    // Verify QStash signature at runtime (not at module load time)
+    const currentSigningKey = process.env.QSTASH_CURRENT_SIGNING_KEY;
+    const nextSigningKey = process.env.QSTASH_NEXT_SIGNING_KEY;
+
+    if (!currentSigningKey || !nextSigningKey) {
+      console.error("QStash signing keys not configured");
+      return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+    }
+
+    // Get the signature from headers
+    const signature = req.headers.get("upstash-signature");
+    if (!signature) {
+      return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+    }
+
+    // Get the raw body for verification
+    const body = await req.text();
+    
+    // Verify the signature
+    const receiver = new Receiver({
+      currentSigningKey,
+      nextSigningKey,
+    });
+
+    try {
+      await receiver.verify({
+        signature,
+        body,
+      });
+    } catch (error) {
+      console.error("Invalid signature:", error);
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+
+    // Parse the verified body
+    const payload = JSON.parse(body);
+    const { userId, title, body: messageBody, url } = payload;
 
     if (!userId || !title || !messageBody) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -25,10 +60,3 @@ async function handler(req: Request) {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
-
-export const POST = verifySignatureAppRouter(handler);
-
-// Disable body parsing by Next.js if needed? No, verifySignatureAppRouter handles it.
-// Actually, for verifySignatureAppRouter to work, it might need the raw body. 
-// But in App Router, req.text() or req.json() reads the body.
-// The wrapper handles verification.
