@@ -1,23 +1,34 @@
 import webPush from 'web-push';
 import { createClient } from '@supabase/supabase-js';
 
-// Setup web-push
-if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT) {
-  console.warn('VAPID keys are missing!');
-}
-
-webPush.setVapidDetails(
-  process.env.VAPID_SUBJECT || 'mailto:admin@example.com',
-  process.env.NEXT_PUBLIC_VAPID_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
-
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Lazy initialization flag
+let vapidInitialized = false;
+
+function ensureVapidInitialized() {
+  if (!vapidInitialized) {
+    // Only initialize VAPID details when actually needed (at runtime, not build time)
+    if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY || !process.env.VAPID_SUBJECT) {
+      console.warn('VAPID keys are missing!');
+    }
+    
+    webPush.setVapidDetails(
+      process.env.VAPID_SUBJECT || 'mailto:admin@example.com',
+      process.env.NEXT_PUBLIC_VAPID_KEY!,
+      process.env.VAPID_PRIVATE_KEY!
+    );
+    
+    vapidInitialized = true;
+  }
+}
+
 export async function sendPushToUser(userId: string, payload: { title: string, body: string, url?: string }) {
+  // Initialize VAPID details on first use
+  ensureVapidInitialized();
   try {
     // Get user subscriptions
     const { data: subscriptions, error } = await supabase
