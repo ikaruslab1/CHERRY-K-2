@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { env } from '@/lib/env';
 
 export function usePushSubscription() {
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -37,9 +38,9 @@ export function usePushSubscription() {
         throw new Error('Push manager no disponible');
       }
 
-      const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY;
+      const vapidKey = env.NEXT_PUBLIC_VAPID_KEY;
       if (!vapidKey) {
-          throw new Error('VAPID Key no configurada');
+          throw new Error('Llave VAPID no configurada');
       }
 
       const subscription = await registration.pushManager.subscribe({
