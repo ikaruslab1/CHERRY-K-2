@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Upload, X, Save, RefreshCw, Eye, ZoomIn, ZoomOut } from 'lucide-react';
+import { Upload, X, Save, RefreshCw, Eye, ZoomIn, ZoomOut, Plus, Image as ImageIcon } from 'lucide-react';
 import { CertificateContent } from '@/components/profile/CertificateContent';
 import type { Certificate } from '@/components/profile/CertificateContent';
 import { useConference } from '@/context/ConferenceContext';
@@ -15,57 +15,119 @@ interface CertificateDesignerProps {
     onSave: (config: any) => Promise<void>;
 }
 
+const PRESET_LOGOS = [
+    'unam',
+    'fesa',
+    'caacfmi',
+    'farg',
+    'fcien',
+    'fcua',
+    'fing',
+    'iuma',
+    'mac',  
+    'lema'
+];
+
 export function CertificateDesigner({ eventId, initialConfig, onSave }: CertificateDesignerProps) {
     const { currentConference } = useConference();
     
-    const [config, setConfig] = useState(initialConfig || {
-        mode: 'template_v1', // default
-        styles: {
-            text_color: '#000000',
-            accent_color: '#dbf227',
-            font_family: 'sans',
-            text_alignment: 'center',
-            content_vertical_position: '40%'
-        },
-        texts: {
-           attendee: "Por su asistencia al evento",
-           speaker: "Por impartir la conferencia:",
-           staff: "Por su valiosa participación en la logística del evento:",
-           organizer: "Por su liderazgo en la organización del evento:"
-        },
-        show_qr: true,
-        qr_position: 'bottom-right'
+    const [config, setConfig] = useState(() => {
+        const defaults = {
+            mode: 'template_v1', // default
+            styles: {
+                text_color: '#000000',
+                accent_color: '#dbf227',
+                font_family: 'sans',
+                text_alignment: 'center',
+                content_vertical_position: '40%'
+            },
+            texts: {
+               attendee: "Por su asistencia al evento",
+               speaker: "Por impartir la conferencia:",
+               staff: "Por su valiosa participación en la logística del evento:",
+               organizer: "Por su liderazgo en la organización del evento:"
+            },
+            show_qr: true,
+            qr_position: 'bottom-right',
+            logos: [
+                { type: 'preset', value: 'unam' },
+                { type: 'preset', value: 'fesa' },
+                { type: 'none', value: '' }
+            ]
+        };
+        // Merge defaults with initialConfig, ensuring deep merge for objects if needed, 
+        // but for now simple spread is okay if initialConfig has the full shape.
+        // If initialConfig is present but missing logos, we default them.
+        return {
+            ...defaults,
+            ...initialConfig,
+            styles: { ...defaults.styles, ...initialConfig?.styles },
+            texts: { ...defaults.texts, ...initialConfig?.texts },
+            logos: initialConfig?.logos || defaults.logos
+        };
     });
 
     const [uploading, setUploading] = useState(false);
+    const [logoUploading, setLogoUploading] = useState<number | null>(null);
     const [saving, setSaving] = useState(false);
     const [previewRole, setPreviewRole] = useState<'attendee'|'speaker'|'staff'>('attendee');
     const [scale, setScale] = useState(0.6); // Default scale
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const logoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const [profiles, setProfiles] = useState<any[]>([]);
+    const [exampleEvents, setExampleEvents] = useState<any[]>([]);
+    const [selectedExampleEventId, setSelectedExampleEventId] = useState<string>('');
+    const [activeLogoSlot, setActiveLogoSlot] = useState<number | null>(null);
+    const [selectedElement, setSelectedElement] = useState<string | null>(null);
+
+    const handleElementUpdate = (id: string, updates: any) => {
+        const currentElements = config.elements || {};
+        const newElements = {
+            ...currentElements,
+            [id]: {
+                ...(currentElements[id] || {}),
+                ...updates
+            }
+        };
+        setConfig({ ...config, elements: newElements });
+    };
 
     useEffect(() => {
-        const fetchProfiles = async () => {
-            const { data } = await supabase
+        const fetchData = async () => {
+            // Fetch Profiles
+            const { data: profilesData } = await supabase
                 .from('profiles')
                 .select('id, first_name, last_name, degree, role, gender')
                 .order('first_name');
-            if (data) setProfiles(data);
-        };
-        fetchProfiles();
-    }, []);
+            if (profilesData) setProfiles(profilesData);
 
+            // Fetch Events for Example Selector
+            if (currentConference) {
+                const { data: eventsData } = await supabase
+                    .from('events')
+                    .select('id, title, date, type, location, description')
+                    .eq('conference_id', currentConference.id)
+                    .order('date', { ascending: true });
+                if (eventsData) setExampleEvents(eventsData);
+            }
+        };
+        fetchData();
+    }, [currentConference]);
+
+    // Determine event data for preview
+    const selectedEvent = exampleEvents.find(e => e.id === selectedExampleEventId);
+    
     // Dummy certificate for preview
     const previewCertificate: Certificate = {
         id: 'PREVIEW-123456',
-        scanned_at: new Date().toISOString(),
+        scanned_at: selectedEvent ? selectedEvent.date : new Date().toISOString(),
         events: {
-            id: eventId || 'evt-preview',
-            title: 'Evento de Prueba',
-            date: new Date().toISOString(),
-            type: 'Conferencia',
-            location: 'Auditorio Principal',
-            description: 'Descripción del evento de prueba.',
+            id: selectedEvent ? selectedEvent.id : (eventId || 'evt-preview'),
+            title: selectedEvent ? selectedEvent.title : 'Evento de Prueba',
+            date: selectedEvent ? selectedEvent.date : new Date().toISOString(),
+            type: selectedEvent ? selectedEvent.type : 'Conferencia',
+            location: selectedEvent ? selectedEvent.location : 'Auditorio Principal',
+            description: selectedEvent ? selectedEvent.description : 'Descripción del evento de prueba.',
             conferences: {
                 title: currentConference?.title || 'XI Congreso Internacional',
                 institution_name: currentConference?.institution_name || 'Universidad Ejemplo',
@@ -119,6 +181,49 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
         }
     };
 
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, slotIndex: number) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+
+        const file = e.target.files[0];
+        
+        // Validate MIME type or extension for SVG
+        if (file.type !== 'image/svg+xml' && !file.name.toLowerCase().endsWith('.svg')) {
+            alert('El archivo debe ser un SVG.');
+            return;
+        }
+
+        const pathRef = eventId || `temp_${Date.now()}`;
+        const fileName = `certificates/${pathRef}/logo_${slotIndex}_${Date.now()}.svg`;
+
+        setLogoUploading(slotIndex);
+        try {
+            const { error: uploadError } = await supabase.storage
+                .from('events') 
+                .upload(fileName, file, { upsert: true });
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('events')
+                .getPublicUrl(fileName);
+            
+            const newLogos = [...(config.logos || [])];
+            newLogos[slotIndex] = { type: 'custom', value: publicUrl };
+            
+            setConfig({
+                ...config,
+                logos: newLogos
+            });
+            setActiveLogoSlot(null); // Close selection
+
+        } catch (error) {
+            console.error('Error uploading logo:', error);
+            alert('Error al subir el logo. Intenta de nuevo.');
+        } finally {
+            setLogoUploading(null);
+        }
+    };
+
     const updateStyle = (key: string, value: string) => {
         setConfig({
             ...config,
@@ -138,9 +243,9 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
         try {
             await onSave(config);
             alert('Diseño guardado correctamente');
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert('Error al guardar');
+            alert(error.message || 'Error al guardar el diseño');
         } finally {
             setSaving(false);
         }
@@ -212,7 +317,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                 {config.template_id === 'classic' && <div className="w-2 h-2 rounded-full bg-[#DBF227]"></div>}
                                             </div>
                                         </button>
-
+                                        
                                         {/* Modern Template */}
                                         <button 
                                             onClick={() => setConfig({...config, template_id: 'modern'})}
@@ -232,10 +337,54 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                         </button>
                                     </div>
                                 </div>
-                                
-
                             </div>
                         )}
+
+                         {/* Logo Configuration */}
+                         <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4 animate-in fade-in duration-500">
+                             <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
+                                 <span className="w-1.5 h-4 bg-[#DBF227] rounded-full"></span>
+                                 Logos del Encabezado
+                             </h3>
+                             <p className="text-[10px] text-gray-500">
+                                 Selecciona hasta 3 logos. Los logos personalizados deben ser preferentemente SVGs en color negro sólido.
+                             </p>
+                             
+                             <div className="grid grid-cols-3 gap-3">
+                                 {[0, 1, 2].map((slotIndex) => {
+                                     const logo = (config.logos && config.logos[slotIndex]) || { type: 'none', value: '' };
+                                     const isActive = activeLogoSlot === slotIndex;
+                                     const logoUrl = logo.type === 'preset' ? `/assets/${logo.value}.svg` : logo.value;
+
+                                     return (
+                                         <div key={slotIndex} className="relative">
+                                             <button
+                                                 onClick={() => setActiveLogoSlot(isActive ? null : slotIndex)}
+                                                 className={`w-full aspect-square rounded-lg border-2 flex flex-col items-center justify-center gap-1 transition-all p-2 bg-white relative overflow-hidden ${isActive ? 'border-[#DBF227] ring-1 ring-[#DBF227]' : 'border-gray-200 hover:border-gray-300'}`}
+                                             >
+                                                 {logo.type !== 'none' && logo.value ? (
+                                                     <>
+                                                         <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+                                                     </>
+                                                 ) : (
+                                                     <>
+                                                         <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                                             <Plus className="w-4 h-4" />
+                                                         </div>
+                                                         <span className="text-[9px] text-gray-400 font-medium">Vacío</span>
+                                                     </>
+                                                 )}
+                                                 <div className="absolute top-1 left-1 text-[8px] font-bold text-gray-300 bg-white/80 px-1 rounded">
+                                                     #{slotIndex + 1}
+                                                 </div>
+                                             </button>
+
+
+                                         </div>
+                                     );
+                                 })}
+                             </div>
+                         </div>
 
                         {/* Background Upload - Only for Custom Mode */}
                         {config.mode === 'custom_background' && (
@@ -285,91 +434,288 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 Estilos
                             </h3>
                             
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1.5">Color Texto</label>
-                                    <div className="flex gap-2 items-center">
-                                        <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-gray-200">
-                                            <input 
-                                                type="color" 
-                                                value={config.styles?.text_color || '#000000'}
-                                                onChange={(e) => updateStyle('text_color', e.target.value)}
-                                                className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] cursor-pointer p-0 m-0"
-                                            />
-                                        </div>
-                                        <input 
-                                            value={config.styles?.text_color || '#000000'}
-                                            onChange={(e) => updateStyle('text_color', e.target.value)}
-                                            className="uppercase text-xs font-mono w-20 p-1.5 border rounded"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-gray-500 mb-1.5">Color Acento</label>
-                                    <div className="flex gap-2 items-center">
-                                        <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-gray-200">
-                                                <input 
-                                                type="color" 
-                                                value={config.styles?.accent_color || '#dbf227'}
-                                                onChange={(e) => updateStyle('accent_color', e.target.value)}
-                                                className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] cursor-pointer p-0 m-0"
-                                            />
-                                        </div>
-                                        <input 
-                                                value={config.styles?.accent_color || '#dbf227'}
-                                                onChange={(e) => updateStyle('accent_color', e.target.value)}
-                                                className="uppercase text-xs font-mono w-20 p-1.5 border rounded"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1.5">Tipografía</label>
-                                <select 
-                                    value={config.styles?.font_family || 'sans'}
-                                    onChange={(e) => updateStyle('font_family', e.target.value)}
-                                    className="w-full p-2 border rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#DBF227] focus:border-transparent outline-none"
-                                >
-                                    <option value="sans">Geist Sans (Moderna)</option>
-                                    <option value="serif">Playfair Display (Elegante)</option>
-                                    <option value="mono">Geist Mono (Técnica)</option>
-                                    <option value="cursive">Great Vibes (Caligrafía)</option>
-                                </select>
-                            </div>
-
-                            {config.mode === 'custom_background' && (
+                            {config.mode !== 'custom_background' && (
                                 <>
-                                    <div className="animate-in fade-in slide-in-from-left-2">
-                                        <label className="block text-xs font-semibold text-gray-500 mb-1.5">Alineación de Texto</label>
-                                        <div className="flex bg-white p-1 rounded-lg border border-gray-200">
-                                            {['left', 'center', 'right'].map((align) => (
-                                                <button 
-                                                    key={align}
-                                                    onClick={() => updateStyle('text_alignment', align)}
-                                                    className={`flex-1 py-1.5 text-xs font-medium rounded-md capitalize transition-all ${config.styles?.text_alignment === align ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-50'}`}
-                                                >
-                                                    {align === 'left' ? 'Izq' : align === 'center' ? 'Cen' : 'Der'}
-                                                </button>
-                                            ))}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-500 mb-1.5">Color Texto</label>
+                                            <div className="flex gap-2 items-center">
+                                                <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-gray-200">
+                                                    <input 
+                                                        type="color" 
+                                                        value={config.styles?.text_color || '#000000'}
+                                                        onChange={(e) => updateStyle('text_color', e.target.value)}
+                                                        className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] cursor-pointer p-0 m-0"
+                                                    />
+                                                </div>
+                                                <input 
+                                                    value={config.styles?.text_color || '#000000'}
+                                                    onChange={(e) => updateStyle('text_color', e.target.value)}
+                                                    className="uppercase text-xs font-mono w-20 p-1.5 border rounded"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-500 mb-1.5">Color Acento</label>
+                                            <div className="flex gap-2 items-center">
+                                                <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-gray-200">
+                                                        <input 
+                                                        type="color" 
+                                                        value={config.styles?.accent_color || '#dbf227'}
+                                                        onChange={(e) => updateStyle('accent_color', e.target.value)}
+                                                        className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] cursor-pointer p-0 m-0"
+                                                    />
+                                                </div>
+                                                <input 
+                                                        value={config.styles?.accent_color || '#dbf227'}
+                                                        onChange={(e) => updateStyle('accent_color', e.target.value)}
+                                                        className="uppercase text-xs font-mono w-20 p-1.5 border rounded"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div className="animate-in fade-in slide-in-from-left-2">
-                                        <div className="flex justify-between items-center mb-1.5">
-                                            <label className="block text-xs font-semibold text-gray-500">Posición Vertical</label>
-                                            <span className="text-[10px] font-mono bg-gray-200 px-1.5 rounded">{config.styles?.content_vertical_position}</span>
-                                        </div>
-                                        <input 
-                                            type="range" 
-                                            min="0" 
-                                            max="100" 
-                                            defaultValue={parseInt(config.styles?.content_vertical_position || "40")}
-                                            onChange={(e) => updateStyle('content_vertical_position', `${e.target.value}%`)}
-                                            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
-                                        />
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 mb-1.5">Tipografía</label>
+                                        <select 
+                                            value={config.styles?.font_family || 'sans'}
+                                            onChange={(e) => updateStyle('font_family', e.target.value)}
+                                            className="w-full p-2 border rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#DBF227] focus:border-transparent outline-none"
+                                        >
+                                            <option value="sans">Geist Sans (Moderna)</option>
+                                            <option value="serif">Playfair Display (Elegante)</option>
+                                            <option value="mono">Geist Mono (Técnica)</option>
+                                            <option value="cursive">Dancing Script (Caligrafía)</option>
+                                        </select>
                                     </div>
                                 </>
+                            )}
+
+                            {config.mode === 'custom_background' && (
+                                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 mt-4 animate-in fade-in slide-in-from-left-2">
+                                    <h4 className="text-xs font-bold text-blue-800 mb-2 uppercase tracking-wide">Editor de Elementos</h4>
+                                    <p className="text-[10px] text-blue-600 mb-3 leading-relaxed">
+                                        Haz clic en los elementos del diseño para seleccionarlos y arrástralos para moverlos.
+                                    </p>
+                                    
+                                    {selectedElement ? (
+                                        <div className="animate-in fade-in slide-in-from-right-2 bg-white p-3 rounded border border-blue-100 shadow-sm">
+                                            <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
+                                                <span className="text-xs font-bold text-gray-700 capitalize">{selectedElement}</span>
+                                                <button onClick={() => setSelectedElement(null)} className="text-[10px] text-gray-400 hover:text-gray-600 underline">Deseleccionar</button>
+                                            </div>
+                                            
+                                            <div className="space-y-4">
+                                                
+                                                {/* Scale Control (Always Visible) */}
+                                                <div>
+                                                    <label className="block text-[10px] font-bold text-gray-400 mb-1">Escala</label>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-mono text-gray-400">0.5x</span>
+                                                        <input 
+                                                            type="range" 
+                                                            min="0.5" 
+                                                            max="3" 
+                                                            step="0.1"
+                                                            value={config.elements?.[selectedElement]?.scale || 1}
+                                                            onChange={(e) => handleElementUpdate(selectedElement, { scale: parseFloat(e.target.value) })}
+                                                            className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
+                                                        />
+                                                        <span className="text-[10px] font-mono w-8 text-right font-bold text-gray-600">
+                                                            {(config.elements?.[selectedElement]?.scale || 1).toFixed(1)}x
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Text Properties (Only for text elements) */}
+                                                {['name', 'eventTitle', 'roleText', 'contextText', 'date', 'id'].includes(selectedElement) && (
+                                                    <>
+                                                        <div className="grid grid-cols-2 gap-3">
+                                                            <div>
+                                                                <label className="block text-[10px] font-bold text-gray-400 mb-1">Fuente</label>
+                                                                <select 
+                                                                    value={config.elements?.[selectedElement]?.fontFamily || 'inherit'}
+                                                                    onChange={(e) => handleElementUpdate(selectedElement, { fontFamily: e.target.value })}
+                                                                    className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227]"
+                                                                >
+                                                                    <option value="inherit">Heredar</option>
+                                                                    <option value="sans">Geist Sans</option>
+                                                                    <option value="serif">Playfair Display</option>
+                                                                    <option value="mono">Geist Mono</option>
+                                                                    <option value="cursive">Dancing Script</option>
+                                                                </select>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[10px] font-bold text-gray-400 mb-1">Color</label>
+                                                                <div className="flex gap-2 items-center">
+                                                                    <input 
+                                                                        type="color" 
+                                                                        value={config.elements?.[selectedElement]?.color || config.styles?.text_color || '#000000'}
+                                                                        onChange={(e) => handleElementUpdate(selectedElement, { color: e.target.value })}
+                                                                        className="w-8 h-8 rounded border border-gray-200 cursor-pointer p-0"
+                                                                    />
+                                                                    <div className="text-[10px] font-mono uppercase bg-gray-100 px-1.5 py-0.5 rounded text-gray-500">
+                                                                        {config.elements?.[selectedElement]?.color || 'AUTO'}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold text-gray-400 mb-1">Alineación</label>
+                                                            <div className="flex bg-gray-50 p-1 rounded border border-gray-200">
+                                                                {['left', 'center', 'right'].map((align) => (
+                                                                    <button 
+                                                                        key={align}
+                                                                        onClick={() => handleElementUpdate(selectedElement, { textAlign: align })}
+                                                                        className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${config.elements?.[selectedElement]?.textAlign === align ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                    >
+                                                                        {align === 'left' ? 'Izq' : align === 'center' ? 'Cen' : 'Der'}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-2 gap-3">
+                                                            <div>
+                                                                <label className="block text-[10px] font-bold text-gray-400 mb-1">Peso</label>
+                                                                <select 
+                                                                    value={config.elements?.[selectedElement]?.fontWeight || 'inherit'}
+                                                                    onChange={(e) => handleElementUpdate(selectedElement, { fontWeight: e.target.value })}
+                                                                    className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227]"
+                                                                >
+                                                                    <option value="inherit">Heredar</option>
+                                                                    <option value="300">Ligero</option>
+                                                                    <option value="400">Normal</option>
+                                                                    <option value="600">Semibold</option>
+                                                                    <option value="700">Bold</option>
+                                                                    <option value="900">Heavy</option>
+                                                                </select>
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-[10px] font-bold text-gray-400 mb-1">Estilo</label>
+                                                                <div className="flex bg-gray-50 p-1 rounded border border-gray-200 gap-1">
+                                                                    <button 
+                                                                        onClick={() => handleElementUpdate(selectedElement, { fontStyle: config.elements?.[selectedElement]?.fontStyle === 'italic' ? 'normal' : 'italic' })}
+                                                                        className={`flex-1 py-1 text-sm font-serif italic rounded transition-all ${config.elements?.[selectedElement]?.fontStyle === 'italic' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                        title="Cursiva"
+                                                                    >
+                                                                        I
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => handleElementUpdate(selectedElement, { textDecoration: config.elements?.[selectedElement]?.textDecoration === 'underline' ? 'none' : 'underline' })}
+                                                                        className={`flex-1 py-1 text-sm font-sans underline rounded transition-all ${config.elements?.[selectedElement]?.textDecoration === 'underline' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                        title="Subrayado"
+                                                                    >
+                                                                        U
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div>
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                <label className="block text-[10px] font-bold text-gray-400">Ancho Máximo (Quiebre)</label>
+                                                                <span className="text-[10px] font-mono font-bold text-gray-600">
+                                                                    {config.elements?.[selectedElement]?.maxWidth ? `${config.elements?.[selectedElement]?.maxWidth}px` : 'Auto'}
+                                                                </span>
+                                                            </div>
+                                                            <input 
+                                                                type="range" 
+                                                                min="200" 
+                                                                max="1000" 
+                                                                step="10"
+                                                                value={config.elements?.[selectedElement]?.maxWidth || 800}
+                                                                onChange={(e) => handleElementUpdate(selectedElement, { maxWidth: parseInt(e.target.value) })}
+                                                                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
+                                                            />
+                                                        </div>
+
+                                                        <div>
+                                                            <div className="flex justify-between mb-1">
+                                                                <label className="block text-[10px] font-bold text-gray-400">Espaciado</label>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-3 bg-gray-50 p-2 rounded border border-gray-200">
+                                                                <div>
+                                                                    <label className="block text-[9px] text-gray-400 mb-0.5">Interlineado</label>
+                                                                    <input 
+                                                                        type="number" 
+                                                                        step="0.1"
+                                                                        min="0.8"
+                                                                        max="3"
+                                                                        value={config.elements?.[selectedElement]?.lineHeight || '1.1'}
+                                                                        onChange={(e) => handleElementUpdate(selectedElement, { lineHeight: e.target.value })}
+                                                                        className="w-full p-1 border rounded text-xs outline-none focus:border-[#DBF227]"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-[9px] text-gray-400 mb-0.5">Tracking (px)</label>
+                                                                    <input 
+                                                                        type="number" 
+                                                                         step="0.5"
+                                                                         min="-2"
+                                                                         max="20"
+                                                                        value={parseFloat(config.elements?.[selectedElement]?.letterSpacing || '0')}
+                                                                        onChange={(e) => handleElementUpdate(selectedElement, { letterSpacing: `${e.target.value}px` })}
+                                                                        className="w-full p-1 border rounded text-xs outline-none focus:border-[#DBF227]"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                )}
+
+                                                {/* Graphical Properties (Logos & Signatures) */}
+                                                {(selectedElement === 'logos' || selectedElement === 'signatures') && (
+                                                    <>
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold text-gray-400 mb-1">Contraste (Color)</label>
+                                                            <div className="flex bg-gray-50 p-1 rounded border border-gray-200">
+                                                                <button 
+                                                                    onClick={() => handleElementUpdate(selectedElement, { contrast: 'black' })}
+                                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${(!config.elements?.[selectedElement]?.contrast || config.elements?.[selectedElement]?.contrast === 'black') ? 'bg-black text-white shadow' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                >
+                                                                    Negro (Original)
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => handleElementUpdate(selectedElement, { contrast: 'white' })}
+                                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${config.elements?.[selectedElement]?.contrast === 'white' ? 'bg-white text-black border border-gray-200 shadow' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                >
+                                                                    Blanco / Invertido
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        {selectedElement === 'logos' && (
+                                                            <div>
+                                                                <label className="block text-[10px] font-bold text-gray-400 mb-1">Disposición</label>
+                                                                <div className="flex bg-gray-50 p-1 rounded border border-gray-200">
+                                                                    <button 
+                                                                        onClick={() => handleElementUpdate(selectedElement, { direction: 'horizontal' })}
+                                                                        className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${(!config.elements?.[selectedElement]?.direction || config.elements?.[selectedElement]?.direction === 'horizontal') ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                    >
+                                                                        Horizontal
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => handleElementUpdate(selectedElement, { direction: 'vertical' })}
+                                                                        className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${config.elements?.[selectedElement]?.direction === 'vertical' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                    >
+                                                                        Vertical
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-[10px] text-gray-400 italic text-center py-4 border border-dashed border-blue-200 rounded bg-white/50">
+                                            Ningún elemento seleccionado
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </div>
 
@@ -502,6 +848,35 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     );
                                 })}
                             </div>
+                            
+                            {/* Example Activity Selector */}
+                            <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 space-y-3">
+                                <div className="flex items-start gap-3">
+                                    <div className="p-2 bg-blue-100 rounded-lg text-blue-600 mt-1">
+                                        <Eye className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-800 text-sm">Vista Previa con Datos Reales</h3>
+                                        <p className="text-[10px] text-gray-500 mt-1 leading-relaxed">
+                                            Selecciona una actividad de la agenda para ver cómo luciría su constancia. 
+                                            <span className="block font-semibold text-blue-600 mt-1">Nota: Esto es solo un ejemplo visual. El diseño se aplicará a todas las constancias del evento.</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <select 
+                                    value={selectedExampleEventId}
+                                    onChange={(e) => setSelectedExampleEventId(e.target.value)}
+                                    className="w-full p-2 border rounded-lg text-xs bg-white focus:ring-2 focus:ring-blue-200 outline-none"
+                                >
+                                    <option value="">-- Usar datos de prueba --</option>
+                                    {exampleEvents.map(evt => (
+                                        <option key={evt.id} value={evt.id}>
+                                            {evt.title} ({new Date(evt.date).toLocaleDateString()})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                     </div>
                 </div>
 
@@ -581,12 +956,115 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 }}
                                 className="shadow-2xl bg-white transition-transform duration-200"
                             >
-                                <CertificateContent certificate={previewCertificate} />
+                                <CertificateContent 
+                                    certificate={previewCertificate} 
+                                    isDesigner={true}
+                                    onElementSelect={setSelectedElement}
+                                    onElementUpdate={handleElementUpdate}
+                                    selectedElement={selectedElement}
+                                    zoomScale={scale}
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            {/* Logo Selection Modal */}
+            {activeLogoSlot !== null && (
+                <div 
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+                    onClick={() => setActiveLogoSlot(null)}
+                >
+                    <div 
+                        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                            <h3 className="font-bold text-lg text-gray-800">Seleccionar Logo #{activeLogoSlot + 1}</h3>
+                            <button 
+                                onClick={() => setActiveLogoSlot(null)}
+                                className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        
+                        <div className="p-6 space-y-6">
+                            {/* Current Selection & Remove Option */}
+                            <div className="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-sm font-medium text-gray-500">Estado actual:</span>
+                                    {config.logos && config.logos[activeLogoSlot]?.type !== 'none' ? (
+                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
+                                            Seleccionado
+                                        </span>
+                                    ) : (
+                                        <span className="text-xs bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full font-bold">
+                                            Vacío
+                                        </span>
+                                    )}
+                                </div>
+                                
+                                <button 
+                                    onClick={() => {
+                                        const newLogos = [...(config.logos || [])];
+                                        newLogos[activeLogoSlot] = { type: 'none', value: '' };
+                                        setConfig({...config, logos: newLogos});
+                                        setActiveLogoSlot(null);
+                                    }}
+                                    className="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                                >
+                                    <X className="w-3 h-3" />
+                                    Remover Logo
+                                </button>
+                            </div>
+
+                            {/* Presets Grid */}
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Logos Disponibles</label>
+                                <div className="grid grid-cols-5 gap-3">
+                                    {PRESET_LOGOS.map((preset) => (
+                                        <button
+                                            key={preset}
+                                            onClick={() => {
+                                                const newLogos = [...(config.logos || [])];
+                                                newLogos[activeLogoSlot] = { type: 'preset', value: preset };
+                                                setConfig({...config, logos: newLogos});
+                                                setActiveLogoSlot(null);
+                                            }}
+                                            className={`aspect-square rounded-xl border-2 p-2 hover:border-[#DBF227] hover:bg-gray-50 transition-all flex items-center justify-center ${config.logos?.[activeLogoSlot]?.type === 'preset' && config.logos?.[activeLogoSlot]?.value === preset ? 'border-[#DBF227] bg-yellow-50' : 'border-gray-100'}`}
+                                            title={preset}
+                                        >
+                                            <img src={`/assets/${preset}.svg`} alt={preset} className="w-full h-full object-contain" />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Custom Upload */}
+                            <div className="border-t border-gray-100 pt-4">
+                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Subir SVG Personalizado</label>
+                                <Button 
+                                    variant="outline" 
+                                    className="w-full border-dashed border-2 h-12 hover:border-[#DBF227] hover:bg-yellow-50/50 text-gray-500"
+                                    onClick={() => logoInputRefs.current[activeLogoSlot]?.click()}
+                                    disabled={logoUploading === activeLogoSlot}
+                                >
+                                    <Upload className="w-4 h-4 mr-2" />
+                                    {logoUploading === activeLogoSlot ? 'Subiendo...' : 'Seleccionar archivo SVG'}
+                                </Button>
+                                <input 
+                                    ref={el => { logoInputRefs.current[activeLogoSlot] = el }}
+                                    type="file" 
+                                    accept="image/svg+xml,.svg" 
+                                    className="hidden"
+                                    onChange={(e) => handleLogoUpload(e, activeLogoSlot)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

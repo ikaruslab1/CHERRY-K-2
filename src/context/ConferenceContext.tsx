@@ -10,6 +10,7 @@ interface ConferenceContextType {
   loading: boolean;
   selectConference: (conference: Conference, redirectPath?: string) => void;
   availableConferences: Conference[];
+  refreshConference: () => Promise<void>;
 }
 
 const ConferenceContext = createContext<ConferenceContextType>({
@@ -17,6 +18,7 @@ const ConferenceContext = createContext<ConferenceContextType>({
   loading: true,
   selectConference: () => {},
   availableConferences: [],
+  refreshConference: async () => {},
 });
 
 export const useConference = () => useContext(ConferenceContext);
@@ -82,8 +84,16 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
     }
   }, [loading, currentConference, pathname, router]);
 
+  const refreshConference = async () => {
+      if (!currentConference) return;
+      const { data } = await supabase.from('conferences').select('*').eq('id', currentConference.id).single();
+      if (data) {
+          setCurrentConference(data);
+      }
+  };
+
   return (
-    <ConferenceContext.Provider value={{ currentConference, loading, selectConference, availableConferences }}>
+    <ConferenceContext.Provider value={{ currentConference, loading, selectConference, availableConferences, refreshConference }}>
       {children}
     </ConferenceContext.Provider>
   );

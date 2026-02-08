@@ -65,7 +65,7 @@ function AdminContent() {
         { id: 'attendance', label: 'Asistencia', icon: <QrCode className="w-5 h-5" />, show: true },
         { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: true },
         { id: 'events', label: 'Gestión Eventos', icon: <Settings className="w-5 h-5" />, show: true },
-        { id: 'design-certificates', label: 'Diseño Constancias', icon: <Award className="w-5 h-5" />, show: true },
+        { id: 'design-certificates', label: 'Diseño de Constancias', icon: <Award className="w-5 h-5" />, show: true },
     ];
 
     return (

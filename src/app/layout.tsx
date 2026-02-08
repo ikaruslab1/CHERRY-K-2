@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Great_Vibes, Playfair_Display } from "next/font/google";
+import { Geist, Geist_Mono, Dancing_Script, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 import { ConferenceProvider } from "@/context/ConferenceContext";
@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const greatVibes = Great_Vibes({
+const dancingScript = Dancing_Script({
   weight: "400",
-  variable: "--font-great-vibes",
+  variable: "--font-dancing-script",
   subsets: ["latin"],
 });
 
@@ -60,7 +60,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${greatVibes.variable} ${playfairDisplay.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} ${playfairDisplay.variable} antialiased`}
       >
         <SyncWrapper>
           <ConferenceProvider>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_1" xmlns="http://www.w3.org/2000/svg" width="500" height="352" version="1.1" viewBox="0 0 500 352">
+  <!-- Generator: Adobe Illustrator 30.1.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 136)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #1d1d1b;
+      }
+    </style>
+  </defs>
+  <path class="st0" d="M88.33,260.57L0,250.05V81.24s14.46,0,14.46,0l127.07,82.04,137.4-82.04h10.85s0,163.56,0,163.56l-78.51,5.26,1.03-14.2s57.85.53,52.17-41.02v-62.58s-105.89,66.26-105.89,66.26L43.39,122.26l-1.55,75.73s-5.68,40.49,49.59,49.44l-3.1,13.15Z"/>
+  <path class="st0" d="M493.8,221.65c-27.38,88.88-94.01,76.26-94.01,76.26-85.23-11.04-74.9-127.01-74.9-127.01,9.81-110.7,86.26-117.01,86.26-117.01,81.09-1.58,73.86,97.82,73.86,97.82,0,0-5.17,56.8-32.02,75.2-26.86,18.41-21.69-13.15-21.69-13.15l21.69-104.66-23.76,2.1-5.17,15.78c-.52-22.09-17.1-21.56-17.1-21.56-30.01,1.05-69.16,109.91-45.92,133.58,23.24,23.67,48.04-38.92,48.04-38.92-7.75,33.66,13.43,42.6,13.43,42.6,58.88,25.24,111.57-149.88,25.83-188.82-85.74-38.94-126.55,68.91-126.55,68.91-38.74,173.02,78.51,183.02,78.51,183.02,77.48,10.52,99.69-85.72,99.69-85.72l-6.2,1.58ZM417.87,160.12s-8.78,39.97-26.34,54.69c-17.56,14.73-4.65-89.93,15.45-97.82,20.09-7.89,10.9,43.12,10.9,43.12Z"/>
+  <metadata>
+    <sfw xmlns="http://ns.adobe.com/SaveForWeb/1.0/">
+      <slices/>
+      <sliceSourceBounds x="0" y="119.4" width="500" height="261.21" bottomLeftOrigin="true"/>
+      <optimizationSettings>
+        <targetSettings fileFormat="PNG8Format" targetSettingsID="0">
+          <PNG8Format autoReduce="false" ditherAlgorithm="diffusion" ditherPercent="100" interlaced="false" matteColor="#FFFFFF" noMatteColor="false" numColors="256" reductionAlgorithm="perceptual" rolloverMasterPalette="false" transparency="true" webShiftPercent="0">
+            <colorTable isExact="false"/>
+            <lockedColors/>
+            <colorShiftEntries/>
+          </PNG8Format>
+        </targetSettings>
+      </optimizationSettings>
+    </sfw>
+  </metadata>
+</svg>

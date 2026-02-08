@@ -46,7 +46,13 @@ export const ModernTemplate = ({
     const roleText = isSpeaker ? (texts.speaker || defaultTexts.speaker) : isStaff ? (texts.staff || defaultTexts.staff) : isOrganizer ? (texts.organizer || defaultTexts.organizer) : (texts.attendee || defaultTexts.attendee);
     const signerCount = config?.signer_count || 1;
     const signers = config?.signers || [];
-    
+    const logos = config?.logos;
+    const effectiveLogos = (logos && logos.length > 0) ? logos : [
+        { type: 'preset', value: 'unam' },
+        { type: 'preset', value: 'fesa' }
+    ];
+    const activeLogos = effectiveLogos.filter((l: any) => l && l.type !== 'none' && l.value);
+
     // Date Formatting (re-implemented here since we split Header)
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-MX', {
@@ -69,19 +75,22 @@ export const ModernTemplate = ({
                 }}
             >
                 <div className="flex flex-col items-center gap-8 w-full px-6">
-                    <img 
-                        src="/assets/unam.svg" 
-                        alt="UNAM" 
-                        className="w-full h-auto object-contain max-h-[120px] opacity-90" 
-                        style={{ filter: logoContrast === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)' }} 
-                    />
-                    <div className="w-[40%] h-[1px] bg-current opacity-30" style={{ color: logoContrast }}></div>
-                    <img 
-                        src="/assets/fesa.svg" 
-                        alt="FES Acatlán" 
-                        className="w-full h-auto object-contain max-h-[120px] opacity-90" 
-                        style={{ filter: logoContrast === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)' }} 
-                    />
+                    {activeLogos.map((logo: any, index: number) => {
+                         const logoUrl = logo.type === 'preset' ? `/assets/${logo.value}.svg` : logo.value;
+                         return (
+                             <React.Fragment key={index}>
+                                <img
+                                    src={logoUrl}
+                                    alt={`Logo ${index + 1}`}
+                                    className="w-full h-auto object-contain max-h-[120px] opacity-90"
+                                    style={{ filter: logoContrast === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)' }}
+                                />
+                                {index < activeLogos.length - 1 && (
+                                    <div className="w-[40%] h-[1px] bg-current opacity-30" style={{ color: logoContrast }}></div>
+                                )}
+                             </React.Fragment>
+                         );
+                    })}
                 </div>
             </div>
 

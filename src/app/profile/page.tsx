@@ -10,7 +10,7 @@ import { UsersTable } from '@/components/admin/UsersTable';
 import { EventsManager } from '@/components/admin/EventsManager';
 import AttendanceView from '@/views/admin/AttendanceView';
 import { ParticipationView } from '@/components/profile/ParticipationView';
-import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard } from 'lucide-react';
+import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard, Award } from 'lucide-react';
 import { CertificatesView } from '@/components/profile/CertificatesView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
@@ -79,6 +79,13 @@ const navItems = [
     { id: 'attendance', label: 'Asistencia', icon: <QrCode className="w-5 h-5" />, show: isAdmin || isStaff },
     { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: isAdmin },
     { id: 'events', label: 'Gestión Eventos', icon: <Settings className="w-5 h-5" />, show: isAdmin },
+    { 
+        id: 'design-certificates', 
+        label: 'Diseño de Constancias', 
+        icon: <Award className="w-5 h-5" />, 
+        show: isAdmin,
+        onClick: () => router.push('/admin?tab=design-certificates')
+    },
     { 
         id: 'owner_link', 
         label: 'Panel Owner', 

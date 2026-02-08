@@ -117,7 +117,8 @@ export function EventsManager() {
               conferences: {
                   title: currentConference.title,
                   institution_name: currentConference.institution_name || 'FES Acatlán',
-                  department_name: currentConference.department_name || 'UNAM' // Fallback
+                  department_name: currentConference.department_name || 'UNAM', // Fallback
+                  certificate_config: currentConference.certificate_config
               }
           } as any,
           profiles: {

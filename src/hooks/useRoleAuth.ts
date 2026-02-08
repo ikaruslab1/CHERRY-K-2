@@ -65,6 +65,24 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
                     
                     // Opcional: Revalidar en segundo plano si hay conexión
                     // Para no bloquear la UI, podríamos lanzar una validación silenciosa aquí
+                    supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', user.id)
+                        .single()
+                        .then(({ data, error }) => {
+                            if (!error && data && data.role !== role) {
+                                console.log('Role updated from server:', data.role);
+                                const newRole = data.role as AllowedRole;
+                                globalCachedRole = { id: user.id, role: newRole };
+                                localStorage.setItem(`user_role_${user.id}`, newRole);
+                                setUserRole(newRole);
+                                
+                                if (allowedRoles.length > 0 && !allowedRoles.includes(newRole)) {
+                                    router.push(redirectTo);
+                                }
+                            }
+                        });
                 }
 
                 // D) Si NO hay rol en caché, consultamos DB (Requiere conexión la primera vez)

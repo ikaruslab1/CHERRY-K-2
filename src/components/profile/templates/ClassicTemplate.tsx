@@ -35,6 +35,7 @@ export const ClassicTemplate = ({
     const roleText = isSpeaker ? (texts.speaker || defaultTexts.speaker) : isStaff ? (texts.staff || defaultTexts.staff) : isOrganizer ? (texts.organizer || defaultTexts.organizer) : (texts.attendee || defaultTexts.attendee);
     const signerCount = config?.signer_count || 1;
     const signers = config?.signers || [];
+    const logos = config?.logos;
 
     return ( 
         <div 
@@ -52,7 +53,7 @@ export const ClassicTemplate = ({
             <div className="absolute bottom-6 right-6 w-16 h-16 border-b-[3px] border-r-[3px] pointer-events-none" style={{ borderColor: accent }}></div>
 
             <div className="relative z-10 h-full flex flex-col justify-between px-12 py-8">
-                <Header date={certificate.events.date} id={certificate.id} variant="classic" />
+                <Header date={certificate.events.date} id={certificate.id} variant="classic" logos={logos} />
                 
                 <MainBody 
                      certificate={certificate} 

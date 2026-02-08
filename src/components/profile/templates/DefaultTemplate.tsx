@@ -36,6 +36,7 @@ export const DefaultTemplate = ({
     const roleText = isSpeaker ? (texts.speaker || defaultTexts.speaker) : isStaff ? (texts.staff || defaultTexts.staff) : isOrganizer ? (texts.organizer || defaultTexts.organizer) : (texts.attendee || defaultTexts.attendee);
     const signerCount = config?.signer_count || 1;
     const signers = config?.signers || [];
+    const logos = config?.logos;
 
     return (
         <div 
@@ -54,7 +55,7 @@ export const DefaultTemplate = ({
              >
                  {/* Header (Logos & Date) */}
                  <div className="w-full mb-0">
-                     <Header date={certificate.events.date} id={certificate.id} accent={contrastColor} variant="default" />
+                     <Header date={certificate.events.date} id={certificate.id} accent={contrastColor} variant="default" logos={logos} />
                  </div>
 
                  {/* Title Section */}

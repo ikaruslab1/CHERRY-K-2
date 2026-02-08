@@ -153,21 +153,47 @@ export const Signatures = ({ count, signers, color = '#000000', align = 'center'
     )
 };
 
-export const Header = ({ date, id, accent = '#000', variant = 'default' }: { date: string, id?: string, accent?: string, variant?: 'default' | 'modern' | 'classic' }) => (
-    <div className={`flex justify-between items-start w-full mb-8 relative z-10 ${variant === 'classic' ? 'font-serif' : 'font-sans'}`}>
-        {/* Logos Left */}
-        <div className="flex items-center gap-4">
-             <img src="/assets/unam.svg" alt="UNAM" className="h-16 w-auto object-contain" style={{ filter: accent === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)' }} />
-             <div className="h-10 w-[1px] bg-current opacity-20"></div>
-             <img src="/assets/fesa.svg" alt="FES Acatlán" className="h-16 w-auto object-contain" style={{ filter: accent === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)' }} />
-        </div> 
-        {/* Date Right */}
-        <div className="text-right" style={{ color: accent }}>
-            <p className={`text-sm ${variant === 'modern' ? 'font-bold' : 'font-medium'}`}>{formatDate(date)}</p>
-            {id && <p className="text-[10px] opacity-60 mt-0.5 font-mono tracking-widest">ID: {id.split('-')[0].toUpperCase()}</p>}
+export const Header = ({ date, id, accent = '#000', variant = 'default', logos }: { date: string, id?: string, accent?: string, variant?: 'default' | 'modern' | 'classic', logos?: any[] }) => {
+    // Default logos if none provided (Backward Compatibility)
+    // If logos array is empty or undefined, use default unam/fesa
+    // But if it's explicitly passed as empty array [], it means no logos? Requirements say "Por defecto siempre van a aparecer los logos unam y fesa".
+    // So if config.logos is missing, fallback. If present, use it.
+    const effectiveLogos = (logos && logos.length > 0) ? logos : [
+        { type: 'preset', value: 'unam' },
+        { type: 'preset', value: 'fesa' }
+    ];
+
+    const activeLogos = effectiveLogos.filter(l => l && l.type !== 'none' && l.value);
+
+    return (
+        <div className={`flex justify-between items-start w-full mb-8 relative z-10 ${variant === 'classic' ? 'font-serif' : 'font-sans'}`}>
+            {/* Logos Left */}
+            <div className="flex items-center gap-4 h-16">
+                 {activeLogos.map((logo, index) => {
+                     const logoUrl = logo.type === 'preset' ? `/assets/${logo.value}.svg` : logo.value;
+                     return (
+                         <div key={index} className="flex items-center gap-4 h-full"> 
+                             <img 
+                                src={logoUrl} 
+                                alt={`Logo ${index + 1}`} 
+                                className="h-full w-auto object-contain max-w-[120px]" 
+                                style={{ filter: accent === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)' }} 
+                             />
+                             {index < activeLogos.length - 1 && (
+                                 <div className="h-10 w-[1px] bg-current opacity-20" style={{ backgroundColor: accent }}></div>
+                             )}
+                         </div>
+                     );
+                 })}
+            </div> 
+            {/* Date Right */}
+            <div className="text-right" style={{ color: accent }}>
+                <p className={`text-sm ${variant === 'modern' ? 'font-bold' : 'font-medium'}`}>{formatDate(date)}</p>
+                {id && <p className="text-[10px] opacity-60 mt-0.5 font-mono tracking-widest">ID: {id.split('-')[0].toUpperCase()}</p>}
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 export const MainBody = ({ 
     certificate, 

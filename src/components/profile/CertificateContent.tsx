@@ -4,7 +4,23 @@ import { ModernTemplate } from './templates/ModernTemplate';
 import { CustomTemplate } from './templates/CustomTemplate';
 import { Certificate } from './templates/CertificateShared';
 
-export function CertificateContent({ certificate }: { certificate: Certificate }) {
+export interface CertificateContentProps {
+    certificate: Certificate;
+    onElementSelect?: (elementId: string) => void;
+    onElementUpdate?: (elementId: string, updates: any) => void;
+    selectedElement?: string | null;
+    isDesigner?: boolean;
+    zoomScale?: number;
+}
+
+export function CertificateContent({ 
+    certificate, 
+    onElementSelect, 
+    onElementUpdate, 
+    selectedElement, 
+    isDesigner,
+    zoomScale = 1
+}: CertificateContentProps) {
     
     const conf = certificate.events.conferences;
     // Use conference config if available, otherwise fallback to event config (for backward compatibility)
@@ -22,7 +38,7 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
     // Display font for Name and Event (user selectable)
     const displayFont = styles.font_family === 'serif' ? 'var(--font-playfair)' : 
                       styles.font_family === 'mono' ? 'var(--font-geist-mono)' : 
-                      styles.font_family === 'cursive' ? 'var(--font-great-vibes)' :
+                      styles.font_family === 'cursive' ? 'var(--font-dancing-script)' :
                       'var(--font-geist-sans)';
 
     // --- CUSTOM BACKGROUND MODE ---
@@ -34,7 +50,12 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
                 displayFont={displayFont} 
                 isSpeaker={isSpeaker} 
                 isStaff={isStaff} 
-                isOrganizer={isOrganizer} 
+                isOrganizer={isOrganizer}
+                onElementSelect={onElementSelect}
+                onElementUpdate={onElementUpdate}
+                selectedElement={selectedElement}
+                isDesigner={isDesigner}
+                zoomScale={zoomScale}
             />
         );
     }

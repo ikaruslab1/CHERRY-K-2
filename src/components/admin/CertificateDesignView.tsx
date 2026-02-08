@@ -6,23 +6,30 @@ import { supabase } from '@/lib/supabase';
 import { Loader2 } from 'lucide-react';
 
 export function CertificateDesignView() {
-    const { currentConference } = useConference();
+    const { currentConference, refreshConference } = useConference();
 
     const handleSaveConfig = async (config: any) => {
         if (!currentConference) return;
 
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('conferences')
             .update({ certificate_config: config })
-            .eq('id', currentConference.id);
+            .eq('id', currentConference.id)
+            .select();
 
         if (error) {
             console.error('Error updating certificate config:', error);
             throw error;
         }
+
+        if (!data || data.length === 0) {
+            console.error('Update operation affected 0 rows. Check RLS policies.');
+            throw new Error('No se pudieron guardan los cambios. Permisos insuficientes (RLS).');
+        }
         
-        // Note: We don't update global context here to avoid redirecting, 
-        // effectively assuming the local state in CertificateDesigner is enough for now.
+        if (refreshConference) {
+            await refreshConference();
+        }
     };
 
     if (!currentConference) {
