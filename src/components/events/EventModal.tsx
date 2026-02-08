@@ -3,9 +3,8 @@
 import { X, Calendar, MapPin, User, CheckCircle2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Event } from '@/types';
-import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface EventModalProps {
@@ -78,7 +77,7 @@ export function EventModal({
             unoptimized={!!event.image_url}
             sizes="(max-width: 640px) 100vw, 600px"
           />
-          {/* Subtle Gradient from bottom for text readability if needed, but keeping it clean for visible image */}
+          {/* Subtle Gradient from bottom for text readability if needed */}
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent"></div>
 
           {/* Type Badge (Top Right) */}
@@ -100,7 +99,7 @@ export function EventModal({
           
            {/* Date Block - floating over image */}
            <div className="absolute bottom-4 left-6 z-20 flex items-end gap-4">
-              <div className="flex flex-col bg-white p-3 shadow-lg min-w-[80px] text-center border-t-4 border-[var(--color-electric)]">
+              <div className="flex flex-col bg-white p-3 shadow-lg min-w-[80px] text-center border-t-4 border-[var(--color-acid)]">
                  <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-0.5">
                     {eventDate.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')}
                  </span>
@@ -217,7 +216,7 @@ export function EventModal({
                   className={`w-full h-14 text-sm tracking-[0.15em] uppercase font-bold transition-all ${
                     isInterested 
                       ? "bg-white text-red-500 border-2 border-red-100 hover:bg-red-50 hover:border-red-200"
-                      : "bg-black text-white hover:bg-[var(--color-electric)] hover:shadow-xl"
+                      : "bg-black text-white hover:bg-[var(--color-acid)] hover:text-black hover:shadow-xl border border-transparent hover:border-black/10"
                   }`}
               >
                   {isInterested ? "Remover de mi agenda" : "Me interesa asistir"}
