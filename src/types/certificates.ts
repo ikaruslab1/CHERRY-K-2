@@ -11,6 +11,15 @@ export interface Certificate {
       gives_certificate?: boolean;
       duration_days?: number;
       conference_id: string;
+      created_at?: string;
+      updated_at?: string;
+      start_time?: string;
+      end_time?: string;
+      status?: string;
+      capacity?: number;
+      image_url?: string | null;
+      event_type?: string;
+      global_event_id?: string | null;
       conferences?: {
           title: string;
           institution_name: string;
