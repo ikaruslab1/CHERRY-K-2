@@ -7,6 +7,7 @@ import { Printer, Link, Check } from 'lucide-react';
 import { useConference } from '@/context/ConferenceContext';
 import { motion, useAnimation } from 'framer-motion';
 import { ParticleBadge } from './ParticleBadge';
+import PushNotificationButton from '@/components/PushNotificationButton';
 
 interface ProfileCardProps {
   profile: {
@@ -307,22 +308,26 @@ export function ProfileCard({ profile }: ProfileCardProps) {
       </motion.div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-3 print:hidden animate-in slide-in-from-bottom-2 fade-in duration-500">
-        <button 
-          onClick={handlePrint}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-100 shadow-sm text-gray-500 hover:text-[#373737] hover:border-[#373737] hover:bg-gray-50 transition-all active:scale-95 text-xs font-bold uppercase tracking-wider"
-        >
-          <Printer className="w-4 h-4" />
-          <span>Imprimir</span>
-        </button>
+      <div className="flex flex-col items-center gap-4 w-full print:hidden animate-in slide-in-from-bottom-2 fade-in duration-500">
+        <div className="flex items-center gap-3">
+            <button 
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-100 shadow-sm text-gray-500 hover:text-[#373737] hover:border-[#373737] hover:bg-gray-50 transition-all active:scale-95 text-xs font-bold uppercase tracking-wider"
+            >
+            <Printer className="w-4 h-4" />
+            <span>Imprimir</span>
+            </button>
+            
+            <button 
+            onClick={handleCopyLink}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-100 shadow-sm text-gray-500 hover:text-[#373737] hover:border-[#373737] hover:bg-gray-50 transition-all active:scale-95 text-xs font-bold uppercase tracking-wider"
+            >
+            {showCopied ? <Check className="w-4 h-4 text-green-500" /> : <Link className="w-4 h-4" />}
+            <span>{showCopied ? 'Copiado' : 'Copiar Acceso'}</span>
+            </button>
+        </div>
         
-        <button 
-          onClick={handleCopyLink}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-100 shadow-sm text-gray-500 hover:text-[#373737] hover:border-[#373737] hover:bg-gray-50 transition-all active:scale-95 text-xs font-bold uppercase tracking-wider"
-        >
-          {showCopied ? <Check className="w-4 h-4 text-green-500" /> : <Link className="w-4 h-4" />}
-          <span>{showCopied ? 'Copiado' : 'Copiar Acceso'}</span>
-        </button>
+        <PushNotificationButton />
       </div>
 
       {/* Print View Only - Hidden normally, visible on print */}

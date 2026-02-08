@@ -5,6 +5,7 @@ import { Scanner } from '@yudiel/react-qr-scanner';
 import { supabase } from '@/lib/supabase';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { checkAndNotifyCertificate } from '@/actions/notifications';
 
 interface QRScannerProps {
   eventId: string;
@@ -107,6 +108,17 @@ export function QRScanner({ eventId, durationDays = 1, onSuccess }: QRScannerPro
       setStatus('success');
       // Show progress in message
       setMessage(`Asistencia ${currentCount + 1}/${targetDuration} registrada.`);
+      
+      // Notify about Certificate
+      try {
+          // Fire and forget notification (non-blocking) - wait, server actions are usually awaited or fire-and-forget?
+          // If we await, it slows down the scanner feedback. But it's safer.
+          // Since it's a critical new feature, let's await but catch errors so scanning doesn't fail.
+          await checkAndNotifyCertificate(profile.id, eventId);
+      } catch (notifyErr) {
+          console.error("Failed to notify certificate:", notifyErr);
+      }
+
       if (onSuccess) onSuccess();
 
     } catch (err: any) {
