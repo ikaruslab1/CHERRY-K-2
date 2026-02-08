@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation'; // Correct for App Router
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { loginWithId } from '@/app/actions';
+import { loginWithId } from '@/actions/auth';
 import { supabase } from '@/lib/supabase';
 import { Loader2 } from 'lucide-react';
 
@@ -43,29 +43,18 @@ export function LoginForm() {
     setError(null);
 
     try {
-      // 1. Get credentials from server
+      // 1. Get credentials and sign in from server
       const result = await loginWithId(idToUse);
 
-      if (!result.success || !result.email || !result.password) {
+      if (!result.success) {
         setError(result.error || 'Credenciales inválidas');
         setIsLoading(false);
         return;
       }
 
-      // 2. Sign in client-side to establish session
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: result.email,
-        password: result.password,
-      });
-
-      if (authError) {
-        setError("Error de autenticación: " + authError.message);
-        setIsLoading(false);
-        return;
-      }
-
-      // 3. Redirect
+      // 2. Redirect (Session is already set by server action via cookies)
       router.push('/profile');
+      router.refresh();
 
     } catch (err: any) {
       setError("Error de conexión");

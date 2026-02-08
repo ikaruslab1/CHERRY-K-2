@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { X, Copy, Printer, Check, ChevronRight, Loader2, LogIn, ArrowLeft } from 'lucide-react';
-import { checkEmailForRecovery, verifyRecoveredUser } from '@/app/actions';
+import { checkEmailForRecovery, verifyRecoveredUser } from '@/actions/auth';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 

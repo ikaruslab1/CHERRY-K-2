@@ -1,93 +1,123 @@
-# Cherry K 2
+# Cherry K-2
 
-Sistema integral de gestión de eventos, asistencia y control de usuarios, desarrollado con tecnologías web modernas.
+**Sistema integral de gestión de eventos masivos, control de asistencia y emisión de constancias digitales.**
 
-## 📋 Descripción
+Este proyecto es una plataforma web progresiva (PWA) de alto rendimiento diseñada para administrar conferencias y eventos académicos. Utiliza un stack moderno enfocado en la velocidad, seguridad y experiencia de usuario.
 
-Este proyecto es una plataforma web diseñada para administrar eventos, controlar la asistencia mediante códigos QR y gestionar la emisión de constancias. Cuenta con un sistema de roles (Administrador, Staff, Usuario/Ponente) que permite adaptar la interfaz y funcionalidades según el tipo de usuario.
+---
 
-## 🚀 Características Principales
+## 🚀 Estado Actual del Proyecto
 
-- **Gestión de Eventos:** Visualización de agenda, creación y edición de eventos.
-- **Control de Asistencia:** Escaneo de códigos QR para registrar la asistencia de los participantes.
-- **Gestión de Usuarios:** Registro, autenticación y perfiles de usuario.
-- **Constancias:** Generación y visualización de certificados de participación.
-- **Roles y Permisos:**
-  - **Admin:** Control total del sistema, gestión de eventos y usuarios.
-  - **Staff:** Herramientas optimizadas para el registro de asistencia en sitio.
-  - **Usuario/Ponente:** Acceso a agenda personal, perfil y descarga de constancias.
+El sistema ha pasado por un proceso intensivo de **refactorización y aseguramiento (Q1 2026)**, cubriendo deuda técnica crítica y optimizando la arquitectura para producción.
 
-## 🛠️ Tecnologías Utilizadas
+### 🛡️ Mejoras de Seguridad y Arquitectura
 
-Este proyecto utiliza un stack moderno y eficiente:
+- **Autenticación Server-Side**: Migración completa a **Server Actions** (`src/actions/auth.ts`). Las credenciales y lógica sensible se ejecutan exclusivamente en el servidor, utilizando cookies seguras (`HttpOnly`) para la gestión de sesiones.
+- **Roles y Permisos Granulares**: Implementación de políticas **RLS (Row Level Security)** robustas en Supabase.
+  - Roles soportados: `Owner` (Superadmin), `Admin`, `Staff`, `Ponente`, `VIP`, `User`.
+  - Prevención de recursión infinita en políticas de base de datos mediante funciones `SECURITY DEFINER`.
+- **Integridad de Datos**: Lógica de registro con **Transacciones Atómicas** (simuladas con rollback automático) para evitar usuarios "zombis" en caso de fallos de red.
+- **Estrategia PWA**: Configuración de caché `NetworkOnly` para rutas críticas de API, garantizando que los usuarios siempre vean datos de asistencia y eventos en tiempo real.
 
-- **Frontend:** [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/)
-- **Lenguaje:** [TypeScript](https://www.typescriptlang.org/)
-- **Estilos:** [Tailwind CSS 4](https://tailwindcss.com/)
-- **Backend & Autenticación:** [Supabase](https://supabase.com/)
-- **Formularios:** React Hook Form + Zod
-- **Iconos:** Lucide React
-- **Utilidades:** QR Code Scanner/Generator
+---
 
-## ⚙️ Instalación y Configuración
+## 📋 Características Principales
 
-Sigue estos pasos para ejecutar el proyecto en tu entorno local:
+### 🎓 Gestión Académica
 
-1.  **Clonar el repositorio:**
+- **Agenda Dinámica**: Visualización de eventos por día, tipo y sede.
+- **Multi-Rol**: Interfaz adaptativa según el nivel de usuario (Panel de Staff, Panel de Admin, Vista de Asistente).
+- **Constancias Automatizadas**: Generación de certificados PDF con diseño responsive.
+  - **Tipos**: Asistencia, Ponente, Staff, Organizador.
+  - **Validación**: Lógica de desbloqueo basada en porcentaje de asistencia o fecha del evento.
+
+### 📱 Experiencia Móvil (PWA)
+
+- **Instalable**: Funciona como una app nativa en iOS y Android.
+- **Escáner QR**: Herramienta integrada para toma de asistencia rápida por parte del Staff.
+- **Modo Offline (UI)**: Interfaz resiliente a desconexiones momentáneas.
+
+### 🛠️ Panel de Administración
+
+- **Control Total**: Gestión de usuarios, asignación de roles y métricas de eventos.
+- **Diseñador de Constancias**: Herramienta visual para personalizar plantillas de certificados.
+
+---
+
+## 💻 Stack Tecnológico
+
+- **Frontend**: [Next.js 16 (App Router)](https://nextjs.org/) + [React 19](https://react.dev/)
+- **Lenguaje**: [TypeScript](https://www.typescriptlang.org/) (Tipado estricto)
+- **Estilos**: [Tailwind CSS 4](https://tailwindcss.com/) + [Shadcn UI](https://ui.shadcn.com/) + [Framer Motion](https://www.framer.com/motion/)
+- **Base de Datos & Auth**: [Supabase](https://supabase.com/) (PostgreSQL)
+- **Infraestructura**: Vercel (Hosting) + Upstash (Redis/QStash para colas - _en progreso_)
+- **Estado Global**: React Context + Hooks Personalizados (ej. `useCertificates`, `useConference`).
+
+---
+
+## 📂 Estructura del Proyecto
+
+La arquitectura sigue una organización modular por dominios:
+
+```bash
+src/
+├── actions/        # Server Actions (Lógica de negocio segura)
+│   ├── auth.ts     # Registro, Login, Recuperación
+│   └── ...
+├── app/            # Rutas de Next.js (App Router)
+├── components/     # UI Reutilizable
+│   ├── auth/       # Formularios de acceso
+│   ├── profile/    # Vistas de usuario y certificados
+│   └── ui/         # Librería de componentes base (Botones, Inputs, Modales)
+├── hooks/          # Lógica de estado reactiva (useCertificates, etc.)
+├── lib/            # Clientes de servicios (Supabase Admin, Utils)
+├── types/          # Definiciones TypeScript compartidas
+└── middleware.ts   # Gestión de sesiones y protección de rutas
+```
+
+**Base de Datos (Supabase):**
+
+- `supabase/schema.sql`: **Fuente de verdad** del esquema de base de datos.
+- `supabase/migrations/`: Historial de cambios evolutivos en la DB.
+
+---
+
+## ⚙️ Instalación Local
+
+1.  **Clonar:**
 
     ```bash
-    git clone <URL_DEL_REPOSITORIO>
+    git clone <URL_REPO>
     cd cherry-k-2
     ```
 
-2.  **Instalar dependencias:**
+2.  **Instalar:**
 
     ```bash
     npm install
-    # o
-    pnpm install
-    # o
-    yarn install
     ```
 
-3.  **Configurar variables de entorno:**
-
-    Crea un archivo `.env.local` en la raíz del proyecto y agrega las credenciales de tu proyecto Supabase:
+3.  **Configurar Variables de Entorno (`.env.local`):**
 
     ```env
-    NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
-    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_clave_anon_de_supabase
+    NEXT_PUBLIC_SUPABASE_URL=tu_url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_key
+    SUPABASE_SERVICE_ROLE_KEY=tu_secret_key_admin  # Requerido para Server Actions de Admin
     ```
 
-4.  **Ejecutar el servidor de desarrollo:**
-
+4.  **Correr:**
     ```bash
     npm run dev
     ```
 
-    Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
+---
 
-## 📂 Estructura del Proyecto
+## 🤝 Contribución y Estándares
 
-El código fuente se encuentra organizado principalmente en `src`:
+- **Code Style**: Se utiliza ESLint y Prettier.
+- **Commits**: Seguir convención de commits semánticos si es posible.
+- **Base de Datos**: Cualquier cambio en DB debe reflejarse en una nueva migración en `supabase/migrations/`.
 
-- `src/app/`: Define las rutas de la aplicación utilizando el App Router de Next.js (`admin`, `staff`, `profile`, etc.).
-- `src/components/`: Contiene los componentes de React organizados por funcionalidad:
-  - `auth`: Formularios de autenticación.
-  - `events`: Componentes de agenda y gestión de eventos.
-  - `attendance`: Lógica y UI para el escáner de asistencia.
-  - `ui`: Componentes base reutilizables.
-- `src/services/`: Lógica de interacción con la base de datos (Supabase).
-- `src/types/`: Definiciones de tipos e interfaces TypeScript.
+---
 
-## 🤝 Contribución
-
-Para mantener la calidad del código, por favor considera las siguientes buenas prácticas:
-
-- Tipado estricto con TypeScript.
-- Uso de componentes funcionales y Hooks.
-- Diseño responsivo y accesible utilizando Tailwind CSS.
-
-## 📄 Licencia
-
-Propiedad exclusiva. Todos los derechos reservados.
+© 2026 Cherry K-2 Team. Propiedad Privada.

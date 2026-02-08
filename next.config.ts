@@ -24,16 +24,13 @@ const withPWA = require("@ducanh2912/next-pwa").default({
     {
       // Cache Supabase API (GET requests)
       urlPattern: /^https:\/\/fhuinrsvgjmrjaamznjd\.supabase\.co\/rest\/v1\/.*/i,
-      handler: "NetworkFirst",
+      handler: "NetworkOnly", // Prevent stale data for API requests
       options: {
-        cacheName: "supabase-api-cache",
-        networkTimeoutSeconds: 5,
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 60 * 60 * 24, // 24 hours
-        },
-        cacheableResponse: {
-          statuses: [0, 200],
+        backgroundSync: {
+          name: "supabase-api-queue",
+          options: {
+            maxRetentionTime: 24 * 60, // Retry for failing requests for up to 24 hours (if offline)
+          },
         },
       },
     },

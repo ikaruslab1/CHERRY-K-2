@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { registerUser } from "@/app/actions";
+import { registerUser } from "@/actions/auth";
 import { Loader2, CheckCircle } from "lucide-react";
 
 // Helper for Title Case

@@ -47,63 +47,10 @@ export const formatDate = (dateString: string) => {
 
 // --- TYPES ---
 
-export interface Certificate {
-    id: string; // attendance id
-    scanned_at: string;
-    events: {
-      id: string;
-      title: string;
-      date: string; // Timestamptz
-      type: string;
-      location: string;
-      description: string;
-      conferences?: {
-          title: string;
-          institution_name: string;
-          department_name: string;
-          certificate_config?: any; // Add config to conference
-      };
-      // Certificate config from DB (legacy event config)
-      certificate_config?: {
-        mode: 'template_v1' | 'custom_background';
-        background_url?: string;
-        styles?: {
-          text_color: string;
-          accent_color: string; 
-          font_family: string;
-          text_alignment: 'left' | 'center' | 'right';
-          content_vertical_position: string; 
-        };
-        texts?: {
-          attendee: string;
-          speaker: string;
-          staff: string;
-          organizer: string;
-          context?: string;
-        };
-        signers?: Array<{
-           name: string;
-           role: string;
-           degree?: string; // Add degree to signers in Certificate interface
-           gender?: string; // Add gender to signers
-           signature_url?: string;
-        }>;
-        show_qr?: boolean;
-        qr_position?: 'bottom-left' | 'bottom-right';
-        signer_count?: number; // Add signer_count
-        template_id?: 'default' | 'classic' | 'modern';
-      } | null;
-    };
-    profiles: {
-        first_name: string;
-        last_name: string;
-        degree: string | null;
-        gender: string | null;
-    }
-    isSpeaker?: boolean;
-    isStaff?: boolean;
-    isOrganizer?: boolean;
-}
+// --- TYPES ---
+
+import { Certificate } from '@/types/certificates';
+export type { Certificate };
 
 // --- COMPONENTS ---
 

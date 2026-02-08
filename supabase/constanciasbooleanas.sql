@@ -1,1 +1,0 @@
-ALTER TABLE events ADD COLUMN gives_certificate BOOLEAN DEFAULT FALSE;
