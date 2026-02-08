@@ -29,17 +29,41 @@ export default function ProfilePage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        console.log('[PROFILE] Starting session check...');
+        
+        // With createBrowserClient, session should be available quickly
+        let user = null;
+        let attempts = 0;
+        const maxAttempts = 10; // Reduced to 1 second
+        
+        while (!user && attempts < maxAttempts) {
+          const { data: { user: currentUser } } = await supabase.auth.getUser();
+          console.log(`[PROFILE] Attempt ${attempts + 1}/${maxAttempts}:`, currentUser ? '✓ User found' : '✗ Not found');
+          
+          if (currentUser) {
+            user = currentUser;
+            break;
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
+        
         if (!user) {
+          console.log('[PROFILE] No user found, redirecting to login');
           router.push('/');
           return;
         }
+
+        console.log('[PROFILE] ✓ User authenticated, loading profile...');
 
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single();
+        
+        console.log('[PROFILE] Profile data loaded:', profile?.role);
         
         if (profile?.role) {
             setUserRole(profile.role);
@@ -56,9 +80,10 @@ export default function ProfilePage() {
            setIsAdmin(true);
         }
 
+        console.log('[PROFILE] ✓ Profile loaded successfully');
         setLoading(false);
       } catch (error) {
-        console.error('Error in loadData:', error);
+        console.error('[PROFILE] Error in loadData:', error);
         setLoading(false);
       }
     };
@@ -94,6 +119,17 @@ const navItems = [
         onClick: () => router.push('/owner') 
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-[#373737]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin h-8 w-8 border-4 border-gray-200 border-t-[#373737] rounded-full" />
+          <p className="text-sm font-medium text-gray-500 animate-pulse">Cargando perfil...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <SidebarAwareContainer className="min-h-screen p-8 bg-gray-50 text-[#373737]">

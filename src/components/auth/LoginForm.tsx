@@ -43,20 +43,56 @@ export function LoginForm() {
     setError(null);
 
     try {
-      // 1. Get credentials and sign in from server
+      console.log('[LOGIN] Starting login with ID:', idToUse);
+      
+      // 1. Server-side authentication (sets cookies)
       const result = await loginWithId(idToUse);
+      
+      console.log('[LOGIN] Server response:', result);
 
-      if (!result.success) {
-        setError(result.error || 'Credenciales inválidas');
+      if (!result || !result.success) {
+        console.log('[LOGIN] Login failed:', result?.error);
+        setError(result?.error || 'Credenciales inválidas');
         setIsLoading(false);
         return;
       }
 
-      // 2. Redirect (Session is already set by server action via cookies)
+      console.log('[LOGIN] Login successful on server, verifying session...');
+      
+      // 2. Quick check that session is available
+      // With createBrowserClient, cookies should be readable immediately
+      let sessionAvailable = false;
+      let attempts = 0;
+      const maxAttempts = 10; // Reduced to 1 second
+      
+      while (!sessionAvailable && attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log(`[LOGIN] Checking session (${attempts + 1}/${maxAttempts}):`, session ? '✓ Available' : '✗ Not yet');
+        
+        if (session) {
+          sessionAvailable = true;
+          console.log('[LOGIN] ✓ Session confirmed in client!');
+        }
+        
+        attempts++;
+      }
+
+      if (!sessionAvailable) {
+        console.error('[LOGIN] Session not available after waiting');
+        setError("Error al verificar la sesión. Por favor intenta de nuevo.");
+        setIsLoading(false);
+        return;
+      }
+
+      // 3. Session is confirmed, now redirect
+      console.log('[LOGIN] Redirecting to profile...');
       router.push('/profile');
       router.refresh();
 
     } catch (err: any) {
+      console.error('[LOGIN] Exception:', err);
       setError("Error de conexión");
       setIsLoading(false);
     }

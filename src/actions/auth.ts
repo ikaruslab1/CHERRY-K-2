@@ -157,7 +157,7 @@ export async function loginWithId(shortId: string) {
     );
     
     // We sign in with the retrieved email and the short_id as password
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
       email: profile.email,
       password: shortId,
     });
@@ -167,8 +167,23 @@ export async function loginWithId(shortId: string) {
       return { success: false, error: "Credenciales inválidas o error de sesión" };
     }
 
-    // 3. Success - cookies are set automatically
-    return { success: true };
+    if (!authData.session) {
+      return { success: false, error: "No se pudo establecer la sesión" };
+    }
+
+    console.log('[SERVER] Login successful, session established');
+
+    // 3. Revalidate paths to clear cache
+    const { revalidatePath } = await import('next/cache');
+    revalidatePath('/profile', 'page');
+    revalidatePath('/', 'page');
+    
+    // Return success with session info so client can verify
+    return { 
+      success: true, 
+      sessionEstablished: true,
+      userId: authData.user.id 
+    };
 
   } catch (err: any) {
     console.error("Login Exception:", err);
