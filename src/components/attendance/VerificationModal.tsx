@@ -1,5 +1,6 @@
 import { IParticipant } from '@/services/attendanceService';
 import { Button } from '@/components/ui/Button';
+import NextImage from 'next/image';
 import { Loader2, CheckCircle, XCircle, User, Award } from 'lucide-react';
 
 interface VerificationModalProps {
@@ -24,7 +25,15 @@ export function VerificationModal({ isOpen, participant, isLoading, onConfirm, o
                     
                     <div className="h-24 w-24 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center text-3xl font-bold text-[#373737] z-10 relative">
                         {participant.avatar_url ? (
-                            <img src={participant.avatar_url} alt="Profile" className="h-full w-full rounded-full object-cover" />
+                            <div className="relative h-full w-full rounded-full overflow-hidden">
+                                <NextImage 
+                                    src={participant.avatar_url} 
+                                    alt="Profile" 
+                                    fill
+                                    className="object-cover"
+                                    sizes="96px"
+                                />
+                            </div>
                         ) : (
                             <span>{participant.first_name?.[0]}{participant.last_name?.[0]}</span>
                         )}

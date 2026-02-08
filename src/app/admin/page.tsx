@@ -9,27 +9,38 @@ import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer
 import { useRoleAuth } from '@/hooks/useRoleAuth';
 import { Loader2, User, Calendar, FileText, QrCode, Users, Settings, Award, LayoutDashboard } from 'lucide-react';
 
+// ... imports
+
 const UsersTable = dynamic(() => import('@/components/admin/UsersTable').then(mod => mod.UsersTable), {
     loading: () => <LoadingSpinner />,
+    ssr: false
 });
 const EventsManager = dynamic(() => import('@/components/admin/EventsManager').then(mod => mod.EventsManager), {
     loading: () => <LoadingSpinner />,
+    ssr: false
 });
 const UserProfileView = dynamic(() => import('@/components/profile/UserProfileView').then(mod => mod.UserProfileView), {
     loading: () => <LoadingSpinner />,
+    ssr: false
 });
 const AgendaView = dynamic(() => import('@/components/events/AgendaView').then(mod => mod.AgendaView), {
     loading: () => <LoadingSpinner />,
+    ssr: false
 });
 const AttendanceView = dynamic(() => import('@/views/admin/AttendanceView'), {
     loading: () => <LoadingSpinner />,
+    ssr: false
 });
 const CertificatesView = dynamic(() => import('@/components/profile/CertificatesView').then(mod => mod.CertificatesView), {
     loading: () => <LoadingSpinner />,
+    ssr: false
 });
 const CertificateDesignView = dynamic(() => import('@/components/admin/CertificateDesignView').then(mod => mod.CertificateDesignView), {
     loading: () => <LoadingSpinner />,
+    ssr: false
 });
+
+// ... rest of the file
 
 function LoadingSpinner() {
     return (

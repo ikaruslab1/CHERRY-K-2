@@ -57,37 +57,9 @@ export function LoginForm() {
         return;
       }
 
-      console.log('[LOGIN] Login successful on server, verifying session...');
+      console.log('[LOGIN] Login successful on server, redirecting...');
       
-      // 2. Quick check that session is available
-      // With createBrowserClient, cookies should be readable immediately
-      let sessionAvailable = false;
-      let attempts = 0;
-      const maxAttempts = 10; // Reduced to 1 second
-      
-      while (!sessionAvailable && attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log(`[LOGIN] Checking session (${attempts + 1}/${maxAttempts}):`, session ? '✓ Available' : '✗ Not yet');
-        
-        if (session) {
-          sessionAvailable = true;
-          console.log('[LOGIN] ✓ Session confirmed in client!');
-        }
-        
-        attempts++;
-      }
-
-      if (!sessionAvailable) {
-        console.error('[LOGIN] Session not available after waiting');
-        setError("Error al verificar la sesión. Por favor intenta de nuevo.");
-        setIsLoading(false);
-        return;
-      }
-
       // 3. Session is confirmed, now redirect
-      console.log('[LOGIN] Redirecting to profile...');
       router.push('/profile');
       router.refresh();
 

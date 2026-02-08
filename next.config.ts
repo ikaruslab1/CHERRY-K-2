@@ -7,6 +7,17 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   skipWaiting: true,
   runtimeCaching: [
     {
+      urlPattern: /^\/assets\/.*/i,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "static-assets",
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 60 * 60 * 24 * 30, // 1 month
+        },
+      },
+    },
+    {
       // Cache Supabase Storage (images, assets)
       urlPattern: /^https:\/\/fhuinrsvgjmrjaamznjd\.supabase\.co\/storage\/v1\/object\/public\/.*/i,
       handler: "StaleWhileRevalidate",
@@ -40,6 +51,20 @@ const withPWA = require("@ducanh2912/next-pwa").default({
 const nextConfig: NextConfig = {
   /* config options here */
   turbopack: {}, 
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'fhuinrsvgjmrjaamznjd.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  }, 
 };
 
-export default withPWA(nextConfig);
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+export default withPWA(withBundleAnalyzer(nextConfig));

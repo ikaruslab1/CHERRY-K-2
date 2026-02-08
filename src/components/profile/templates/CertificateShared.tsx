@@ -1,6 +1,7 @@
 import React from 'react';
 // @ts-ignore
 import Barcode from 'react-barcode';
+import NextImage from 'next/image';
 
 // --- UTILITIES ---
 
@@ -120,9 +121,11 @@ export const Header = ({ date, id, accent = '#000', variant = 'default', logos }
                      const logoUrl = logo.type === 'preset' ? `/assets/${logo.value}.svg` : logo.value;
                      return (
                          <div key={index} className="flex items-center gap-4 h-full"> 
-                             <img 
+                             <NextImage 
                                 src={logoUrl} 
                                 alt={`Logo ${index + 1}`} 
+                                width={120}
+                                height={64}
                                 className="h-full w-auto object-contain max-w-[120px]" 
                                 style={{ filter: accent === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)' }} 
                              />

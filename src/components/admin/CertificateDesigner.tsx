@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Upload, X, Save, RefreshCw, Eye, ZoomIn, ZoomOut, Plus, Image as ImageIcon } from 'lucide-react';
+import NextImage from 'next/image';
 import { CertificateContent } from '@/components/profile/CertificateContent';
 import type { Certificate } from '@/components/profile/CertificateContent';
 import { useConference } from '@/context/ConferenceContext';
@@ -374,8 +375,10 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                              >
                                                  {logo.type !== 'none' && logo.value ? (
                                                      <>
-                                                         <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
-                                                     </>
+                                                        <div className="relative w-full h-full p-1">
+                                                            <NextImage src={logoUrl} alt="Logo" fill className="object-contain" sizes="64px" />
+                                                        </div>
+                                                    </>
                                                  ) : (
                                                      <>
                                                          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
@@ -422,16 +425,16 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 <p className="text-[10px] text-gray-400 mt-2 text-center">Recomendado: 3300x2550px (300dpi Carta Horizontal)</p>
                                  
                                  {config.background_url && (
-                                     <div className="mt-4 relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-                                         <img src={config.background_url} alt="Background Preview" className="w-full h-32 object-cover" />
+                                     <div className="mt-4 relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm w-full h-32">
+                                         <NextImage src={config.background_url} alt="Background Preview" fill className="object-cover" sizes="(max-width: 768px) 100vw, 300px" />
                                          <button 
                                             onClick={() => setConfig({...config, background_url: undefined, mode: 'template_v1'})}
-                                            className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg hover:bg-red-600 transition-colors"
+                                            className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg hover:bg-red-600 transition-colors z-10"
                                             title="Eliminar fondo"
                                          >
                                              <X className="w-4 h-4" />
                                          </button>
-                                         <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] p-1 text-center">Vista Previa</div>
+                                         <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] p-1 text-center font-medium backdrop-blur-sm">Vista Previa</div>
                                      </div>
                                  )}
                             </div>

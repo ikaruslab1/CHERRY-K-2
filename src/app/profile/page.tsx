@@ -15,6 +15,7 @@ import { CertificatesView } from '@/components/profile/CertificatesView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -120,14 +121,45 @@ const navItems = [
     }
   ];
 
+
+// ... inside component
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-[#373737]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin h-8 w-8 border-4 border-gray-200 border-t-[#373737] rounded-full" />
-          <p className="text-sm font-medium text-gray-500 animate-pulse">Cargando perfil...</p>
+      <SidebarAwareContainer className="min-h-screen p-8 bg-gray-50">
+        {/* Mobile Nav Skeleton */}
+        <div className="md:hidden flex justify-between items-center mb-8">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <Skeleton className="h-8 w-32" />
         </div>
-      </div>
+
+        <div className="max-w-4xl mx-auto space-y-8 mt-12 md:mt-0">
+            {/* Header / Tabs Skeleton */}
+            <div className="flex gap-4 overflow-x-auto pb-4 md:pb-0">
+                {[1, 2, 3, 4].map((i) => (
+                    <Skeleton key={i} className="h-10 w-32 flex-shrink-0 rounded-full" />
+                ))}
+            </div>
+
+            {/* Main Content Area Skeleton */}
+            <div className="space-y-6">
+                <div className="flex flex-col md:flex-row gap-6 items-center md:items-start p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                     <Skeleton className="h-24 w-24 rounded-full" />
+                     <div className="space-y-3 w-full max-w-sm text-center md:text-left">
+                        <Skeleton className="h-8 w-3/4 mx-auto md:mx-0" />
+                        <Skeleton className="h-4 w-1/2 mx-auto md:mx-0" />
+                        <Skeleton className="h-4 w-full mx-auto md:mx-0" />
+                     </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <Skeleton className="h-48 w-full rounded-2xl" />
+                     <Skeleton className="h-48 w-full rounded-2xl" />
+                     <Skeleton className="h-48 w-full rounded-2xl" />
+                </div>
+            </div>
+        </div>
+      </SidebarAwareContainer>
     );
   }
 

@@ -1,4 +1,5 @@
 import React, { useRef, useLayoutEffect, useState, useMemo } from 'react';
+import NextImage from 'next/image';
 import { Certificate, formatDate, getDegreeAbbr, Signatures, getEventArticle } from './CertificateShared';
 
 // Helper to map font options
@@ -350,11 +351,16 @@ export const CustomTemplate = ({
         >
             {/* Background Image */}
             {config?.background_url && (
-                <img 
-                    src={config.background_url} 
-                    alt="Background" 
-                    className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
-                />
+                <div className="absolute inset-0 z-0 pointer-events-none w-full h-full"> 
+                    <NextImage 
+                        src={config.background_url} 
+                        alt="Background" 
+                        fill
+                        priority
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                </div>
             )}
 
             {/* Guides Overlay */}
@@ -599,9 +605,11 @@ export const CustomTemplate = ({
                                 const logoUrl = logo.type === 'preset' ? `/assets/${logo.value}.svg` : logo.value;
                                 return (
                                     <React.Fragment key={index}>
-                                        <img 
+                                        <NextImage 
                                             src={logoUrl} 
                                             alt={`Logo ${index}`} 
+                                            width={120}
+                                            height={60}
                                             className={`${elements.logos?.direction === 'vertical' ? 'w-full h-auto' : 'h-full w-auto'} object-contain max-h-[60px] max-w-[120px]`}
                                             style={{ 
                                                 filter: (elements.logos?.contrast === 'white') ? 'brightness(0) invert(1)' : 'brightness(0)' 

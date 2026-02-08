@@ -1,5 +1,6 @@
 import React from 'react';
 import { Certificate, Header, MainBody, Signatures, getEventArticle } from './CertificateShared';
+import NextImage from 'next/image';
 
 interface TemplateProps {
     certificate: Certificate;
@@ -79,9 +80,11 @@ export const ModernTemplate = ({
                          const logoUrl = logo.type === 'preset' ? `/assets/${logo.value}.svg` : logo.value;
                          return (
                              <React.Fragment key={index}>
-                                <img
+                                <NextImage
                                     src={logoUrl}
                                     alt={`Logo ${index + 1}`}
+                                    width={150}
+                                    height={120}
                                     className="w-full h-auto object-contain max-h-[120px] opacity-90"
                                     style={{ filter: logoContrast === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)' }}
                                 />

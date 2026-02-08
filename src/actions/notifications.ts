@@ -1,6 +1,8 @@
 'use server';
 
 import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from "@supabase/ssr"; // Import for server action
+import { cookies } from "next/headers"; // Import for server action
 import { Client } from "@upstash/qstash";
 
 // Use service role to bypass RLS and read global event configs/attendance
@@ -8,6 +10,68 @@ const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+
+// REFACTORED: subscribeToNotifications (Originally API Route)
+export async function subscribeToNotifications(subscription: any, userAgent: string) {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() { return cookieStore.getAll() },
+          setAll(cookiesToSet) {
+             try {
+               cookiesToSet.forEach(({ name, value, options }) =>
+                 cookieStore.set(name, value, options)
+               )
+             } catch {}
+          },
+        },
+      }
+    );
+
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Auth Check
+    if (!session) {
+      console.error('[subscribeToNotifications] Unauthorized attempt');
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Validation
+    if (!subscription || !subscription.endpoint || !subscription.keys) {
+        console.error('[subscribeToNotifications] Invalid subscription data');
+        return { success: false, error: 'Invalid subscription data' };
+    }
+
+    // Database Operation
+    const { error } = await supabase
+      .from('push_subscriptions')
+      .upsert(
+        { 
+          user_id: session.user.id, 
+          subscription: subscription,
+          user_agent: userAgent
+        },
+        { onConflict: 'user_id, subscription' }
+      );
+
+    if (error) {
+       console.error('[subscribeToNotifications] Supabase upsert error:', error);
+       return { success: false, error: 'Database error' };
+    }
+
+    return { success: true };
+
+  } catch (error) {
+    console.error('[subscribeToNotifications] Server Action Exception:', error);
+    return { success: false, error: 'Internal Server Error' };
+  }
+}
+
 
 export async function checkAndNotifyCertificate(userId: string, eventId: string) {
   console.log(`[checkAndNotifyCertificate] Starting for User: ${userId}, Event: ${eventId}`);

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { env } from '@/lib/env';
+import { subscribeToNotifications } from '@/actions/notifications';
 
 export function usePushSubscription() {
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -43,25 +44,16 @@ export function usePushSubscription() {
           throw new Error('Llave VAPID no configurada');
       }
 
-      const subscription = await registration.pushManager.subscribe({
+      const pushSubscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidKey),
       });
 
-      // Save to server
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Usuario no autenticado');
+      // Save to server using Server Action
+      const result = await subscribeToNotifications(JSON.parse(JSON.stringify(pushSubscription)), navigator.userAgent);
 
-      const res = await fetch('/api/notifications/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(subscription),
-      });
-
-      if (!res.ok) {
-        throw new Error('Error al guardar suscripción en servidor');
+      if (result.error) {
+        throw new Error(result.error);
       }
 
       setIsSubscribed(true);
