@@ -3,133 +3,168 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useConference } from '@/context/ConferenceContext';
 
 type AllowedRole = 'admin' | 'staff' | 'ponente' | 'user' | 'owner' | 'vip';
 
-// Cache simple en memoria para evitar llamadas repetidas en la misma sesión de navegación
-let globalCachedRole: { id: string, role: string } | null = null;
+// Cache simple en memoria para evitar llamadas repetidas en la misma sesión
+// Key: `${userId}_${conferenceId}`
+const globalRoleCache: Record<string, AllowedRole> = {};
 
-/**
- * Hook para proteger rutas basado en roles.
- * Valida que el usuario esté autenticado y tenga uno de los roles permitidos.
- * @param allowedRoles Array de roles permitidos. Si está vacío, solo verifica autenticación.
- * @param redirectTo Ruta a la que redirigir si falla la validación.
- */
 export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string = '/profile') {
     const router = useRouter();
+    const { currentConference, loading: conferenceLoading } = useConference();
+    
+    // Convert allowedRoles to string for stable dependency
+    const allowedRolesStr = JSON.stringify(allowedRoles);
+
     const [loading, setLoading] = useState(true);
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [userRole, setUserRole] = useState<AllowedRole | null>(null);
 
     useEffect(() => {
+        let isMounted = true;
+
+        const getEffectiveRole = async (userId: string, conferenceId: string): Promise<AllowedRole> => {
+             // 1. Verificar si es Owner Global (Perfil principal)
+             const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', userId)
+                .single();
+             
+             if (profile && profile.role === 'owner') {
+                 return 'owner';
+             }
+
+             // 2. Verificar Rol Local en Conferencia
+             const { data: localRole } = await supabase
+                .from('conference_roles')
+                .select('role')
+                .eq('user_id', userId)
+                .eq('conference_id', conferenceId)
+                .single();
+             
+             if (localRole && localRole.role) {
+                 return localRole.role as AllowedRole;
+             }
+             
+             return 'user';
+        };
+
+        const updateCache = (userId: string, conferenceId: string, role: AllowedRole) => {
+            const key = `${userId}_${conferenceId}`;
+            globalRoleCache[key] = role;
+            if (typeof window !== 'undefined') {
+                localStorage.setItem(`user_role_${key}`, role);
+            }
+        };
+
+        const validateRole = async (userId: string, conferenceId: string, currentRole: AllowedRole) => {
+             const serverRole = await getEffectiveRole(userId, conferenceId);
+
+             if (!isMounted) return;
+
+             if (serverRole !== currentRole) {
+                 console.log('Role updated from server:', serverRole);
+                 updateCache(userId, conferenceId, serverRole);
+                 setUserRole(serverRole);
+                 
+                 const roles = JSON.parse(allowedRolesStr);
+                 if (roles.length > 0 && !roles.includes(serverRole)) {
+                     router.push(redirectTo);
+                 }
+             }
+        };
+
         const checkAuth = async () => {
+            if (conferenceLoading) return;
+
             try {
-                // 1. Verificar Sesión (Offline-friendly)
-                // Usamos getSession en lugar de getUser para permitir funcionamiento offline
+                // 1. Verificar Sesión
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession();
                 
                 if (sessionError || !session?.user) {
-                    console.warn('No session found or error:', sessionError);
-                    router.push('/');
+                    if (isMounted) router.push('/');
                     return;
                 }
 
                 const user = session.user;
+                
+                if (!currentConference) {
+                    if (isMounted) {
+                        setUserRole('user'); // Default role
+                        setLoading(false);
+                        // Only redirect if roles are strictly required and we are not in selection
+                        const roles = JSON.parse(allowedRolesStr);
+                        if (roles.length > 0 && !redirectTo.includes('select-conference')) {
+                            router.push('/select-conference'); 
+                        } else {
+                            setIsAuthorized(true);
+                        }
+                    }
+                    return;
+                }
 
-                // 2. Optimización: Buscar en caché (Memoria -> LocalStorage -> DB)
+                const conferenceId = currentConference.id;
+                const cacheKey = `${user.id}_${conferenceId}`;
                 let role: AllowedRole | null = null;
                 
-                // A) Caché en Memoria
-                if (globalCachedRole && globalCachedRole.id === user.id) {
-                    role = globalCachedRole.role as AllowedRole;
-                } 
-                // B) Caché en LocalStorage (Persistencia Offline)
-                else {
-                    const cachedRoleStr = localStorage.getItem(`user_role_${user.id}`);
-                    if (cachedRoleStr) {
+                // 2. Cache
+                if (globalRoleCache[cacheKey]) {
+                    role = globalRoleCache[cacheKey];
+                } else {
+                    const cachedRoleStr = typeof window !== 'undefined' ? localStorage.getItem(`user_role_${cacheKey}`) : null;
+                    if (cachedRoleStr && ['admin', 'staff', 'ponente', 'user', 'owner', 'vip'].includes(cachedRoleStr)) {
                         role = cachedRoleStr as AllowedRole;
-                        // Restaurar a memoria
-                        globalCachedRole = { id: user.id, role };
+                        globalRoleCache[cacheKey] = role;
                     }
                 }
 
-                // C) Si tenemos rol (de memoria o local), validamos y renderizamos
+                // 3. Logic
                 if (role) {
-                    setUserRole(role);
-                    if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
-                        router.push(redirectTo);
-                        return;
+                    if (isMounted) {
+                        setUserRole(role);
+                        const roles = JSON.parse(allowedRolesStr);
+                        if (roles.length > 0 && !roles.includes(role)) {
+                            router.push(redirectTo);
+                            return;
+                        }
+                        setIsAuthorized(true);
+                        setLoading(false);
+                        
+                        validateRole(user.id, conferenceId, role);
                     }
-                    setIsAuthorized(true);
-                    setLoading(false);
+                } else {
+                    // Fetch fresh
+                    const serverRole = await getEffectiveRole(user.id, conferenceId);
                     
-                    // Opcional: Revalidar en segundo plano si hay conexión
-                    // Para no bloquear la UI, podríamos lanzar una validación silenciosa aquí
-                    supabase
-                        .from('profiles')
-                        .select('role')
-                        .eq('id', user.id)
-                        .single()
-                        .then(({ data, error }) => {
-                            if (!error && data && data.role !== role) {
-                                console.log('Role updated from server:', data.role);
-                                const newRole = data.role as AllowedRole;
-                                globalCachedRole = { id: user.id, role: newRole };
-                                localStorage.setItem(`user_role_${user.id}`, newRole);
-                                setUserRole(newRole);
-                                
-                                if (allowedRoles.length > 0 && !allowedRoles.includes(newRole)) {
-                                    router.push(redirectTo);
-                                }
-                            }
-                        });
-                }
-
-                // D) Si NO hay rol en caché, consultamos DB (Requiere conexión la primera vez)
-                if (!role) {
-                    const { data: profile, error } = await supabase
-                        .from('profiles')
-                        .select('role')
-                        .eq('id', user.id)
-                        .single();
-
-                    if (error || !profile) {
-                        console.error('Error fetching profile role:', error);
-                        // Si falla y no tenemos rol, solo redirigimos si es un error fatal de autenticación
-                        // Pero si es falta de conexión, tal vez deberíamos mostrar un error en lugar de logout?
-                        // Por seguridad, sin rol no podemos dejar pasar. El usuario DEBE conectarse al menos una vez.
-                        router.push('/');
-                        return;
+                    if (isMounted) {
+                        updateCache(user.id, conferenceId, serverRole);
+                        setUserRole(serverRole);
+                        
+                        const roles = JSON.parse(allowedRolesStr);
+                        if (roles.length > 0 && !roles.includes(serverRole)) {
+                            router.push(redirectTo);
+                            return;
+                        }
+                        setIsAuthorized(true);
+                        setLoading(false);
                     }
-
-                    role = profile.role as AllowedRole;
-                    
-                    // Guardar en caché y localStorage
-                    globalCachedRole = { id: user.id, role: role };
-                    localStorage.setItem(`user_role_${user.id}`, role);
-                    
-                    setUserRole(role);
-                }
-
-                // Validación final (en caso de que hayamos obtenido el rol recién ahora)
-                if (loading) { // Solo si no autorizamos arriba
-                    if (allowedRoles.length > 0 && role && !allowedRoles.includes(role)) {
-                        router.push(redirectTo);
-                        return;
-                    }
-                    setIsAuthorized(true);
                 }
 
             } catch (error) {
                 console.error('Auth check error:', error);
-                router.push('/');
-            } finally {
-                setLoading(false);
+                if (isMounted) router.push('/');
             }
         };
 
         checkAuth();
-    }, [router, JSON.stringify(allowedRoles), redirectTo]);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [router, allowedRolesStr, redirectTo, currentConference, conferenceLoading]);
 
     return { loading, isAuthorized, userRole };
 }

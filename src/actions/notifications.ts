@@ -1,7 +1,9 @@
 'use server';
 
 import { createClient } from '@supabase/supabase-js';
-import { sendPushToUser } from '@/lib/notifications';
+import { Client } from "@upstash/qstash";
+
+const qstash = new Client({ token: process.env.QSTASH_TOKEN! });
 
 // Use service role to bypass RLS and read global event configs/attendance
 const supabaseAdmin = createClient(
@@ -41,17 +43,22 @@ export async function checkAndNotifyCertificate(userId: string, eventId: string)
     const required = event.duration_days || 1;
 
     // 3. Check Condition
-    // If this function is called AFTER the insert, currentCount should include the new one.
-    // We send notification ONLY if they just met the requirement.
-    // i.e., currentCount === required. 
-    // If they have more, they already got it. (Unless we want to re-notify? No).
-    
     if (currentCount === required) {
-        // 4. Send Push
-        await sendPushToUser(userId, {
-            title: '¡Felicidades! 🎉',
-            body: `Has completado tu asistencia al evento "${event.title}". Tu constancia ya está disponible.`,
-            url: `/profile/certificates` // Redirect to certificates view
+        // 4. Publish to QStash
+        // Use NEXT_PUBLIC_VERCEL_URL or VERCEL_URL if available, otherwise localhost for dev?
+        // In Vercel, VERCEL_URL is set but without protocol.
+        const baseUrl = process.env.VERCEL_URL 
+          ? `https://${process.env.VERCEL_URL}` 
+          : 'http://localhost:3000';
+
+        await qstash.publishJSON({
+            url: `${baseUrl}/api/qstash/certificate`,
+            body: {
+                userId,
+                title: '¡Felicidades! 🎉',
+                body: `Has completado tu asistencia al evento "${event.title}". Tu constancia ya está disponible.`,
+                url: `/profile/certificates`
+            }
         });
     }
 

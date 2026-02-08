@@ -11,6 +11,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { UserProfile } from '@/types';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 import { useUsers } from '@/hooks/useUsers';
+import { useConference } from '@/context/ConferenceContext';
 
   export function UsersTable({ readOnly = false, currentUserRole }: { readOnly?: boolean, currentUserRole?: string }) {
   const [search, setSearch] = useState('');
@@ -22,6 +23,7 @@ import { useUsers } from '@/hooks/useUsers';
   const [selectedRole, setSelectedRole] = useState<UserProfile['role'] | ''>('');
   const [updating, setUpdating] = useState(false);
   const [origin, setOrigin] = useState('');
+  const { currentConference } = useConference();
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -45,16 +47,33 @@ import { useUsers } from '@/hooks/useUsers';
     if (!selectedUser) return;
     setUpdating(true);
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({ role: selectedRole })
-      .eq('id', selectedUser.id);
+    let error;
+
+    if (currentConference) {
+        // Update conference specific role
+        const { error: err } = await supabase
+          .from('conference_roles')
+          .upsert({ 
+            user_id: selectedUser.id, 
+            conference_id: currentConference.id,
+            role: selectedRole 
+          }, { onConflict: 'user_id, conference_id' });
+        error = err;
+    } else {
+        // Fallback: Global role update (deprecated but compatible)
+        const { error: err } = await supabase
+          .from('profiles')
+          .update({ role: selectedRole })
+          .eq('id', selectedUser.id);
+        error = err;
+    }
 
     if (!error) {
       mutate();
       closeModal();
     } else {
         alert("Error actualizando rol");
+        console.error(error);
     }
     setUpdating(false);
   };
@@ -71,7 +90,11 @@ import { useUsers } from '@/hooks/useUsers';
   };
 
   const rolesList = (['user', 'vip', 'ponente', 'staff', 'admin', 'owner'] as UserProfile['role'][]).filter(role => {
+      // Sólo Owner puede asignar Owner
       if (role === 'owner' && currentUserRole !== 'owner') return false;
+      // Sólo Owner puede asignar Admin
+      if (role === 'admin' && currentUserRole !== 'owner') return false;
+      
       return true;
   });
 
