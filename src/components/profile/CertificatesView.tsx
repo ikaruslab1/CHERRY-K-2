@@ -30,6 +30,7 @@ export interface Certificate {
           title: string;
           institution_name: string;
           department_name: string;
+          certificate_config?: any;
       };
       
       certificate_config?: any; 
@@ -89,7 +90,8 @@ export function CertificatesView() {
             conferences (
               title,
               institution_name,
-              department_name
+              department_name,
+              certificate_config
             ),
             certificate_config
           ),
@@ -149,7 +151,8 @@ export function CertificatesView() {
             conferences (
               title,
               institution_name,
-              department_name
+              department_name,
+              certificate_config
             )
         `)
         .eq('speaker_id', user.id)
@@ -231,7 +234,8 @@ export function CertificatesView() {
                       conferences: {
                           title: currentConference.title,
                           institution_name: currentConference.institution_name || 'FES Acatlán',
-                          department_name: currentConference.department_name || 'UNAM'
+                          department_name: currentConference.department_name || 'UNAM',
+                          certificate_config: currentConference.certificate_config
                       }
                   },
                   profiles: {
@@ -267,7 +271,8 @@ export function CertificatesView() {
                   conferences: {
                       title: currentConference.title,
                       institution_name: currentConference.institution_name || 'FES Acatlán',
-                      department_name: currentConference.department_name || 'UNAM'
+                      department_name: currentConference.department_name || 'UNAM',
+                      certificate_config: currentConference.certificate_config
                   }
               },
               profiles: {

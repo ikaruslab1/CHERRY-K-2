@@ -27,6 +27,16 @@ const getDegreeAbbr = (degree: string | null, gender: string | null) => {
     return 'al';
   };
 
+  // Utility for contrast color
+  const getContrastColor = (hexColor: string) => {
+      const hex = hexColor.replace('#', '');
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+      const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      return (yiq >= 128) ? '#000000' : '#ffffff';
+  };
+
 interface Certificate {
     id: string; // attendance id
     scanned_at: string;
@@ -41,8 +51,9 @@ interface Certificate {
           title: string;
           institution_name: string;
           department_name: string;
+          certificate_config?: any; // Add config to conference
       };
-      // Certificate config from DB
+      // Certificate config from DB (legacy event config)
       certificate_config?: {
         mode: 'template_v1' | 'custom_background';
         background_url?: string;
@@ -90,16 +101,186 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
     };
     
     const conf = certificate.events.conferences;
-    const config = certificate.events.certificate_config;
+    // Use conference config if available, otherwise fallback to event config (for backward compatibility)
+    const config = conf?.certificate_config || certificate.events.certificate_config;
 
     // Determine Role
     const isSpeaker = certificate.isSpeaker;
     const isStaff = certificate.isStaff;
     const isOrganizer = certificate.isOrganizer;
 
+    // --- GLOBAL STYLES LOGIC ---
+    const styles = config?.styles || {};
+    // Base font for structural text (always sans for readability)
+    const bodyFont = 'var(--font-geist-sans)';
+    // Display font for Name and Event (user selectable)
+    const displayFont = styles.font_family === 'serif' ? 'var(--font-playfair)' : 
+                      styles.font_family === 'mono' ? 'var(--font-geist-mono)' : 
+                      styles.font_family === 'cursive' ? 'var(--font-great-vibes)' :
+                      'var(--font-geist-sans)';
+
+    // --- SIGNER LOGIC ---
+    const signerCount = config?.signer_count || 1;
+    const signers = config?.signers || [];
+
+    // Simple Mock Barcode Component
+    const MockBarcode = ({ color = '#000' }: { color?: string }) => (
+        <div className="flex h-10 items-end justify-center gap-[3px] opacity-80 select-none overflow-hidden" style={{ color }}>
+            {Array.from({ length: 25 }).map((_, i) => (
+                <div 
+                    key={i} 
+                    className="bg-current" 
+                    style={{ 
+                        height: `${Math.max(60, Math.random() * 100)}%`,
+                        width: Math.random() > 0.6 ? '3px' : '1px'
+                    }} 
+                />
+            ))}
+        </div>
+    );
+
+    // Helper to generate signature blocks -- Compact Version
+    const Signatures = ({ count, color = '#000000', align = 'center' }: { count: number, color?: string, align?: 'center' | 'left' | 'right' }) => {
+        return (
+            <div className={`flex gap-6 ${align === 'center' ? 'justify-center' : align === 'left' ? 'justify-start' : 'justify-end'} mt-2 w-full px-0`}>
+
+                {Array.from({ length: count }).map((_, i) => {
+                    const signer = signers[i] || {};
+                    const name = signer.name || 'Ana María Cárdenas Vargas';
+                    const role = signer.role || 'Jefa de carrera en Diseño Gráfico';
+                    
+                    return (
+                        <div key={i} className={`text-center flex flex-col items-center ${count > 2 ? 'min-w-[150px]' : 'min-w-[200px]'}`}>
+                            {/* Barcode (replacing QR logic) */}
+                            <div className="mb-2 w-full flex justify-center">
+                                <MockBarcode color={color} />
+                            </div>
+                            
+                            {/* Divider Line */}
+                            <div className="w-full border-b border-gray-400 mb-2 opacity-50"></div>
+                            
+                            {/* Name & Role */}
+                            <p className="text-sm font-bold uppercase whitespace-nowrap" style={{ color: color }}>{name}</p>
+                            <p className="text-[10px] opacity-70 whitespace-nowrap" style={{ color: color }}>{role}</p>
+                        </div>
+                    );
+                })}
+            </div>
+        )
+    };
+
+    // --- LAYOUT HELPERS ---
+    const Header = ({ date, accent = '#000', variant = 'default' }: { date: string, accent?: string, variant?: 'default' | 'modern' | 'classic' }) => (
+        <div className={`flex justify-between items-start w-full mb-8 relative z-10 ${variant === 'classic' ? 'font-serif' : 'font-sans'}`}>
+            {/* Logos Left */}
+            <div className="flex items-center gap-4">
+                 <img src="/assets/unam.svg" alt="UNAM" className="h-16 w-auto object-contain brightness-0 opacity-80" style={{ color: accent === '#ffffff' ? 'white' : 'black', filter: accent === '#ffffff' ? 'invert(1)' : 'none' }} />
+                 <div className="h-10 w-[1px] bg-current opacity-20"></div>
+                 <img src="/assets/fesa.svg" alt="FES Acatlán" className="h-16 w-auto object-contain brightness-0 opacity-80" style={{ color: accent === '#ffffff' ? 'white' : 'black', filter: accent === '#ffffff' ? 'invert(1)' : 'none' }} />
+            </div>
+            {/* Date Right */}
+            <div className="text-right" style={{ color: accent }}>
+                <p className={`text-sm ${variant === 'modern' ? 'font-bold' : 'font-medium'}`}>{formatDate(date)}</p>
+            </div>
+        </div>
+    );
+
+    const MainBody = ({ 
+        certificate, 
+        displayText, 
+        styles,
+        textColor,
+        variant = 'default'
+    }: { 
+        certificate: Certificate, 
+        displayText: string, 
+        styles: any,
+        textColor: string,
+        variant?: 'default' | 'modern' | 'classic'
+    }) => {
+        // Dynamic Styles based on variant
+        const titleFont = variant === 'classic' ? 'var(--font-playfair)' : 'var(--font-geist-sans)';
+        const nameFont = variant === 'classic' ? 'var(--font-great-vibes)' : 'inherit';
+        
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center text-center z-10 w-full max-w-4xl mx-auto px-8">
+                {/* Constancia Title */}
+                {variant === 'modern' ? (
+                     <div className="relative mb-4">
+                        <div className="absolute -inset-4 bg-gray-100 skew-x-[-10deg] opacity-50 -z-10 transform scale-110"></div>
+                        <h1 className="text-[90px] font-black leading-none tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600" style={{ fontFamily: titleFont }}>
+                            CONSTANCIA
+                        </h1>
+                     </div>
+                ) : (
+                    <h1 className={`${variant === 'classic' ? 'text-[70px] tracking-widest font-serif text-gray-800' : 'text-[80px] font-bold tracking-widest'} leading-none uppercase mb-2`} style={{ fontFamily: titleFont }}>
+                        CONSTANCIA
+                    </h1>
+                )}
+
+                {/* Subtitle */}
+                {variant === 'modern' ? (
+                     <h2 className="text-xl font-bold tracking-[0.5em] uppercase mb-12 text-white bg-black px-6 py-1 transform -skew-x-10">
+                        de participación
+                    </h2>
+                ) : variant === 'classic' ? (
+                    <h2 className="text-2xl font-serif italic tracking-widest mb-10 text-gray-500">
+                        — de participación —
+                    </h2>
+                ) : (
+                    <h2 className="text-3xl font-light tracking-[0.2em] uppercase mb-12 opacity-90">
+                        de participación
+                    </h2>
+                )}
+
+                {/* Role Text */}
+                <p className={`text-lg mb-4 opacity-80 max-w-2xl ${variant === 'classic' ? 'font-serif italic text-gray-600' : variant === 'modern' ? 'font-bold text-gray-500 uppercase text-sm tracking-wide' : 'font-light'}`}>
+                    a:
+                </p>
+
+                {/* Name */}
+                <h3 
+                    className={`${variant === 'classic' ? 'text-6xl font-normal my-4' : variant === 'modern' ? 'text-6xl font-black uppercase tracking-tight my-4' : 'text-5xl font-bold mb-6'}`} 
+                    style={{ color: styles.accent_color, fontFamily: displayFont }}
+                >
+                    {getDegreeAbbr(certificate.profiles.degree, certificate.profiles.gender)} {certificate.profiles.first_name} {certificate.profiles.last_name}
+                </h3>
+
+                {/* Divider */}
+                {variant === 'classic' ? (
+                     <div className="w-full max-w-sm h-px bg-gray-300 mb-8 mx-auto relative flex items-center justify-center">
+                         <div className="w-2 h-2 rounded-full border border-gray-400 bg-white absolute"></div>
+                     </div>
+                ) : variant === 'modern' ? (
+                    <div className="w-24 h-2 mb-8 mx-auto" style={{ backgroundColor: styles.accent_color }}></div>
+                ) : (
+                    <div className="w-32 h-1 bg-current mb-6 opacity-20 mx-auto"></div>
+                )}
+
+                {/* Event Context */}
+                <p className={`text-lg mb-4 opacity-80 max-w-2xl ${variant === 'classic' ? 'font-serif italic text-gray-600' : variant === 'modern' ? 'font-bold text-gray-500 uppercase text-sm tracking-wide' : 'font-light'}`}>
+                    {displayText}
+                </p>
+
+                {/* Event Title */}
+                <h4 
+                    className={`${variant === 'classic' ? 'text-3xl font-serif font-bold text-gray-800' : variant === 'modern' ? 'text-4xl font-black uppercase tracking-tighter' : 'text-3xl font-bold uppercase'} mb-12 max-w-3xl leading-tight`}
+                    style={{ fontFamily: displayFont }}
+                >
+                    {certificate.events.title}
+                </h4>
+
+                {/* Motto */}
+                <p className={`text-sm opacity-70 ${variant === 'classic' ? 'font-serif italic text-gray-400' : 'font-serif italic'}`}>
+                    "Por mi raza hablará el espíritu"
+                </p>
+            </div>
+        );
+    };
+
     // --- CUSTOM BACKGROUND MODE ---
     if (config?.mode === 'custom_background') {
-        const styles = config.styles || {
+        const customStyles = config.styles || {
             text_color: '#000000',
             accent_color: '#dbf227',
             font_family: 'sans',
@@ -113,14 +294,8 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
             staff: "Por su valiosa participación en la logística del evento:",
             organizer: "Por su invaluable apoyo y liderazgo en la organización del evento:"
         };
-
         const roleText = isSpeaker ? texts.speaker : isStaff ? texts.staff : isOrganizer ? texts.organizer : texts.attendee;
-        
-        // Font selection
-        const fontFamily = styles.font_family === 'serif' ? 'var(--font-playfair)' : 
-                          styles.font_family === 'mono' ? 'var(--font-geist-mono)' : 
-                          'var(--font-geist-sans)'; // Default sans
-        
+
         return (
             <div 
                 style={{ 
@@ -129,261 +304,237 @@ export function CertificateContent({ certificate }: { certificate: Certificate }
                     position: 'relative',
                     overflow: 'hidden',
                     backgroundColor: 'white',
-                    color: styles.text_color,
-                    fontFamily: fontFamily
+                    color: customStyles.text_color,
+                    fontFamily: bodyFont
                 }} 
-                className="certificate-container mx-auto shadow-none print:shadow-none"
+                className="certificate-container mx-auto shadow-none print:shadow-none flex flex-col p-12"
             >
                 {/* Background Image */}
                 {config.background_url && (
                     <img 
                         src={config.background_url} 
-                        alt="Certificate Background" 
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            zIndex: 0
-                        }}
+                        alt="Background" 
+                        className="absolute inset-0 w-full h-full object-cover z-0"
                     />
                 )}
+                
+                {/* Layout Overlay */}
+                 <div className="relative z-10 h-full flex flex-col justify-between">
+                    <Header date={certificate.events.date} accent={customStyles.text_color} variant="default" />
+                    
+                    <MainBody 
+                        certificate={certificate} 
+                        displayText={roleText} 
+                        styles={customStyles} 
+                        textColor={customStyles.text_color} 
+                        variant="default" // Default style for custom background to let background shine
+                    />
 
-                {/* Content Overlay */}
-                <div 
-                    style={{
-                        position: 'relative',
-                        zIndex: 10,
-                        paddingTop: styles.content_vertical_position,
-                        paddingLeft: '2rem',
-                        paddingRight: '2rem',
-                        textAlign: styles.text_alignment as any,
-                        width: '100%'
-                    }}
-                >
-                    <div style={{ maxWidth: '85%', margin: '0 auto' }}>
-                         {/* Name */}
-                        <h2 style={{ 
-                            fontSize: '2.5rem', 
-                            fontWeight: 'bold', 
-                            marginBottom: '0.5rem',
-                            lineHeight: 1.2
-                        }}>
-                             {getDegreeAbbr(certificate.profiles.degree, certificate.profiles.gender)} {certificate.profiles.first_name} {certificate.profiles.last_name}
-                        </h2>
-
-                        {/* Role Text */}
-                        <p style={{ fontSize: '1.2rem', marginBottom: '0.5rem', opacity: 0.9 }}>
-                            {roleText}
-                        </p>
-
-                        {/* Event Title */}
-                        {certificate.events.title && (
-                             <h3 style={{ 
-                                fontSize: '1.8rem', 
-                                fontWeight: '800', 
-                                textTransform: 'uppercase',
-                                marginBottom: '0.5rem',
-                                color: styles.accent_color // Use accent color for title? Or maybe just text color
-                            }}>
-                                {certificate.events.title}
-                            </h3>
-                        )}
-                        
-                         {/* Date / Location */}
-                        <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>
-                            {formatDate(certificate.events.date)}
-                        </p>
+                    <div className="w-full flex justify-center mt-8">
+                       <Signatures count={signerCount} align="center" color={customStyles.text_color} />
                     </div>
                 </div>
-
-                {/* QR Code - Optional/Configurable position */}
-                {(config.show_qr !== false) && (
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '25mm',
-                        right: config.qr_position === 'bottom-left' ? undefined : '25mm',
-                        left: config.qr_position === 'bottom-left' ? '25mm' : undefined,
-                        zIndex: 20
-                    }}>
-                         <div className="bg-white p-2 rounded shadow-sm inline-block">
-                            <QRCodeSVG 
-                                value={`https://cherry-k-2.com/verify/${certificate.id}`} 
-                                size={60} 
-                                level="M"
-                                fgColor="#000000"
-                            />
-                        </div>
-                        <div style={{ fontSize: '10px', marginTop: '4px', textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.7)',  padding: '2px', borderRadius: '4px' }}>
-                             ID: {certificate.id.split('-').pop()?.toUpperCase()}
-                        </div>
-                    </div>
-                )}
             </div>
         );
     }
 
-    // --- DEFAULT LAYOUT (Original) ---
-    const accentColor = '#dbf227'; // Hardcoded default
-    const institution = conf?.institution_name || 'FES Acatlán';
-    const department = conf?.department_name || 'UNAM'; // Default fallback
-    const confTitle = conf?.title || 'SEMANA DEL DISEÑO';
+    // --- TEMPLATE: CLASSIC / ELEGANT ---
+    if (config?.template_id === 'classic') {
+        const accent = config.styles?.accent_color || '#dbf227'; 
+        const textColor = config.styles?.text_color || '#373737'; 
+        
+        const defaultTexts = {
+             attendee: `Por su asistencia ${getEventArticle(certificate.events.type)} ${certificate.events.type}`,
+             speaker: `Por impartir la ${certificate.events.type.toLowerCase()}:`,
+             staff: "Por su valiosa participación en la logística del evento:",
+             organizer: "Por su invaluable apoyo y liderazgo en la organización del evento:"
+        };
+        const texts = config?.texts || {};
+        const roleText = isSpeaker ? (texts.speaker || defaultTexts.speaker) : isStaff ? (texts.staff || defaultTexts.staff) : isOrganizer ? (texts.organizer || defaultTexts.organizer) : (texts.attendee || defaultTexts.attendee);
+
+        return ( 
+            <div 
+                style={{ width: '279.4mm', height: '215.9mm', color: textColor, fontFamily: 'var(--font-playfair)' }} 
+                className="bg-[#faf9f6] relative overflow-hidden mx-auto p-12 flex flex-col justify-between"
+            >
+                {/* Classic Ornament Border */}
+                <div className="absolute inset-4 border border-[#ddd] pointer-events-none"></div>
+                <div className="absolute inset-6 border-[3px] border-double pointer-events-none" style={{ borderColor: accent }}></div>
+                
+                {/* Corners */}
+                <div className="absolute top-6 left-6 w-16 h-16 border-t-[3px] border-l-[3px] pointer-events-none" style={{ borderColor: accent }}></div>
+                <div className="absolute top-6 right-6 w-16 h-16 border-t-[3px] border-r-[3px] pointer-events-none" style={{ borderColor: accent }}></div>
+                <div className="absolute bottom-6 left-6 w-16 h-16 border-b-[3px] border-l-[3px] pointer-events-none" style={{ borderColor: accent }}></div>
+                <div className="absolute bottom-6 right-6 w-16 h-16 border-b-[3px] border-r-[3px] pointer-events-none" style={{ borderColor: accent }}></div>
+
+                <div className="relative z-10 h-full flex flex-col justify-between px-12 py-8">
+                    <Header date={certificate.events.date} variant="classic" />
+                    
+                    <MainBody 
+                         certificate={certificate} 
+                         displayText={roleText} 
+                         styles={{ accent_color: accent }} 
+                         textColor={textColor} 
+                         variant="classic"
+                    />
+
+                    <div className="w-full flex justify-center mt-4">
+                         <Signatures count={signerCount} align="center" color={textColor} />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // --- TEMPLATE: MODERN / GEOMETRIC ---
+    if (config?.template_id === 'modern') {
+        const accent = config.styles?.accent_color || '#dbf227';
+        const textColor = config.styles?.text_color || '#000000'; 
+        
+        const defaultTexts = {
+             attendee: `Por su asistencia ${getEventArticle(certificate.events.type)} ${certificate.events.type}`,
+             speaker: `Por impartir la ${certificate.events.type.toLowerCase()}:`,
+             staff: "Por su valiosa participación en la logística del evento:",
+             organizer: "Por su invaluable apoyo y liderazgo en la organización del evento:"
+        };
+        const texts = config?.texts || {};
+        const roleText = isSpeaker ? (texts.speaker || defaultTexts.speaker) : isStaff ? (texts.staff || defaultTexts.staff) : isOrganizer ? (texts.organizer || defaultTexts.organizer) : (texts.attendee || defaultTexts.attendee);
+
+        return (
+            <div 
+                style={{ width: '279.4mm', height: '215.9mm', color: textColor, fontFamily: 'var(--font-geist-sans)' }} 
+                className="bg-white relative overflow-hidden mx-auto flex flex-col p-12"
+            >
+                {/* Modern Geometric Accents */}
+                <div className="absolute top-0 right-0 w-[40%] h-[100%] bg-gray-50 skew-x-12 origin-top pointer-events-none -z-0"></div>
+                <div className="absolute bottom-0 left-0 w-full h-2 pointer-events-none" style={{ background: accent }}></div>
+                <div className="absolute top-0 right-0 w-32 h-32 opacity-20 pointer-events-none rounded-bl-full" style={{ background: accent }}></div>
+
+                <div className="relative z-10 h-full flex flex-col justify-between">
+                     <Header date={certificate.events.date} variant="modern" />
+                    
+                     <MainBody 
+                         certificate={certificate} 
+                         displayText={roleText} 
+                         styles={{ accent_color: accent }} 
+                         textColor={textColor} 
+                         variant="modern"
+                     />
+
+                     <div className="w-full flex justify-center mt-8 pt-8">
+                         <Signatures count={signerCount} align="center" color={textColor} />
+                     </div>
+                </div>
+            </div>
+        );
+    }
+
+    // --- DEFAULT LAYOUT (Original Refactored - Split) ---
+    const accent = config?.styles?.accent_color || '#dbf227'; 
+    const contrastColor = getContrastColor(accent);
+    const textColor = '#1a1a1a';
+    
+    const defaultTexts = {
+        attendee: `Por su asistencia ${getEventArticle(certificate.events.type)} ${certificate.events.type}`,
+        speaker: `Por impartir la ${certificate.events.type.toLowerCase()}:`,
+        staff: "Por su valiosa participación en la logística del evento:",
+        organizer: "Por su invaluable apoyo y liderazgo en la organización del evento:"
+    };
+    const texts = config?.texts || {};
+    const roleText = isSpeaker ? (texts.speaker || defaultTexts.speaker) : isStaff ? (texts.staff || defaultTexts.staff) : isOrganizer ? (texts.organizer || defaultTexts.organizer) : (texts.attendee || defaultTexts.attendee);
 
     return (
         <div 
             style={{ 
                 width: '279.4mm', 
                 height: '215.9mm',
+                fontFamily: bodyFont,
+                backgroundColor: 'white',
             }} 
-            className="flex flex-col bg-white relative overflow-hidden mx-auto shadow-none print:shadow-none"
+            className="relative overflow-hidden mx-auto shadow-none print:shadow-none flex flex-col"
         >
-            {/* TOP DARK SECTION - 60% */}
-            <div className="h-[60%] w-full bg-[#1a1a1a] relative flex flex-col px-12 pt-8 pb-6">
-                
-                {/* Subtle texture overlay */}
-                <div className="absolute inset-0 opacity-[0.015] pointer-events-none"
-                    style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
-                    }}
-                />
+             {/* TOP HALF - Accent Background */}
+             <div 
+                style={{ backgroundColor: accent, color: contrastColor, height: '50%' }} 
+                className="w-full relative flex flex-col items-center p-12 pb-0"
+             >
+                 {/* Header (Logos & Date) */}
+                 <div className="w-full mb-2">
+                     <Header date={certificate.events.date} accent={contrastColor} variant="default" />
+                 </div>
 
-                {/* Top Left - Brand Logo */}
-                <div className="flex items-center gap-3 mb-8 z-10">
-                    <img src="/assets/unam.svg" alt="UNAM" className="h-16 w-auto object-contain brightness-0 invert opacity-90" />
-                    <div className="h-12 w-[1px] bg-white/20"></div>
-                    <img src="/assets/fesa.svg" alt="FES Acatlán" className="h-16 w-auto object-contain brightness-0 invert opacity-90" />
-                </div>
-
-                {/* Circular Badge Top Right */}
-                <div className="absolute top-8 right-12 z-10">
-                    <div className="relative w-32 h-32">
-                        {/* Circular text ring */}
-                        <svg viewBox="0 0 100 100" className="w-full h-full opacity-40">
-                            <defs>
-                                <path id="circlePath" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
-                            </defs>
-                            <text className="text-[6px] fill-white uppercase tracking-[0.3em]" style={{ fontFamily: 'var(--font-playfair)' }}>
-                                <textPath href="#circlePath" startOffset="0%">
-                                    {confTitle} • {institution} •
-                                </textPath>
-                            </text>
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <Award className="w-8 h-8 opacity-70" style={{ color: accentColor }} />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Main Title */}
-                <div className="flex-1 flex flex-col justify-center items-center text-center z-10 -mt-4">
-                    <h1 className="font-[var(--font-playfair)] text-[85px] font-bold tracking-[0.15em] text-[#c0c0c0] uppercase leading-none mb-2" >
+                 {/* Title Section */}
+                 <div className="flex-1 flex flex-col justify-center items-center text-center -mt-12">
+                    <p className="text-sm uppercase tracking-[0.3em] opacity-80 mb-4">
+                        Se otorga la presente
+                    </p>
+                    <h1 className="text-[100px] font-bold tracking-widest leading-none uppercase mb-2">
                         CONSTANCIA
                     </h1>
-                    <p className="font-[var(--font-great-vibes)] text-6xl -mt-4 tracking-wide" style={{ color: accentColor }}>
-                        {isSpeaker ? 'de Ponente' : isStaff ? 'de Staff' : isOrganizer ? 'de Organizador' : 'de Participación'}
+                    <h2 className="text-3xl font-light tracking-[0.2em] uppercase opacity-90">
+                        de participación
+                    </h2>
+                 </div>
+
+                 {/* Decorative Line at Bottom of Block */}
+                 <div className="w-full h-4 bg-white opacity-20 absolute bottom-0 left-0"></div>
+                 <div className="w-full h-1 absolute bottom-4 left-0" style={{ backgroundColor: contrastColor, opacity: 0.3 }}></div>
+             </div>
+             
+             {/* BOTTOM HALF - White Background */}
+             <div className="h-[50%] bg-white text-[#1a1a1a] flex flex-col items-center justify-between p-12 pt-8 text-center relative">
+                {/* Accent Line separate from block */}
+                <div className="absolute top-1 left-0 w-full h-1" style={{ backgroundColor: accent }}></div>
+
+                <div className="flex-1 flex flex-col justify-center w-full max-w-4xl mx-auto">
+                    {/* Role Text */}
+                    <p className="text-lg mb-1 opacity-80 font-light">
+                        a:
+                    </p>
+
+                    {/* Name */}
+                    <h3 
+                        className="text-5xl font-bold mb-4" 
+                        style={{ color: accent, fontFamily: displayFont }}
+                    >
+                        {getDegreeAbbr(certificate.profiles.degree, certificate.profiles.gender)} {certificate.profiles.first_name} {certificate.profiles.last_name}
+                    </h3>
+
+                    {/* Divider */}
+                    <div className="w-32 h-1 bg-gray-200 mb-4 mx-auto"></div>
+
+                    {/* Event Context */}
+                    <p className="text-lg mb-2 opacity-80 font-light">
+                        {roleText}
+                    </p>
+
+                    {/* Event Title */}
+                    <h4 
+                        className="text-3xl font-bold uppercase mb-6 max-w-3xl mx-auto leading-tight"
+                        style={{ fontFamily: displayFont }}
+                    >
+                        {certificate.events.title}
+                    </h4>
+
+                    {/* Motto */}
+                    <p className="text-sm opacity-70 font-serif italic mb-2">
+                        "Por mi raza hablará el espíritu"
+                    </p>
+                    
+                    {/* Address */}
+                    <p className="text-[10px] opacity-50 uppercase tracking-wider">
+                        Naucalpan de Juárez, Méx. Av. Jardines de San Mateo s/n, Sta Cruz Acatlan
                     </p>
                 </div>
 
-            </div>
-
-            {/* BOTTOM WHITE SECTION - 40% */}
-            <div className="h-[40%] w-full bg-white relative px-12 py-8 flex flex-col">
-                
-                {/* Decorative gradient separator */}
-                <div 
-                    className="absolute top-0 left-0 right-0 h-1 opacity-60"
-                    style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }}
-                ></div>
-
-                {/* Content Grid */}
-                <div className="flex-1 flex gap-8 relative z-10">
-                    
-                    {/* Left Content - 65% */}
-                    <div className="w-[65%] flex flex-col justify-between">
-                        
-                        <div>
-                            <p className="text-[10px] uppercase tracking-[0.25em] text-gray-400 font-semibold mb-3">
-                                ESTO ES PARA CERTIFICAR QUE
-                            </p>
-                            
-                            <div className="border-b-2 border-gray-300 pb-1 mb-4">
-                                <h2 className="text-2xl font-bold text-[#373737]" >
-                                    {getDegreeAbbr(certificate.profiles.degree, certificate.profiles.gender)} {certificate.profiles.first_name} {certificate.profiles.last_name}
-                                </h2>
-                            </div>
-
-                            <p className="text-sm text-gray-600 leading-relaxed mb-2">
-                                {isSpeaker 
-                                    ? <span>Por impartir la {certificate.events.type.toLowerCase()}:</span>
-                                    : isStaff
-                                    ? <span>Por su valiosa participación en la logística del evento:</span>
-                                    : isOrganizer
-                                    ? <span>Por su invaluable apoyo y liderazgo en la organización del evento:</span>
-                                    : <span>Ha completado satisfactoriamente su asistencia {getEventArticle(certificate.events.type)} {certificate.events.type}</span>
-                                }
-                            </p>
-
-                            <h3 className="text-xl font-black uppercase text-[#1a1a1a] mb-3 tracking-wide" >
-                                {certificate.events.title}
-                            </h3>
-
-                            <p className="text-xs text-gray-500">
-                                Realizado en {certificate.events.location || 'FES Acatlán, UNAM'} • {formatDate(certificate.events.date)}
-                            </p>
-                        </div>
-
-                        {/* Bottom info */}
-                        <div className="text-[15px] text-gray-400 italic leading-none">
-                            <p>"Por mi raza hablará el espíritu"</p>
-                            <p>{institution}, {department}</p>
-                        </div>
-                    </div>
-
-                    {/* Right Content - 35% */}
-                    <div className="w-[35%] flex flex-col justify-between items-end relative">
-                        
-                        {/* Decorative watercolor element (simulated with gradient) */}
-                        <div className="absolute -top-4 -right-8 w-48 h-48 rounded-full opacity-20 pointer-events-none" 
-                            style={{
-                                background: `radial-gradient(circle at 30% 40%, ${accentColor} 0%, #e8e8e8 40%, transparent 70%)`,
-                                filter: 'blur(30px)'
-                            }}
-                        />
-
-                        {/* QR Code & Signature */}
-                        <div className="w-full flex flex-col items-end gap-3 z-10 ">
-                            <div className=" w-35 h-35 bg-white p-2 border border-gray-200 rounded shadow-sm">
-                                <QRCodeSVG 
-                                    value={`https://cherry-k-2.com/verify/${certificate.id}`} 
-                                    size={65} 
-                                    level="H"
-                                    fgColor="#1a1a1a"
-                                    className="w-full h-full object-contain"
-                                />
-                            </div>
-<br />
-                            <div className="text-right">
-                                <div className="w-65 border-b border-gray-400 mb-1 relative">
-                                    <span className="absolute bottom-0 right-0 font-[var(--font-great-vibes)] text-xl  font-bold">
-                                        Ana María Cárdenas Vargas
-                                    </span>
-                                </div>
-                                <p className="text-[16px] text-gray-500">Jefa de la carrera en Diseño Gráfico</p>
-                                <p className="text-[12px] text-gray-400 font-mono mt-2">
-                                    ID: {certificate.id.split('-').pop()?.toUpperCase()}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
+                {/* Signatures */}
+                <div className="w-full flex justify-center mt-auto">
+                    <Signatures count={signerCount} align="center" color="#1a1a1a" />
                 </div>
-
-            </div>
-
+             </div>
         </div>
     );
 }
+
 
 export type { Certificate };

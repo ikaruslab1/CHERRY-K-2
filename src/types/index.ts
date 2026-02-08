@@ -66,6 +66,30 @@ export interface Conference {
   institution_name?: string;
   department_name?: string;
   created_at?: string;
+  certificate_config?: {
+    mode: 'template_v1' | 'custom_background';
+    background_url?: string;
+    styles?: {
+      text_color: string;
+      accent_color: string;
+      font_family: string;
+      text_alignment: 'left' | 'center' | 'right';
+      content_vertical_position: string;
+    };
+    texts?: {
+      attendee: string;
+      speaker: string;
+      staff: string;
+      organizer: string;
+    };
+    signers?: Array<{
+       name: string;
+       role: string;
+       signature_url?: string;
+    }>;
+    show_qr?: boolean;
+    qr_position?: 'bottom-left' | 'bottom-right';
+  } | null;
 }
 
 export interface Attendance {
