@@ -48,7 +48,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
         const fetchProfiles = async () => {
             const { data } = await supabase
                 .from('profiles')
-                .select('id, first_name, last_name, degree, role')
+                .select('id, first_name, last_name, degree, role, gender')
                 .order('first_name');
             if (data) setProfiles(data);
         };
@@ -397,12 +397,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     className="bg-white"
                                 />
                             </div>
+
                             <div>
-                                <label className="block text-xs font-semibold text-gray-500 mb-1.5">Staff</label>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1.5">Contexto Global</label>
                                 <Input 
-                                    value={config.texts?.staff || ''}
-                                    onChange={(e) => updateText('staff', e.target.value)}
-                                    placeholder="Por su apoyo..."
+                                    value={config.texts?.context || ''}
+                                    onChange={(e) => updateText('context', e.target.value)}
+                                    placeholder="En el marco del / de / la..."
                                     className="bg-white"
                                 />
                             </div>
@@ -461,7 +462,8 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                             ...newSigners[idx],
                                                             profile_id: e.target.value,
                                                             name: selectedProfile ? `${selectedProfile.first_name} ${selectedProfile.last_name}` : '',
-                                                            degree: selectedProfile ? selectedProfile.degree : ''
+                                                            degree: selectedProfile ? selectedProfile.degree : '',
+                                                            gender: selectedProfile ? selectedProfile.gender : ''
                                                         };
                                                         
                                                         // Also ensure signer_count is updated or we just rely on signers array length in consumer?
@@ -534,12 +536,6 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${previewRole === 'speaker' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
                              >
                                  Ponente
-                             </button>
-                             <button
-                                onClick={() => setPreviewRole('staff')}
-                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${previewRole === 'staff' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
-                             >
-                                 Staff
                              </button>
                         </div>
                     </div>

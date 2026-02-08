@@ -5,7 +5,8 @@ import { QRCodeSVG } from 'qrcode.react';
 import { getDegreeAbbreviation } from '@/utils/degreeHelper';
 import { Printer, Link, Check } from 'lucide-react';
 import { useConference } from '@/context/ConferenceContext';
-import { motion } from 'framer-motion';
+import { motion, useAnimation } from 'framer-motion';
+import { ParticleBadge } from './ParticleBadge';
 
 interface ProfileCardProps {
   profile: {
@@ -18,9 +19,19 @@ interface ProfileCardProps {
   };
 }
 
+interface Particle {
+  id: string;
+  angle: number;
+  distance: number;
+  size: number;
+  color: string;
+}
+
 export function ProfileCard({ profile }: ProfileCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const controls = useAnimation();
   const { currentConference } = useConference();
   
   const degreeAbbr = getDegreeAbbreviation(profile.degree, profile.gender);
@@ -77,6 +88,44 @@ export function ProfileCard({ profile }: ProfileCardProps) {
     navigator.clipboard.writeText(link);
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
+  };
+
+  const handleCardClick = async () => {
+    // 1. Jump Up
+    controls.start({
+      scale: 1.15,
+      transition: { duration: 0.3, ease: "easeOut" }
+    });
+
+    // 2. Flip halfway through jump
+    setIsFlipped(!isFlipped);
+    
+    // 3. Land and Spawn Particles
+    setTimeout(() => {
+        // Land
+        controls.start({
+          scale: 1,
+          transition: { duration: 0.3, ease: "easeIn" }
+        });
+
+        // Spawn particles
+        const timestamp = Date.now();
+        const particleCount = 12;
+        const newParticles: Particle[] = Array.from({ length: particleCount }).map((_, i) => ({
+          id: `${timestamp}-${i}`,
+          angle: (i * (360 / particleCount)) + (Math.random() * 30 - 15),
+          distance: 140 + Math.random() * 60, // Increased distance
+          size: 6 + Math.random() * 6,
+          color: themeColor
+        }));
+        
+        setParticles(prev => [...prev, ...newParticles]);
+        
+        // Clean up
+        setTimeout(() => {
+            setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
+        }, 1500); // Increased duration cleanup
+    }, 300);
   };
 
   // Reusable Front Face Content
@@ -140,17 +189,15 @@ export function ProfileCard({ profile }: ProfileCardProps) {
 
           {/* Role Badge */}
           {/* Role Badge */}
-          <span 
-            className="shrink-0 px-8 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase shadow-lg shadow-black/5 mb-2 transition-colors duration-300"
-            style={{ 
-              background: themeColor, 
-              color: themeTextColor,
-              animation: animation,
-              backgroundSize: bgSize
-            }}
-          >
-              {roleName}
-          </span>
+          {/* Role Badge */}
+          <ParticleBadge 
+            roleName={roleName}
+            themeColor={themeColor}
+            themeTextColor={themeTextColor}
+            animation={animation}
+            bgSize={bgSize}
+            className="mb-2"
+          />
       </div>
 
       {/* Footer - Safe Zone Bottom */}
@@ -180,12 +227,41 @@ export function ProfileCard({ profile }: ProfileCardProps) {
       }}
       className="flex flex-col items-center gap-6 w-full max-w-[18rem] xs:max-w-xs sm:max-w-sm mx-auto"
     >
-      <div 
+      <motion.div 
         className="relative w-full aspect-[9/16] [perspective:1000px] cursor-pointer group print:hidden"
-        onClick={() => setIsFlipped(!isFlipped)}
+        onClick={handleCardClick}
+        animate={controls}
       >
+        {/* Particles - In front of the card */}
+        <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+          {particles.map((particle) => (
+            <motion.div
+              key={particle.id}
+              initial={{ x: 0, y: 0, opacity: 0, scale: 0 }}
+              animate={{
+                x: Math.cos((particle.angle * Math.PI) / 180) * particle.distance,
+                y: Math.sin((particle.angle * Math.PI) / 180) * particle.distance,
+                opacity: [1, 1, 0],
+                scale: [0, 1.2, 0],
+              }}
+              transition={{ duration: 1.3, ease: "easeOut" }}
+              className="absolute rounded-full"
+              style={{
+                width: particle.size,
+                height: particle.size,
+                background: particle.color, 
+              }}
+            />
+          ))}
+        </div>
+
+
         {/* 3D Wrapper */}
-        <div className={`relative w-full h-full transition-all duration-700 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
+        <motion.div 
+          className="relative w-full h-full [transform-style:preserve-3d]"
+          animate={{ rotateY: isFlipped ? 180 : 0 }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
+        >
           
           {/* Front Face */}
           <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] glass rounded-[2rem] xs:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col">
@@ -227,8 +303,8 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                </div>
           </div>
 
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Action Buttons */}
       <div className="flex items-center gap-3 print:hidden animate-in slide-in-from-bottom-2 fade-in duration-500">
