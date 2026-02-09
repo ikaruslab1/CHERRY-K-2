@@ -164,7 +164,7 @@ const navItems = [
   }
 
   return (
-    <SidebarAwareContainer className="min-h-screen p-8 bg-gray-50 text-[#373737]">
+    <SidebarAwareContainer className="min-h-screen p-4 md:p-8 bg-gray-50 text-[#373737]">
       <ResponsiveNav 
         items={navItems}
         activeTab={activeTab}

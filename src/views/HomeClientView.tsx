@@ -32,11 +32,10 @@ export default function HomeClientView({ initialConferences }: HomeClientViewPro
               <div 
                 key={conf.id} 
                 className="group relative overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-all hover:shadow-md cursor-pointer bg-white/5 backdrop-blur-sm border-white/10"
-                onClick={() => {
-                   // Navigate to conference details or login if needed
-                   // For now, redirect to login/register since this is the public landing
-                   router.push('/login'); 
-                }}
+                  onClick={() => {
+                     // Navigate to login with event context
+                     router.push(`/login?event=${conf.id}`); 
+                  }}
               >
                 <div className="flex flex-col gap-4">
                   <div className="space-y-2">

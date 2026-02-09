@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { LogOut, X, Menu, ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
+import { LogOut, X, Menu, ChevronLeft, ChevronRight, LayoutGrid, Bell, BellOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '@/context/SidebarContext';
 import { useConference } from '@/context/ConferenceContext';
 import { InstallPWAButton } from '../ui/InstallPWAButton';
+import { usePushSubscription } from '@/hooks/usePushSubscription';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -27,6 +28,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const { isDesktopCollapsed, setIsDesktopCollapsed } = useSidebar();
     const { currentConference } = useConference();
+    const { isSubscribed, subscribe: handlePushSubscription, isLoading } = usePushSubscription();
 
     // Filter visible items
     const visibleItems = items.filter(item => item.show !== false);
@@ -75,12 +77,12 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                             {/* Header Mobile */}
                             <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
                                 <div className="flex items-center gap-3 overflow-hidden flex-1 min-w-0">
-                                    <div className="w-8 h-8 bg-[var(--color-acid)] text-black flex items-center justify-center rounded-lg shrink-0 shadow-sm border border-black/5">
-                                        <LayoutGrid className="w-4 h-4" />
+                                    <div className="w-8 h-8 bg-[var(--color-acid)] flex items-center justify-center rounded-lg shrink-0 shadow-sm border border-black/5">
+                                        <LayoutGrid className="w-4 h-4" style={{ color: 'var(--color-acid-text)' }} />
                                     </div>
                                     <div className="flex flex-col overflow-hidden min-w-0">
                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Menu</span>
-                                       <h2 className="text-sm font-bold text-black uppercase tracking-wider leading-none truncate opacity-90">
+                                       <h2 className="text-sm font-bold text-black uppercase tracking-wider leading-tight opacity-90 break-words">
                                           {currentConference?.title || 'Cherry-K'}
                                        </h2>
                                     </div>
@@ -113,10 +115,10 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                                                 isActive ? itemActive : itemInactive
                                             )}
                                         >
-                                            <span className={cn("transition-colors", isActive ? "text-black" : "text-gray-400")}>
+                                            <span className={cn("transition-colors", isActive ? "" : "text-gray-400")} style={isActive ? { color: 'var(--color-acid-text)' } : undefined}>
                                                 {item.icon}
                                             </span>
-                                            <span>{item.label}</span>
+                                            <span style={isActive ? { color: 'var(--color-acid-text)' } : undefined}>{item.label}</span>
                                         </button>
                                     );
                                 })}
@@ -125,6 +127,19 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                             {/* Footer Mobile */}
                             <div className="pt-6 border-t border-gray-100 mt-auto space-y-3">
                                 <InstallPWAButton />
+                                <button
+                                    onClick={handlePushSubscription}
+                                    disabled={isLoading}
+                                    className={cn(
+                                        "w-full flex items-center gap-3 px-4 py-3 transition-colors text-sm font-medium rounded-lg",
+                                        isSubscribed 
+                                            ? "text-green-600 hover:bg-green-50" 
+                                            : "text-gray-500 hover:bg-gray-50 hover:text-black"
+                                    )}
+                                >
+                                    {isSubscribed ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
+                                    <span>{isLoading ? 'Cargando...' : (isSubscribed ? 'Notificaciones Activadas' : 'Activar Notificaciones')}</span>
+                                </button>
                                 <button
                                     onClick={handleSignOut}
                                     className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors text-sm font-medium rounded-lg"
@@ -147,15 +162,16 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                 transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
                 className={cn(
                     "hidden md:flex fixed top-0 left-0 bottom-0 z-40 flex-col",
-                    sidebarBg
+                    sidebarBg,
+                    "shadow-[10px_0_30px_rgba(0,0,0,0.03)]"
                 )}
             >
                 {/* Header Desktop */}
-                <div className="flex items-center justify-between p-5 border-b border-gray-100 h-[80px]">
+                <div className="flex items-center justify-between p-5 border-b border-gray-100 min-h-[80px]">
                     <div className="flex items-center gap-3 overflow-hidden flex-1 min-w-0">
                          {/* Icon always visible */}
-                        <div className="w-9 h-9 bg-[var(--color-acid)] text-black flex items-center justify-center rounded-xl shrink-0 transition-all hover:scale-105 shadow-sm border border-black/5">
-                            <LayoutGrid className="w-5 h-5" />
+                        <div className="w-9 h-9 bg-[var(--color-acid)] flex items-center justify-center rounded-xl shrink-0 transition-all hover:scale-105 shadow-sm border border-black/5">
+                            <LayoutGrid className="w-5 h-5" style={{ color: 'var(--color-acid-text)' }} />
                         </div>
                         
                         {/* Text - Fades out when collapsed */}
@@ -168,10 +184,12 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                                     transition={{ duration: 0.2 }}
                                     className="flex flex-col overflow-hidden min-w-0"
                                 >
-                                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1 ml-1 whitespace-nowrap">Menu</span>
-                                   <h2 className="text-xs font-bold text-black uppercase tracking-wider leading-none ml-1 truncate" title={currentConference?.title || 'Cherry-K'}>
-                                       {currentConference?.title || 'Cherry-K'}
-                                   </h2>
+                                    <div className="min-w-[160px]">
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1 ml-1 whitespace-nowrap">Menu</span>
+                                        <h2 className="text-xs font-bold text-black uppercase tracking-wider leading-tight ml-1 break-words" title={currentConference?.title || 'Cherry-K'}>
+                                            {currentConference?.title || 'Cherry-K'}
+                                        </h2>
+                                    </div>
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -219,8 +237,8 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                             >
                                 <span className={cn(
                                     "relative z-10 shrink-0 transition-colors duration-200", 
-                                    isActive ? "text-black" : "text-gray-400 group-hover:text-black"
-                                )}>
+                                    isActive ? "" : "text-gray-400 group-hover:text-black"
+                                )} style={isActive ? { color: 'var(--color-acid-text)' } : undefined}>
                                     {item.icon}
                                 </span>
                                 
@@ -231,6 +249,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                                         exit={{ opacity: 0 }}
                                         transition={{ duration: 0.2 }}
                                         className="text-sm font-medium tracking-wide relative z-10 truncate"
+                                        style={isActive ? { color: 'var(--color-acid-text)' } : undefined}
                                     >
                                         {item.label}
                                     </motion.span>
@@ -243,6 +262,36 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                 {/* Footer Desktop */}
                 <div className="p-3 border-t border-gray-100 space-y-2">
                     <InstallPWAButton collapsed={isDesktopCollapsed} />
+                    
+                    <button
+                        onClick={handlePushSubscription}
+                        disabled={isLoading}
+                        className={cn(
+                            "w-full flex items-center gap-3 px-3 py-3 transition-colors font-medium rounded-lg",
+                            isSubscribed 
+                                ? "text-green-600 hover:bg-green-50" 
+                                : "text-gray-500 hover:bg-gray-50 hover:text-black",
+                            isDesktopCollapsed ? "justify-center" : ""
+                        )}
+                        title={isDesktopCollapsed ? (isSubscribed ? 'Notificaciones Activadas' : 'Activar Notificaciones') : ''}
+                    >
+                        {isSubscribed ? (
+                            <Bell className="w-5 h-5 shrink-0" />
+                        ) : (
+                            <BellOff className="w-5 h-5 shrink-0" />
+                        )}
+                        {!isDesktopCollapsed && (
+                            <motion.span 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="text-sm truncate"
+                            >
+                                {isLoading ? 'Cargando...' : (isSubscribed ? 'Notificaciones On' : 'Activar Alertas')}
+                            </motion.span>
+                        )}
+                    </button>
+
                     <button
                         onClick={handleSignOut}
                         className={cn(

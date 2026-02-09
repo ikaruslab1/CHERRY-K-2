@@ -119,11 +119,11 @@ export function EventModal({
         </div>
 
         {/* Content Body - White Background, Black Text */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar bg-white">
+        <div className="flex-1 overflow-y-scroll p-8 space-y-8 custom-scrollbar bg-white">
           
           {/* Title & Tags */}
           <div className="space-y-4">
-             <h2 className="text-3xl md:text-4xl font-bold text-black leading-[0.95] tracking-tight uppercase">
+             <h2 className="text-3xl md:text-4xl font-bold text-black leading-[0.95] tracking-tight uppercase break-words text-balance">
                {event.title}
              </h2>
 

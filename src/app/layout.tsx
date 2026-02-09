@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Dancing_Script, Playfair_Display, Syne, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -6,6 +7,7 @@ import { ConferenceProvider } from "@/context/ConferenceContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { SyncWrapper } from "@/components/SyncWrapper";
 import { DevServiceWorkerUnregister } from "@/components/DevServiceWorkerUnregister";
+import { DynamicTheme } from "@/components/theme/DynamicTheme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -81,12 +83,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} ${playfairDisplay.variable} ${syne.variable} ${manrope.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <SyncWrapper>
-          <ConferenceProvider>
-            <SidebarProvider>
-              {children}
-            </SidebarProvider>
-            {process.env.NODE_ENV === 'development' && <DevServiceWorkerUnregister />}
-          </ConferenceProvider>
+          <Suspense fallback={null}>
+            <ConferenceProvider>
+              <DynamicTheme />
+              <SidebarProvider>
+                {children}
+              </SidebarProvider>
+              {process.env.NODE_ENV === 'development' && <DevServiceWorkerUnregister />}
+            </ConferenceProvider>
+          </Suspense>
         </SyncWrapper>
       </body>
     </html>

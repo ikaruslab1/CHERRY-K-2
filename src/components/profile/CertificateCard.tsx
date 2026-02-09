@@ -30,12 +30,12 @@ interface CertificateCardProps {
 export function CertificateCard({ cert, onView, formatDate }: CertificateCardProps) {
     return (
         <div className="bg-white border boundary-gray-200 rounded-xl p-4 md:p-5 hover:shadow-md transition-shadow group relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#DBF227]/10 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-acid)]/10 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110" />
             
             <div className="relative z-10 flex flex-col h-full justify-between gap-4">
                 <div>
                     <div className="flex justify-between items-start mb-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#DBF227]/20 text-yellow-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--color-acid)]/20 text-yellow-800">
                             {cert.events.type || 'Evento'}
                         </span>
                         <span className="text-xs text-gray-400 font-mono">

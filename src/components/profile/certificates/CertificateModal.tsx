@@ -33,7 +33,7 @@ export function CertificateModal({
                 <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
                     <h3 className="font-semibold text-gray-700">Vista Previa de Constancia</h3>
                     <div className="flex items-center gap-2">
-                         <Button variant="outline" onClick={handlePrint} className="gap-2">
+                         <Button variant="outline" onClick={handlePrint} className="gap-2 text-black hover:text-black">
                              <Printer className="h-4 w-4" />
                              Imprimir
                          </Button>

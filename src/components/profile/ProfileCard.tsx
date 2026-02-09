@@ -7,7 +7,7 @@ import { Printer, Link, Check } from 'lucide-react';
 import { useConference } from '@/context/ConferenceContext';
 import { motion, useAnimation } from 'framer-motion';
 import { ParticleBadge } from './ParticleBadge';
-import PushNotificationButton from '@/components/PushNotificationButton';
+import { getContrastColorHex } from '@/lib/colorUtils';
 
 interface ProfileCardProps {
   profile: {
@@ -38,21 +38,54 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   const degreeAbbr = getDegreeAbbreviation(profile.degree, profile.gender);
   const fullName = `${degreeAbbr} ${profile.first_name} ${profile.last_name}`;
   
+  
   // Dynamic values from conference or defaults
   const eventTitle = currentConference?.title || 'Semana del Diseño';
   const institution = currentConference?.institution_name || 'Facultad de Estudios Superiores Acatlán';
   const department = currentConference?.department_name || 'Licenciatura en Diseño Gráfico';
+  
+  // Extract color value from accent_color object
+  const accentColorConfig = currentConference?.accent_color || { type: 'solid', value: '#DBF227' };
+  const accentColor = accentColorConfig.type === 'gradient' 
+    ? (accentColorConfig.value.match(/#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}/)?.[0] || '#DBF227')
+    : accentColorConfig.value;
+  
+  const badgeIcon = currentConference?.badge_icon || { type: 'default', value: '' };
 
   const getRoleTheme = (role: string) => {
     switch (role?.toLowerCase()) {
       case 'ponente':
-        return { bg: '#278BF2', text: '#FFFFFF', name: 'Ponente' };
+        return { 
+          bg: '#278BF2', 
+          text: '#FFFFFF', 
+          name: 'Ponente',
+          animation: 'shimmer 2s ease-in-out infinite',
+          animationType: 'shimmer'
+        };
       case 'staff':
-        return { bg: '#F23527', text: '#FFFFFF', name: 'Staff' };
+        return { 
+          bg: '#F23527', 
+          text: '#FFFFFF', 
+          name: 'Staff',
+          animation: 'pulse 2s ease-in-out infinite',
+          animationType: 'pulse'
+        };
       case 'admin':
-        return { bg: '#373737', text: '#FFFFFF', name: 'Administrador' };
+        return { 
+          bg: '#373737', 
+          text: '#FFFFFF', 
+          name: 'Administrador',
+          animation: 'breathing 3s ease-in-out infinite',
+          animationType: 'breathing'
+        };
       case 'vip':
-        return { bg: '#F2D027', text: '#373737', name: 'VIP' };
+        return { 
+          bg: '#F2D027', 
+          text: '#373737', 
+          name: 'VIP',
+          animation: 'glow 2s ease-in-out infinite',
+          animationType: 'glow'
+        };
       case 'owner':
         return { 
           bg: 'linear-gradient(45deg, #FFFFFF, #FFD1FF, #CCEAFF, #FFFFFF, #D1FFEA, #FFFAD1, #FFFFFF)', 
@@ -60,15 +93,25 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           name: 'Desarrollador',
           border: '1px solid rgba(255, 255, 255, 0.5)',
           animation: 'gradient 10s ease infinite',
-          bgSize: '300% 300%'
+          bgSize: '300% 300%',
+          animationType: 'gradient'
         };
       default:
-        // Default color for standard users/attendees
-        return { bg: '#DBF227', text: '#373737', name: 'Asistente' };
+        // Default color for standard users/attendees - uses conference accent color
+        // Support both solid and gradient
+        const bgValue = accentColorConfig.value;
+        return { 
+          bg: bgValue, 
+          text: getContrastColorHex(bgValue), 
+          name: 'Asistente',
+          animation: 'wave 3s ease-in-out infinite',
+          animationType: 'wave'
+        };
     }
   };
 
-  const { bg: themeColor, text: themeTextColor, name: roleName, animation, bgSize } = getRoleTheme(profile.role);
+  const { bg: themeColor, text: themeTextColor, name: roleName, animation, bgSize, animationType } = getRoleTheme(profile.role);
+
   
   // JSON data for QR
   const qrData = JSON.stringify({
@@ -133,17 +176,68 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   const FrontFaceContent = (
     <div className="flex flex-col h-full w-full bg-white select-none">
       {/* Header - Accent Color - Safe Zone Top */}
-      {/* Header - Accent Color - Safe Zone Top */}
       <div 
         className="relative shrink-0 flex flex-col items-center justify-center pt-8 pb-6 px-4 overflow-hidden transition-colors duration-300"
         style={{ 
           background: themeColor,
-          animation: animation,
-          backgroundSize: bgSize
+          ...(animationType === 'gradient' && {
+            backgroundSize: bgSize,
+            animation: animation
+          })
         }}
       >
-          {/* Animated Background Effect */}
-          <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-[gradient_8s_ease_infinite]" />
+          {/* Animation Overlays */}
+          {animationType === 'shimmer' && (
+            <div 
+              className="absolute inset-0 opacity-40"
+              style={{
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)',
+                backgroundSize: '200% 100%',
+                animation: 'shimmer 2s ease-in-out infinite'
+              }}
+            />
+          )}
+          
+          {animationType === 'pulse' && (
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                animation: 'pulse 2s ease-in-out infinite'
+              }}
+            />
+          )}
+          
+          {animationType === 'breathing' && (
+            <div 
+              className="absolute inset-0 opacity-30"
+              style={{
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%)',
+                animation: 'breathing 3s ease-in-out infinite'
+              }}
+            />
+          )}
+          
+          {animationType === 'glow' && (
+            <div 
+              className="absolute inset-0"
+              style={{
+                boxShadow: 'inset 0 0 60px rgba(255,255,255,0.4)',
+                animation: 'glow 2s ease-in-out infinite'
+              }}
+            />
+          )}
+          
+          {animationType === 'wave' && (
+            <div 
+              className="absolute inset-0 opacity-40"
+              style={{
+                background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%)',
+                backgroundSize: '200% 200%',
+                animation: 'wave 3s ease-in-out infinite'
+              }}
+            />
+          )}
           
           <div className="relative z-10 flex flex-col items-center">
             <span 
@@ -177,38 +271,45 @@ export function ProfileCard({ profile }: ProfileCardProps) {
               </h1>
           </div>
 
-          {/* QR Section - Guaranteed Padding */}
-          <div className="relative my-2 p-3 bg-white border-2 border-dashed border-gray-200 rounded-2xl shadow-sm shrink-0">
-              <QRCodeSVG 
-                  value={qrData} 
-                  size={140}
-                  level="H"
-                  includeMargin={false}
-                  className="w-[140px] h-[140px] object-contain"
-              />
+          {/* QR Section - Maximized & Elegant */}
+          <div className="relative flex-1 flex items-center justify-center py-6 w-full">
+              <div className="relative p-4 bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100">
+                  <div className="absolute inset-0 rounded-3xl border border-black/5" />
+                  <QRCodeSVG 
+                      value={qrData} 
+                      size={200}
+                      level="H"
+                      includeMargin={true}
+                      className="w-full h-full object-contain max-w-[200px] max-h-[200px]"
+                  />
+                  {/* Decorative corners */}
+                  <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-black/10 rounded-tl-lg" />
+                  <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-black/10 rounded-tr-lg" />
+                  <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-black/10 rounded-bl-lg" />
+                  <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-black/10 rounded-br-lg" />
+              </div>
           </div>
 
-          {/* Role Badge */}
-          {/* Role Badge */}
-          {/* Role Badge */}
+          {/* Role Badge - Subtle & Clean */}
           <ParticleBadge 
             roleName={roleName}
             themeColor={themeColor}
             themeTextColor={themeTextColor}
             animation={animation}
             bgSize={bgSize}
-            className="mb-2"
+            animationType={animationType}
+            className="mb-4 scale-90"
           />
       </div>
 
       {/* Footer - Safe Zone Bottom */}
-      <div className="shrink-0 pb-8 pt-2 px-6 text-center">
-          <div className="w-12 h-1.5 bg-gray-100 mx-auto rounded-full mb-3" />
-          <div className="space-y-1">
-            <p className="text-[#373737] text-[9px] font-bold uppercase tracking-wider leading-relaxed">
+      <div className="shrink-0 pb-8 pt-0 px-6 text-center">
+          <div className=" opacity-60 grayscale transition-all duration-500 hover:grayscale-0 hover:opacity-100">
+            <p className="text-[#373737] text-[10px] font-bold uppercase tracking-widest leading-relaxed">
                 {institution}
             </p>
-            <p className="text-gray-400 text-[8px] font-medium tracking-widest uppercase">
+            <div className="w-8 h-px bg-gray-200 mx-auto" />
+            <p className="text-gray-400 text-[9px] font-medium tracking-[0.2em] uppercase">
                 {department}
             </p>
           </div>
@@ -218,18 +319,17 @@ export function ProfileCard({ profile }: ProfileCardProps) {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 0.8, y: 50, rotateX: -15 }}
-      animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
+      initial={{ opacity: 0, scale: 0.9, y: 30 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ 
         type: "spring", 
-        stiffness: 200, 
-        damping: 15, 
-        mass: 1
+        stiffness: 260, 
+        damping: 20 
       }}
-      className="flex flex-col items-center gap-6 w-full max-w-[18rem] xs:max-w-xs sm:max-w-sm mx-auto"
+      className="flex flex-col items-center gap-8 w-full max-w-[20rem] xs:max-w-xs sm:max-w-sm mx-auto"
     >
       <motion.div 
-        className="relative w-full aspect-[9/16] [perspective:1000px] cursor-pointer group print:hidden"
+        className="relative w-full aspect-[9/15] [perspective:1000px] cursor-pointer group print:hidden select-none"
         onClick={handleCardClick}
         animate={controls}
       >
@@ -265,32 +365,95 @@ export function ProfileCard({ profile }: ProfileCardProps) {
         >
           
           {/* Front Face */}
-          <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] glass rounded-[2rem] xs:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col">
+          <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-white rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col border border-gray-100">
               {FrontFaceContent}
           </div>
 
           {/* Back Face */}
-          {/* Back Face */}
           <div 
-            className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col items-center justify-center p-8 text-center transition-colors duration-300"
+            className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col items-center justify-center p-8 text-center transition-colors duration-300"
             style={{ 
               background: themeColor,
-              animation: animation,
-              backgroundSize: bgSize
+              ...(animationType === 'gradient' && {
+                backgroundSize: bgSize,
+                animation: animation
+              })
             }}
           >
-               <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] bg-[length:250%_250%] animate-[gradient_8s_ease_infinite]" />
+               {/* Animation Overlays */}
+               {animationType === 'shimmer' && (
+                 <div 
+                   className="absolute inset-0 opacity-40"
+                   style={{
+                     background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)',
+                     backgroundSize: '200% 100%',
+                     animation: 'shimmer 2s ease-in-out infinite'
+                   }}
+                 />
+               )}
+               
+               {animationType === 'pulse' && (
+                 <div 
+                   className="absolute inset-0"
+                   style={{
+                     background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                     animation: 'pulse 2s ease-in-out infinite'
+                   }}
+                 />
+               )}
+               
+               {animationType === 'breathing' && (
+                 <div 
+                   className="absolute inset-0 opacity-30"
+                   style={{
+                     background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%)',
+                     animation: 'breathing 3s ease-in-out infinite'
+                   }}
+                 />
+               )}
+               
+               {animationType === 'glow' && (
+                 <div 
+                   className="absolute inset-0"
+                   style={{
+                     boxShadow: 'inset 0 0 60px rgba(255,255,255,0.4)',
+                     animation: 'glow 2s ease-in-out infinite'
+                   }}
+                 />
+               )}
+               
+               {animationType === 'wave' && (
+                 <div 
+                   className="absolute inset-0 opacity-40"
+                   style={{
+                     background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%)',
+                     backgroundSize: '200% 200%',
+                     animation: 'wave 3s ease-in-out infinite'
+                   }}
+                 />
+               )}
                
                <div className="relative z-10 space-y-6">
-                  <div 
-                    className="w-20 h-20 border-4 rounded-full flex items-center justify-center mx-auto mb-4"
-                    style={{ borderColor: themeTextColor }}
-                  >
-                       <div 
-                        className="w-10 h-10 rounded-full animate-bounce"
+                  {badgeIcon.type !== 'default' && badgeIcon.value ? (
+                    <img 
+                      src={badgeIcon.type === 'preset' ? `/assets/${badgeIcon.value}.svg` : badgeIcon.value}
+                      alt="Badge Icon"
+                      className="w-24 h-24 object-contain mx-auto mb-6"
+                      style={{ 
+                        filter: themeTextColor === '#FFFFFF' ? 'brightness(0) invert(1)' : 'brightness(0)'
+                      }}
+                    />
+                  ) : (
+                    <div 
+                      className="w-24 h-24 border-4 rounded-full flex items-center justify-center mx-auto mb-6 bg-white/10 backdrop-blur-sm overflow-hidden"
+                      style={{ borderColor: themeTextColor }}
+                    >
+                      <div 
+                        className="w-12 h-12 rounded-full animate-pulse"
                         style={{ backgroundColor: themeTextColor }} 
-                       />
-                  </div>
+                      />
+                    </div>
+                  )}
                   <h2 
                     className="text-4xl font-black uppercase tracking-widest leading-tight drop-shadow-sm"
                     style={{ color: themeTextColor }}
@@ -309,25 +472,23 @@ export function ProfileCard({ profile }: ProfileCardProps) {
 
       {/* Action Buttons */}
       <div className="flex flex-col items-center gap-4 w-full print:hidden animate-in slide-in-from-bottom-2 fade-in duration-500">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center gap-3 w-full">
             <button 
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-100 shadow-sm text-gray-500 hover:text-[#373737] hover:border-[#373737] hover:bg-gray-50 transition-all active:scale-95 text-xs font-bold uppercase tracking-wider"
+                onClick={handlePrint}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] text-gray-500 hover:text-black hover:border-black/10 hover:shadow-lg transition-all active:scale-95 text-xs font-bold uppercase tracking-wider group"
             >
-            <Printer className="w-4 h-4" />
-            <span>Imprimir</span>
+                <Printer className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <span>Imprimir</span>
             </button>
             
             <button 
-            onClick={handleCopyLink}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-100 shadow-sm text-gray-500 hover:text-[#373737] hover:border-[#373737] hover:bg-gray-50 transition-all active:scale-95 text-xs font-bold uppercase tracking-wider"
+                onClick={handleCopyLink}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] text-gray-500 hover:text-black hover:border-black/10 hover:shadow-lg transition-all active:scale-95 text-xs font-bold uppercase tracking-wider group"
             >
-            {showCopied ? <Check className="w-4 h-4 text-green-500" /> : <Link className="w-4 h-4" />}
-            <span>{showCopied ? 'Copiado' : 'Copiar Acceso'}</span>
+                {showCopied ? <Check className="w-4 h-4 text-green-500" /> : <Link className="w-4 h-4 group-hover:scale-110 transition-transform" />}
+                <span>{showCopied ? 'Copiado' : 'Compartir'}</span>
             </button>
         </div>
-        
-        <PushNotificationButton />
       </div>
 
       {/* Print View Only - Hidden normally, visible on print */}

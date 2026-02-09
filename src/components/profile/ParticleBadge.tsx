@@ -9,6 +9,7 @@ interface ParticleBadgeProps {
   themeTextColor: string;
   animation?: string;
   bgSize?: string;
+  animationType?: string;
   className?: string;
 }
 
@@ -26,6 +27,7 @@ export function ParticleBadge({
   themeTextColor, 
   animation, 
   bgSize,
+  animationType,
   className = ''
 }: ParticleBadgeProps) {
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -81,15 +83,70 @@ export function ParticleBadge({
         onClick={handleClick}
         whileTap={{ scale: 0.9 }}
         whileHover={{ scale: 1.05 }}
-        className="relative z-10 shrink-0 px-8 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase shadow-lg shadow-black/5 transition-all duration-300 cursor-pointer select-none border-none outline-none"
+        className="relative z-10 shrink-0 px-8 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase shadow-lg shadow-black/5 transition-all duration-300 cursor-pointer select-none border-none outline-none overflow-hidden"
         style={{
           background: themeColor,
           color: themeTextColor,
-          animation: animation,
-          backgroundSize: bgSize,
+          ...(animationType === 'gradient' && {
+            backgroundSize: bgSize,
+            animation: animation
+          })
         }}
       >
-        {roleName}
+        {/* Animation Overlays */}
+        {animationType === 'shimmer' && (
+          <div 
+            className="absolute inset-0 opacity-40 pointer-events-none"
+            style={{
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 2s ease-in-out infinite'
+            }}
+          />
+        )}
+        
+        {animationType === 'pulse' && (
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
+              animation: 'pulse 2s ease-in-out infinite'
+            }}
+          />
+        )}
+        
+        {animationType === 'breathing' && (
+          <div 
+            className="absolute inset-0 opacity-30 pointer-events-none"
+            style={{
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%)',
+              animation: 'breathing 3s ease-in-out infinite'
+            }}
+          />
+        )}
+        
+        {animationType === 'glow' && (
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              boxShadow: 'inset 0 0 60px rgba(255,255,255,0.4)',
+              animation: 'glow 2s ease-in-out infinite'
+            }}
+          />
+        )}
+        
+        {animationType === 'wave' && (
+          <div 
+            className="absolute inset-0 opacity-40 pointer-events-none"
+            style={{
+              background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%)',
+              backgroundSize: '200% 200%',
+              animation: 'wave 3s ease-in-out infinite'
+            }}
+          />
+        )}
+        
+        <span className="relative z-10">{roleName}</span>
       </motion.button>
     </div>
   );

@@ -66,6 +66,14 @@ export interface Conference {
   institution_name?: string;
   department_name?: string;
   created_at?: string;
+  accent_color?: {
+    type: 'solid' | 'gradient';
+    value: string; // hex color for solid, CSS gradient string for gradient
+  };
+  badge_icon?: {
+    type: 'preset' | 'custom' | 'default';
+    value: string;
+  };
   certificate_config?: {
     mode: 'template_v1' | 'custom_background';
     background_url?: string;

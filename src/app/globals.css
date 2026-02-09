@@ -10,12 +10,14 @@
   --font-jetbrains: var(--font-jetbrains);
 
   /* ACID EDITORIAL PALETTE - SWISS EDITION */
-  --color-acid: #D9F528;
+  --color-acid: #d9f528;
+  --color-acid-gradient: #d9f528; /* Can be overridden with gradient */
+  --color-acid-text: #000000; /* Automatically calculated for contrast */
   --color-acid-fg: #000000;
   --color-void: #050505;
-  --color-chalk: #F2F2F2;
+  --color-chalk: #f2f2f2;
   --color-surface: #111111;
-  --color-electric: #5E17EB;
+  --color-electric: #5e17eb;
   --color-subtle: #333333;
 }
 
@@ -23,27 +25,27 @@
   /* Default Theme: Void (Dark) */
   --background: var(--color-void);
   --foreground: var(--color-chalk);
-  
+
   --primary: var(--color-acid);
   --primary-foreground: var(--color-acid-fg);
-  
+
   --secondary: var(--color-electric);
   --secondary-foreground: #ffffff;
-  
+
   --muted: var(--color-surface);
   --muted-foreground: #888888;
-  
+
   --accent: var(--color-surface);
   --accent-foreground: var(--color-chalk);
-  
-  --destructive: #EF4444;
+
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  
+
   --border: var(--color-subtle);
   --input: var(--color-surface);
   --ring: var(--color-acid);
-  
-  --radius: 0rem; 
+
+  --radius: 0rem;
 }
 
 /* Base Styles */
@@ -51,26 +53,40 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   /* SWITCH TO GEIST SANS (HELVETICA EQUIVALENT) FOR EVERYTHING */
-  font-family: var(--font-geist-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family:
+    var(--font-geist-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
+
   /* Acid Grid Texture */
   background-image: radial-gradient(var(--color-surface) 1px, transparent 1px);
   background-size: 32px 32px;
   background-attachment: fixed;
+
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
 }
 
 /* Typography Hierarchy - Unified Swiss Style */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   /* Removing Syne, using Geist Sans for clean, uniform strokes */
-  font-family: var(--font-geist-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-weight: 700; 
+  font-family:
+    var(--font-geist-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
   letter-spacing: -0.03em; /* Tighter tracking for that Swiss look */
 }
 
 /* Utilities / Mono */
-code, pre, kbd, samp, .font-mono {
+code,
+pre,
+kbd,
+samp,
+.font-mono {
   font-family: var(--font-jetbrains), ui-monospace, monospace;
 }
 
@@ -78,4 +94,70 @@ code, pre, kbd, samp, .font-mono {
 ::selection {
   background-color: var(--color-acid);
   color: var(--color-acid-fg);
+}
+
+/* Badge Animation Keyframes */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes breathing {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: inset 0 0 80px rgba(255, 255, 255, 0.6);
+  }
+}
+
+@keyframes wave {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
 }

@@ -113,20 +113,20 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-in fade-in duration-200 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100">
         
         {/* Header */}
-        <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div className="bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
                 {step > 1 && step < 3 && (
-                    <button onClick={() => setStep(step - 1 as any)} className="text-gray-400 hover:text-gray-600">
+                    <button onClick={() => setStep(step - 1 as any)} className="text-gray-600 hover:text-black transition-colors">
                         <ArrowLeft size={20} />
                     </button>
                 )}
-                <h3 className="font-bold text-lg text-gray-800">Recuperar ID</h3>
+                <h3 className="font-bold text-xl text-black">Recuperar ID</h3>
             </div>
-            <button onClick={handleReset} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <button onClick={handleReset} className="text-gray-400 hover:text-black transition-colors">
                 <X size={20} />
             </button>
         </div>
@@ -134,32 +134,36 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
         {/* Content */}
         <div className="p-6">
             {step === 1 && (
-                <form onSubmit={handleStep1} className="space-y-4">
-                    <p className="text-gray-600 text-sm">Ingresa tu correo electrónico registrado para comenzar el proceso de recuperación.</p>
+                <form onSubmit={handleStep1} className="space-y-5">
+                    <p className="text-gray-800 text-base font-medium leading-relaxed">
+                        Ingresa tu correo electrónico registrado para comenzar el proceso de recuperación.
+                    </p>
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-gray-700 uppercase tracking-wider ml-1">Correo Electrónico</label>
+                        <label className="text-sm font-bold text-gray-900 uppercase tracking-wide ml-1">Correo Electrónico</label>
                         <Input 
                             type="email" 
                             value={email} 
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="tu@email.com"
-                            className="bg-gray-50 border-gray-200 focus:bg-white transition-all"
+                            className="bg-white border-gray-200 focus:border-black focus:ring-1 focus:ring-black transition-all text-black font-medium h-12 rounded-xl placeholder:text-gray-500"
                             required
                         />
                     </div>
-                    {error && <p className="text-red-500 text-sm font-medium animate-pulse">{error}</p>}
-                    <Button type="submit" className="w-full mt-2" disabled={isLoading}>
-                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2"/> : null}
-                        Continuar <ChevronRight className="w-4 h-4 ml-1" />
+                    {error && <p className="text-red-600 text-sm font-bold animate-pulse">{error}</p>}
+                    <Button type="submit" className="w-full mt-2 h-12 text-base font-bold bg-[#373737] hover:bg-black text-white rounded-xl" disabled={isLoading}>
+                        {isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2"/> : null}
+                        Continuar <ChevronRight className="w-5 h-5 ml-1" />
                     </Button>
                 </form>
             )}
 
             {step === 2 && (
-                <form onSubmit={handleStep2} className="space-y-4">
-                    <p className="text-gray-600 text-sm">¡Correo encontrado! Ahora, confirma tu identidad ingresando tu número de celular (10 dígitos).</p>
+                <form onSubmit={handleStep2} className="space-y-5">
+                    <p className="text-gray-800 text-base font-medium leading-relaxed">
+                        ¡Correo encontrado! Ahora, confirma tu identidad ingresando tu número de celular (10 dígitos).
+                    </p>
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-gray-700 uppercase tracking-wider ml-1">Celular</label>
+                        <label className="text-sm font-bold text-gray-900 uppercase tracking-wide ml-1">Celular</label>
                         <Input 
                             type="tel" 
                             value={phone} 
@@ -168,14 +172,14 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
                                 setPhone(val);
                             }}
                             placeholder="Ej. 5512345678"
-                            className="bg-gray-50 border-gray-200 focus:bg-white transition-all text-center tracking-widest font-mono text-lg"
+                            className="bg-white border-gray-200 focus:border-black focus:ring-1 focus:ring-black transition-all text-center tracking-widest font-mono text-xl font-bold text-black h-12 rounded-xl placeholder:text-gray-500"
                             required
                         />
-                         <p className="text-xs text-gray-400 text-right">{phone.length}/10</p>
+                         <p className="text-xs text-gray-500 font-semibold text-right">{phone.length}/10</p>
                     </div>
-                    {error && <p className="text-red-500 text-sm font-medium animate-pulse">{error}</p>}
-                    <Button type="submit" className="w-full mt-2" disabled={isLoading || phone.length < 10}>
-                         {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2"/> : null}
+                    {error && <p className="text-red-600 text-sm font-bold animate-pulse">{error}</p>}
+                    <Button type="submit" className="w-full mt-2 h-12 text-base font-bold bg-[#373737] hover:bg-black text-white rounded-xl" disabled={isLoading || phone.length < 10}>
+                         {isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2"/> : null}
                         Validar Identidad
                     </Button>
                 </form>
@@ -183,26 +187,26 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
 
             {step === 3 && (
                 <div className="space-y-6 text-center">
-                    <div className="w-16 h-16 bg-[#DBF227]/20 rounded-full flex items-center justify-center mx-auto text-[#aebf22]">
-                        <Check size={32} strokeWidth={3} />
+                    <div className="w-20 h-20 bg-[#DBF227]/20 rounded-full flex items-center justify-center mx-auto text-[#aebf22]">
+                        <Check size={40} strokeWidth={3} />
                     </div>
                     <div className="space-y-2">
-                        <h4 className="text-2xl font-bold text-gray-800">¡Validación Exitosa!</h4>
-                        <p className="text-gray-500 text-sm">Hemos recuperado tu código de acceso.</p>
+                        <h4 className="text-2xl font-black text-black">¡Validación Exitosa!</h4>
+                        <p className="text-gray-700 font-medium">Hemos recuperado tu código de acceso.</p>
                     </div>
 
-                    <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-4 relative group">
-                        <p className="font-mono text-3xl font-bold Tracking-widest text-[#373737] uppercase select-all">
+                    <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 relative group">
+                        <p className="font-mono text-4xl font-black tracking-widest text-black uppercase select-all">
                             {recoveredId}
                         </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
-                        <Button variant="outline" type="button" onClick={copyToClipboard} className="w-full relative overflow-hidden">
+                        <Button variant="outline" type="button" onClick={copyToClipboard} className="w-full relative overflow-hidden h-11 border-gray-300 text-gray-700 font-bold hover:bg-gray-50 hover:text-black">
                             {copied ? <Check className="w-4 h-4 mr-2 text-green-600" /> : <Copy className="w-4 h-4 mr-2" />}
                             {copied ? "Copiado" : "Copiar"}
                         </Button>
-                        <Button variant="outline" type="button" onClick={handlePrint} className="w-full">
+                        <Button variant="outline" type="button" onClick={handlePrint} className="w-full h-11 border-gray-300 text-gray-700 font-bold hover:bg-gray-50 hover:text-black">
                             <Printer className="w-4 h-4 mr-2" />
                             Imprimir
                         </Button>
@@ -210,11 +214,11 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
 
                     <div className="pt-4 border-t border-gray-100">
                         <Button 
-                            className="w-full bg-[#373737] hover:bg-black text-white" 
+                            className="w-full bg-[#373737] hover:bg-black text-white font-bold rounded-xl h-14 text-lg shadow-lg hover:shadow-xl transition-all" 
                             size="lg"
                             onClick={() => onLoginRaw(recoveredId)}
                         >
-                            <LogIn className="w-4 h-4 mr-2" />
+                            <LogIn className="w-5 h-5 mr-2" />
                             Iniciar Sesión Ahora
                         </Button>
                     </div>

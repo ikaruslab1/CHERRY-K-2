@@ -1,12 +1,12 @@
 import { cookies } from 'next/headers';
 import { createServerClient, CookieOptions } from '@supabase/ssr';
 import { redirect } from 'next/navigation';
-import HomeClientView from '@/views/HomeClientView';
-import { Conference } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home() {
+export default async function Home(props: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const cookieStore = await cookies();
 
   const supabase = createServerClient(
@@ -38,12 +38,19 @@ export default async function Home() {
     redirect('/profile');
   }
 
-  // 2. Fetch Data (No Waterfall)
-  const { data: conferences } = await supabase
-    .from('conferences')
-    .select('*')
-    .eq('is_active', true)
-    .order('start_date', { ascending: false });
-
-  return <HomeClientView initialConferences={(conferences as Conference[]) || []} />;
+  // Redirect to login page, preserving any query parameters
+  const searchParams = await props.searchParams;
+  let queryString = '';
+  if (searchParams) {
+      queryString = new URLSearchParams(
+          Object.entries(searchParams).reduce((acc, [key, value]) => {
+              if (typeof value === 'string') acc[key] = value;
+              else if (Array.isArray(value)) acc[key] = value.join(',');
+              return acc;
+          }, {} as Record<string, string>)
+      ).toString();
+  }
+  const destination = queryString ? `/login?${queryString}` : '/login';
+  
+  redirect(destination);
 }

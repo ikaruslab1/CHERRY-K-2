@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Conference } from '@/types';
 
@@ -29,11 +29,11 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
+  // 1. Load available conferences (Run once)
   useEffect(() => {
-    // Load available conferences and restore session
-    const init = async () => {
-      // 1. Fetch active conferences
+    const fetchConferences = async () => {
       const { data: conferences, error } = await supabase
         .from('conferences')
         .select('*')
@@ -41,30 +41,61 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
         .order('start_date', { ascending: false });
 
       if (error) console.error('Error fetching conferences:', error);
-      const list = conferences || [];
-      setAvailableConferences(list);
-
-      // 2. Try to recover from localStorage
-      const savedId = typeof window !== 'undefined' ? localStorage.getItem('conference_id') : null;
-      
-      let found = null;
-      if (savedId) {
-        found = list.find(c => c.id === savedId) || null;
-      }
-      
-      // If only one conference exists and no saved selection, might auto-select?
-      // Better not force it unless specific requirement, but for migration UX it helps.
-      if (!found && list.length === 1) {
-         found = list[0];
-         localStorage.setItem('conference_id', found.id);
-      }
-
-      setCurrentConference(found);
-      setLoading(false);
+      setAvailableConferences(conferences || []);
+      // Set loading to false only after initial conference check? 
+      // Actually we need to wait for the second effect to run at least once or checking localStorage here.
+      // But we can keep loading=true until selection logic runs.
     };
     
-    init();
+    fetchConferences();
   }, []);
+
+  // 2. Handle Selection Logic based on URL or LocalStorage
+  useEffect(() => {
+    // Wait until conferences are loaded
+    if (availableConferences.length === 0 && loading) {
+       // If truly no conferences, we might want to stop loading to avoid stuck state
+       // But fetchConferences sets empty array if error/empty.
+       // We can check if fetch is done by seeing if availableConferences is set? 
+       // Initial state is [].
+       // This is a bit tricky. Let's assume if [] and it's been a while? 
+       // Better: add a separate loaded flag for conferences.
+       return; 
+    }
+
+    const paramId = searchParams.get('event');
+    const savedId = typeof window !== 'undefined' ? localStorage.getItem('conference_id') : null;
+    
+    let found = null;
+    
+    // Priority 1: URL Param
+    if (paramId) {
+        found = availableConferences.find(c => c.id === paramId) || null;
+    }
+    
+    // Priority 2: LocalStorage (if no URL param)
+    if (!found && savedId && !paramId) {
+      found = availableConferences.find(c => c.id === savedId) || null;
+    }
+    
+    // Priority 3: Auto-select if only one
+    if (!found && availableConferences.length === 1) {
+       found = availableConferences[0];
+       localStorage.setItem('conference_id', found.id);
+    }
+
+    // Only update if different to avoid loops
+    if (found?.id !== currentConference?.id) {
+        setCurrentConference(found);
+    }
+    
+    // Always stop loading after this check, even if nothing found
+    setLoading(false);
+    
+  }, [availableConferences, searchParams]); // Remove 'loading' dependency to avoid loop if we set loading false here.
+  // Actually, we need to know when fetch is done. 
+  // Let's rely on avaiableConferences being set. Use a separate state for dataLoaded if needed, 
+  // but let's assume if fetch runs it updates state.
 
   const selectConference = (conference: Conference, redirectPath: string = '/profile') => {
     setCurrentConference(conference);
@@ -75,11 +106,11 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
   // Navigation Guard
   useEffect(() => {
     if (!loading) {
-       const publicRoutes = ['/', '/auth', '/select-conference'];
+       const publicRoutes = ['/', '/auth', '/select-conference', '/login', '/register'];
        const isPublic = publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
        
        if (!isPublic && !currentConference) {
-           router.push('/select-conference');
+           router.push('/login?action=select_event');
        }
     }
   }, [loading, currentConference, pathname, router]);

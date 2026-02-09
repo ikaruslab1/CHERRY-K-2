@@ -6,8 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { registerUser } from "@/actions/auth";
+import { registerUser, loginWithId } from "@/actions/auth";
 import { Loader2, CheckCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // Helper for Title Case
 const toTitleCase = (str: string) => {
@@ -60,7 +61,9 @@ const formSchema = z
 type FormData = z.infer<typeof formSchema>;
 
 export function RegisterForm() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isAutoLoggingIn, setIsAutoLoggingIn] = useState(false);
   const [successData, setSuccessData] = useState<{
     id: string;
     name: string;
@@ -112,10 +115,32 @@ export function RegisterForm() {
       const result = await registerUser(formattedData);
       if (result.success && result.data) {
         localStorage.removeItem("register_form_data"); // Clear saved data
+        
+        const shortId = result.data.short_id;
+        const fullName = `${formattedData.firstName} ${formattedData.lastName}`;
+        
+        // Show success message briefly
         setSuccessData({
-          id: result.data.short_id,
-          name: `${formattedData.firstName} ${formattedData.lastName}`,
+          id: shortId,
+          name: fullName,
         });
+        
+        // Auto-login after a short delay to show the success message
+        setIsAutoLoggingIn(true);
+        setTimeout(async () => {
+          const loginResult = await loginWithId(shortId);
+          
+          if (loginResult.success) {
+            // Redirect to profile page
+            router.push('/profile');
+          } else {
+            // If auto-login fails, keep showing the success message
+            // User can manually login with their ID
+            setIsAutoLoggingIn(false);
+            console.error("Auto-login failed:", loginResult.error);
+          }
+        }, 2000); // 2 second delay to show success message
+        
       } else {
         alert("Error al registrar: " + result.error);
       }
@@ -157,18 +182,34 @@ export function RegisterForm() {
           </p>
         </div>
 
-        <p className="text-sm text-gray-400 mb-6">
-          Guarda este ID. Lo necesitarás para ingresar al evento y registrar tu
-          asistencia.
-        </p>
+        {isAutoLoggingIn ? (
+          <>
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <Loader2 className="h-5 w-5 animate-spin text-[#DBF227]" />
+              <p className="text-sm text-gray-600 font-medium">
+                Iniciando sesión automáticamente...
+              </p>
+            </div>
+            <p className="text-xs text-gray-400">
+              Serás redirigido a tu perfil en un momento
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-gray-400 mb-6">
+              Guarda este ID. Lo necesitarás para ingresar al evento y registrar tu
+              asistencia.
+            </p>
 
-        <Button
-          onClick={() => window.location.reload()}
-          variant="primary"
-          className="w-full"
-        >
-          Entendido
-        </Button>
+            <Button
+              onClick={() => window.location.reload()}
+              variant="primary"
+              className="w-full"
+            >
+              Entendido
+            </Button>
+          </>
+        )}
       </div>
     );
   }
@@ -193,8 +234,10 @@ export function RegisterForm() {
               handleBlur(e, "firstName", firstNameReg.onBlur)
             }
             placeholder="Ej. Juan"
-            className={`rounded-xl border bg-gray-50 focus:bg-white transition-all h-12 ${
-              errors.firstName ? "border-red-500 bg-red-50" : "border-gray-200"
+            className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
+              errors.firstName 
+              ? "border-red-500 bg-red-50" 
+              : "border-gray-200 bg-white focus:bg-white focus:border-black focus:ring-1 focus:ring-black"
             }`}
           />
           {errors.firstName && (
@@ -213,8 +256,10 @@ export function RegisterForm() {
               handleBlur(e, "lastName", lastNameReg.onBlur)
             }
             placeholder="Ej. Pérez López"
-            className={`rounded-xl border bg-gray-50 focus:bg-white transition-all h-12 ${
-              errors.lastName ? "border-red-500 bg-red-50" : "border-gray-200"
+            className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
+              errors.lastName 
+              ? "border-red-500 bg-red-50" 
+              : "border-gray-200 bg-white focus:bg-white focus:border-black focus:ring-1 focus:ring-black"
             }`}
           />
           {errors.lastName && (
@@ -232,8 +277,10 @@ export function RegisterForm() {
           </label>
           <select
             {...register("degree")}
-            className={`flex h-12 w-full rounded-xl border bg-gray-50 px-3 py-2 text-sm text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:bg-white transition-all ${
-              errors.degree ? "border-red-500 bg-red-50" : "border-gray-200"
+            className={`flex h-12 w-full rounded-xl border px-3 py-2 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black text-black ${
+              errors.degree 
+              ? "border-red-500 bg-red-50 text-[#373737]" 
+              : "border-gray-200 bg-white focus:bg-white"
             }`}
           >
             <option value="">Seleccionar...</option>
@@ -254,8 +301,10 @@ export function RegisterForm() {
           </label>
           <select
             {...register("gender")}
-            className={`flex h-12 w-full rounded-xl border bg-gray-50 px-3 py-2 text-sm text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:bg-white transition-all ${
-              errors.gender ? "border-red-500 bg-red-50" : "border-gray-200"
+             className={`flex h-12 w-full rounded-xl border px-3 py-2 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black text-black ${
+              errors.gender 
+              ? "border-red-500 bg-red-50" 
+              : "border-gray-200 bg-white focus:bg-white"
             }`}
           >
             <option value="">Seleccionar...</option>
@@ -277,8 +326,10 @@ export function RegisterForm() {
           {...register("email")}
           type="email"
           placeholder="juan@ejemplo.com"
-          className={`rounded-xl border bg-gray-50 focus:bg-white transition-all h-12 ${
-            errors.email ? "border-red-500 bg-red-50" : "border-gray-200"
+          className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
+            errors.email 
+            ? "border-red-500 bg-red-50" 
+            : "border-gray-200 bg-white focus:bg-white focus:border-black focus:ring-1 focus:ring-black"
           }`}
         />
         {errors.email && (
@@ -294,10 +345,10 @@ export function RegisterForm() {
           {...register("confirmEmail")}
           type="email"
           placeholder="juan@example.com"
-          className={`rounded-xl border bg-gray-50 focus:bg-white transition-all h-12 ${
+          className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
             errors.confirmEmail
               ? "border-red-500 bg-red-50"
-              : "border-gray-200"
+              : "border-gray-200 bg-white focus:bg-white focus:border-black focus:ring-1 focus:ring-black"
           }`}
         />
         {errors.confirmEmail && (
@@ -315,8 +366,10 @@ export function RegisterForm() {
           {...register("phone")}
           type="tel"
           placeholder="Minimo 10 digitos. Sin lada."
-          className={`rounded-xl border bg-gray-50 focus:bg-white transition-all h-12 ${
-            errors.phone ? "border-red-500 bg-red-50" : "border-gray-200"
+          className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
+            errors.phone 
+            ? "border-red-500 bg-red-50" 
+            : "border-gray-200 bg-white focus:bg-white focus:border-black focus:ring-1 focus:ring-black"
           }`}
         />
         {errors.phone && (
@@ -327,7 +380,7 @@ export function RegisterForm() {
       <Button
         type="submit"
         disabled={isLoading}
-        className="w-full mt-6 font-bold"
+        className="w-full mt-6 font-bold bg-[#373737] hover:bg-black text-white"
         size="lg"
       >
         {isLoading ? (

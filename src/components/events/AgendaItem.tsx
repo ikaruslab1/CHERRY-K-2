@@ -1,5 +1,6 @@
-import { Calendar, Clock, Tag, CheckCircle2, Medal } from "lucide-react";
+import { Calendar, Clock, Tag, CheckCircle2, Medal, Star } from "lucide-react";
 import { Event } from "@/types";
+import { motion } from "framer-motion";
 
 interface AgendaItemProps {
   event: Event;
@@ -21,21 +22,22 @@ export function AgendaItem({
   const eventDate = new Date(event.date);
   const duration = event.duration_days || 1;
 
-  // Determine styles based on status
-  // Priority: Attended > Interested > Default
-  let gradientStyles = "bg-white";
-  let borderStyle = "bg-gray-200";
+  // Clean, minimal styling - only acid green as accent
+  let cardBg = "bg-white";
+  let borderColor = "border-gray-200";
+  let accentBar = "bg-gray-300";
 
   if (isAttended) {
-    gradientStyles = "bg-[#DBF227]/10";
-    borderStyle = "bg-[#DBF227]";
+    // Completed events: Acid green accent
+    borderColor = "border-[#DBF227]";
+    accentBar = "bg-[#DBF227]";
   } else if (isInterested) {
-    gradientStyles = "bg-gray-50";
-    borderStyle = "bg-[#373737]";
+    // Interested events: Dark accent
+    borderColor = "border-slate-500";
+    accentBar = "bg-slate-500";
   }
 
   const formatDateRange = () => {
-    // Standard format: "mié. 25 oct." or similar depending on browser
     const startStr = eventDate.toLocaleDateString("es-ES", {
       weekday: "short",
       day: "numeric",
@@ -65,33 +67,31 @@ export function AgendaItem({
   };
 
   return (
-    <button
+    <motion.button
       onClick={() => onClick(event)}
-      className="group relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-sm transition-all hover:shadow-md hover:border-gray-300 hover:-translate-y-0.5"
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className={`group relative w-full overflow-hidden rounded-xl border-2 ${borderColor} ${cardBg} text-left shadow-sm hover:shadow-lg transition-all duration-200`}
     >
-      {/* Left Indicator Strip */}
+      {/* Left Accent Bar - Clean and simple */}
       <div
-        className={`absolute bottom-0 left-0 top-0 w-1.5 ${borderStyle} transition-colors`}
-      />
-
-      {/* Solid Background */}
-      <div
-        className={`absolute inset-0 ${gradientStyles} transition-colors`}
+        className={`absolute bottom-0 left-0 top-0 w-1 ${accentBar} transition-all duration-200`}
       />
 
       {/* Content Container */}
-      <div className="relative flex flex-col gap-3 p-5 pl-7 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+      <div className="relative flex flex-col gap-4 p-5 pl-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         {/* Main Info */}
-        <div className="flex flex-1 flex-col items-start gap-2">
-          {/* Tags & Status */}
+        <div className="flex flex-1 flex-col items-start gap-3">
+          {/* Tags & Status - Minimal design */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-md border border-gray-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+            <span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-600">
               {event.type}
             </span>
 
             {event.gives_certificate && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-200/10 border border-gray-200/50 px-2.5 py-1 text-[10px] font-bold text-[#373737] shadow-sm">
-                <Medal className="h-3 w-3" /> Otorga constancia
+              <span className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2.5 py-1 text-[10px] font-bold text-gray-600">
+                <Medal className="h-3 w-3" /> Constancia
               </span>
             )}
 
@@ -103,54 +103,68 @@ export function AgendaItem({
                     tag.toLowerCase().includes(searchQuery.toLowerCase()),
                   )
                   .map((tag) => (
-                    <span
+                    <motion.span
                       key={tag}
-                      className="inline-flex items-center rounded-md bg-[#DBF227]/20 border border-[#DBF227]/30 px-2 py-0.5 text-[10px] font-bold text-[#373737]"
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="inline-flex items-center rounded-md bg-[#DBF227]/20 border border-[#DBF227] px-2 py-1 text-[10px] font-bold text-[#373737]"
                     >
-                      <Tag className="w-3 h-3 mr-1 opacity-50" /> {tag}
-                    </span>
+                      <Tag className="w-3 h-3 mr-1" /> {tag}
+                    </motion.span>
                   ))}
               </>
             )}
+            
             {isAttended && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#DBF227] px-2.5 py-1 text-[10px] font-bold text-[#373737] shadow-sm">
-                <CheckCircle2 className="h-3 w-3" /> Asistido
+              <span className="inline-flex items-center gap-1 rounded-md bg-[#DBF227] border border-[#DBF227] px-2.5 py-1 text-[10px] font-bold text-black">
+                <CheckCircle2 className="h-3 w-3" /> Completado
+              </span>
+            )}
+
+            {isInterested && !isAttended && (
+              <span className="inline-flex items-center gap-1 rounded-md border border-[#373737] bg-white px-2.5 py-1 text-[10px] font-bold text-[#373737]">
+                <Star className="h-3 w-3" /> Me interesa
               </span>
             )}
           </div>
 
-          {/* Title */}
-          <h3 className="line-clamp-2 text-lg font-bold leading-snug text-[#373737] transition-colors group-hover:text-black">
+          {/* Title - Clean and bold */}
+          <h3 className="line-clamp-2 text-lg font-bold leading-tight text-[#373737] transition-colors duration-200 group-hover:text-black">
             {event.title}
           </h3>
         </div>
 
-        {/* Date & Time */}
-        <div className="flex shrink-0 flex-row items-center gap-4 text-xs font-medium uppercase tracking-wide text-gray-400 sm:flex-col sm:items-end sm:gap-1">
+        {/* Date & Time - Minimal */}
+        <div className="flex shrink-0 flex-col items-start sm:items-end gap-2.5 min-w-[130px]">
           {/* Progress Bar for Multi-day Events */}
           {duration > 1 && attendanceCount > 0 && (
-            <div className="w-full sm:w-24 flex flex-col items-end gap-1 mb-2">
-              <div className="text-[10px] font-bold text-[#373737] normal-case">
-                {attendanceCount}/{duration} Asistencias
+            <div className="w-full flex flex-col items-end gap-1.5">
+              <div className="text-xs font-bold text-[#373737]">
+                <span className="text-[#DBF227]">{attendanceCount}</span>
+                <span className="text-gray-400 mx-1">/</span>
+                <span className="text-gray-500">{duration}</span>
               </div>
-              <div className="h-1.5 w-24 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
-                <div
-                  className="h-full bg-[#DBF227] transition-all duration-500"
-                  style={{
-                    width: `${Math.min((attendanceCount / duration) * 100, 100)}%`,
-                  }}
+              <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min((attendanceCount / duration) * 100, 100)}%` }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  className="h-full bg-[#DBF227]"
                 />
               </div>
             </div>
           )}
 
-          <div className="flex items-center gap-1.5">
-            <Calendar className="h-4 w-4" />
-            <span>{formatDateRange()}</span>
+          {/* Date */}
+          <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
+            <Calendar className="h-3.5 w-3.5 text-gray-400" />
+            <span className="font-mono uppercase tracking-wide">{formatDateRange()}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Clock className="h-4 w-4" />
-            <span>
+          
+          {/* Time */}
+          <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
+            <Clock className="h-3.5 w-3.5 text-gray-400" />
+            <span className="font-mono">
               {eventDate.toLocaleTimeString("es-ES", {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -159,6 +173,6 @@ export function AgendaItem({
           </div>
         </div>
       </div>
-    </button>
+    </motion.button>
   );
 }

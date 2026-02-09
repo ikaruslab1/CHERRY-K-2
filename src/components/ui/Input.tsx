@@ -18,7 +18,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           // Clean up standard borders
           "border-t-0 border-x-0", 
           // Interaction
-          "focus-visible:outline-none focus-visible:bg-[#1a1a1a] transition-colors duration-300",
+          "focus-visible:outline-none transition-colors duration-300",
           // Disabled
           "disabled:cursor-not-allowed disabled:opacity-50",
           className
