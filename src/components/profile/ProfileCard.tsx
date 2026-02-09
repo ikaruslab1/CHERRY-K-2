@@ -177,7 +177,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
     <div className="flex flex-col h-full w-full bg-white select-none">
       {/* Header - Accent Color - Safe Zone Top */}
       <div 
-        className="relative shrink-0 flex flex-col items-center justify-center pt-8 pb-6 px-4 overflow-hidden transition-colors duration-300"
+        className="relative shrink-0 flex flex-col items-center justify-center pt-6 pb-4 px-4 overflow-hidden transition-colors duration-300"
         style={{ 
           background: themeColor,
           ...(animationType === 'gradient' && {
@@ -272,15 +272,15 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           </div>
 
           {/* QR Section - Maximized & Elegant */}
-          <div className="relative flex-1 flex items-center justify-center py-6 w-full">
-              <div className="relative p-4 bg-white rounded-3xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100">
-                  <div className="absolute inset-0 rounded-3xl border border-black/5" />
+          <div className="relative flex-1 flex items-center justify-center py-2 w-full">
+              <div className="relative p-3 bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100">
+                  <div className="absolute inset-0 rounded-2xl border border-black/5" />
                   <QRCodeSVG 
                       value={qrData} 
-                      size={200}
+                      size={180}
                       level="H"
                       includeMargin={true}
-                      className="w-full h-full object-contain max-w-[200px] max-h-[200px]"
+                      className="w-full h-full object-contain max-w-[180px] max-h-[180px]"
                   />
                   {/* Decorative corners */}
                   <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-black/10 rounded-tl-lg" />
@@ -303,12 +303,12 @@ export function ProfileCard({ profile }: ProfileCardProps) {
       </div>
 
       {/* Footer - Safe Zone Bottom */}
-      <div className="shrink-0 pb-8 pt-0 px-6 text-center">
+      <div className="shrink-0 pb-6 pt-2 px-6 text-center">
           <div className=" opacity-60 grayscale transition-all duration-500 hover:grayscale-0 hover:opacity-100">
-            <p className="text-[#373737] text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+            <p className="text-[#373737] text-[10px] font-bold uppercase tracking-widest leading-relaxed mb-1">
                 {institution}
             </p>
-            <div className="w-8 h-px bg-gray-200 mx-auto" />
+            <div className="w-8 h-px bg-gray-200 mx-auto my-2" />
             <p className="text-gray-400 text-[9px] font-medium tracking-[0.2em] uppercase">
                 {department}
             </p>
@@ -329,7 +329,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
       className="flex flex-col items-center gap-8 w-full max-w-[20rem] xs:max-w-xs sm:max-w-sm mx-auto"
     >
       <motion.div 
-        className="relative w-full aspect-[9/15] [perspective:1000px] cursor-pointer group print:hidden select-none"
+        className="relative w-full aspect-[9/16] [perspective:1000px] cursor-pointer group print:hidden select-none"
         onClick={handleCardClick}
         animate={controls}
       >

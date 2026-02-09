@@ -164,15 +164,16 @@ const navItems = [
   }
 
   return (
-    <SidebarAwareContainer className="min-h-screen p-4 md:p-8 bg-gray-50 text-[#373737]">
-      <ResponsiveNav 
-        items={navItems}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        handleSignOut={handleSignOut}
-      />
-      
-      <div className="max-w-4xl mx-auto space-y-8 mt-12 md:mt-0">
+    <SidebarAwareContainer className="min-h-screen bg-gray-50 text-[#373737]">
+      <div className="p-4 md:p-8 min-h-screen flex flex-col">
+          <ResponsiveNav 
+            items={navItems}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            handleSignOut={handleSignOut}
+          />
+          
+          <div className="max-w-4xl mx-auto space-y-8 mt-12 md:mt-0 flex-1 w-full">
 
         <div className="p-0 min-h-[500px]">
              <AnimatePresence mode="wait">
@@ -193,6 +194,7 @@ const navItems = [
                 </motion.div>
              </AnimatePresence>
         </div>
+      </div>
       </div>
     </SidebarAwareContainer>
   );

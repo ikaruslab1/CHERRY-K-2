@@ -3,58 +3,80 @@ import { CertificateContent, Certificate } from './CertificateContent';
 
 export function CertificatePreview({ certificate }: { certificate: Certificate }) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [scale, setScale] = useState(1);
+    const [scale, setScale] = useState<number | null>(null); // Start null to hide
+
+    // Constants
+    const MM_TO_PX = 3.7795;
+    const PDF_WIDTH_MM = 279.4;
+    const PDF_HEIGHT_MM = 215.9;
+    
+    // Base dimensions in PX
+    const widthPx = PDF_WIDTH_MM * MM_TO_PX;
+    const heightPx = PDF_HEIGHT_MM * MM_TO_PX;
 
     useEffect(() => {
         const updateScale = () => {
-            if (containerRef.current) {
+            if (containerRef.current && containerRef.current.parentElement) {
                 const parent = containerRef.current.parentElement;
-                if (parent) {
-                    const availableWidth = parent.clientWidth - 48; // padding
-                    const availableHeight = parent.clientHeight - 48;
-                    
-                    // Ratio for Letter Landscape: 279.4 / 215.9 ~= 1.294
-                    
-                    // We calculate scale to FIT the 279.4mm x 215.9mm box into the available px space.
-                    // 1mm ~ 3.7795px
-                    const baseWidthPx = 279.4 * 3.7795; // ~1056px
-                    const baseHeightPx = 215.9 * 3.7795; // ~816px
+                
+                // Use getBoundingClientRect for more accurate available space
+                const rect = parent.getBoundingClientRect();
+                
+                // Subtract padding safely (e.g. 32px total horizontal padding is p-4, but let's be safe with 40-60px)
+                // If parent has p-2 (16px total), we subtract that plus a bit of margin.
+                const paddingX = 32; 
+                const paddingY = 32;
 
-                    const scaleX = availableWidth / baseWidthPx;
-                    const scaleY = availableHeight / baseHeightPx;
-                    
-                    const newScale = Math.min(scaleX, scaleY, 0.95); 
-                    setScale(newScale);
-                }
+                const availableWidth = rect.width - paddingX; 
+                const availableHeight = rect.height - paddingY;
+                
+                const scaleX = availableWidth / widthPx;
+                const scaleY = availableHeight / heightPx;
+                
+                // Allow scale to be determined by the most constrained dimension
+                // Cap at 1.0 (100%) so it doesn't blow up on huge screens
+                const newScale = Math.min(scaleX, scaleY, 1); 
+                setScale(newScale);
             }
         };
 
-        window.addEventListener('resize', updateScale);
+        // Initial
         updateScale();
-        setTimeout(updateScale, 100);
 
-        return () => window.removeEventListener('resize', updateScale);
-    }, []);
+        // Robust Resize Observer
+        const parentElement = containerRef.current?.parentElement;
+        let observer: ResizeObserver | null = null;
 
-    // Base dimensions in PX for the transform container
-    const widthPx = 279.4 * 3.78; 
-    const heightPx = 215.9 * 3.78;
+        if (parentElement) {
+            observer = new ResizeObserver(() => {
+                window.requestAnimationFrame(updateScale);
+            });
+            observer.observe(parentElement);
+        }
+
+        return () => {
+            if (observer) observer.disconnect();
+        };
+    }, [widthPx, heightPx]);
 
     return (
         <div 
             ref={containerRef} 
             style={{ 
-                width: widthPx * scale, 
-                height: heightPx * scale 
+                width: widthPx * (scale || 0.1), 
+                height: heightPx * (scale || 0.1),
+                opacity: scale ? 1 : 0,
+                maxWidth: '100%',
+                maxHeight: '100%'
             }} 
-            className="origin-center shadow-2xl transition-all duration-300 ease-out bg-white"
+            className="origin-center shadow-2xl transition-all duration-300 ease-out bg-white relative"
         >
             <div 
                 style={{ 
-                    transform: `scale(${scale})`, 
+                    transform: `scale(${scale || 1})`, 
                     transformOrigin: 'top left', 
-                    width: '279.4mm', 
-                    height: '215.9mm',
+                    width: `${PDF_WIDTH_MM}mm`, 
+                    height: `${PDF_HEIGHT_MM}mm`,
                 }}
             >
                 <CertificateContent certificate={certificate} />

@@ -26,16 +26,16 @@ export function CertificateModal({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 overflow-hidden">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl flex flex-col h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 sm:p-4 overflow-hidden print:hidden">
+            <div className="bg-white sm:rounded-xl shadow-2xl w-full max-w-6xl flex flex-col h-full sm:h-[90vh]">
                 
                 {/* Modal Toolbar */}
-                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
-                    <h3 className="font-semibold text-gray-700">Vista Previa de Constancia</h3>
+                <div className="p-3 sm:p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
+                    <h3 className="font-semibold text-gray-700 text-sm sm:text-base">Vista Previa de Constancia</h3>
                     <div className="flex items-center gap-2">
-                         <Button variant="outline" onClick={handlePrint} className="gap-2 text-black hover:text-black">
+                         <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2 text-black hover:text-black">
                              <Printer className="h-4 w-4" />
-                             Imprimir
+                             <span className="hidden sm:inline">Imprimir</span>
                          </Button>
                          <button 
                             onClick={onClose}
@@ -47,7 +47,7 @@ export function CertificateModal({
                 </div>
 
                 {/* Scaled View Area */}
-                <div className="flex-1 overflow-hidden bg-gray-900/90 relative flex items-center justify-center p-4 md:p-8">
+                <div className="flex-1 overflow-hidden bg-gray-900/90 relative flex items-center justify-center p-2 sm:p-8 min-w-0 min-h-0">
                     <CertificatePreview certificate={certificate} />
                 </div>
             </div>

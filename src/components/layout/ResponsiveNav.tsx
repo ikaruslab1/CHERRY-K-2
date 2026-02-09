@@ -167,7 +167,10 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                 )}
             >
                 {/* Header Desktop */}
-                <div className="flex items-center justify-between p-5 border-b border-gray-100 min-h-[80px]">
+                <motion.div 
+                    layout
+                    className="flex items-center justify-between p-5 border-b border-gray-100 min-h-[80px]"
+                >
                     <div className="flex items-center gap-3 overflow-hidden flex-1 min-w-0">
                          {/* Icon always visible */}
                         <div className="w-9 h-9 bg-[var(--color-acid)] flex items-center justify-center rounded-xl shrink-0 transition-all hover:scale-105 shadow-sm border border-black/5">
@@ -194,7 +197,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                             )}
                         </AnimatePresence>
                     </div>
-                </div>
+                </motion.div>
                 
                 {/* Toggle Overlay */}
                 {isDesktopCollapsed && (
@@ -215,7 +218,10 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
 
 
                 {/* Nav Items Desktop */}
-                <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-200">
+                <motion.nav 
+                    layout
+                    className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-200"
+                >
                     {visibleItems.map((item) => {
                         const isActive = activeTab === item.id;
                         return (
@@ -257,10 +263,13 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                             </button>
                         );
                     })}
-                </nav>
+                </motion.nav>
 
                 {/* Footer Desktop */}
-                <div className="p-3 border-t border-gray-100 space-y-2">
+                <motion.div 
+                    layout
+                    className="p-3 border-t border-gray-100 space-y-2"
+                >
                     <InstallPWAButton collapsed={isDesktopCollapsed} />
                     
                     <button
@@ -312,7 +321,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                             </motion.span>
                         )}
                     </button>
-                </div>
+                </motion.div>
             </motion.aside>
         </>
     );

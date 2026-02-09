@@ -78,7 +78,7 @@ export default function LoginPage() {
         {/* Header Segment */}
         <div className="relative z-10 space-y-6">
             <span className="text-xs font-mono uppercase tracking-widest text-gray-500">Plataforma</span>
-          <h1 className="text-7xl font-bold tracking-tighter leading-none">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-none">
             Cherry-K-2
           </h1>
           <div className="h-1 w-24 bg-black" />
@@ -136,10 +136,10 @@ export default function LoginPage() {
       </div>
 
       {/* Right Column - Clean White Forms */}
-      <div className="relative flex items-center justify-center p-6 md:p-12 lg:p-24 bg-white">
+      <div className="relative flex flex-col items-center justify-center p-6 md:p-12 lg:p-24 bg-white">
         
         {/* Event Selection Button */}
-        <div className="absolute top-6 right-6 z-20">
+        <div className="w-full flex justify-end mb-6 lg:absolute lg:top-6 lg:right-6 lg:mb-0 z-20">
             <button
                 onClick={() => setShowEventModal(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors text-sm font-medium text-slate-700"

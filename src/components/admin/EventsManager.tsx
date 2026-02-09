@@ -191,19 +191,19 @@ export function EventsManager() {
           ) : (
           <>
             {events.map(event => (
-              <div key={event.id} className="bg-white p-5 rounded-2xl flex flex-col xs:flex-row justify-between items-start xs:items-center group transition-all gap-4 xs:gap-0">
-                  <div className="w-full xs:w-auto">
-                      <div className="flex items-center gap-2 mb-1">
+              <div key={event.id} className="bg-white p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center group transition-all gap-4 border border-gray-100 shadow-sm hover:shadow-md">
+                  <div className="w-full sm:flex-1">
+                      <div className="flex items-center gap-2 mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2 py-1 rounded-md">{event.type}</span>
-                        <span className="text-xs text-gray-400">{new Date(event.date).toLocaleDateString([], {weekday: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
+                        <span className="text-xs text-gray-400 font-mono">{new Date(event.date).toLocaleDateString([], {weekday: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
                       </div>
-                      <h4 className="font-bold text-lg text-[#373737]">{event.title}</h4>
-                      <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#DBF227]"></span> 
-                        {event.location}
+                      <h4 className="font-bold text-lg text-[#373737] leading-tight mb-1">{event.title}</h4>
+                      <p className="text-sm text-gray-500 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#DBF227] shrink-0"></span> 
+                        <span className="truncate">{event.location}</span>
                       </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 border-gray-50 pt-3 sm:pt-0">
                       {event.speaker_id && (
                           <Button size="sm" variant="ghost" onClick={() => handleOpenCertificate(event)} className="text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl" title="Ver Constancia de Ponente">
                               <Eye className="h-4 w-4" />
@@ -225,16 +225,16 @@ export function EventsManager() {
 
       {/* Certificate Modal */}
       {selectedCertificate && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-4 overflow-hidden">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl flex flex-col h-[90vh]">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 sm:p-4 overflow-hidden print:hidden">
+            <div className="bg-white sm:rounded-xl shadow-2xl w-full max-w-6xl flex flex-col h-full sm:h-[90vh]">
                 
                 {/* Modal Toolbar */}
-                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
-                    <h3 className="font-semibold text-gray-700">Vista Previa de Constancia (Ponente)</h3>
+                <div className="p-3 sm:p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
+                    <h3 className="font-semibold text-gray-700 text-sm sm:text-base">Vista Previa de Constancia (Ponente)</h3>
                     <div className="flex items-center gap-2">
-                         <Button variant="outline" onClick={handlePrintCertificate} className="gap-2">
+                         <Button variant="outline" size="sm" onClick={handlePrintCertificate} className="gap-2 text-black hover:text-black">
                              <Printer className="h-4 w-4" />
-                             Imprimir
+                             <span className="hidden sm:inline">Imprimir</span>
                          </Button>
                          <button 
                             onClick={() => setSelectedCertificate(null)}
@@ -246,7 +246,7 @@ export function EventsManager() {
                 </div>
 
                 {/* Scaled View Area */}
-                <div className="flex-1 overflow-hidden bg-gray-900/90 relative flex items-center justify-center p-4 md:p-8">
+                <div className="flex-1 overflow-hidden bg-gray-900/90 relative flex items-center justify-center p-2 sm:p-8 min-w-0 min-h-0">
                     <CertificatePreview certificate={selectedCertificate} />
                 </div>
             </div>

@@ -80,17 +80,17 @@ export function AgendaItem({
       />
 
       {/* Content Container */}
-      <div className="relative flex flex-col gap-4 p-5 pl-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+      <div className="relative flex flex-col gap-3 p-4 pl-5 sm:p-5 sm:pl-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         {/* Main Info */}
-        <div className="flex flex-1 flex-col items-start gap-3">
+        <div className="flex flex-1 flex-col items-start gap-2 sm:gap-3">
           {/* Tags & Status - Minimal design */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-600">
+            <span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-600">
               {event.type}
             </span>
 
             {event.gives_certificate && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2.5 py-1 text-[10px] font-bold text-gray-600">
+              <span className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-gray-600">
                 <Medal className="h-3 w-3" /> Constancia
               </span>
             )}
@@ -107,7 +107,7 @@ export function AgendaItem({
                       key={tag}
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="inline-flex items-center rounded-md bg-[#DBF227]/20 border border-[#DBF227] px-2 py-1 text-[10px] font-bold text-[#373737]"
+                      className="inline-flex items-center rounded-md bg-[#DBF227]/20 border border-[#DBF227] px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-[#373737]"
                     >
                       <Tag className="w-3 h-3 mr-1" /> {tag}
                     </motion.span>
@@ -116,29 +116,30 @@ export function AgendaItem({
             )}
             
             {isAttended && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-[#DBF227] border border-[#DBF227] px-2.5 py-1 text-[10px] font-bold text-black">
+              <span className="inline-flex items-center gap-1 rounded-md bg-[#DBF227] border border-[#DBF227] px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-black">
                 <CheckCircle2 className="h-3 w-3" /> Completado
               </span>
             )}
 
             {isInterested && !isAttended && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-[#373737] bg-white px-2.5 py-1 text-[10px] font-bold text-[#373737]">
+              <span className="inline-flex items-center gap-1 rounded-md border border-[#373737] bg-white px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-[#373737]">
                 <Star className="h-3 w-3" /> Me interesa
               </span>
             )}
           </div>
 
           {/* Title - Clean and bold */}
-          <h3 className="line-clamp-2 text-lg font-bold leading-tight text-[#373737] transition-colors duration-200 group-hover:text-black">
+          <h3 className="line-clamp-2 text-base sm:text-lg font-bold leading-snug text-[#373737] transition-colors duration-200 group-hover:text-black">
             {event.title}
           </h3>
         </div>
 
-        {/* Date & Time - Minimal */}
-        <div className="flex shrink-0 flex-col items-start sm:items-end gap-2.5 min-w-[130px]">
-          {/* Progress Bar for Multi-day Events */}
+        {/* Date & Time - Responsive Layout */}
+        <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:gap-2.5 min-w-[130px] w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 mt-1 sm:mt-0">
+          
+          {/* Progress Bar for Multi-day Events - Only on Desktop for simplicity or integrated differently */}
           {duration > 1 && attendanceCount > 0 && (
-            <div className="w-full flex flex-col items-end gap-1.5">
+            <div className="hidden sm:flex w-full flex-col items-end gap-1.5">
               <div className="text-xs font-bold text-[#373737]">
                 <span className="text-[#DBF227]">{attendanceCount}</span>
                 <span className="text-gray-400 mx-1">/</span>
