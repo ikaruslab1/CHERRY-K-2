@@ -111,8 +111,8 @@ export function AgendaItem({
 
   if (isAttended) {
     // Completed events: Acid green accent
-    borderColor = "border-[#DBF227]";
-    accentBar = "bg-[#DBF227]";
+    borderColor = "border-[var(--color-acid)]";
+    accentBar = "bg-[var(--color-acid)]";
   } else if (isInterested) {
     // Interested events: Dark accent
     borderColor = "border-slate-500";
@@ -189,7 +189,7 @@ export function AgendaItem({
                       key={tag}
                       initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="inline-flex items-center rounded-md bg-[#DBF227]/20 border border-[#DBF227] px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-[#373737]"
+                      className="inline-flex items-center rounded-md bg-[var(--color-acid)]/20 border border-[var(--color-acid)] px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-[#373737]"
                     >
                       <Tag className="w-3 h-3 mr-1" /> {tag}
                     </motion.span>
@@ -198,7 +198,7 @@ export function AgendaItem({
             )}
             
             {isAttended && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-[#DBF227] border border-[#DBF227] px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-black">
+              <span className="inline-flex items-center gap-1 rounded-md bg-[var(--color-acid)] border border-[var(--color-acid)] px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-[var(--color-acid-text)]">
                 <CheckCircle2 className="h-3 w-3" /> Completado
               </span>
             )}
@@ -222,7 +222,7 @@ export function AgendaItem({
                 return (
                   <div 
                     key={idx} 
-                    className="p-1 rounded bg-gray-50 border border-gray-100 text-gray-400 group-hover:border-[#DBF227] group-hover:text-black transition-all"
+                    className="p-1 rounded bg-gray-50 border border-gray-100 text-gray-400 group-hover:border-[var(--color-acid)] group-hover:bg-[var(--color-acid)] group-hover:text-[var(--color-acid-text)] transition-all"
                     title={link.label}
                   >
                     <IconComp size={14} />

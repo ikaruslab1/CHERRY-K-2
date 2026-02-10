@@ -215,7 +215,7 @@ export function EventModal({
             {event.tags && event.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                 {event.tags.map(tag => (
-                    <span key={tag} className="text-[10px] font-bold text-gray-500 bg-gray-100 px-3 py-1 uppercase tracking-widest border border-gray-200 hover:bg-[var(--color-acid)] hover:text-black hover:border-transparent transition-colors">
+                    <span key={tag} className="text-[10px] font-bold text-gray-500 bg-gray-100 px-3 py-1 uppercase tracking-widest border border-gray-200 hover:bg-[var(--color-acid)] hover:text-[var(--color-acid-text)] hover:border-transparent transition-colors">
                       #{tag}
                     </span>
                 ))}
@@ -247,14 +247,14 @@ export function EventModal({
                       rel="noopener noreferrer"
                       className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-100 hover:border-[var(--color-acid)] hover:bg-white transition-all group"
                     >
-                      <div className="p-2 bg-white border border-gray-100 group-hover:bg-[var(--color-acid)] group-hover:text-black transition-colors">
+                      <div className="p-2 bg-white border border-gray-100 group-hover:bg-[var(--color-acid)] group-hover:text-[var(--color-acid-text)] transition-colors">
                         <IconComp size={18} />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-bold text-black uppercase tracking-wider">{link.label}</p>
                         <p className="text-[10px] text-gray-400 truncate max-w-[250px] font-mono">{link.url}</p>
                       </div>
-                      <ExternalLink size={14} className="text-gray-300 group-hover:text-black transition-colors" />
+                      <ExternalLink size={14} className="text-gray-300 group-hover:text-[var(--color-acid-text)] transition-colors" />
                     </a>
                   );
                 })}
@@ -329,7 +329,7 @@ export function EventModal({
                   className={`w-full h-14 text-sm tracking-[0.15em] uppercase font-bold transition-all ${
                     isInterested 
                       ? "bg-white text-red-500 border-2 border-red-100 hover:bg-red-50 hover:border-red-200"
-                      : "bg-black text-white hover:bg-[var(--color-acid)] hover:text-black hover:shadow-xl border border-transparent hover:border-black/10"
+                      : "bg-black text-white hover:bg-[var(--color-acid)] hover:text-[var(--color-acid-text)] hover:shadow-xl border border-transparent hover:border-black/10"
                   }`}
               >
                   {isInterested ? "Remover de mi agenda" : "Me interesa asistir"}
