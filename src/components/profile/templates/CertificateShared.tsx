@@ -42,7 +42,8 @@ export const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-MX', {
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'America/Mexico_City'
     });
 };
 

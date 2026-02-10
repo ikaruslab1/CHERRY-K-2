@@ -6,6 +6,7 @@ import { Event } from '@/types';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { formatMexicoTime, formatMexicoDate } from '@/lib/dateUtils';
 
 interface EventModalProps {
   event: Event | null;
@@ -101,7 +102,7 @@ export function EventModal({
            <div className="absolute bottom-4 left-6 z-20 flex items-end gap-4">
               <div className="flex flex-col bg-white p-3 shadow-lg min-w-[80px] text-center border-t-4 border-[var(--color-acid)]">
                  <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-0.5">
-                    {eventDate.toLocaleDateString('es-ES', { month: 'short' }).replace('.', '')}
+                    {formatMexicoDate(eventDate, { month: 'short' }).replace('.', '')}
                  </span>
                  <span className="text-3xl font-bold text-black tracking-tighter leading-none font-geist-sans">
                     {(() => {
@@ -183,7 +184,7 @@ export function EventModal({
                     <div>
                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Horario</h4>
                         <p className="text-base text-black font-medium">
-                            {eventDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                            {formatMexicoTime(eventDate)}
                         </p>
                     </div>
                 </div>

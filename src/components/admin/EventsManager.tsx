@@ -11,6 +11,7 @@ import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 import { Event, UserProfile } from '@/types';
 import { EventForm } from '@/components/admin/EventForm';
 import { useConference } from '@/context/ConferenceContext';
+import { formatMexicoDate } from '@/lib/dateUtils';
 
 export function EventsManager() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -195,7 +196,7 @@ export function EventsManager() {
                   <div className="w-full sm:flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2 py-1 rounded-md">{event.type}</span>
-                        <span className="text-xs text-gray-400 font-mono">{new Date(event.date).toLocaleDateString([], {weekday: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
+                        <span className="text-xs text-gray-400 font-mono">{formatMexicoDate(event.date, {weekday: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
                       </div>
                       <h4 className="font-bold text-lg text-[#373737] leading-tight mb-1">{event.title}</h4>
                       <p className="text-sm text-gray-500 flex items-center gap-1.5">

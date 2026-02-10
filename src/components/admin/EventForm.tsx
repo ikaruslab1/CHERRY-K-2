@@ -4,6 +4,7 @@ import { Plus, X } from 'lucide-react';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { SpeakerSelector } from '@/components/admin/SpeakerSelector';
 import { Event, UserProfile } from '@/types';
+import { formatToMexicoDateTimeLocal, parseMexicoDateTimeLocal } from '@/lib/dateUtils';
 
 interface EventFormProps {
     initialData: Event | null;
@@ -24,7 +25,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
             setValue('title', initialData.title || '');
             setValue('description', initialData.description || '');
             setValue('location', initialData.location || '');
-            setValue('date', initialData.date ? new Date(initialData.date).toISOString().slice(0, 16) : '');
+            setValue('date', initialData.date ? formatToMexicoDateTimeLocal(initialData.date) : '');
             setValue('type', initialData.type || 'Conferencia Magistral');
             setValue('speaker_id', initialData.speaker_id || '');
             setValue('image_url', initialData.image_url || '');
@@ -48,7 +49,8 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
     }, [eventType, setValue]);
 
     const handleFormSubmit = async (data: any) => {
-        await onSubmit({ ...data, type: eventType, tags });
+        const formattedDate = data.date ? parseMexicoDateTimeLocal(data.date).toISOString() : null;
+        await onSubmit({ ...data, date: formattedDate, type: eventType, tags });
     };
 
     const addTag = (e?: React.KeyboardEvent | React.MouseEvent) => {

@@ -1,6 +1,7 @@
 import { Calendar, Clock, Tag, CheckCircle2, Medal, Star } from "lucide-react";
 import { Event } from "@/types";
 import { motion } from "framer-motion";
+import { formatMexicoTime, formatMexicoDate } from "@/lib/dateUtils";
 
 interface AgendaItemProps {
   event: Event;
@@ -38,7 +39,7 @@ export function AgendaItem({
   }
 
   const formatDateRange = () => {
-    const startStr = eventDate.toLocaleDateString("es-ES", {
+    const startStr = formatMexicoDate(eventDate, {
       weekday: "short",
       day: "numeric",
       month: "short",
@@ -48,15 +49,15 @@ export function AgendaItem({
       const endDate = new Date(eventDate);
       endDate.setDate(eventDate.getDate() + (duration - 1));
 
-      const startDayStr = eventDate.toLocaleDateString("es-ES", {
+      const startDayStr = formatMexicoDate(eventDate, {
         weekday: "short",
         day: "numeric",
       });
-      const endDayStr = endDate.toLocaleDateString("es-ES", {
+      const endDayStr = formatMexicoDate(endDate, {
         weekday: "short",
         day: "numeric",
       });
-      const monthStr = eventDate.toLocaleDateString("es-ES", {
+      const monthStr = formatMexicoDate(eventDate, {
         month: "short",
       });
 
@@ -166,10 +167,7 @@ export function AgendaItem({
           <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
             <Clock className="h-3.5 w-3.5 text-gray-400" />
             <span className="font-mono">
-              {eventDate.toLocaleTimeString("es-ES", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {formatMexicoTime(eventDate)}
             </span>
           </div>
         </div>
