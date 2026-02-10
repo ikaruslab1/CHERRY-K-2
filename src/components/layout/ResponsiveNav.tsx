@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LogOut, X, Menu, ChevronLeft, ChevronRight, LayoutGrid, Bell, BellOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '@/context/SidebarContext';
@@ -42,10 +42,36 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
     // Inactive Item: Gray Text, Hover to Light Gray with Black Text
     const itemInactive = "text-gray-500 hover:bg-gray-50 hover:text-black transition-colors duration-200";
 
+    const [isVisible, setIsVisible] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            
+            if (currentScrollY > lastScrollY && currentScrollY > 10) {
+                // Scrolling down
+                setIsVisible(false);
+            } else {
+                // Scrolling up
+                setIsVisible(true);
+            }
+            setLastScrollY(currentScrollY);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [lastScrollY]);
+
     return (
         <>
             {/* MOBILE: Toggle Button */}
-            <div className="md:hidden fixed top-4 left-4 z-40">
+            <motion.div 
+                className="md:hidden fixed top-4 left-4 z-50"
+                initial={{ y: 0 }}
+                animate={{ y: isVisible ? 0 : -100 }}
+                transition={{ duration: 0.3 }}
+            >
                <button 
                   onClick={() => setIsMobileOpen(true)}
                   className="bg-white p-2.5 shadow-sm border border-gray-200 text-black flex items-center justify-center active:scale-95 transition-transform rounded-xl"
@@ -53,7 +79,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                >
                   <Menu className="w-5 h-5" />
                </button>
-            </div>
+            </motion.div>
 
             {/* MOBILE: Backdrop & Menu */}
             <AnimatePresence>
@@ -161,7 +187,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                 }}
                 transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
                 className={cn(
-                    "hidden md:flex fixed top-0 left-0 bottom-0 z-40 flex-col",
+                    "hidden md:flex fixed top-0 left-0 bottom-0 z-50 flex-col",
                     sidebarBg,
                     "shadow-[10px_0_30px_rgba(0,0,0,0.03)]"
                 )}

@@ -218,26 +218,16 @@ export function AgendaItem({
           </div>
 
           <div className="space-y-1.5">
-              <h3 className={`text-xl sm:text-2xl font-bold leading-tight tracking-tight ${isDark ? "text-white" : "text-[#121212]"}`}>
+              <h3 className={`pb-4 text-xl sm:text-2xl font-bold leading-tight tracking-tight ${isDark ? "text-white" : "text-[#121212]"}`}>
                   {event.title}
               </h3>
               
-              <div className="flex flex-col gap-1">
-                {event.speaker && (
-                    <p className={`text-sm font-medium font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                        {Array.isArray(event.speaker) 
-                            ? event.speaker.map(s => `${s.first_name} ${s.last_name}`).join(', ')
-                            : `${event.speaker.first_name} ${event.speaker.last_name}`}
-                    </p>
-                )}
-                
-                {event.location && (
+              {event.location && (
                   <div className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide mt-1 ${isDark ? "text-gray-500" : "text-gray-400"}`}>
                       <MapPin className="h-3.5 w-3.5" />
                       {event.location}
                   </div>
                 )}
-              </div>
           </div>
 
           {/* Links */}
