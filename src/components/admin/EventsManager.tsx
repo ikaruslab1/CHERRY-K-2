@@ -68,6 +68,7 @@ export function EventsManager() {
             duration_days: data.duration_days,
             gives_certificate: data.gives_certificate,
             tags: data.tags,
+            custom_links: data.custom_links || [],
             conference_id: currentConference?.id
         };
 

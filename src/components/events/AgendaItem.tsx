@@ -1,4 +1,16 @@
-import { Calendar, Clock, Tag, CheckCircle2, Medal, Star } from "lucide-react";
+import { 
+  Calendar, Clock, Tag, CheckCircle2, Medal, Star, 
+  FileText, FileSpreadsheet, Table, FileImage, Image as ImageIcon, 
+  Presentation, MonitorPlay, FileCode, BookOpen, Library, 
+  ClipboardList, GraduationCap, School, Award, FileBadge, 
+  Bookmark, Download, Video, Camera, Cast, Radio, Link as LinkIcon, 
+  ExternalLink, Mic, PlayCircle, Monitor, Laptop, 
+  LocateFixed, Building2, Landmark, Users, User as UserIcon, 
+  Contact, BadgeAlert, Info, HelpCircle, Share2, MessageCircle, 
+  Mail, Printer, MessageSquare, Youtube, Facebook, Twitter, Instagram, 
+  Linkedin, Github, Globe, MessageSquareQuote, Settings, Bell, Search, 
+  Heart, Coffee, Briefcase, Home, MapPin
+} from "lucide-react";
 import { Event } from "@/types";
 import { motion } from "framer-motion";
 import { formatMexicoTime, formatMexicoDate } from "@/lib/dateUtils";
@@ -11,6 +23,75 @@ interface AgendaItemProps {
   searchQuery: string;
   onClick: (event: Event) => void;
 }
+
+const ICON_MAP: Record<string, any> = {
+  'file-text': FileText,
+  'file-pdf': FileText,
+  'file-spreadsheet': FileSpreadsheet,
+  'table': Table,
+  'file-image': FileImage,
+  'image': ImageIcon,
+  'presentation': Presentation,
+  'projection-screen': MonitorPlay,
+  'file-code': FileCode,
+  'book-open': BookOpen,
+  'library': Library,
+  'clipboard-list': ClipboardList,
+  'graduation-cap': GraduationCap,
+  'academic-cap': School,
+  'award': Award,
+  'certificate': FileBadge,
+  'bookmark': Bookmark,
+  'download': Download,
+  'video': Video,
+  'video-camera': Camera,
+  'cast': Cast,
+  'broadcast': Radio,
+  'link': LinkIcon,
+  'external-link': ExternalLink,
+  'microphone': Mic,
+  'play-circle': PlayCircle,
+  'monitor': Monitor,
+  'desktop': Laptop,
+  'calendar': Calendar,
+  'clock': Clock,
+  'map-pin': MapPin,
+  'location': LocateFixed,
+  'building': Building2,
+  'landmark': Landmark,
+  'users': Users,
+  'user': UserIcon,
+  'id-card': Contact,
+  'badge': BadgeAlert,
+  'info': Info,
+  'info-circle': Info,
+  'help-circle': HelpCircle,
+  'question-mark': HelpCircle,
+  'share-2': Share2,
+  'message-square': MessageSquare,
+  'chat': MessageCircle,
+  'mail': Mail,
+  'printer': Printer,
+  'zoom': Video,
+  'moodle': GraduationCap,
+  'classroom': School,
+  'youtube': Youtube,
+  'facebook': Facebook,
+  'twitter': Twitter,
+  'instagram': Instagram,
+  'linkedin': Linkedin,
+  'github': Github,
+  'globe': Globe,
+  'quote': MessageSquareQuote,
+  'settings': Settings,
+  'bell': Bell,
+  'search': Search,
+  'heart': Heart,
+  'star': Star,
+  'coffee': Coffee,
+  'work': Briefcase,
+  'home': Home,
+};
 
 export function AgendaItem({
   event,
@@ -129,10 +210,27 @@ export function AgendaItem({
             )}
           </div>
 
-          {/* Title - Clean and bold */}
-          <h3 className="line-clamp-2 text-base sm:text-lg font-bold leading-snug text-[#373737] transition-colors duration-200 group-hover:text-black">
+          <h3 className="line-clamp-1 text-base sm:text-lg font-bold leading-snug text-[#373737] transition-colors duration-200 group-hover:text-black">
             {event.title}
           </h3>
+
+          {/* Links Preview */}
+          {event.custom_links && event.custom_links.length > 0 && (
+            <div className="flex gap-1.5 mt-0.5">
+              {event.custom_links.map((link, idx) => {
+                const IconComp = ICON_MAP[link.icon] || LinkIcon;
+                return (
+                  <div 
+                    key={idx} 
+                    className="p-1 rounded bg-gray-50 border border-gray-100 text-gray-400 group-hover:border-[#DBF227] group-hover:text-black transition-all"
+                    title={link.label}
+                  >
+                    <IconComp size={14} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Date & Time - Responsive Layout */}

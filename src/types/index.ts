@@ -1,3 +1,9 @@
+export interface EventLink {
+  icon: string;
+  label: string;
+  url: string;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -17,6 +23,7 @@ export interface Event {
   gives_certificate?: boolean;
   duration_days?: number;
   conference_id: string;
+  custom_links?: EventLink[];
   certificate_config?: {
     mode: 'template_v1' | 'custom_background';
     background_url?: string;

@@ -1,10 +1,100 @@
 import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Plus, X } from 'lucide-react';
+import { 
+    Plus, X, FileText, FileSpreadsheet, Table, FileImage, Image, Presentation, MonitorPlay, FileCode, 
+    BookOpen, Library, ClipboardList, GraduationCap, School, Award, FileBadge, Bookmark, 
+    Download, Video, Camera, Cast, Radio, Link, ExternalLink, Mic, PlayCircle, Monitor, Laptop, 
+    Calendar, Clock, MapPin, LocateFixed, Building2, Landmark, Users, User, Contact, BadgeAlert, 
+    Info, HelpCircle, Share2, MessageCircle, Mail, Printer, ChevronDown, Check, MessageSquare,
+    Youtube, Facebook, Twitter, Instagram, Linkedin, Github, Settings, Bell, Search, Heart, Star, 
+    Coffee, Briefcase, Home, Globe, MessageSquareQuote
+} from 'lucide-react';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
+import { useFieldArray } from 'react-hook-form';
 import { SpeakerSelector } from '@/components/admin/SpeakerSelector';
 import { Event, UserProfile } from '@/types';
 import { formatToMexicoDateTimeLocal, parseMexicoDateTimeLocal } from '@/lib/dateUtils';
+
+const ICON_CATEGORIES = [
+    {
+        name: 'Académicos',
+        icons: [
+            { label: 'Documento', icon: 'file-text', component: FileText },
+            { label: 'PDF', icon: 'file-pdf', component: FileText },
+            { label: 'Excel', icon: 'file-spreadsheet', component: FileSpreadsheet },
+            { label: 'Tabla', icon: 'table', component: Table },
+            { label: 'Imagen de Archivo', icon: 'file-image', component: FileImage },
+            { label: 'Imagen', icon: 'image', component: Image },
+            { label: 'Presentación', icon: 'presentation', component: Presentation },
+            { label: 'Pantalla', icon: 'projection-screen', component: MonitorPlay },
+            { label: 'Código', icon: 'file-code', component: FileCode },
+            { label: 'Libro', icon: 'book-open', component: BookOpen },
+            { label: 'Biblioteca', icon: 'library', component: Library },
+            { label: 'Lista', icon: 'clipboard-list', component: ClipboardList },
+            { label: 'Graduación', icon: 'graduation-cap', component: GraduationCap },
+            { label: 'Académico', icon: 'academic-cap', component: School },
+            { label: 'Premio', icon: 'award', component: Award },
+            { label: 'Certificado', icon: 'certificate', component: FileBadge },
+            { label: 'Marcador', icon: 'bookmark', component: Bookmark },
+        ]
+    },
+    {
+        name: 'Medios y Plataformas',
+        icons: [
+            { label: 'Zoom / Video', icon: 'zoom', component: Video },
+            { label: 'Moodle / LMS', icon: 'moodle', component: GraduationCap },
+            { label: 'Google Classroom', icon: 'classroom', component: School },
+            { label: 'Youtube', icon: 'youtube', component: Youtube },
+            { label: 'Facebook', icon: 'facebook', component: Facebook },
+            { label: 'Twitter / X', icon: 'twitter', component: Twitter },
+            { label: 'Instagram', icon: 'instagram', component: Instagram },
+            { label: 'Linkedin', icon: 'linkedin', component: Linkedin },
+            { label: 'Github', icon: 'github', component: Github },
+            { label: 'Web / Global', icon: 'globe', component: Globe },
+            { label: 'Video Sesión', icon: 'video', component: Video },
+            { label: 'Transmisión', icon: 'broadcast', component: Radio },
+            { label: 'Podcast / Mic', icon: 'microphone', component: Mic },
+            { label: 'Chat / Mensaje', icon: 'chat', component: MessageCircle },
+            { label: 'Cita', icon: 'quote', component: MessageSquareQuote },
+            { label: 'Mail', icon: 'mail', component: Mail },
+        ]
+    },
+    {
+        name: 'Iconos Generales',
+        icons: [
+            { label: 'Link', icon: 'link', component: Link },
+            { label: 'Link Externo', icon: 'external-link', component: ExternalLink },
+            { label: 'Descarga', icon: 'download', component: Download },
+            { label: 'Calendario', icon: 'calendar', component: Calendar },
+            { label: 'Reloj', icon: 'clock', component: Clock },
+            { label: 'Mapa', icon: 'map-pin', component: MapPin },
+            { label: 'Ubicación', icon: 'location', component: LocateFixed },
+            { label: 'Edificio', icon: 'building', component: Building2 },
+            { label: 'Landmark', icon: 'landmark', component: Landmark },
+            { label: 'Usuarios', icon: 'users', component: Users },
+            { label: 'Usuario', icon: 'user', component: User },
+            { label: 'ID Card', icon: 'id-card', component: Contact },
+            { label: 'Badge', icon: 'badge', component: BadgeAlert },
+            { label: 'Info', icon: 'info', component: Info },
+            { label: 'Ayuda', icon: 'help-circle', component: HelpCircle },
+            { label: 'Compartir', icon: 'share-2', component: Share2 },
+            { label: 'Configuración', icon: 'settings', component: Settings },
+            { label: 'Notificación', icon: 'bell', component: Bell },
+            { label: 'Búsqueda', icon: 'search', component: Search },
+            { label: 'Favorito', icon: 'heart', component: Heart },
+            { label: 'Destacado', icon: 'star', component: Star },
+            { label: 'Café / Break', icon: 'coffee', component: Coffee },
+            { label: 'Maletín / Trabajo', icon: 'work', component: Briefcase },
+            { label: 'Inicio', icon: 'home', component: Home },
+            { label: 'Laptop', icon: 'desktop', component: Laptop },
+            { label: 'Monitor', icon: 'monitor', component: Monitor },
+            { label: 'Impresora', icon: 'printer', component: Printer },
+        ]
+    }
+];
+
+// Flat version for easy lookup
+const ALL_ICONS = ICON_CATEGORIES.flatMap(cat => cat.icons);
 
 interface EventFormProps {
     initialData: Event | null;
@@ -16,9 +106,14 @@ interface EventFormProps {
 
 export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }: EventFormProps) {
     const { register, handleSubmit, reset, setValue, control, watch } = useForm<Event>();
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "custom_links"
+    });
     const [eventType, setEventType] = useState('Conferencia Magistral');
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
+    const [openIconPicker, setOpenIconPicker] = useState<number | null>(null);
 
     useEffect(() => {
         if (initialData) {
@@ -32,6 +127,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
             setValue('gives_certificate', initialData.gives_certificate || false);
             setValue('duration_days', initialData.duration_days || 1);
             setValue('certificate_config', initialData.certificate_config || null);
+            setValue('custom_links', initialData.custom_links || []);
             
             setEventType(initialData.type || 'Conferencia Magistral');
             setTags(initialData.tags || []);
@@ -41,6 +137,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
             setTags([]);
             setValue('speaker_id', '');
             setValue('duration_days', 1);
+            setValue('custom_links', []);
         }
     }, [initialData, reset, setValue]);
 
@@ -173,6 +270,108 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                         />
                     )}
                  />
+             </div>
+
+             {/* Custom Links Section */}
+             <div className="space-y-4 pt-4 border-t border-gray-100">
+                <div className="flex justify-between items-center">
+                    <label className="text-sm font-bold text-[#373737]">Links Personalizados (Máx 3):</label>
+                    {fields.length < 3 && (
+                        <button 
+                            type="button" 
+                            onClick={() => append({ icon: 'link', label: '', url: '' })}
+                            className="text-xs font-bold text-[#aacc00] hover:text-[#373737] flex items-center gap-1 transition-colors"
+                        >
+                            <Plus size={14} /> Agregar Link
+                        </button>
+                    )}
+                </div>
+
+                <div className="space-y-3">
+                    {fields.map((field, index) => (
+                        <div key={field.id} className="flex gap-2 items-start animate-in slide-in-from-left-2 duration-200">
+                            {/* Icon Selector */}
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenIconPicker(openIconPicker === index ? null : index)}
+                                    className="p-3 rounded-xl border border-gray-200 bg-white hover:border-[#DBF227] transition-all text-[#373737] flex items-center justify-center min-w-[50px] h-[46px]"
+                                    title="Seleccionar icono"
+                                >
+                                    {(() => {
+                                        const iconVal = watch(`custom_links.${index}.icon`);
+                                        const iconOption = ALL_ICONS.find(o => o.icon === iconVal) || ALL_ICONS[0]; 
+                                        const IconComp = iconOption.component;
+                                        return <IconComp size={20} />;
+                                    })()}
+                                    <ChevronDown size={12} className="ml-1 text-gray-400" />
+                                </button>
+
+                                {openIconPicker === index && (
+                                    <div className="absolute top-full left-0 z-[100] mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 max-h-[350px] overflow-y-auto animate-in zoom-in-95 duration-200 custom-scrollbar">
+                                        <div className="space-y-4">
+                                            {ICON_CATEGORIES.map((category, catIdx) => (
+                                                <div key={catIdx} className="space-y-2">
+                                                    <div className="text-[10px] font-bold text-[#aacc00] uppercase tracking-widest px-1 flex items-center gap-2">
+                                                        {category.name}
+                                                        <div className="h-px flex-1 bg-gray-100" />
+                                                    </div>
+                                                    <div className="grid grid-cols-6 gap-2">
+                                                        {category.icons.map((opt, i) => {
+                                                            const IconComp = opt.component;
+                                                            const isSelected = watch(`custom_links.${index}.icon`) === opt.icon;
+                                                            return (
+                                                                <button
+                                                                    key={i}
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setValue(`custom_links.${index}.icon`, opt.icon);
+                                                                        setOpenIconPicker(null);
+                                                                    }}
+                                                                    className={`p-2 rounded-lg flex items-center justify-center transition-all ${
+                                                                        isSelected ? 'bg-[#DBF227] text-[#373737]' : 'hover:bg-gray-100 text-gray-500'
+                                                                    }`}
+                                                                    title={opt.label}
+                                                                >
+                                                                    <IconComp size={18} />
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex-1 space-y-2">
+                                <input 
+                                    {...register(`custom_links.${index}.label` as const, { required: true })}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent transition-all bg-gray-50/50"
+                                    placeholder="Texto del link (ej. Sesión Zoom)"
+                                />
+                                <input 
+                                    {...register(`custom_links.${index}.url` as const, { required: true })}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent transition-all bg-gray-50/50"
+                                    placeholder="URL (ej. https://...)"
+                                />
+                            </div>
+
+                            <button 
+                                type="button" 
+                                onClick={() => remove(index)}
+                                className="p-3 text-gray-300 hover:text-red-500 transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                    ))}
+
+                    {fields.length === 0 && (
+                        <p className="text-xs text-gray-400 italic">No hay links personalizados agregados.</p>
+                    )}
+                </div>
              </div>
 
     {/* Location & Date */}

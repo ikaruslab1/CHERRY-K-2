@@ -41,7 +41,7 @@ export function AgendaView() {
         
           let eventsQuery = supabase
           .from('events')
-          .select('id, title, description, location, date, type, tags, image_url, gives_certificate, duration_days, speaker:profiles!speaker_id(first_name, last_name, degree, gender)')
+          .select('id, title, description, location, date, type, tags, image_url, gives_certificate, duration_days, custom_links, speaker:profiles!speaker_id(first_name, last_name, degree, gender)')
           .eq('conference_id', currentConference?.id)
           .order('date', { ascending: true });
 

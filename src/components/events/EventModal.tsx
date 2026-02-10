@@ -1,6 +1,18 @@
 'use client';
 
-import { X, Calendar, MapPin, User, CheckCircle2, Clock } from 'lucide-react';
+import { 
+  X, Calendar, MapPin, User, CheckCircle2, Clock, 
+  FileText, FileSpreadsheet, Table, FileImage, Image as ImageIcon, 
+  Presentation, MonitorPlay, FileCode, BookOpen, Library, 
+  ClipboardList, GraduationCap, School, Award, FileBadge, 
+  Bookmark, Download, Video, Camera, Cast, Radio, Link as LinkIcon, 
+  ExternalLink, Mic, PlayCircle, Monitor, Laptop, 
+  LocateFixed, Building2, Landmark, Users, User as UserIcon, 
+  Contact, BadgeAlert, Info, HelpCircle, Share2, MessageCircle, 
+  Mail, Printer, MessageSquare, Youtube, Facebook, Twitter, Instagram, 
+  Linkedin, Github, Globe, MessageSquareQuote, Settings, Bell, Search, 
+  Heart, Star, Coffee, Briefcase, Home
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Event } from '@/types';
 import Image from 'next/image';
@@ -30,6 +42,75 @@ const getDegreeAbbr = (degree?: string) => {
   if (lower.includes('arquitect')) return 'Arq.';
   
   return degree;
+};
+
+const ICON_MAP: Record<string, any> = {
+  'file-text': FileText,
+  'file-pdf': FileText,
+  'file-spreadsheet': FileSpreadsheet,
+  'table': Table,
+  'file-image': FileImage,
+  'image': ImageIcon,
+  'presentation': Presentation,
+  'projection-screen': MonitorPlay,
+  'file-code': FileCode,
+  'book-open': BookOpen,
+  'library': Library,
+  'clipboard-list': ClipboardList,
+  'graduation-cap': GraduationCap,
+  'academic-cap': School,
+  'award': Award,
+  'certificate': FileBadge,
+  'bookmark': Bookmark,
+  'download': Download,
+  'video': Video,
+  'video-camera': Camera,
+  'cast': Cast,
+  'broadcast': Radio,
+  'link': LinkIcon,
+  'external-link': ExternalLink,
+  'microphone': Mic,
+  'play-circle': PlayCircle,
+  'monitor': Monitor,
+  'desktop': Laptop,
+  'calendar': Calendar,
+  'clock': Clock,
+  'map-pin': MapPin,
+  'location': LocateFixed,
+  'building': Building2,
+  'landmark': Landmark,
+  'users': Users,
+  'user': UserIcon,
+  'id-card': Contact,
+  'badge': BadgeAlert,
+  'info': Info,
+  'info-circle': Info,
+  'help-circle': HelpCircle,
+  'question-mark': HelpCircle,
+  'share-2': Share2,
+  'message-square': MessageSquare,
+  'chat': MessageCircle,
+  'mail': Mail,
+  'printer': Printer,
+  'zoom': Video,
+  'moodle': GraduationCap,
+  'classroom': School,
+  'youtube': Youtube,
+  'facebook': Facebook,
+  'twitter': Twitter,
+  'instagram': Instagram,
+  'linkedin': Linkedin,
+  'github': Github,
+  'globe': Globe,
+  'quote': MessageSquareQuote,
+  'settings': Settings,
+  'bell': Bell,
+  'search': Search,
+  'heart': Heart,
+  'star': Star,
+  'coffee': Coffee,
+  'work': Briefcase,
+  'home': Home,
 };
 
 export function EventModal({ 
@@ -139,6 +220,45 @@ export function EventModal({
             )}
           </div>
 
+          {/* Description */}
+          <div className="space-y-">
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Sobre la actividad</h4>
+            <div 
+                className="text-gray-600 text-base leading-relaxed prose prose-neutral max-w-none font-geist-sans"
+                dangerouslySetInnerHTML={{ __html: event.description }}
+            />
+          </div>
+
+          {/* Custom Links */}
+          {event.custom_links && event.custom_links.length > 0 && (
+            <div className="space-y-4 pt-2">
+              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Recursos y Enlaces</h4>
+              <div className="grid grid-cols-1 gap-3">
+                {event.custom_links.map((link, idx) => {
+                  const IconComp = ICON_MAP[link.icon] || LinkIcon;
+                  return (
+                    <a 
+                      key={idx}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-100 hover:border-[var(--color-acid)] hover:bg-white transition-all group"
+                    >
+                      <div className="p-2 bg-white border border-gray-100 group-hover:bg-[var(--color-acid)] group-hover:text-black transition-colors">
+                        <IconComp size={18} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-black uppercase tracking-wider">{link.label}</p>
+                        <p className="text-[10px] text-gray-400 truncate max-w-[250px] font-mono">{link.url}</p>
+                      </div>
+                      <ExternalLink size={14} className="text-gray-300 group-hover:text-black transition-colors" />
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="h-px w-full bg-gray-100" />
 
           {/* Info Grid */}
@@ -188,17 +308,6 @@ export function EventModal({
                         </p>
                     </div>
                 </div>
-          </div>
-
-          <div className="h-px w-full bg-gray-100" />
-
-          {/* Description */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Sobre la actividad</h4>
-            <div 
-                className="text-gray-600 text-base leading-relaxed prose prose-neutral max-w-none font-geist-sans"
-                dangerouslySetInnerHTML={{ __html: event.description }}
-            />
           </div>
           
         </div>
