@@ -481,7 +481,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                         <select 
                                             value={config.styles?.font_family || 'sans'}
                                             onChange={(e) => updateStyle('font_family', e.target.value)}
-                                            className="w-full p-2 border rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#DBF227] focus:border-transparent outline-none"
+                                            className="w-full p-2 border rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#DBF227] focus:border-transparent outline-none text-black"
                                         >
                                             <option value="sans">Geist Sans (Moderna)</option>
                                             <option value="serif">Playfair Display (Elegante)</option>
@@ -732,7 +732,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     value={config.texts?.attendee || ''}
                                     onChange={(e) => updateText('attendee', e.target.value)}
                                     placeholder="Por su asistencia..."
-                                    className="bg-white"
+                                    className="bg-white text-black"
                                 />
                             </div>
                             <div>
@@ -741,7 +741,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     value={config.texts?.speaker || ''}
                                     onChange={(e) => updateText('speaker', e.target.value)}
                                     placeholder="Por impartir..."
-                                    className="bg-white"
+                                    className="bg-white text-black"
                                 />
                             </div>
 
@@ -751,7 +751,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     value={config.texts?.context || ''}
                                     onChange={(e) => updateText('context', e.target.value)}
                                     placeholder="En el marco del / de / la..."
-                                    className="bg-white"
+                                    className="bg-white text-black"
                                 />
                             </div>
                         </div>
@@ -819,7 +819,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                         // For now, let's just save.
                                                         setConfig({...config, signers: newSigners});
                                                     }}
-                                                    className="w-full p-2 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227]"
+                                                    className="w-full p-2 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227] text-black"
                                                 >
                                                     <option value="">Seleccionar participante...</option>
                                                     {profiles.map(p => (
@@ -842,7 +842,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                         setConfig({...config, signers: newSigners});
                                                     }}
                                                     placeholder="Ej. Director General"
-                                                    className="h-8 text-xs"
+                                                    className="h-8 text-xs text-black"
                                                 />
                                             </div>
                                         </div>

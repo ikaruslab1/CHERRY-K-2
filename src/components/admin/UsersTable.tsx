@@ -103,10 +103,11 @@ import { useConference } from '@/context/ConferenceContext';
   };
 
   const rolesList = (['user', 'vip', 'ponente', 'staff', 'admin', 'owner'] as UserProfile['role'][]).filter(role => {
-      // Sólo Owner puede asignar Owner
+      // Sólo Owner (Desarrollador) puede asignar el rol de Owner
       if (role === 'owner' && currentUserRole !== 'owner') return false;
-      // Sólo Owner puede asignar Admin
-      if (role === 'admin' && currentUserRole !== 'owner') return false;
+      
+      // Tanto Admin como Owner pueden asignar el rol de Admin
+      if (role === 'admin' && !(currentUserRole === 'owner' || currentUserRole === 'admin')) return false;
       
       return true;
   });
