@@ -36,6 +36,18 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                staff: "Por su valiosa participación en la logística del evento:",
                organizer: "Por su liderazgo en la organización del evento:"
             },
+            name_style: {
+                fontSize: '5xl',
+                textAlign: 'center',
+                lineHeight: '1',
+                fontFamily: 'sans'
+            },
+            event_title_style: {
+                fontSize: '3xl',
+                textAlign: 'center',
+                lineHeight: '1.1',
+                fontFamily: 'sans'
+            },
             show_qr: true,
             qr_position: 'bottom-right',
             logos: [
@@ -44,14 +56,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                 { type: 'none', value: '' }
             ]
         };
-        // Merge defaults with initialConfig, ensuring deep merge for objects if needed, 
-        // but for now simple spread is okay if initialConfig has the full shape.
-        // If initialConfig is present but missing logos, we default them.
         return {
             ...defaults,
             ...initialConfig,
             styles: { ...defaults.styles, ...initialConfig?.styles },
             texts: { ...defaults.texts, ...initialConfig?.texts },
+            name_style: { ...defaults.name_style, ...initialConfig?.name_style },
+            event_title_style: { ...defaults.event_title_style, ...initialConfig?.event_title_style },
             logos: initialConfig?.logos || defaults.logos
         };
     });
@@ -255,6 +266,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
         setConfig({
             ...config,
             texts: { ...config.texts, [key]: value }
+        });
+    };
+
+    const updateTextElementStyle = (element: 'name_style' | 'event_title_style', key: string, value: string) => {
+        setConfig({
+            ...config,
+            [element]: { ...config[element], [key]: value }
         });
     };
 
@@ -740,6 +758,179 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 </div>
                             )}
                         </div>
+
+                        {/* Text Element Typography - Only for Template V1 Mode */}
+                        {config.mode !== 'custom_background' && (
+                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-5 animate-in fade-in duration-500 delay-75">
+                                <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
+                                    <span className="w-1.5 h-4 bg-[#DBF227] rounded-full"></span>
+                                    Tipografía de Textos
+                                </h3>
+                                <p className="text-[10px] text-gray-500 -mt-2">
+                                    Personaliza la apariencia del nombre y el título del evento en la constancia.
+                                </p>
+
+                                {/* --- Name Style --- */}
+                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">Nombre de la persona</span>
+                                        <span className="text-[9px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-bold">NOMBRE</span>
+                                    </div>
+
+                                    {/* Font Family */}
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-400 mb-1">Tipo de letra</label>
+                                        <select
+                                            value={config.name_style?.fontFamily || 'sans'}
+                                            onChange={(e) => updateTextElementStyle('name_style', 'fontFamily', e.target.value)}
+                                            className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227] text-black"
+                                        >
+                                            <option value="sans">Geist Sans (Moderna)</option>
+                                            <option value="serif">Playfair Display (Elegante)</option>
+                                            <option value="mono">Geist Mono (Técnica)</option>
+                                            <option value="cursive">Dancing Script (Caligrafía)</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Font Size */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <label className="block text-[10px] font-bold text-gray-400">Tamaño de fuente</label>
+                                            <span className="text-[10px] font-mono font-bold text-gray-600">
+                                                {config.name_style?.fontSize || '5xl'}
+                                            </span>
+                                        </div>
+                                        <select
+                                            value={config.name_style?.fontSize || '5xl'}
+                                            onChange={(e) => updateTextElementStyle('name_style', 'fontSize', e.target.value)}
+                                            className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227] text-black"
+                                        >
+                                            <option value="2xl">Muy pequeño (2xl)</option>
+                                            <option value="3xl">Pequeño (3xl)</option>
+                                            <option value="4xl">Mediano (4xl)</option>
+                                            <option value="5xl">Grande (5xl)</option>
+                                            <option value="6xl">Muy grande (6xl)</option>
+                                            <option value="7xl">Extra grande (7xl)</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Alignment */}
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-400 mb-1">Alineación</label>
+                                        <div className="flex bg-gray-50 p-1 rounded border border-gray-200">
+                                            {['left', 'center', 'right'].map((align) => (
+                                                <button
+                                                    key={align}
+                                                    onClick={() => updateTextElementStyle('name_style', 'textAlign', align)}
+                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${config.name_style?.textAlign === align ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                >
+                                                    {align === 'left' ? 'Izquierda' : align === 'center' ? 'Centro' : 'Derecha'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Line Height */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <label className="block text-[10px] font-bold text-gray-400">Espacio entre líneas</label>
+                                            <span className="text-[10px] font-mono font-bold text-gray-600">
+                                                {config.name_style?.lineHeight || '1'}
+                                            </span>
+                                        </div>
+                                        <input
+                                            type="range"
+                                            min="0.8"
+                                            max="2.5"
+                                            step="0.1"
+                                            value={config.name_style?.lineHeight || '1'}
+                                            onChange={(e) => updateTextElementStyle('name_style', 'lineHeight', e.target.value)}
+                                            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* --- Event Title Style --- */}
+                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">Título del evento</span>
+                                        <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">EVENTO</span>
+                                    </div>
+
+                                    {/* Font Family */}
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-400 mb-1">Tipo de letra</label>
+                                        <select
+                                            value={config.event_title_style?.fontFamily || 'sans'}
+                                            onChange={(e) => updateTextElementStyle('event_title_style', 'fontFamily', e.target.value)}
+                                            className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227] text-black"
+                                        >
+                                            <option value="sans">Geist Sans (Moderna)</option>
+                                            <option value="serif">Playfair Display (Elegante)</option>
+                                            <option value="mono">Geist Mono (Técnica)</option>
+                                            <option value="cursive">Dancing Script (Caligrafía)</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Font Size */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <label className="block text-[10px] font-bold text-gray-400">Tamaño de fuente</label>
+                                            <span className="text-[10px] font-mono font-bold text-gray-600">
+                                                {config.event_title_style?.fontSize || '3xl'}
+                                            </span>
+                                        </div>
+                                        <select
+                                            value={config.event_title_style?.fontSize || '3xl'}
+                                            onChange={(e) => updateTextElementStyle('event_title_style', 'fontSize', e.target.value)}
+                                            className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227] text-black"
+                                        >
+                                            <option value="xl">Muy pequeño (xl)</option>
+                                            <option value="2xl">Pequeño (2xl)</option>
+                                            <option value="3xl">Mediano (3xl)</option>
+                                            <option value="4xl">Grande (4xl)</option>
+                                            <option value="5xl">Muy grande (5xl)</option>
+                                            <option value="6xl">Extra grande (6xl)</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Alignment */}
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-400 mb-1">Alineación</label>
+                                        <div className="flex bg-gray-50 p-1 rounded border border-gray-200">
+                                            {['left', 'center', 'right'].map((align) => (
+                                                <button
+                                                    key={align}
+                                                    onClick={() => updateTextElementStyle('event_title_style', 'textAlign', align)}
+                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${config.event_title_style?.textAlign === align ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                >
+                                                    {align === 'left' ? 'Izquierda' : align === 'center' ? 'Centro' : 'Derecha'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Line Height */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <label className="block text-[10px] font-bold text-gray-400">Espacio entre líneas</label>
+                                            <span className="text-[10px] font-mono font-bold text-gray-600">
+                                                {config.event_title_style?.lineHeight || '1.1'}
+                                            </span>
+                                        </div>
+                                        <input
+                                            type="range"
+                                            min="0.8"
+                                            max="2.5"
+                                            step="0.1"
+                                            value={config.event_title_style?.lineHeight || '1.1'}
+                                            onChange={(e) => updateTextElementStyle('event_title_style', 'lineHeight', e.target.value)}
+                                            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Texts Configuration - Always Visible */}
                         <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4 animate-in fade-in duration-500 delay-100">

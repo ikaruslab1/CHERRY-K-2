@@ -23,6 +23,24 @@ export function formatToMexicoDateTimeLocal(date: Date | string | number): strin
 }
 
 /**
+ * Returns YYYY-MM-DD representation of a date in America/Mexico_City timezone
+ */
+export function getMexicoDateISO(date: Date | string | number): string {
+    const d = new Date(date);
+    const formatter = new Intl.DateTimeFormat('sv-SE', {
+        timeZone: 'America/Mexico_City',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+    
+    const parts = formatter.formatToParts(d);
+    const getPart = (type: string) => parts.find(p => p.type === type)?.value;
+    
+    return `${getPart('year')}-${getPart('month')}-${getPart('day')}`;
+}
+
+/**
  * Parses a datetime-local string (YYYY-MM-DDTHH:mm) assuming it's in America/Mexico_City
  * and returns a Date object.
  */

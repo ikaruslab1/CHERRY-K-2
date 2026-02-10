@@ -106,11 +106,15 @@ export function EventMetricsDetail({ eventId, onBack }: EventMetricsDetailProps)
                          </tr>
                      ) : (
                          attendees.map((attendee) => {
-                             // Check completion status based on days attended vs duration
-                             const uniqueDays = new Set(attendee.days_attended).size;
-                             const isComplete = uniqueDays >= durationDays;
+                             // Agenda Logic Replacement: 
+                             // Status is based on Total Scans vs Duration Days.
+                             // Strict day checking removed as per user request.
+                             const scanCount = attendee.scans.length;
+                             const isComplete = scanCount >= durationDays;
                              const statusColor = isComplete ? 'bg-green-100 text-green-700' : 'bg-yellow-50 text-yellow-600';
-                             const statusLabel = isComplete ? 'Completo' : 'Parcial';
+                             // If complete or single day attended -> Asistido/Completo
+                             // If multi-day and not complete -> Parcial
+                             const statusLabel = isComplete ? (durationDays > 1 ? 'Completo' : 'Asistido') : 'Parcial';
 
                              return (
                                  <tr key={attendee.user_id} className="hover:bg-gray-50/50 transition-colors group">
@@ -131,20 +135,21 @@ export function EventMetricsDetail({ eventId, onBack }: EventMetricsDetailProps)
                                      </td>
                                      
                                      {daysArray.map(day => {
-                                         // Filter scans for this logical day
-                                         // Reuse logic from service or re-calculate locally if needed. 
-                                         // Service already returns days_attended, but not which scan belongs to which day explicitly in a map.
-                                         // Let's rely on simple date calc again for display grouping.
-                                         
-                                         const eventStartDate = new Date(event.date);
-                                         // Adjust event start date to midnight to be safe for day buckets
-                                         const startDay = new Date(eventStartDate.getFullYear(), eventStartDate.getMonth(), eventStartDate.getDate());
-
+                                         // Filter scans for this logical column
                                          const dayScans = attendee.scans.filter(scan => {
-                                             const scanDate = new Date(scan.scanned_at);
-                                             const sDay = new Date(scanDate.getFullYear(), scanDate.getMonth(), scanDate.getDate());
-                                             const diffDays = Math.floor((sDay.getTime() - startDay.getTime()) / (1000 * 60 * 60 * 24));
-                                             return (diffDays + 1) === day;
+                                            // Naive Day Alignment for visual purposes
+                                            const d = new Date(scan.scanned_at);
+                                            const start = new Date(event.date);
+                                            // We just check if it kinda matches the day index
+                                            // If not exact, we could just dump all extra scans in the last column or something, 
+                                            // but let's try strict date match locally.
+                                            const diffTime = d.getTime() - start.getTime();
+                                            const dayNum = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                            
+                                            // If the dayNum matches this column (1, 2...)
+                                            // Or if it's the first column (day 1) and dayNum <= 1 (handles same start day)
+                                            if (day === 1 && dayNum <= 1) return true;
+                                            return dayNum === day;
                                          });
 
                                          const hasDuplicate = dayScans.length > 1;

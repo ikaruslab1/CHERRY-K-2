@@ -83,12 +83,14 @@ export function EventMetricsDashboard({ onSelectEvent }: EventMetricsDashboardPr
 
                 {/* Metrics Visualization */}
                 <div className="space-y-3 bg-gray-50 rounded-xl p-3 mb-4">
-                    <div className="flex justify-between items-end text-sm">
-                        <span className="text-gray-500 font-medium">Asistencia</span>
-                        <div className="text-right">
-                            <span className="font-bold text-[#373737] text-lg">{event.unique_attendees}</span>
-                            <span className="text-gray-400 text-xs mx-1">/</span>
-                            <span className="text-gray-400 text-xs">{event.total_interested} interesados</span>
+                    <div className="flex flex-col gap-1 text-sm">
+                        <div className="flex justify-between items-end">
+                             <span className="text-gray-500 font-medium">Asistencia</span>
+                             <span className="font-bold text-[#373737] text-lg">{event.unique_attendees}</span>
+                        </div>
+                        <div className="flex justify-between items-end">
+                             <span className="text-gray-500 font-medium">Interesados</span>
+                             <span className="text-gray-600 font-semibold">{event.total_interested}</span>
                         </div>
                     </div>
                     

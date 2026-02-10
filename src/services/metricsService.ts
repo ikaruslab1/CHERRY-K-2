@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { Event, UserProfile } from '@/types';
 
@@ -62,8 +61,8 @@ export const metricsService = {
       for (const event of events) {
         // Interest Count
         const { count: interestCount, error: interestError } = await supabase
-          .from('event_interest') 
-          .select('*', { count: 'exact', head: true })
+          .from('event_interests') 
+          .select('user_id', { count: 'exact', head: true })
           .eq('event_id', event.id);
 
         // Attendance Count (Raw scans)
@@ -100,16 +99,23 @@ export const metricsService = {
    */
   async getEventAttendanceDetails(eventId: string, eventDate: string): Promise<EventAttendee[]> {
       try {
-          // Intentar usar RPC optimizado
-          const { data: rpcData, error: rpcError } = await supabase.rpc('get_event_attendance_details', {
-              p_event_id: eventId
-          });
+          // Intentar usar RPC optimizado - DISABLED FOR DEBUGGING/FIXING
+          // const { data: rpcData, error: rpcError } = await supabase.rpc('get_event_attendance_details', {
+          //     p_event_id: eventId
+          // });
 
+          const rpcData = null; // Force null
+          const rpcError = { message: "Disabled" }; // Force error-like behavior
+
+          if (!rpcError && rpcData) { 
+             // ... unreachable ...
+          }
+          
+          /*
           if (!rpcError && rpcData) {
-              const attendeesMap = new Map<string, EventAttendee>();
-              const eventStartDate = new Date(eventDate);
-              // Normalize start date to midnight for day calc
-              const startDay = new Date(eventStartDate.getFullYear(), eventStartDate.getMonth(), eventStartDate.getDate());
+              // Normalize start date to a comparable ISO string (YYYY-MM-DD)
+              // The event date is stored as date string (YYYY-MM-DD) which assumes local time (Mexico)
+              const startDayStr = eventDate;
 
               rpcData.forEach((row: any) => {
                    if (!attendeesMap.has(row.user_id)) {
@@ -133,35 +139,44 @@ export const metricsService = {
 
                    const attendee = attendeesMap.get(row.user_id)!;
                    
-                   // Add scan
+                   // Add scan regardless of date logic (Agenda logic)
                    attendee.scans.push({
                        id: row.attendance_id,
                        user_id: row.user_id,
                        scanned_at: row.scanned_at
                    });
 
-                   // Calculate Logical Day
+                   // Simply track unique days loosely for UI if possible, else rely on scan count
+                   // We won't filter out based on dayNumber <= 0 anymore
                    const scanDate = new Date(row.scanned_at);
-                   const scanDay = new Date(scanDate.getFullYear(), scanDate.getMonth(), scanDate.getDate());
-                   const diffDays = Math.floor((scanDay.getTime() - startDay.getTime()) / (1000 * 60 * 60 * 24));
-                   const dayNumber = diffDays + 1;
-
-                   if (dayNumber > 0 && !attendee.days_attended.includes(dayNumber)) {
-                       attendee.days_attended.push(dayNumber);
+                   const startDate = new Date(eventDate);
+                   
+                   // Rough calculation for column placement (optional)
+                   const diffTime = scanDate.getTime() - startDate.getTime();
+                   const dayNumber = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                   
+                   // Just push it, we don't strict filter
+                   if (!attendee.days_attended.includes(dayNumber)) {
+                        attendee.days_attended.push(dayNumber);
                    }
               });
 
-               // Determine status
+               // Determine status based on COUNT (Agenda logic)
+               // Duration needs to be fetched or passed. We'll use a heuristic here, 
+               // but the UI has the real duration to decide "Complete" vs "Partial".
                attendeesMap.forEach(attendee => {
+                    // We just return 'partial' if they have scans. 
+                    // The UI will upgrade to 'complete' if scans.length >= duration.
                     attendee.status = attendee.scans.length > 0 ? 'partial' : 'absent';
                     attendee.days_attended.sort((a, b) => a - b);
                });
 
                return Array.from(attendeesMap.values());
           }
+          */
 
           if (rpcError) {
-             console.warn('RPC get_event_attendance_details failed, falling back to client-side logic.', rpcError.message);
+             // console.warn('RPC get_event_attendance_details failed, falling back to client-side logic.', rpcError.message);
           }
 
           // --- FALLBACK LEGACY JOIN ---
@@ -180,9 +195,11 @@ export const metricsService = {
           const userIds = Array.from(new Set(scans.map((s: any) => s.user_id)));
 
           // 3. Fetch User Profiles
+          // Note: 'role' might not exist directly on profiles table if using conference_roles. 
+          // We will fetch is_owner and basics.
           const { data: profiles, error: profilesError } = await supabase
               .from('profiles')
-              .select('id, first_name, last_name, email, role, degree')
+              .select('id, first_name, last_name, email, degree, is_owner')
               .in('id', userIds);
 
           if (profilesError) throw profilesError;
@@ -192,20 +209,21 @@ export const metricsService = {
 
           // Initialize map with profiles
           profiles?.forEach((profile: any) => {
+              // Fallback role logic if not joined with conference_roles
+              const computedRole = profile.is_owner ? 'owner' : 'user'; 
+              
               attendeesMap.set(profile.id, {
                   user_id: profile.id,
-                  user: profile,
+                  user: {
+                      ...profile,
+                      role: computedRole
+                  },
                   scans: [],
                   days_attended: [],
                   status: 'absent'
               });
           });
 
-          // Process scans
-          const eventStartDate = new Date(eventDate);
-           // Normalize start date to midnight for day calc
-          const startDay = new Date(eventStartDate.getFullYear(), eventStartDate.getMonth(), eventStartDate.getDate());
-          
           scans.forEach((scan: any) => {
               const attendee = attendeesMap.get(scan.user_id);
               if (attendee) {
@@ -215,32 +233,20 @@ export const metricsService = {
                       scanned_at: scan.scanned_at
                   });
 
-                  // Calculate Logical Day
-                  const scanDate = new Date(scan.scanned_at);
-                  const scanDay = new Date(scanDate.getFullYear(), scanDate.getMonth(), scanDate.getDate());
-                  
-                  const diffDays = Math.floor((scanDay.getTime() - startDay.getTime()) / (1000 * 60 * 60 * 24));
-                  const dayNumber = diffDays + 1; // 1-based index
+                   // Simple Day calc for columns
+                   const scanDate = new Date(scan.scanned_at);
+                   const startDate = new Date(eventDate);
+                   const diffTime = scanDate.getTime() - startDate.getTime();
+                   const dayNumber = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                  if (dayNumber > 0 && !attendee.days_attended.includes(dayNumber)) {
-                      attendee.days_attended.push(dayNumber);
-                  }
+                   if (!attendee.days_attended.includes(dayNumber)) {
+                       attendee.days_attended.push(dayNumber);
+                   }
               }
           });
 
-          // Determine status
-          /* 
-            Logic: 
-            - If days_attended.length >= duration_days -> 'complete'
-            - If days_attended.length > 0 -> 'partial'
-            - Else 'absent'
-          */
-          // We need the event duration to be passed down or fetched. 
-          // For now, let's assume if they have at least 1 scan, it's 'partial' or 'complete' depending on context.
-          // The caller component will refine this with the event's duration_days.
-          
            attendeesMap.forEach(attendee => {
-                attendee.status = attendee.scans.length > 0 ? 'partial' : 'absent'; // Preliminary
+                attendee.status = attendee.scans.length > 0 ? 'partial' : 'absent'; 
                 attendee.days_attended.sort((a, b) => a - b);
            });
 

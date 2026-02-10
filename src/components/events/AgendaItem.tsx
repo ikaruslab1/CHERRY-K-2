@@ -209,6 +209,24 @@ export function AgendaItem({
                   )}
               </div>
 
+              {/* Progress for Multi-day Events */}
+              {(event.duration_days || 1) > 1 && (
+                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border ${
+                      isDark 
+                        ? "bg-amber-950/30 border-amber-900/50 text-amber-200" 
+                        : "bg-amber-50 border-amber-100 text-amber-700" 
+                  }`}>
+                      {attendanceCount >= (event.duration_days || 1) ? (
+                         <CheckCircle2 className="h-3.5 w-3.5" />
+                      ) : (
+                         <Clock className="h-3.5 w-3.5" />
+                      )}
+                      <span className="text-[10px] font-bold uppercase tracking-wider">
+                          Asistencias: {Math.min(attendanceCount, event.duration_days || 1)}/{event.duration_days || 1}
+                      </span>
+                  </div>
+              )}
+
               {/* Interest Star Indicator (when active) */}
               {isInterested && !isAttended && (
                  <div className="bg-[var(--color-acid)] text-black p-1.5 rounded-full shadow-[0_0_10px_rgba(219,242,39,0.3)]">

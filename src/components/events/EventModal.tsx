@@ -30,6 +30,7 @@ interface EventModalProps {
   onToggleInterest: (eventId: string) => void;
   onMarkAttendance?: (eventId: string) => void;
   hideActionButtons?: boolean;
+  attendanceCount?: number;
 }
 
 const getDegreeAbbr = (degree?: string, gender?: string) => {
@@ -125,7 +126,8 @@ export function EventModal({
   isInterested,
   onToggleInterest,
   onMarkAttendance,
-  hideActionButtons
+  hideActionButtons,
+  attendanceCount
 }: EventModalProps) {
 
   if (!event) return null;
@@ -168,10 +170,18 @@ export function EventModal({
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent"></div>
 
           {/* Type Badge (Top Right) */}
-          <div className="absolute top-4 right-4 z-20">
+          <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
             <div className="bg-white text-black border border-gray-200 text-xs font-bold uppercase tracking-widest px-4 py-2 shadow-sm">
               {event.type}
             </div>
+            
+            {/* Multi-day Progress Badge */}
+            {(event.duration_days || 1) > 1 && (
+               <div className="bg-amber-500/90 backdrop-blur-sm text-white border border-amber-400/50 text-xs font-bold uppercase tracking-widest px-4 py-2 shadow-sm flex items-center gap-2 transition-all hover:bg-amber-600">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span>Progreso: {Math.min(attendanceCount || 0, event.duration_days || 1)}/{event.duration_days}</span>
+               </div>
+            )}
           </div>
           
            {/* Close Button (Top Left) */}

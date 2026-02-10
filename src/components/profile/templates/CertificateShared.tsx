@@ -51,8 +51,36 @@ export const formatDate = (dateString: string) => {
 
 // --- TYPES ---
 
-import { Certificate } from '@/types/certificates';
-export type { Certificate };
+import { Certificate, TextElementStyle } from '@/types/certificates';
+export type { Certificate, TextElementStyle };
+
+// --- TEXT STYLE UTILITIES ---
+
+export const resolveFontSize = (size?: string): string => {
+    const map: Record<string, string> = {
+        'sm': '0.875rem',
+        'base': '1rem',
+        'lg': '1.125rem',
+        'xl': '1.25rem',
+        '2xl': '1.5rem',
+        '3xl': '1.875rem',
+        '4xl': '2.25rem',
+        '5xl': '3rem',
+        '6xl': '3.75rem',
+        '7xl': '4.5rem',
+    };
+    return map[size || '3xl'] || map['3xl'];
+};
+
+export const resolveFontFamily = (family?: string): string => {
+    const map: Record<string, string> = {
+        'sans': 'var(--font-geist-sans)',
+        'serif': 'var(--font-playfair)',
+        'mono': 'var(--font-geist-mono)',
+        'cursive': 'var(--font-dancing-script)',
+    };
+    return map[family || 'sans'] || 'inherit';
+};
 
 // --- COMPONENTS ---
 
@@ -156,7 +184,9 @@ export const MainBody = ({
     displayFont,
     align = 'center',
     isStaff,
-    isOrganizer
+    isOrganizer,
+    nameStyle,
+    eventTitleStyle
 }: { 
     certificate: Certificate, 
     displayText: string, 
@@ -167,7 +197,9 @@ export const MainBody = ({
     displayFont: string,
     align?: 'center' | 'left' | 'right',
     isStaff?: boolean,
-    isOrganizer?: boolean
+    isOrganizer?: boolean,
+    nameStyle?: TextElementStyle,
+    eventTitleStyle?: TextElementStyle
 }) => {
     // Dynamic Styles based on variant
     const titleFont = variant === 'classic' ? 'var(--font-playfair)' : 'var(--font-geist-sans)';
@@ -176,6 +208,17 @@ export const MainBody = ({
     // Determine alignment classes
     const alignmentClasses = align === 'right' ? 'items-end text-right' : align === 'left' ? 'items-start text-left' : 'items-center text-center';
     const marginClasses = align === 'right' ? 'ml-auto mr-0' : align === 'left' ? 'mr-auto ml-0' : 'mx-auto';
+
+    // Resolved text element styles
+    const nameResolvedFont = nameStyle?.fontFamily ? resolveFontFamily(nameStyle.fontFamily) : displayFont;
+    const nameResolvedSize = nameStyle?.fontSize ? resolveFontSize(nameStyle.fontSize) : undefined;
+    const nameResolvedAlign = nameStyle?.textAlign || undefined;
+    const nameResolvedLineHeight = nameStyle?.lineHeight || undefined;
+
+    const eventResolvedFont = eventTitleStyle?.fontFamily ? resolveFontFamily(eventTitleStyle.fontFamily) : displayFont;
+    const eventResolvedSize = eventTitleStyle?.fontSize ? resolveFontSize(eventTitleStyle.fontSize) : undefined;
+    const eventResolvedAlign = eventTitleStyle?.textAlign || undefined;
+    const eventResolvedLineHeight = eventTitleStyle?.lineHeight || undefined;
 
     return (
         <div className={`flex-1 flex flex-col ${alignmentClasses} justify-center z-10 w-full max-w-4xl ${marginClasses} px-8`}>
@@ -216,7 +259,13 @@ export const MainBody = ({
             {/* Name */}
             <h3 
                 className={`${variant === 'classic' ? 'text-6xl font-normal my-4' : variant === 'modern' ? 'text-6xl font-black uppercase tracking-tight my-2 leading-none' : 'text-5xl font-bold mb-6'}`} 
-                style={{ color: styles.accent_color, fontFamily: displayFont }}
+                style={{ 
+                    color: styles.accent_color, 
+                    fontFamily: nameResolvedFont,
+                    ...(nameResolvedSize && { fontSize: nameResolvedSize }),
+                    ...(nameResolvedAlign && { textAlign: nameResolvedAlign as any }),
+                    ...(nameResolvedLineHeight && { lineHeight: nameResolvedLineHeight }),
+                }}
             >
                 {getDegreeAbbr(certificate.profiles.degree, certificate.profiles.gender)} {certificate.profiles.first_name} {certificate.profiles.last_name}
             </h3>
@@ -239,8 +288,14 @@ export const MainBody = ({
 
             {/* Event Title */}
             <h4 
-                className={`${variant === 'classic' ? 'text-3xl font-serif font-bold text-gray-800' : variant === 'modern' ? 'text-4xl font-black uppercase tracking-tighter leading-none' : 'text-3xl font-bold uppercase'} mb-2 max-w-3xl leading-tight`}
-                style={{ fontFamily: displayFont }}
+                className={`${variant === 'classic' ? 'text-3xl font-serif font-bold text-gray-800' : variant === 'modern' ? 'text-4xl font-black uppercase tracking-tighter leading-none' : 'text-3xl font-bold uppercase'} mb-2 max-w-3xl`}
+                style={{ 
+                    fontFamily: eventResolvedFont,
+                    ...(eventResolvedSize && { fontSize: eventResolvedSize }),
+                    ...(eventResolvedAlign && { textAlign: eventResolvedAlign as any }),
+                    ...(eventResolvedLineHeight && { lineHeight: eventResolvedLineHeight }),
+                    ...(!eventResolvedLineHeight && { lineHeight: '1.1' }),
+                }}
             >
                 {certificate.events.title}
             </h4>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Certificate, Header, Signatures, getEventArticle, getDegreeAbbr, getContrastColor } from './CertificateShared';
+import { Certificate, Header, Signatures, getEventArticle, getDegreeAbbr, getContrastColor, resolveFontSize, resolveFontFamily } from './CertificateShared';
+import type { TextElementStyle } from './CertificateShared';
 
 interface TemplateProps {
     certificate: Certificate;
@@ -37,6 +38,18 @@ export const DefaultTemplate = ({
     const signerCount = config?.signer_count || 1;
     const signers = config?.signers || [];
     const logos = config?.logos;
+
+    // Resolved text element styles
+    const nameStyle: TextElementStyle | undefined = config?.name_style;
+    const eventTitleStyle: TextElementStyle | undefined = config?.event_title_style;
+    const nameFont = nameStyle?.fontFamily ? resolveFontFamily(nameStyle.fontFamily) : displayFont;
+    const nameSize = nameStyle?.fontSize ? resolveFontSize(nameStyle.fontSize) : undefined;
+    const nameAlign = nameStyle?.textAlign || undefined;
+    const nameLH = nameStyle?.lineHeight || undefined;
+    const eventFont = eventTitleStyle?.fontFamily ? resolveFontFamily(eventTitleStyle.fontFamily) : displayFont;
+    const eventSize = eventTitleStyle?.fontSize ? resolveFontSize(eventTitleStyle.fontSize) : undefined;
+    const eventAlign = eventTitleStyle?.textAlign || undefined;
+    const eventLH = eventTitleStyle?.lineHeight || undefined;
 
     return (
         <div 
@@ -91,7 +104,13 @@ export const DefaultTemplate = ({
                     {/* Name */}
                     <h3 
                         className="text-5xl font-bold mb-2 leading-none" 
-                        style={{ color: accent, fontFamily: displayFont }}
+                        style={{ 
+                            color: accent, 
+                            fontFamily: nameFont,
+                            ...(nameSize && { fontSize: nameSize }),
+                            ...(nameAlign && { textAlign: nameAlign as any }),
+                            ...(nameLH && { lineHeight: nameLH }),
+                        }}
                     >
                         {getDegreeAbbr(certificate.profiles.degree, certificate.profiles.gender)} {certificate.profiles.first_name} {certificate.profiles.last_name}
                     </h3>
@@ -106,8 +125,14 @@ export const DefaultTemplate = ({
 
                     {/* Event Title */}
                     <h4 
-                        className="text-3xl font-bold uppercase mb-2 max-w-3xl mx-auto leading-tight"
-                        style={{ fontFamily: displayFont }}
+                        className="text-3xl font-bold uppercase mb-2 max-w-3xl mx-auto"
+                        style={{ 
+                            fontFamily: eventFont,
+                            ...(eventSize && { fontSize: eventSize }),
+                            ...(eventAlign && { textAlign: eventAlign as any }),
+                            ...(eventLH && { lineHeight: eventLH }),
+                            ...(!eventLH && { lineHeight: '1.1' }),
+                        }}
                     >
                         {certificate.events.title}
                     </h4>

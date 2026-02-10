@@ -65,6 +65,8 @@ export const ClassicTemplate = ({
                      displayFont={displayFont}
                      isStaff={isStaff}
                      isOrganizer={isOrganizer}
+                     nameStyle={config?.name_style}
+                     eventTitleStyle={config?.event_title_style}
                 />
 
                 <div className="w-full flex justify-center mt-4">

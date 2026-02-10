@@ -1,3 +1,10 @@
+export interface TextElementStyle {
+    fontSize?: string;       // e.g. '5xl', '4xl', '3xl', '2xl', 'xl', 'lg'
+    textAlign?: 'left' | 'center' | 'right';
+    lineHeight?: string;     // e.g. '1', '1.2', '1.5'
+    fontFamily?: 'sans' | 'serif' | 'mono' | 'cursive';
+}
+
 export interface Certificate {
     id: string; // attendance id OR event id for speakers
     scanned_at: string; // OR event date for speakers
@@ -44,6 +51,8 @@ export interface Certificate {
           organizer: string;
           context?: string;
         };
+        name_style?: TextElementStyle;
+        event_title_style?: TextElementStyle;
         signers?: Array<{
            name: string;
            role: string;

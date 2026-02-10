@@ -121,6 +121,8 @@ export const ModernTemplate = ({
                          align="center"
                          isStaff={isStaff}
                          isOrganizer={isOrganizer}
+                         nameStyle={config?.name_style}
+                         eventTitleStyle={config?.event_title_style}
                      />
                  </div>
 

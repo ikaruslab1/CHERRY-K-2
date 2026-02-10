@@ -491,6 +491,7 @@ export function AgendaView() {
             isInterested={selectedEvent ? interests.has(selectedEvent.id) : false}
             onToggleInterest={toggleInterest}
             onMarkAttendance={markSelfAttendance}
+            attendanceCount={selectedEvent ? (attendance[selectedEvent.id] || 0) : 0}
           />
         )}
       </AnimatePresence>
