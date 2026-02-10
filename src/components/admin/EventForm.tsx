@@ -12,6 +12,7 @@ import {
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { useFieldArray } from 'react-hook-form';
 import { SpeakerSelector } from '@/components/admin/SpeakerSelector';
+import { MultipleSpeakerSelector } from '@/components/admin/MultipleSpeakerSelector';
 import { Event, UserProfile } from '@/types';
 import { formatToMexicoDateTimeLocal, parseMexicoDateTimeLocal } from '@/lib/dateUtils';
 
@@ -116,6 +117,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
     const [openIconPicker, setOpenIconPicker] = useState<number | null>(null);
     const [autoAttendHours, setAutoAttendHours] = useState(1);
     const [autoAttendMins, setAutoAttendMins] = useState(0);
+    const [speakerIds, setSpeakerIds] = useState<string[]>([]); // Multiple speakers
 
     useEffect(() => {
         if (initialData) {
@@ -140,10 +142,19 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
             
             setEventType(initialData.type || 'Conferencia Magistral');
             setTags(initialData.tags || []);
+            
+            // Load multiple speakers (new system) or fallback to legacy speaker_id
+            const loadedSpeakerIds = initialData.speakers?.map(s => s.id) || [];
+            // If no speakers but has speaker_id (legacy), add it
+            if (loadedSpeakerIds.length === 0 && initialData.speaker_id) {
+                loadedSpeakerIds.push(initialData.speaker_id);
+            }
+            setSpeakerIds(loadedSpeakerIds);
         } else {
             reset();
             setEventType('Conferencia Magistral');
             setTags([]);
+            setSpeakerIds([]);
             setValue('speaker_id', '');
             setValue('duration_days', 1);
             setValue('custom_links', []);
@@ -162,6 +173,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
             date: formattedDate, 
             type: eventType, 
             tags,
+            speakerIds, // Multiple speakers
             auto_attendance_limit: totalAutoMins
         });
     };
@@ -502,11 +514,12 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                 </div>
              </div>
 
-            {/* Speaker Selection (Custom Combobox) */}
-            <SpeakerSelector 
+            {/* Multiple Speakers Selection */}
+            <MultipleSpeakerSelector 
                 users={users}
-                selectedSpeakerId={watch('speaker_id') || null}
-                onSelect={(id) => setValue('speaker_id', id)}
+                selectedSpeakerIds={speakerIds}
+                onSelect={setSpeakerIds}
+                maxSpeakers={10}
             />
 
             <div className="pt-6 flex flex-col-reverse xs:flex-row justify-between items-center border-t border-gray-100 mt-8 gap-3 xs:gap-0">

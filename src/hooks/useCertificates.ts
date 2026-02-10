@@ -122,7 +122,36 @@ export function useCertificates(conferenceId: string | undefined): UseCertificat
       }
 
       // --- SPEAKER CERTIFICATES ---
-      const { data: speakerEvents, error: speakerError } = await supabase
+      console.log('[useCertificates] Fetching speaker certificates for user:', user.id, 'in conference:', conferenceId);
+      
+      // Fetch events where user is in event_speakers table
+      const { data: eventSpeakerRecords, error: eventSpeakersError } = await supabase
+        .from('event_speakers')
+        .select(`
+            event_id,
+            events!inner (
+                id,
+                title,
+                date,
+                type,
+                location,
+                description,
+                gives_certificate,
+                duration_days,
+                conference_id,
+                conferences (
+                  title,
+                  institution_name,
+                  department_name,
+                  certificate_config
+                )
+            )
+        `)
+        .eq('user_id', user.id)
+        .eq('events.conference_id', conferenceId);
+
+      // Also fetch legacy speaker_id events (for backwards compatibility)
+      const { data: legacySpeakerEvents, error: legacyError } = await supabase
         .from('events')
         .select(`
             id,
@@ -144,11 +173,43 @@ export function useCertificates(conferenceId: string | undefined): UseCertificat
         .eq('speaker_id', user.id)
         .eq('conference_id', conferenceId);
 
-      if (speakerError) {
-          console.error("Error fetching speaker events:", speakerError);
+      console.log('[useCertificates] Speaker events query results:', {
+        fromEventSpeakers: eventSpeakerRecords?.length || 0,
+        fromLegacySpeakerId: legacySpeakerEvents?.length || 0,
+        errors: { eventSpeakersError, legacyError }
+      });
+
+      // Combine and deduplicate events
+      const allSpeakerEvents: any[] = [];
+      const eventIds = new Set<string>();
+
+      // Add events from event_speakers table
+      if (eventSpeakerRecords) {
+        eventSpeakerRecords.forEach((record: any) => {
+          if (!eventIds.has(record.events.id)) {
+            allSpeakerEvents.push(record.events);
+            eventIds.add(record.events.id);
+          }
+        });
+      }
+
+      // Add legacy speaker_id events
+      if (legacySpeakerEvents) {
+        legacySpeakerEvents.forEach((event: any) => {
+          if (!eventIds.has(event.id)) {
+            allSpeakerEvents.push(event);
+            eventIds.add(event.id);
+          }
+        });
+      }
+
+      if (eventSpeakersError || legacyError) {
+          console.error("[useCertificates] Error fetching speaker events:", { eventSpeakersError, legacyError });
       } else {
            // Transform speaker events into "Certificate" objects
-           const speakerCerts: Certificate[] = (speakerEvents || []).filter((e: any) => e.gives_certificate).map(event => ({
+           // NOTE: Ponentes SIEMPRE reciben constancia por presidir un evento,
+           // independientemente de gives_certificate (que es solo para asistentes)
+           const speakerCerts: Certificate[] = allSpeakerEvents.map(event => ({
             id: `SPK-${event.id}`, 
             scanned_at: event.date,
             events: event as any, 
@@ -160,6 +221,12 @@ export function useCertificates(conferenceId: string | undefined): UseCertificat
             },
             isSpeaker: true
           }));
+
+          console.log('[useCertificates] Speaker certificates (ponentes SIEMPRE reciben constancia):', {
+            totalEvents: allSpeakerEvents.length,
+            certificatesGenerated: speakerCerts.length,
+            certificates: speakerCerts
+          });
 
           // Sort by date descending
           speakerCerts.sort((a, b) => new Date(b.scanned_at).getTime() - new Date(a.scanned_at).getTime());

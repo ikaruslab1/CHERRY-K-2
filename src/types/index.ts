@@ -12,13 +12,20 @@ export interface Event {
   date: string;
   type: string;
   image_url?: string;
-  speaker_id?: string | null;
+  speaker_id?: string | null; // Primary speaker (legacy)
   speaker?: {
     first_name: string;
     last_name: string;
     degree?: string;
     gender?: string;
   };
+  speakers?: Array<{ // Multiple speakers support (up to 10)
+    id: string;
+    first_name: string;
+    last_name: string;
+    degree?: string;
+    gender?: string;
+  }>;
   tags?: string[];
   gives_certificate?: boolean;
   auto_attendance?: boolean;

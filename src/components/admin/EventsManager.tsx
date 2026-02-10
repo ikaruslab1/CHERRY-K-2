@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
-import { Trash, Edit, Plus, Eye, Printer, X } from 'lucide-react';
+import { Trash, Edit, Plus, Eye, Printer, X, Users } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { CertificateContent, Certificate } from '@/components/profile/CertificateContent';
 import { CertificatePreview } from '@/components/profile/CertificatePreview';
@@ -25,12 +25,50 @@ export function EventsManager() {
   const fetchEvents = async () => {
     if (!currentConference) return;
     setLoading(true);
-    const { data } = await supabase
+    
+    // Fetch events with speakers
+    const { data: eventsData } = await supabase
         .from('events')
         .select('*')
         .eq('conference_id', currentConference.id)
         .order('date');
-    setEvents((data as Event[]) || []);
+    
+    if (eventsData) {
+        // Fetch speakers for each event
+        const eventsWithSpeakers = await Promise.all(
+            eventsData.map(async (event) => {
+                const { data: eventSpeakers } = await supabase
+                    .from('event_speakers')
+                    .select(`
+                        user_id,
+                        profiles:user_id (
+                            id,
+                            first_name,
+                            last_name,
+                            degree,
+                            gender
+                        )
+                    `)
+                    .eq('event_id', event.id);
+                
+                return {
+                    ...event,
+                    speakers: eventSpeakers
+                        ?.filter((es: any) => es.profiles !== null) // Filter out null profiles
+                        .map((es: any) => ({
+                            id: es.profiles.id,
+                            first_name: es.profiles.first_name,
+                            last_name: es.profiles.last_name,
+                            degree: es.profiles.degree,
+                            gender: es.profiles.gender
+                        })) || []
+                };
+            })
+        );
+        
+        setEvents(eventsWithSpeakers as Event[]);
+    }
+    
     setLoading(false);
   };
 
@@ -72,13 +110,16 @@ export function EventsManager() {
         return;
     }
     try {
+        console.log('EventsManager onSubmit data:', data);
+        console.log('Speaker IDs to save:', data.speakerIds);
+        
         const eventData = {
             title: data.title,
             description: data.description,
             location: data.location,
             date: data.date,
             type: data.type,
-            speaker_id: data.speaker_id || null,
+            speaker_id: data.speakerIds?.[0] || null, // First speaker as primary (legacy)
             image_url: data.image_url || null,
             duration_days: data.duration_days,
             gives_certificate: data.gives_certificate,
@@ -89,12 +130,37 @@ export function EventsManager() {
             conference_id: currentConference?.id
         };
 
+        let eventId: string;
+
         if (isEditing) {
             const { error } = await supabase.from('events').update(eventData).eq('id', isEditing.id);
             if (error) throw error;
+            eventId = isEditing.id;
+            
+            // Delete old speakers
+            const { error: deleteError } = await supabase.from('event_speakers').delete().eq('event_id', eventId);
+            if (deleteError) {
+                console.error('Error deleting speakers:', deleteError);
+                throw deleteError;
+            }
         } else {
-            const { error } = await supabase.from('events').insert(eventData);
+            const { data: newEvent, error } = await supabase.from('events').insert(eventData).select().single();
             if (error) throw error;
+            eventId = newEvent.id;
+        }
+
+        // Insert new speakers
+        if (data.speakerIds && data.speakerIds.length > 0) {
+            const speakerRecords = data.speakerIds.map((userId: string) => ({
+                event_id: eventId,
+                user_id: userId
+            }));
+            
+            const { error: speakersError } = await supabase
+                .from('event_speakers')
+                .insert(speakerRecords);
+            
+            if (speakersError) throw speakersError;
         }
 
         setIsEditing(null);
@@ -217,10 +283,18 @@ export function EventsManager() {
                         <span className="text-xs text-gray-400 font-mono">{formatMexicoDate(event.date, {weekday: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
                       </div>
                       <h4 className="font-bold text-lg text-[#373737] leading-tight mb-1">{event.title}</h4>
-                      <p className="text-sm text-gray-500 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#DBF227] shrink-0"></span> 
-                        <span className="truncate">{event.location}</span>
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-gray-500 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#DBF227] shrink-0"></span> 
+                          <span className="truncate">{event.location}</span>
+                        </p>
+                        {event.speakers && event.speakers.length > 0 && (
+                          <span className="text-[10px] font-bold text-[#aacc00] bg-[#DBF227]/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {event.speakers.length} ponente{event.speakers.length !== 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
                   </div>
                   <div className="flex gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 border-gray-50 pt-3 sm:pt-0">
                       {event.speaker_id && (

@@ -83,23 +83,44 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
 
     useEffect(() => {
         const fetchData = async () => {
-            // Fetch Profiles
-            const { data: profilesData } = await supabase
-                .from('profiles')
-                .select('id, first_name, last_name, degree, role, gender')
-                .order('first_name');
-            if (profilesData) setProfiles(profilesData);
+            if (!currentConference) return;
+
+            // Fetch Profiles (Signers candidates) using conference context
+            try {
+                // Try to get users associated with the conference first
+                const { data: usersData, error: usersError } = await supabase.rpc('get_users_for_conference', {
+                    p_conference_id: currentConference.id
+                });
+                
+                if (!usersError && usersData) {
+                     setProfiles(usersData);
+                } else {
+                    // Fallback to all profiles if RPC fails or returns partial
+                     const { data: profilesData } = await supabase
+                        .from('profiles')
+                        .select('id, first_name, last_name, degree, role, gender')
+                        .order('first_name');
+                    if (profilesData) setProfiles(profilesData);
+                }
+            } catch (err) {
+                console.error("Error fetching profiles:", err);
+                 // Final fallback attempt
+                 const { data: profilesData } = await supabase
+                    .from('profiles')
+                    .select('id, first_name, last_name, degree, role, gender')
+                    .order('first_name');
+                if (profilesData) setProfiles(profilesData);
+            }
 
             // Fetch Events for Example Selector
-            if (currentConference) {
-                const { data: eventsData } = await supabase
-                    .from('events')
-                    .select('id, title, date, type, location, description')
-                    .eq('conference_id', currentConference.id)
-                    .order('date', { ascending: true });
-                if (eventsData) setExampleEvents(eventsData);
-            }
+            const { data: eventsData } = await supabase
+                .from('events')
+                .select('id, title, date, type, location, description')
+                .eq('conference_id', currentConference.id)
+                .order('date', { ascending: true });
+            if (eventsData) setExampleEvents(eventsData);
         };
+        
         fetchData();
     }, [currentConference]);
 
@@ -799,25 +820,28 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                 <select
                                                     value={signer.profile_id || ''}
                                                     onChange={(e) => {
-                                                        const selectedProfile = profiles.find(p => p.id === e.target.value);
-                                                        const newSigners = [...(config.signers || [])];
-                                                        // Ensure array is initialized up to this index if it wasn't
-                                                        if (!newSigners[idx]) newSigners[idx] = {};
+                                                        const selectedId = e.target.value;
+                                                        const selectedProfile = profiles.find(p => p.id === selectedId);
                                                         
-                                                        // Update slot
+                                                        // Create a copy of signers, filling gaps if necessary
+                                                        const currentSigners = config.signers || [];
+                                                        const newSigners = [...currentSigners];
+                                                        
+                                                        // Ensure the specific index exists
+                                                        if (!newSigners[idx]) {
+                                                            newSigners[idx] = { role: 'Jefa de carrera', profile_id: '' };
+                                                        }
+                                                        
+                                                        // Update the specific slot
                                                         newSigners[idx] = {
                                                             ...newSigners[idx],
-                                                            profile_id: e.target.value,
+                                                            profile_id: selectedId,
                                                             name: selectedProfile ? `${selectedProfile.first_name} ${selectedProfile.last_name}` : '',
                                                             degree: selectedProfile ? selectedProfile.degree : '',
                                                             gender: selectedProfile ? selectedProfile.gender : ''
                                                         };
                                                         
-                                                        // Also ensure signer_count is updated or we just rely on signers array length in consumer?
-                                                        // We'll set signer_count to 3 effectively or max index + 1?
-                                                        // For compatibility, let's update signer_count to match the highest index filled + 1?
-                                                        // For now, let's just save.
-                                                        setConfig({...config, signers: newSigners});
+                                                        setConfig({ ...config, signers: newSigners });
                                                     }}
                                                     className="w-full p-2 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227] text-black"
                                                 >
@@ -842,7 +866,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                         setConfig({...config, signers: newSigners});
                                                     }}
                                                     placeholder="Ej. Director General"
-                                                    className="h-8 text-xs text-black"
+                                                    className="h-8 text-xs text-black bg-white border border-gray-300"
                                                 />
                                             </div>
                                         </div>

@@ -41,16 +41,33 @@ export function AgendaView() {
         
           let eventsQuery = supabase
           .from('events')
-          .select('id, title, description, location, date, type, tags, image_url, gives_certificate, auto_attendance, auto_attendance_limit, duration_days, custom_links, speaker:profiles!speaker_id(first_name, last_name, degree, gender)')
+          .select(`
+            id, title, description, location, date, type, tags, image_url, 
+            gives_certificate, auto_attendance, auto_attendance_limit, duration_days, custom_links, 
+            speaker:profiles!speaker_id(first_name, last_name, degree, gender),
+            event_speakers(
+              profiles(id, first_name, last_name, degree, gender)
+            )
+          `)
           .eq('conference_id', currentConference?.id)
           .order('date', { ascending: true });
 
         if (!user) {
           const { data: eventsData } = await eventsQuery;
-          const formattedEvents = (eventsData || []).map((e: any) => ({
-            ...e,
-            speaker: Array.isArray(e.speaker) ? e.speaker[0] : e.speaker
-          }));
+          const formattedEvents = (eventsData || []).map((e: any) => {
+             // Map new speakers structure
+             const speakers = e.event_speakers?.map((es: any) => es.profiles).filter(Boolean) || [];
+             // Fallback to legacy if no multiple speakers
+             if (speakers.length === 0 && e.speaker) {
+                 speakers.push(Array.isArray(e.speaker) ? e.speaker[0] : e.speaker);
+             }
+
+             return {
+                ...e,
+                speaker: Array.isArray(e.speaker) ? e.speaker[0] : e.speaker,
+                speakers
+             };
+          });
           setEvents(formattedEvents);
           setLoading(false);
           return;
@@ -71,10 +88,20 @@ export function AgendaView() {
         ]);
 
         if (eventsResponse.data) {
-          const formattedEvents = (eventsResponse.data as any[]).map(e => ({
-            ...e,
-            speaker: Array.isArray(e.speaker) ? e.speaker[0] : e.speaker
-          }));
+          const formattedEvents = (eventsResponse.data as any[]).map(e => {
+            // Map new speakers structure
+             const speakers = e.event_speakers?.map((es: any) => es.profiles).filter(Boolean) || [];
+             // Fallback to legacy if no multiple speakers
+             if (speakers.length === 0 && e.speaker) {
+                 speakers.push(Array.isArray(e.speaker) ? e.speaker[0] : e.speaker);
+             }
+
+            return {
+                ...e,
+                speaker: Array.isArray(e.speaker) ? e.speaker[0] : e.speaker,
+                speakers
+            };
+          });
           setEvents(formattedEvents);
         }
         

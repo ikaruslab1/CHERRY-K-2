@@ -21,15 +21,29 @@ export function ParticipationView() {
 
         const { data } = await supabase
           .from('events')
-          .select('id, title, description, location, date, type, tags, image_url, gives_certificate, duration_days, speaker:profiles!speaker_id(first_name, last_name, degree, gender)')
+          .select(`
+            id, title, description, location, date, type, tags, image_url, 
+            gives_certificate, duration_days, 
+            speaker:profiles!speaker_id(first_name, last_name, degree, gender),
+            event_speakers(
+              profiles(id, first_name, last_name, degree, gender)
+            )
+          `)
           .eq('speaker_id', user.id)
           .order('date', { ascending: true });
 
         if (data) {
-          const formattedEvents = data.map((e: any) => ({
-            ...e,
-            speaker: Array.isArray(e.speaker) ? e.speaker[0] : e.speaker
-          }));
+          const formattedEvents = data.map((e: any) => {
+             const speakers = e.event_speakers?.map((es: any) => es.profiles).filter(Boolean) || [];
+             if (speakers.length === 0 && e.speaker) {
+                 speakers.push(Array.isArray(e.speaker) ? e.speaker[0] : e.speaker);
+             }
+             return {
+                ...e,
+                speaker: Array.isArray(e.speaker) ? e.speaker[0] : e.speaker,
+                speakers
+             };
+          });
           setEvents(formattedEvents);
         }
       } catch (error) {

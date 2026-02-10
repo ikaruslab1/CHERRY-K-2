@@ -32,17 +32,19 @@ interface EventModalProps {
   hideActionButtons?: boolean;
 }
 
-// Helper to abbreviate degrees
-const getDegreeAbbr = (degree?: string) => {
+const getDegreeAbbr = (degree?: string, gender?: string) => {
   if (!degree) return '';
   const lower = degree.toLowerCase();
+  const isFemale = gender?.toLowerCase() === 'femenino' || gender?.toLowerCase() === 'mujer';
   
-  if (lower.includes('doctor')) return 'Dr.';
-  if (lower.includes('maestr') || lower.includes('magister')) return 'Mtro.';
+  if (lower.includes('doctor')) return isFemale ? 'Dra.' : 'Dr.';
+  if (lower.includes('maestr')) return isFemale ? 'Mtra.' : 'Mtro.';
   if (lower.includes('licencia')) return 'Lic.';
-  if (lower.includes('ingenier')) return 'Ing.';
+  if (lower.includes('ingenier')) return isFemale ? 'Ing.' : 'Ing.'; // Ing. is usually neutral or Ing./Inga. but standard is Ing.
   if (lower.includes('arquitect')) return 'Arq.';
-  
+  if (lower.includes('profesor')) return isFemale ? 'Profa.' : 'Prof.';
+  if (lower.includes('estudiante') || lower.includes('alumno')) return ''; // No prefix for students
+
   return degree;
 };
 
@@ -182,29 +184,45 @@ export function EventModal({
             <X className="h-5 w-5" />
           </motion.button>
           
-           {/* Date Block - floating over image */}
-           <div className="absolute bottom-4 left-6 z-20 flex items-end gap-4">
-              <div className="flex flex-col bg-white p-3 shadow-lg min-w-[80px] text-center border-t-4 border-[var(--color-acid)]">
-                 <span className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-0.5">
-                    {formatMexicoDate(eventDate, { month: 'short' }).replace('.', '')}
-                 </span>
-                 <span className="text-3xl font-bold text-black tracking-tighter leading-none font-geist-sans">
-                    {(() => {
-                        const duration = event.duration_days || 1;
-                        if (duration > 1) {
-                            const endDate = new Date(eventDate);
-                            endDate.setDate(eventDate.getDate() + (duration - 1));
-                            return `${eventDate.getDate()}-${endDate.getDate()}`;
-                        }
-                        return eventDate.getDate();
-                    })()}
-                 </span>
+           {/* Date & Time Block - Unified & Polished */}
+           <div className="absolute bottom-0 left-6 z-20 transform translate-y-1/4 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex bg-white">
+              {/* Accent Strip */}
+              <div className="w-1.5 bg-[var(--color-acid)]"></div>
+              
+              <div className="flex divide-x divide-gray-100">
+                  {/* Date Part */}
+                  <div className="p-3 px-5 flex flex-col items-center justify-center bg-white">
+                       <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">
+                          {formatMexicoDate(eventDate, { month: 'short' }).replace('.', '')}
+                       </span>
+                       <span className="text-3xl font-black text-[#373737] tracking-tight leading-none font-geist-sans">
+                          {(() => {
+                              const duration = event.duration_days || 1;
+                              if (duration > 1) {
+                                  const endDate = new Date(eventDate);
+                                  endDate.setDate(eventDate.getDate() + (duration - 1));
+                                  return `${eventDate.getDate()}-${endDate.getDate()}`;
+                              }
+                              return eventDate.getDate();
+                          })()}
+                       </span>
+                  </div>
+
+                  {/* Time Part */}
+                  <div className="p-3 px-5 flex flex-col justify-center items-start min-w-[110px] bg-white">
+                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                          <Clock className="h-3 w-3" /> Hora
+                       </span>
+                       <span className="text-xl font-bold text-[#373737] tracking-tight leading-none font-geist-sans">
+                          {formatMexicoTime(eventDate)}
+                       </span>
+                  </div>
               </div>
            </div>
         </div>
 
         {/* Content Body - White Background, Black Text */}
-        <div className="flex-1 overflow-y-scroll p-8 space-y-8 custom-scrollbar bg-white">
+        <div className="flex-1 overflow-y-scroll p-8 pt-12 space-y-8 custom-scrollbar bg-white">
           
           {/* Title & Tags */}
           <div className="space-y-4">
@@ -224,13 +242,15 @@ export function EventModal({
           </div>
 
           {/* Description */}
-          <div className="space-y-">
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Sobre la actividad</h4>
-            <div 
-                className="text-gray-600 text-base leading-relaxed prose prose-neutral max-w-none font-geist-sans"
-                dangerouslySetInnerHTML={{ __html: event.description }}
-            />
-          </div>
+          {event.description && (
+            <div className="space-y-4">
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Sobre la actividad</h4>
+                <div 
+                    className="text-gray-600 text-base leading-relaxed prose prose-neutral max-w-none font-geist-sans"
+                    dangerouslySetInnerHTML={{ __html: event.description }}
+                />
+            </div>
+          )}
 
           {/* Custom Links */}
           {event.custom_links && event.custom_links.length > 0 && (
@@ -280,7 +300,43 @@ export function EventModal({
                </div>
 
                {/* Speaker */}
-               {event.speaker && (
+               {/* Speakers */}
+               {(event.speakers && event.speakers.length > 0) ? (
+                   <div className="flex gap-4 md:col-span-2">
+                        <div className="p-3 bg-gray-50 text-black border border-gray-100 h-fit shrink-0">
+                            <Users className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+                              {(() => {
+                                  const type = (event.type || '').toLowerCase();
+                                  const count = event.speakers.length;
+                                  
+                                  if (type.includes('conferencia')) return count > 1 ? 'Conferencistas' : 'Conferencista';
+                                  if (type.includes('ponencia')) return count > 1 ? 'Ponentes' : 'Ponente';
+                                  if (type.includes('taller')) return count > 1 ? 'Talleristas' : 'Tallerista';
+                                  if (type.includes('actividad')) return 'Preside'; // Fixed static label as requested
+                                  
+                                  return count > 1 ? 'Ponentes' : 'Ponente';
+                              })()}
+                            </h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {event.speakers.map((speaker, idx) => (
+                                    <div key={idx} className="flex items-center gap-3 p-2 border border-transparent hover:bg-gray-50 hover:border-gray-100 rounded-lg transition-colors group">
+                                         <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-[10px] font-bold text-gray-500 border border-gray-200 group-hover:bg-[#DBF227] group-hover:text-black group-hover:border-transparent transition-colors">
+                                            {speaker.first_name?.[0]}{speaker.last_name?.[0]}
+                                         </div>
+                                         <div className="min-w-0">
+                                            <p className="text-sm font-bold text-black leading-tight text-balance">
+                                                {getDegreeAbbr(speaker?.degree, speaker?.gender)} {speaker.first_name} {speaker.last_name}
+                                            </p>
+                                         </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                   </div>
+               ) : event.speaker && (
                    <div className="flex gap-4">
                         <div className="p-3 bg-gray-50 text-black border border-gray-100 h-fit">
                             <User className="h-5 w-5" />
@@ -288,29 +344,22 @@ export function EventModal({
                         <div>
                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
                               {(() => {
-                                const type = event.type || '';
-                                return type === 'Taller' ? 'Tallerista' : 'Speaker';
+                                  const type = (event.type || '').toLowerCase();
+                                  if (type.includes('conferencia')) return 'Conferencista';
+                                  if (type.includes('ponencia')) return 'Ponente';
+                                  if (type.includes('taller')) return 'Tallerista';
+                                  if (type.includes('actividad')) return 'Preside';
+                                  return 'Speaker';
                               })()}
                             </h4>
                             <p className="text-base text-black font-medium">
-                                 {getDegreeAbbr(event.speaker.degree)} {event.speaker.first_name} {event.speaker.last_name}
+                                 {getDegreeAbbr(event.speaker.degree, event.speaker.gender)} {event.speaker.first_name} {event.speaker.last_name}
                             </p>
                         </div>
                    </div>
                 )}
                 
-                {/* Time */}
-                <div className="flex gap-4">
-                    <div className="p-3 bg-gray-50 text-black border border-gray-100 h-fit">
-                        <Clock className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Horario</h4>
-                        <p className="text-base text-black font-medium">
-                            {formatMexicoTime(eventDate)}
-                        </p>
-                    </div>
-                </div>
+
           </div>
           
         </div>
