@@ -90,8 +90,10 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
                 }
 
                 const user = session.user;
+                console.log(`[useRoleAuth] Checking auth for user: ${user.id} (${user.email})`);
                 
                 if (!currentConference) {
+                    console.log('[useRoleAuth] No current conference, setting role to user');
                     if (isMounted) {
                         setUserRole('user'); // Default role
                         setLoading(false);
@@ -107,17 +109,20 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
                 }
 
                 const conferenceId = currentConference.id;
+                console.log(`[useRoleAuth] Current Conference ID: ${conferenceId}`);
                 const cacheKey = `${user.id}_${conferenceId}`;
                 let role: AllowedRole | null = null;
                 
                 // 2. Cache
                 if (globalRoleCache[cacheKey]) {
                     role = globalRoleCache[cacheKey];
+                    console.log(`[useRoleAuth] Found role in memory cache: ${role}`);
                 } else {
                     const cachedRoleStr = typeof window !== 'undefined' ? localStorage.getItem(`user_role_${cacheKey}`) : null;
                     if (cachedRoleStr && ['admin', 'staff', 'ponente', 'user', 'owner', 'vip'].includes(cachedRoleStr)) {
                         role = cachedRoleStr as AllowedRole;
                         globalRoleCache[cacheKey] = role;
+                        console.log(`[useRoleAuth] Found role in localStorage: ${role}`);
                     }
                 }
 
@@ -127,6 +132,7 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
                         setUserRole(role);
                         const roles = JSON.parse(allowedRolesStr);
                         if (roles.length > 0 && !roles.includes(role)) {
+                            console.log(`[useRoleAuth] Role ${role} not allowed for this route`);
                             router.push(redirectTo);
                             return;
                         }
@@ -137,7 +143,9 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
                     }
                 } else {
                     // Fetch fresh
+                    console.log('[useRoleAuth] Fetching fresh role from server...');
                     const serverRole = await getEffectiveRole(user.id, conferenceId);
+                    console.log(`[useRoleAuth] Server role: ${serverRole}`);
                     
                     if (isMounted) {
                         updateCache(user.id, conferenceId, serverRole);
@@ -154,7 +162,7 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
                 }
 
             } catch (error) {
-                console.error('Auth check error:', error);
+                console.error('[useRoleAuth] Check error:', error);
                 if (isMounted) router.push('/');
             }
         };

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -16,100 +15,43 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { useConference } from '@/context/ConferenceContext';
+import { useRoleAuth } from '@/hooks/useRoleAuth';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const { currentConference } = useConference();
+  const { loading: authLoading, userRole } = useRoleAuth();
+  const [sessionLoading, setSessionLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'participation' | 'constancias'>('profile');
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isStaff, setIsStaff] = useState(false);
-  const [isPonente, setIsPonente] = useState(false);
-  const [isOwner, setIsOwner] = useState(false);
-  const [userRole, setUserRole] = useState<string>('');
+
+  const isAdmin = userRole === 'admin' || userRole === 'owner';
+  const isStaff = userRole === 'staff';
+  const isPonente = userRole === 'ponente';
+  const isOwner = userRole === 'owner';
+
+  console.log('[ProfilePage] Current State -> userRole:', userRole, 'isAdmin:', isAdmin, 'isStaff:', isStaff);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        console.log('[PROFILE] Starting session check...');
-        
-        // With createBrowserClient, session should be available quickly
-        let user = null;
-        let attempts = 0;
-        const maxAttempts = 10; // Reduced to 1 second
-        
-        while (!user && attempts < maxAttempts) {
-          const { data: { user: currentUser } } = await supabase.auth.getUser();
-          console.log(`[PROFILE] Attempt ${attempts + 1}/${maxAttempts}:`, currentUser ? '✓ User found' : '✗ Not found');
-          
-          if (currentUser) {
-            user = currentUser;
-            break;
-          }
-          
-          await new Promise(resolve => setTimeout(resolve, 100));
-          attempts++;
-        }
-        
-        if (!user) {
-          console.log('[PROFILE] No user found, redirecting to login');
-          router.push('/');
-          return;
-        }
-
-        console.log('[PROFILE] ✓ User authenticated, loading profile...');
-
-        // Get current conference ID from localStorage (context fallback)
-        const conferenceId = typeof window !== 'undefined' ? localStorage.getItem('current_conference_id') : null;
-
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_owner')
-          .eq('id', user.id)
-          .single();
-        
-        console.log('[PROFILE] Profile data loaded:', profile?.is_owner ? 'owner' : 'user');
-        
-        let effectiveRole = 'user';
-        if (profile?.is_owner) {
-            effectiveRole = 'owner';
-            setIsOwner(true);
-            setIsAdmin(true);
-        } else if (conferenceId) {
-            // Check conference role
-             const { data: localRole } = await supabase
-              .from('conference_roles')
-              .select('role')
-              .eq('user_id', user.id)
-              .eq('conference_id', conferenceId)
-              .single();
-            
-            if (localRole?.role) {
-                effectiveRole = localRole.role;
-            }
-        }
-
-        setUserRole(effectiveRole);
-        setIsAdmin(effectiveRole === 'admin' || effectiveRole === 'owner');
-        setIsStaff(effectiveRole === 'staff');
-        setIsPonente(effectiveRole === 'ponente');
-
-        console.log('[PROFILE] ✓ Profile loaded successfully');
-        setLoading(false);
-      } catch (error) {
-        console.error('[PROFILE] Error in loadData:', error);
-        setLoading(false);
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/');
+      } else {
+        setSessionLoading(false);
       }
     };
-
-    loadData();
+    checkSession();
   }, [router]);
+
+  const loading = authLoading || sessionLoading;
 
   const handleSignOut = async () => {
       await supabase.auth.signOut();
       router.push('/');
   };
 
-const navItems = [
+  const navItems = [
     { id: 'profile', label: 'Mi Perfil', icon: <User className="w-5 h-5" />, show: true },
     { id: 'agenda', label: 'Agenda', icon: <Calendar className="w-5 h-5" />, show: true },
     { id: 'constancias', label: 'Constancias', icon: <FileText className="w-5 h-5" />, show: true },
@@ -133,27 +75,19 @@ const navItems = [
     }
   ];
 
-
-// ... inside component
-
   if (loading) {
     return (
       <SidebarAwareContainer className="min-h-screen p-8 bg-gray-50">
-        {/* Mobile Nav Skeleton */}
         <div className="md:hidden flex justify-between items-center mb-8">
             <Skeleton className="h-10 w-10 rounded-full" />
             <Skeleton className="h-8 w-32" />
         </div>
-
         <div className="max-w-4xl mx-auto space-y-8 mt-12 md:mt-0">
-            {/* Header / Tabs Skeleton */}
             <div className="flex gap-4 overflow-x-auto pb-4 md:pb-0">
                 {[1, 2, 3, 4].map((i) => (
                     <Skeleton key={i} className="h-10 w-32 flex-shrink-0 rounded-full" />
                 ))}
             </div>
-
-            {/* Main Content Area Skeleton */}
             <div className="space-y-6">
                 <div className="flex flex-col md:flex-row gap-6 items-center md:items-start p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
                      <Skeleton className="h-24 w-24 rounded-full" />
@@ -163,9 +97,7 @@ const navItems = [
                         <Skeleton className="h-4 w-full mx-auto md:mx-0" />
                      </div>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <Skeleton className="h-48 w-full rounded-2xl" />
                      <Skeleton className="h-48 w-full rounded-2xl" />
                      <Skeleton className="h-48 w-full rounded-2xl" />
                 </div>
@@ -186,27 +118,26 @@ const navItems = [
           />
           
           <div className="max-w-4xl mx-auto space-y-8 mt-12 md:mt-0 flex-1 w-full">
-
-        <div className="p-0 min-h-[500px]">
-             <AnimatePresence mode="wait">
-                <motion.div
-                    key={activeTab}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                >
-                    {activeTab === 'profile' && <UserProfileView />}
-                    {activeTab === 'agenda' && <AgendaView />}
-                    {activeTab === 'constancias' && <CertificatesView />}
-                    {isPonente && activeTab === 'participation' && <ParticipationView />}
-                    {(isAdmin || isStaff) && activeTab === 'attendance' && <AttendanceView />}
-                    {isAdmin && activeTab === 'users' && <UsersTable currentUserRole={userRole} />}
-                    {isAdmin && activeTab === 'events' && <EventsManager />}
-                </motion.div>
-             </AnimatePresence>
-        </div>
-      </div>
+            <div className="p-0 min-h-[500px]">
+                 <AnimatePresence mode="wait">
+                    <motion.div
+                        key={activeTab}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        {activeTab === 'profile' && <UserProfileView />}
+                        {activeTab === 'agenda' && <AgendaView />}
+                        {activeTab === 'constancias' && <CertificatesView />}
+                        {isPonente && activeTab === 'participation' && <ParticipationView />}
+                        {(isAdmin || isStaff) && activeTab === 'attendance' && <AttendanceView />}
+                        {isAdmin && activeTab === 'users' && <UsersTable currentUserRole={userRole || undefined} />}
+                        {isAdmin && activeTab === 'events' && <EventsManager />}
+                    </motion.div>
+                 </AnimatePresence>
+            </div>
+          </div>
       </div>
     </SidebarAwareContainer>
   );
