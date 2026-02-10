@@ -15,6 +15,7 @@ interface NavItem {
     icon?: React.ReactNode;
     show?: boolean;
     onClick?: () => void;
+    isDivider?: boolean;
 }
 
 interface ResponsiveNavProps {
@@ -124,6 +125,13 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                             {/* Nav Items Mobile */}
                             <nav className="flex-1 space-y-1">
                                 {visibleItems.map((item) => {
+                                    if (item.isDivider) {
+                                         return (
+                                            <div key={item.id} className="px-4 pt-4 pb-2">
+                                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{item.label}</p>
+                                            </div>
+                                         );
+                                    }
                                     const isActive = activeTab === item.id;
                                     return (
                                         <button
@@ -249,6 +257,16 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                     className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-200"
                 >
                     {visibleItems.map((item) => {
+                        if (item.isDivider) {
+                             if (isDesktopCollapsed) {
+                                 return <div key={item.id} className="mx-2 my-4 h-px bg-gray-100" title={item.label} />;
+                             }
+                             return (
+                                <div key={item.id} className="px-3 pt-6 pb-2">
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 text-center">{item.label}</p>
+                                </div>
+                             );
+                        }
                         const isActive = activeTab === item.id;
                         return (
                             <button

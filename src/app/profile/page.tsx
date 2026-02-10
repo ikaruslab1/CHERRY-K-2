@@ -9,7 +9,9 @@ import { UsersTable } from '@/components/admin/UsersTable';
 import { EventsManager } from '@/components/admin/EventsManager';
 import AttendanceView from '@/views/admin/AttendanceView';
 import { ParticipationView } from '@/components/profile/ParticipationView';
-import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard, Award } from 'lucide-react';
+import { MetricsView } from '@/components/admin/metrics/MetricsView';
+import { CertificateDesignView } from '@/components/admin/CertificateDesignView';
+import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard, Award, Crown } from 'lucide-react';
 import { CertificatesView } from '@/components/profile/CertificatesView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
@@ -23,7 +25,7 @@ export default function ProfilePage() {
   const { currentConference } = useConference();
   const { loading: authLoading, userRole } = useRoleAuth();
   const [sessionLoading, setSessionLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'participation' | 'constancias'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'metrics' | 'attendance' | 'participation' | 'constancias' | 'design-certificates'>('profile');
 
   const isAdmin = userRole === 'admin' || userRole === 'owner';
   const isStaff = userRole === 'staff';
@@ -56,20 +58,22 @@ export default function ProfilePage() {
     { id: 'agenda', label: 'Agenda', icon: <Calendar className="w-5 h-5" />, show: true },
     { id: 'constancias', label: 'Constancias', icon: <FileText className="w-5 h-5" />, show: true },
     { id: 'participation', label: 'Participación', icon: <Mic className="w-5 h-5" />, show: isPonente },
+    { id: 'divider-admin', label: 'Herramientas de Administrador', show: isAdmin, isDivider: true },
     { id: 'attendance', label: 'Asistencia', icon: <QrCode className="w-5 h-5" />, show: isAdmin || isStaff },
     { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: isAdmin },
     { id: 'events', label: 'Gestión Eventos', icon: <Settings className="w-5 h-5" />, show: isAdmin },
+    { id: 'metrics', label: 'Dashboard Métricas', icon: <LayoutDashboard className="w-5 h-5" />, show: isAdmin },
     { 
         id: 'design-certificates', 
         label: 'Diseño de Constancias', 
         icon: <Award className="w-5 h-5" />, 
-        show: isAdmin,
-        onClick: () => router.push('/admin?tab=design-certificates')
+        show: isAdmin
     },
+    { id: 'divider-owner', label: 'Herramienta de Owner', show: isOwner, isDivider: true },
     { 
         id: 'owner_link', 
         label: 'Panel Owner', 
-        icon: <LayoutDashboard className="w-5 h-5" />, 
+        icon: <Crown className="w-5 h-5" />, 
         show: isOwner,
         onClick: () => router.push('/owner') 
     }
@@ -134,6 +138,8 @@ export default function ProfilePage() {
                         {(isAdmin || isStaff) && activeTab === 'attendance' && <AttendanceView />}
                         {isAdmin && activeTab === 'users' && <UsersTable currentUserRole={userRole || undefined} />}
                         {isAdmin && activeTab === 'events' && <EventsManager />}
+                        {isAdmin && activeTab === 'metrics' && <MetricsView />}
+                        {isAdmin && activeTab === 'design-certificates' && <CertificateDesignView />}
                     </motion.div>
                  </AnimatePresence>
             </div>

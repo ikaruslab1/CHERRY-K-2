@@ -13,6 +13,7 @@ import { EventForm } from '@/components/admin/EventForm';
 import { useConference } from '@/context/ConferenceContext';
 import { formatMexicoDate } from '@/lib/dateUtils';
 
+
 export function EventsManager() {
   const [events, setEvents] = useState<Event[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -20,6 +21,7 @@ export function EventsManager() {
   const [isEditing, setIsEditing] = useState<Event | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
+
   const { currentConference } = useConference();
 
   const fetchEvents = async () => {
@@ -230,14 +232,19 @@ export function EventsManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-xl font-bold text-[#373737]">Agenda del Evento</h3>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-4 mb-4">
+        <div className="flex items-center gap-4">
+             <h3 className="text-xl font-bold text-[#373737]">Gestión de Eventos</h3>
+        </div>
+        
         <div className="flex justify-between items-center">
             <Button onClick={() => { setIsCreating(true); setIsEditing(null); }} className="bg-[#373737] text-white hover:bg-black">
                 <Plus className="mr-2 h-4 w-4" /> Nuevo Evento
             </Button>
         </div>
       </div>
+
+
 
       {isCreating && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 sm:p-6 bg-black/50 animate-in fade-in duration-300">
