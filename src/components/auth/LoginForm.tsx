@@ -40,9 +40,8 @@ export function LoginForm() {
       const result = await loginWithId(data.shortId);
       
       if (result.success) {
-        // Redirect is handled by logic or router here.
-        // The server action revalidates path, but we need to client-side redirect.
-        router.push('/profile'); 
+        // Redirigir usando window.location para asegurar que las cookies se procesen correctamente
+        window.location.href = '/profile'; 
       } else {
         setError(result.error || 'Error al iniciar sesión');
       }

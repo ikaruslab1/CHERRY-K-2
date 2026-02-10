@@ -6,6 +6,7 @@ import { RegisterForm } from '@/components/auth/RegisterForm';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from "next/navigation";
 import { useConference } from '@/context/ConferenceContext';
+import { supabase } from '@/lib/supabase';
 
 const features = [
   {
@@ -34,6 +35,7 @@ export default function LoginPage() {
   const [view, setView] = useState<'login' | 'register'>('login');
   const [currentFeature, setCurrentFeature] = useState(0);
   const [showEventModal, setShowEventModal] = useState(false);
+  const router = useRouter();
   const { currentConference, availableConferences, selectConference } = useConference();
   const searchParams = useSearchParams();
 
@@ -43,6 +45,19 @@ export default function LoginPage() {
           setShowEventModal(true);
       }
   }, [searchParams]);
+
+  useEffect(() => {
+    // Si el usuario viene específicamente a seleccionar un evento, no lo redirigimos
+    if (searchParams.get('action') === 'select_event') return;
+
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        router.push('/profile');
+      }
+    };
+    checkUser();
+  }, [router, searchParams]);
 
   useEffect(() => {
     const timer = setInterval(() => {

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { db, LocalTicket, LocalAgendaItem, LocalProfile } from '@/lib/db';
+import { useConference } from '@/context/ConferenceContext';
 
 export function useSyncData() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<Date | null>(null);
+  const { currentConference } = useConference();
 
   useEffect(() => {
     const sync = async () => {
@@ -18,7 +20,7 @@ export function useSyncData() {
             return;
         }
 
-        // 1. Sync Profile
+        // 1. Sync Profile & Role Hierarchy
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
@@ -26,12 +28,30 @@ export function useSyncData() {
           .single();
         
         if (profile) {
+          let effectiveRole = profile.role;
+
+          // Si no es owner y hay una conferencia activa, buscar el rol local
+          if (profile.role !== 'owner' && currentConference) {
+            const { data: localRole } = await supabase
+              .from('conference_roles')
+              .select('role')
+              .eq('user_id', user.id)
+              .eq('conference_id', currentConference.id)
+              .single();
+            
+            if (localRole) {
+              effectiveRole = localRole.role;
+            } else {
+              effectiveRole = 'user'; // Fallback si no tiene rol en este evento
+            }
+          }
+
           const localProfile: LocalProfile = {
             id: profile.id,
             first_name: profile.first_name,
             last_name: profile.last_name,
             email: profile.email,
-            role: profile.role,
+            role: effectiveRole, // Guardamos el rol efectivo para uso offline
             degree: profile.degree,
             short_id: profile.short_id,
             gender: profile.gender
@@ -108,7 +128,7 @@ export function useSyncData() {
     return () => {
       window.removeEventListener('online', handleOnline);
     };
-  }, []);
+  }, [currentConference?.id]);
 
   return { isSyncing, lastSync };
 }

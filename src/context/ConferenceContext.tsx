@@ -87,12 +87,15 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
     // Only update if different to avoid loops
     if (found?.id !== currentConference?.id) {
         setCurrentConference(found);
+        if (found) {
+            localStorage.setItem('conference_id', found.id);
+        }
     }
     
     // Always stop loading after this check, even if nothing found
     setLoading(false);
     
-  }, [availableConferences, searchParams]); // Remove 'loading' dependency to avoid loop if we set loading false here.
+  }, [availableConferences, searchParams, currentConference?.id]);
   // Actually, we need to know when fetch is done. 
   // Let's rely on avaiableConferences being set. Use a separate state for dataLoaded if needed, 
   // but let's assume if fetch runs it updates state.

@@ -32,10 +32,10 @@ export default async function Home(props: {
   );
 
   // 1. Server-side Session Check (Fast Redirect)
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
   
-  if (session) {
-    redirect('/profile');
+  if (user) {
+    return redirect('/profile');
   }
 
   // Redirect to login page, preserving any query parameters
@@ -52,5 +52,5 @@ export default async function Home(props: {
   }
   const destination = queryString ? `/login?${queryString}` : '/login';
   
-  redirect(destination);
+  return redirect(destination);
 }

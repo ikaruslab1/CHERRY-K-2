@@ -131,8 +131,8 @@ export function RegisterForm() {
           const loginResult = await loginWithId(shortId);
           
           if (loginResult.success) {
-            // Redirect to profile page
-            router.push('/profile');
+            // Redirigir usando window.location para asegurar que las cookies se procesen correctamente
+            window.location.href = '/profile';
           } else {
             // If auto-login fails, keep showing the success message
             // User can manually login with their ID

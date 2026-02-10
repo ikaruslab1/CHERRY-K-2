@@ -291,15 +291,22 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           </div>
 
           {/* Role Badge - Subtle & Clean */}
-          <ParticleBadge 
-            roleName={roleName}
-            themeColor={themeColor}
-            themeTextColor={themeTextColor}
-            animation={animation}
-            bgSize={bgSize}
-            animationType={animationType}
-            className="mb-4 scale-90"
-          />
+          <div className="flex flex-col items-center mb-4">
+              {profile.role !== 'owner' && (
+                  <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mb-1.5 opacity-60">
+                      Rol en este evento
+                  </span>
+              )}
+              <ParticleBadge 
+                roleName={roleName}
+                themeColor={themeColor}
+                themeTextColor={themeTextColor}
+                animation={animation}
+                bgSize={bgSize}
+                animationType={animationType}
+                className="scale-90"
+              />
+          </div>
       </div>
 
       {/* Footer - Safe Zone Bottom */}

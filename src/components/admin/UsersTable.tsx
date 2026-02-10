@@ -44,13 +44,33 @@ import { useConference } from '@/context/ConferenceContext';
   };
 
   const saveRole = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser || !currentConference) return;
     setUpdating(true);
 
     let error;
 
-    if (currentConference) {
-        // Update conference specific role
+    // Lógica Segregada:
+    // 1. El rol 'owner' (desarrollador) es el único global.
+    // 2. Todos los demás roles son específicos de la conferencia.
+    
+    if (selectedRole === 'owner') {
+        // Asignar Owner Globalmente
+        const { error: err } = await supabase
+          .from('profiles')
+          .update({ role: 'owner' })
+          .eq('id', selectedUser.id);
+        error = err;
+    } else {
+        // Si el usuario era owner global y ahora se le asigna otro rol, 
+        // reseteamos su perfil global a 'user' y asignamos el rol local.
+        if (selectedUser.role === 'owner') {
+            await supabase
+              .from('profiles')
+              .update({ role: 'user' })
+              .eq('id', selectedUser.id);
+        }
+
+        // Upsert en roles de conferencia
         const { error: err } = await supabase
           .from('conference_roles')
           .upsert({ 
@@ -58,13 +78,6 @@ import { useConference } from '@/context/ConferenceContext';
             conference_id: currentConference.id,
             role: selectedRole 
           }, { onConflict: 'user_id, conference_id' });
-        error = err;
-    } else {
-        // Fallback: Global role update (deprecated but compatible)
-        const { error: err } = await supabase
-          .from('profiles')
-          .update({ role: selectedRole })
-          .eq('id', selectedUser.id);
         error = err;
     }
 
