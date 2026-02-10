@@ -9,25 +9,13 @@ import NextImage from 'next/image';
 import { CertificateContent } from '@/components/profile/CertificateContent';
 import type { Certificate } from '@/components/profile/CertificateContent';
 import { useConference } from '@/context/ConferenceContext';
+import { PRESET_LOGOS } from '@/lib/constants';
 
 interface CertificateDesignerProps {
     eventId?: string; // Optional, if modifying a specific event
     initialConfig: any;
     onSave: (config: any) => Promise<void>;
 }
-
-const PRESET_LOGOS = [
-    'unam',
-    'fesa',
-    'caacfmi',
-    'farg',
-    'fcien',
-    'fcua',
-    'fing',
-    'iuma',
-    'mac',  
-    'lema'
-];
 
 export function CertificateDesigner({ eventId, initialConfig, onSave }: CertificateDesignerProps) {
     const { currentConference } = useConference();

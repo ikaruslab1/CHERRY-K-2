@@ -10,6 +10,7 @@ import { User, LogOut, LayoutDashboard, Upload, X } from 'lucide-react';
 import { Conference } from '@/types';
 import { useConference } from '@/context/ConferenceContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PRESET_LOGOS } from '@/lib/constants';
 
 export default function OwnerDashboard() {
   const { isAuthorized } = useRoleAuth(['owner']);
@@ -65,21 +66,6 @@ export default function OwnerDashboard() {
   
   const [showBadgeIconModal, setShowBadgeIconModal] = useState(false);
   const [uploadingBadgeIcon, setUploadingBadgeIcon] = useState(false);
-
-  // Preset badge icons (similar to logos)
-  const PRESET_BADGE_ICONS = [
-    'unam',
-    'fesa',
-    'caacfmi',
-    'farg',
-    'fcien',
-    'fcua',
-    'fing',
-    'iuma',
-    'mac',
-    'lema',
-    'adsem'
-  ];
 
   useEffect(() => {
     const checkUser = async () => {
@@ -717,7 +703,7 @@ export default function OwnerDashboard() {
                 <div>
                   <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Iconos Disponibles</label>
                   <div className="grid grid-cols-5 gap-3">
-                    {PRESET_BADGE_ICONS.map((preset) => (
+                    {PRESET_LOGOS.map((preset) => (
                       <button
                         key={preset}
                         onClick={() => {
@@ -758,7 +744,5 @@ export default function OwnerDashboard() {
         )}
       </AnimatePresence>
     </SidebarAwareContainer>
-
-
   );
 }
