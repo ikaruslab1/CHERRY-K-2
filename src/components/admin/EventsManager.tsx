@@ -22,6 +22,8 @@ export function EventsManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
 
+  const [speakerSelection, setSpeakerSelection] = useState<{event: Event, speakers: any[]} | null>(null);
+
   const { currentConference } = useConference();
 
   const fetchEvents = async () => {
@@ -186,17 +188,11 @@ export function EventsManager() {
       setIsCreating(true);
   };
 
-  const handleOpenCertificate = (event: Event) => {
-      if (!event.speaker_id || !currentConference) return;
-      
-      const speaker = users.find(u => u.id === event.speaker_id);
-      if (!speaker) {
-          alert("No se encontró la información del ponente.");
-          return;
-      }
+  const generateAndShowCertificate = (event: Event, speaker: any) => {
+      if (!currentConference) return;
 
       const cert: Certificate = {
-          id: `SPK-${event.id}`,
+          id: `SPK-${event.id}-${speaker.id || 'LEGACY'}`,
           scanned_at: event.date,
           events: {
               ...event,
@@ -218,6 +214,34 @@ export function EventsManager() {
       };
       
       setSelectedCertificate(cert);
+      setSpeakerSelection(null);
+  };
+
+  const handleOpenCertificate = (event: Event) => {
+      if (!currentConference) return;
+      
+      const speakers = event.speakers && event.speakers.length > 0 ? event.speakers : null;
+
+      if (!speakers) {
+          // Fallback to legacy speaker_id check
+          if (event.speaker_id) {
+              const speaker = users.find(u => u.id === event.speaker_id);
+              if (speaker) {
+                  generateAndShowCertificate(event, speaker);
+              } else {
+                  alert("No se encontró la información del ponente.");
+              }
+              return;
+          }
+           alert("No hay ponentes asignados a este evento.");
+           return;
+      }
+
+      if (speakers.length === 1) {
+          generateAndShowCertificate(event, speakers[0]);
+      } else {
+          setSpeakerSelection({ event, speakers });
+      }
   };
 
   const handlePrintCertificate = () => {
@@ -304,7 +328,7 @@ export function EventsManager() {
                       </div>
                   </div>
                   <div className="flex gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 border-gray-50 pt-3 sm:pt-0">
-                      {event.speaker_id && (
+                      {(event.speaker_id || (event.speakers && event.speakers.length > 0)) && (
                           <Button size="sm" variant="ghost" onClick={() => handleOpenCertificate(event)} className="text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl" title="Ver Constancia de Ponente">
                               <Eye className="h-4 w-4" />
                           </Button>
@@ -321,6 +345,47 @@ export function EventsManager() {
           </>
           )}
       </div>
+
+      {/* Speaker Selection Modal */}
+      {speakerSelection && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <h3 className="font-semibold text-gray-700">Seleccionar Ponente</h3>
+                    <button 
+                        onClick={() => setSpeakerSelection(null)}
+                        className="p-1 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
+                </div>
+                <div className="p-2 max-h-[60vh] overflow-y-auto">
+                    {speakerSelection.speakers.map((speaker, idx) => (
+                        <button
+                            key={speaker.id || idx}
+                            onClick={() => generateAndShowCertificate(speakerSelection.event, speaker)}
+                            className="w-full text-left p-3 hover:bg-gray-50 rounded-xl transition-colors flex items-center gap-3 group border-b border-gray-50 last:border-0"
+                        >
+                            <div className="h-10 w-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">
+                                {speaker.first_name?.[0]}{speaker.last_name?.[0]}
+                            </div>
+                            <div>
+                                <p className="font-medium text-gray-700 group-hover:text-gray-900">
+                                    {speaker.first_name} {speaker.last_name}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                    {speaker.degree || 'Sin grado'}
+                                </p>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+                <div className="p-3 bg-gray-50 border-t border-gray-100 text-center">
+                    <p className="text-xs text-gray-400">Selecciona un ponente para ver su constancia</p>
+                </div>
+            </div>
+        </div>
+      )}
 
 
       {/* Certificate Modal */}

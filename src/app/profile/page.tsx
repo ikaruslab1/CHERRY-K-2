@@ -57,10 +57,11 @@ export default function ProfilePage() {
     { id: 'profile', label: 'Mi Perfil', icon: <User className="w-5 h-5" />, show: true },
     { id: 'agenda', label: 'Agenda', icon: <Calendar className="w-5 h-5" />, show: true },
     { id: 'constancias', label: 'Constancias', icon: <FileText className="w-5 h-5" />, show: true },
+    { id: 'divider-ponente', label: 'Herramientas del Ponente', show: isPonente, isDivider: true },
     { id: 'participation', label: 'Participación', icon: <Mic className="w-5 h-5" />, show: isPonente },
-    { id: 'divider-admin', label: 'Herramientas de Administrador', show: isAdmin, isDivider: true },
+    { id: 'divider-admin', label: isStaff ? 'Herramientas del Staff' : 'Herramientas de Administrador', show: isAdmin || isStaff, isDivider: true },
     { id: 'attendance', label: 'Asistencia', icon: <QrCode className="w-5 h-5" />, show: isAdmin || isStaff },
-    { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: isAdmin },
+    { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: isAdmin || isStaff },
     { id: 'events', label: 'Gestión Eventos', icon: <Settings className="w-5 h-5" />, show: isAdmin },
     { id: 'metrics', label: 'Dashboard Métricas', icon: <LayoutDashboard className="w-5 h-5" />, show: isAdmin },
     { 
@@ -136,7 +137,7 @@ export default function ProfilePage() {
                         {activeTab === 'constancias' && <CertificatesView />}
                         {isPonente && activeTab === 'participation' && <ParticipationView />}
                         {(isAdmin || isStaff) && activeTab === 'attendance' && <AttendanceView />}
-                        {isAdmin && activeTab === 'users' && <UsersTable currentUserRole={userRole || undefined} />}
+                        {(isAdmin || isStaff) && activeTab === 'users' && <UsersTable readOnly={isStaff} currentUserRole={userRole || undefined} />}
                         {isAdmin && activeTab === 'events' && <EventsManager />}
                         {isAdmin && activeTab === 'metrics' && <MetricsView />}
                         {isAdmin && activeTab === 'design-certificates' && <CertificateDesignView />}
