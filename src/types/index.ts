@@ -21,6 +21,8 @@ export interface Event {
   };
   tags?: string[];
   gives_certificate?: boolean;
+  auto_attendance?: boolean;
+  auto_attendance_limit?: number; // Minutes after start
   duration_days?: number;
   conference_id: string;
   custom_links?: EventLink[];

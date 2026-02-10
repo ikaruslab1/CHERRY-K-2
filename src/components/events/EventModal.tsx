@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { 
   X, Calendar, MapPin, User, CheckCircle2, Clock, 
   FileText, FileSpreadsheet, Table, FileImage, Image as ImageIcon, 
@@ -27,6 +28,7 @@ interface EventModalProps {
   isAttended: boolean;
   isInterested: boolean;
   onToggleInterest: (eventId: string) => void;
+  onMarkAttendance?: (eventId: string) => void;
   hideActionButtons?: boolean;
 }
 
@@ -120,6 +122,7 @@ export function EventModal({
   isAttended, 
   isInterested,
   onToggleInterest,
+  onMarkAttendance,
   hideActionButtons
 }: EventModalProps) {
 
@@ -331,6 +334,43 @@ export function EventModal({
               >
                   {isInterested ? "Remover de mi agenda" : "Me interesa asistir"}
               </Button>
+            )}
+
+            {/* Auto-attendance Button */}
+            {!isAttended && event.auto_attendance && onMarkAttendance && (
+                <div className="mt-4">
+                    {(() => {
+                        const now = new Date();
+                        const eventStart = new Date(event.date);
+                        const limitMinutes = event.auto_attendance_limit || 60;
+                        const eventEndLimit = new Date(eventStart.getTime() + limitMinutes * 60000);
+                        const isActive = now >= eventStart && now <= eventEndLimit;
+
+                        if (isActive) {
+                            return (
+                                <Button 
+                                    onClick={() => onMarkAttendance(event.id)}
+                                    className="w-full h-12 text-sm font-bold bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-200/50 flex items-center justify-center gap-2 uppercase tracking-widest transition-all animate-pulse-subtle"
+                                >
+                                    <CheckCircle2 className="h-5 w-5" />
+                                    Pasar asistencia ahora
+                                </Button>
+                            );
+                        } else if (now < eventStart) {
+                            return (
+                                <p className="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest">
+                                    La auto-asistencia se activará al iniciar el evento
+                                </p>
+                            );
+                        } else {
+                            return (
+                                <p className="text-[10px] text-center text-red-400 font-bold uppercase tracking-widest">
+                                    El tiempo de auto-asistencia ha expirado
+                                </p>
+                            );
+                        }
+                    })()}
+                </div>
             )}
         </div>
         )}

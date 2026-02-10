@@ -7,7 +7,7 @@ import {
     Calendar, Clock, MapPin, LocateFixed, Building2, Landmark, Users, User, Contact, BadgeAlert, 
     Info, HelpCircle, Share2, MessageCircle, Mail, Printer, ChevronDown, Check, MessageSquare,
     Youtube, Facebook, Twitter, Instagram, Linkedin, Github, Settings, Bell, Search, Heart, Star, 
-    Coffee, Briefcase, Home, Globe, MessageSquareQuote
+    Coffee, Briefcase, Home, Globe, MessageSquareQuote, AlertTriangle
 } from 'lucide-react';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { useFieldArray } from 'react-hook-form';
@@ -114,6 +114,8 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
     const [openIconPicker, setOpenIconPicker] = useState<number | null>(null);
+    const [autoAttendHours, setAutoAttendHours] = useState(1);
+    const [autoAttendMins, setAutoAttendMins] = useState(0);
 
     useEffect(() => {
         if (initialData) {
@@ -125,9 +127,16 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
             setValue('speaker_id', initialData.speaker_id || '');
             setValue('image_url', initialData.image_url || '');
             setValue('gives_certificate', initialData.gives_certificate || false);
+            setValue('auto_attendance', initialData.auto_attendance || false);
+            setValue('auto_attendance_limit', initialData.auto_attendance_limit || 60);
             setValue('duration_days', initialData.duration_days || 1);
             setValue('certificate_config', initialData.certificate_config || null);
             setValue('custom_links', initialData.custom_links || []);
+            
+            // Set local state for hours/mins
+            const totalMins = initialData.auto_attendance_limit || 60;
+            setAutoAttendHours(Math.floor(totalMins / 60));
+            setAutoAttendMins(totalMins % 60);
             
             setEventType(initialData.type || 'Conferencia Magistral');
             setTags(initialData.tags || []);
@@ -147,7 +156,14 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
 
     const handleFormSubmit = async (data: any) => {
         const formattedDate = data.date ? parseMexicoDateTimeLocal(data.date).toISOString() : null;
-        await onSubmit({ ...data, date: formattedDate, type: eventType, tags });
+        const totalAutoMins = (autoAttendHours * 60) + autoAttendMins;
+        await onSubmit({ 
+            ...data, 
+            date: formattedDate, 
+            type: eventType, 
+            tags,
+            auto_attendance_limit: totalAutoMins
+        });
     };
 
     const addTag = (e?: React.KeyboardEvent | React.MouseEvent) => {
@@ -422,8 +438,68 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#DBF227]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#DBF227]"></div>
                     </label>
                 </div>
-                
 
+                {/* Auto-attendance Switch */}
+                <div className={`space-y-4 p-3 rounded-xl border transition-all duration-300 ${watch('auto_attendance') ? 'bg-amber-50 border-amber-200' : 'bg-gray-50/50 border-gray-100 hover:border-gray-200'}`}>
+                    <div className="flex items-center gap-3">
+                        <div className="flex-1">
+                            <label className="text-sm font-bold text-[#373737] block">Auto-asistencia</label>
+                            <p className={`text-xs transition-colors ${watch('auto_attendance') ? 'text-amber-700' : 'text-gray-400'}`}>
+                                Permitir que los asistentes marquen su propia asistencia desde el portal.
+                            </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                {...register('auto_attendance')} 
+                                className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-100 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                        </label>
+                    </div>
+
+                    {watch('auto_attendance') && (
+                        <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
+                            <div className="flex gap-3 p-3 bg-amber-100/50 rounded-lg border border-amber-200 text-amber-800 text-xs items-start">
+                                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                                <p>
+                                    <strong>Aviso de seguridad:</strong> Al activar esta opción, las personas podrán pasarse lista ellas solas. Esto puede representar una brecha de seguridad si no se supervisa. ¿Desea proceder?
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-amber-900">Tiempo límite de auto-asistencia:</label>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex-1 space-y-1">
+                                        <span className="text-[10px] text-amber-700 font-medium uppercase">Horas</span>
+                                        <input 
+                                            type="number"
+                                            min="0"
+                                            max="24"
+                                            value={autoAttendHours}
+                                            onChange={(e) => setAutoAttendHours(parseInt(e.target.value) || 0)}
+                                            className="w-full px-3 py-2 rounded-lg border border-amber-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                    <div className="flex-1 space-y-1">
+                                        <span className="text-[10px] text-amber-700 font-medium uppercase">Minutos</span>
+                                        <input 
+                                            type="number"
+                                            min="0"
+                                            max="59"
+                                            value={autoAttendMins}
+                                            onChange={(e) => setAutoAttendMins(parseInt(e.target.value) || 0)}
+                                            className="w-full px-3 py-2 rounded-lg border border-amber-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-amber-600 italic">
+                                    El botón de auto-asistencia estará activo durante {autoAttendHours > 0 ? `${autoAttendHours}h ` : ''}{autoAttendMins}m después del inicio del evento.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
              </div>
 
             {/* Speaker Selection (Custom Combobox) */}

@@ -41,7 +41,7 @@ export function AgendaView() {
         
           let eventsQuery = supabase
           .from('events')
-          .select('id, title, description, location, date, type, tags, image_url, gives_certificate, duration_days, custom_links, speaker:profiles!speaker_id(first_name, last_name, degree, gender)')
+          .select('id, title, description, location, date, type, tags, image_url, gives_certificate, auto_attendance, auto_attendance_limit, duration_days, custom_links, speaker:profiles!speaker_id(first_name, last_name, degree, gender)')
           .eq('conference_id', currentConference?.id)
           .order('date', { ascending: true });
 
@@ -125,6 +125,31 @@ export function AgendaView() {
       if (isInterested) newInterests.delete(eventId);
       else newInterests.add(eventId);
       setInterests(newInterests);
+    }
+  };
+
+  const markSelfAttendance = async (eventId: string) => {
+    if (!userId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('attendance')
+        .insert({ 
+            user_id: userId, 
+            event_id: eventId,
+            scanned_by: userId 
+        });
+
+      if (!error) {
+        setAttendance(prev => ({
+            ...prev,
+            [eventId]: (prev[eventId] || 0) + 1
+        }));
+      } else {
+        console.error('Error marking attendance:', error);
+      }
+    } catch (err) {
+      console.error('Error in markSelfAttendance:', err);
     }
   };
 
@@ -385,6 +410,7 @@ export function AgendaView() {
             isAttended={selectedEvent ? (attendance[selectedEvent.id] || 0) >= (selectedEvent.duration_days || 1) : false}
             isInterested={selectedEvent ? interests.has(selectedEvent.id) : false}
             onToggleInterest={toggleInterest}
+            onMarkAttendance={markSelfAttendance}
           />
         )}
       </AnimatePresence>
