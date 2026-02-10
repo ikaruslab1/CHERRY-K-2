@@ -150,7 +150,7 @@ export function EventModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="relative w-full max-w-2xl bg-white shadow-2xl flex flex-col max-h-[95vh] sm:max-h-[85vh] overflow-hidden rounded-none"
+        className="relative w-full max-w-2xl bg-white shadow-2xl flex flex-col h-[95vh] sm:h-[90vh] overflow-hidden rounded-t-3xl sm:rounded-2xl"
       >
         
         {/* Header Image Area - Full Clarity */}

@@ -447,7 +447,7 @@ export function AgendaView() {
                             return (
                               <div key={date} className="relative">
                                 {/* Minimalist Urban Header Design */}
-                                <div className="sticky top-0 z-40 py-4 bg-[#fafafa]/95 backdrop-blur-md border-b border-gray-200">
+                                <div className="sticky top-0 z-30 py-4 bg-[#fafafa]/95 backdrop-blur-md border-b border-gray-200">
                                   <div className="flex items-center justify-between px-1">
                                     <div className="flex items-baseline gap-3">
                                       <h4 className="text-3xl font-extrabold text-black uppercase tracking-tight">

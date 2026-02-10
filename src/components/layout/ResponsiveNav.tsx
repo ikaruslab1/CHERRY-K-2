@@ -67,7 +67,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
         <>
             {/* MOBILE: Toggle Button */}
             <motion.div 
-                className="md:hidden fixed top-4 left-4 z-50"
+                className="md:hidden fixed top-4 left-4 z-[100]"
                 initial={{ y: 0 }}
                 animate={{ y: isVisible ? 0 : -100 }}
                 transition={{ duration: 0.3 }}
