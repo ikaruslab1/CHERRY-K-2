@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Calendar, Search, Star, CheckCircle2 } from 'lucide-react';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 import { useConference } from '@/context/ConferenceContext';
+import { formatMexicoDate } from '@/lib/dateUtils';
 
 import { Event } from '@/types';
 import { EventModal } from './EventModal';
@@ -418,7 +419,59 @@ export function AgendaView() {
                         </span>
                       </div>
                     )}
-                    {renderEventList(otherEvents)}
+                    
+                    {(() => {
+                      const groupedEvents: Record<string, Event[]> = {};
+                      const dates: string[] = [];
+
+                      otherEvents.forEach(event => {
+                        const dateKey = formatMexicoDate(event.date, { weekday: 'long', day: 'numeric', month: 'long' });
+                        const formattedDate = dateKey.charAt(0).toUpperCase() + dateKey.slice(1);
+                        
+                        if (!groupedEvents[formattedDate]) {
+                          groupedEvents[formattedDate] = [];
+                          dates.push(formattedDate);
+                        }
+                        groupedEvents[formattedDate].push(event);
+                      });
+
+                      return (
+                        <div className="space-y-8">
+                          {dates.map((date, index) => {
+                            const eventsOnDate = groupedEvents[date];
+                            const count = eventsOnDate.length;
+                            // Split "Lunes, 10 de febrero" into parts
+                            const [dayPart, ...dateParts] = date.split(',');
+                            const dateRest = dateParts.join(',').trim();
+                            
+                            return (
+                              <div key={date} className="relative">
+                                {/* Minimalist Urban Header Design */}
+                                <div className="sticky top-0 z-40 py-4 bg-[#fafafa]/95 backdrop-blur-md border-b border-gray-200">
+                                  <div className="flex items-center justify-between px-1">
+                                    <div className="flex items-baseline gap-3">
+                                      <h4 className="text-3xl font-extrabold text-black uppercase tracking-tight">
+                                        {dayPart}
+                                      </h4>
+                                      <span className="text-lg font-medium text-gray-500 capitalize">
+                                        {dateRest || date}
+                                      </span>
+                                    </div>
+                                    
+                                     <span className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest bg-gray-100 px-2 py-1 rounded-full border border-gray-200">
+                                      {count} {count === 1 ? 'EVENTO' : 'EVENTOS'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="space-y-4 pb-12 pt-4">
+                                  {renderEventList(eventsOnDate)}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                   </motion.div>
                 )}
               </>

@@ -148,128 +148,172 @@ export function AgendaItem({
     return startStr;
   };
 
+  // Dynamic styles based on state
+  const isDark = isInterested && !isAttended;
+  
+  const containerBase = "group relative flex w-full flex-col sm:flex-row overflow-hidden rounded-2xl border transition-all duration-300";
+  const containerStyles = isAttended 
+    ? "bg-white border-transparent" // Detached state handles visuals
+    : isDark 
+      ? "bg-[#121212] border-[#121212] text-white shadow-lg" 
+      : "bg-white border-gray-300 text-[#121212] shadow-sm hover:border-gray-400 hover:shadow-md";
+
+  const stubStyles = isAttended
+    ? "bg-[var(--color-acid)] text-[#121212]"
+    : isDark
+      ? "bg-[#1f1f1f] text-gray-400"
+      : "bg-gray-50 text-gray-500 border-l border-gray-200 border-dashed"; // Added dashed border for visual separation in default
+
   return (
-    <motion.button
-      onClick={() => onClick(event)}
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.99 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className={`group relative w-full overflow-hidden rounded-xl border-2 ${borderColor} ${cardBg} text-left shadow-sm hover:shadow-lg transition-all duration-200`}
-    >
-      {/* Left Accent Bar - Clean and simple */}
-      <div
-        className={`absolute bottom-0 left-0 top-0 w-1 ${accentBar} transition-all duration-200`}
-      />
+    <div className="relative w-full"> 
+      {/* We use a div wrapper to handle the 'detachment' visual which might break the button container logic if we split them too far, 
+          but for simplicity we keep the button semantic or structure. 
+          Actually, let's keep it as a button but handle the stub animation internally. */}
+      
+      <motion.button
+        onClick={() => onClick(event)}
+        className={`${containerBase} ${containerStyles}`}
+        layout
+      >
+        {/* Left Section - Main Content */}
+        <div className="flex-1 p-5 sm:p-6 flex flex-col gap-4 relative z-10">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border ${
+                    isDark ? "bg-white text-black border-white" : "bg-black text-white border-black"
+                  }`}>
+                      {event.type}
+                  </span>
 
-      {/* Content Container */}
-      <div className="relative flex flex-col gap-3 p-4 pl-5 sm:p-5 sm:pl-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-        {/* Main Info */}
-        <div className="flex flex-1 flex-col items-start gap-2 sm:gap-3">
-          {/* Tags & Status - Minimal design */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-md border border-gray-300 bg-gray-50 px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-gray-600">
-              {event.type}
-            </span>
+                  {event.gives_certificate && (
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
+                        isDark ? "border-gray-700 bg-[#1f1f1f] text-gray-300" : "border-gray-200 bg-gray-50 text-gray-600"
+                      }`}>
+                          <Medal className="h-3 w-3" /> Constancia
+                      </span>
+                  )}
+                  
+                  {/* Tags */}
+                  {event.tags && event.tags.length > 0 && searchQuery && (
+                    <>
+                      {event.tags
+                        .filter((tag) =>
+                          tag.toLowerCase().includes(searchQuery.toLowerCase()),
+                        )
+                        .map((tag) => (
+                          <span key={tag} className="px-2 py-0.5 rounded-full bg-[var(--color-acid)] text-[10px] font-bold uppercase text-black">
+                             {tag}
+                          </span>
+                        ))}
+                    </>
+                  )}
+              </div>
 
-            {event.gives_certificate && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-gray-600">
-                <Medal className="h-3 w-3" /> Constancia
-              </span>
-            )}
+              {/* Interest Star Indicator (when active) */}
+              {isInterested && !isAttended && (
+                 <div className="bg-[var(--color-acid)] text-black p-1.5 rounded-full shadow-[0_0_10px_rgba(219,242,39,0.3)]">
+                    <Star className="w-3 h-3 fill-black" />
+                 </div>
+              )}
+          </div>
 
-            {/* Search Match Tags */}
-            {event.tags && event.tags.length > 0 && searchQuery && (
-              <>
-                {event.tags
-                  .filter((tag) =>
-                    tag.toLowerCase().includes(searchQuery.toLowerCase()),
-                  )
-                  .map((tag) => (
-                    <motion.span
-                      key={tag}
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="inline-flex items-center rounded-md bg-[var(--color-acid)]/20 border border-[var(--color-acid)] px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-[#373737]"
-                    >
-                      <Tag className="w-3 h-3 mr-1" /> {tag}
-                    </motion.span>
-                  ))}
-              </>
+          <div className="space-y-1.5">
+              <h3 className={`text-xl sm:text-2xl font-bold leading-tight tracking-tight ${isDark ? "text-white" : "text-[#121212]"}`}>
+                  {event.title}
+              </h3>
+              
+              <div className="flex flex-col gap-1">
+                {event.speaker && (
+                    <p className={`text-sm font-medium font-mono ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                        {Array.isArray(event.speaker) 
+                            ? event.speaker.map(s => `${s.first_name} ${s.last_name}`).join(', ')
+                            : `${event.speaker.first_name} ${event.speaker.last_name}`}
+                    </p>
+                )}
+                
+                {event.location && (
+                  <div className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide mt-1 ${isDark ? "text-gray-500" : "text-gray-400"}`}>
+                      <MapPin className="h-3.5 w-3.5" />
+                      {event.location}
+                  </div>
+                )}
+              </div>
+          </div>
+
+          {/* Links */}
+          {event.custom_links && event.custom_links.length > 0 && (
+              <div className="mt-auto pt-2 flex gap-2">
+                  {event.custom_links.map((link, idx) => {
+                      const IconComp = ICON_MAP[link.icon] || LinkIcon;
+                      return (
+                          <div key={idx} className={`p-1.5 rounded-lg border transition-colors ${
+                            isDark 
+                              ? "border-gray-800 bg-[#1f1f1f] text-gray-400 hover:text-white hover:border-gray-600" 
+                              : "border-gray-100 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-black"
+                          }`} title={link.label}>
+                              <IconComp size={14} />
+                          </div>
+                      );
+                  })}
+              </div>
+          )}
+        </div>
+
+        {/* Perforation / Connector - Animated only if attended */}
+        <div className={`hidden sm:flex flex-col items-center justify-between py-3 relative w-6 z-20`}>
+           <div className={`absolute top-[-50%] bottom-[-50%] left-1/2 w-0 border-r-2 border-dashed ${isDark ? "border-[#333]" : "border-gray-300"}`} />
+           <div className={`absolute top-[-6px] left-[50%] translate-x-[-50%] h-3 w-3 rounded-full ${isDark ? "bg-[#121212]" : "bg-white"} z-30`} />
+           <div className={`absolute bottom-[-6px] left-[50%] translate-x-[-50%] h-3 w-3 rounded-full ${isDark ? "bg-[#121212]" : "bg-white"} z-30`} />
+        </div>
+
+         {/* Mobile Perforation */}
+        <div className="flex sm:hidden flex-row items-center justify-between px-3 relative h-6 w-full z-20">
+           <div className={`absolute left-[-50%] right-[-50%] top-1/2 h-0 border-b-2 border-dashed ${isDark ? "border-[#333]" : "border-gray-300"}`} />
+           <div className={`absolute left-[-6px] top-[50%] translate-y-[-50%] h-3 w-3 rounded-full ${isDark ? "bg-[#121212]" : "bg-white"} z-30`} />
+           <div className={`absolute right-[-6px] top-[50%] translate-y-[-50%] h-3 w-3 rounded-full ${isDark ? "bg-[#121212]" : "bg-white"} z-30`} />
+        </div>
+
+        {/* Right Section - Stub */}
+        <motion.div 
+          className={`
+            relative w-full sm:w-48 p-5 flex flex-col items-center justify-center text-center gap-2
+            ${stubStyles}
+          `}
+          animate={isAttended ? { 
+            x: 8, 
+            rotate: 2,
+            y: 2,
+            scale: 0.98,
+            boxShadow: "2px 4px 12px rgba(0,0,0,0.1)"
+          } : { x: 0, rotate: 0, y: 0, scale: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 20 }}
+        >
+            {isAttended && (
+                <div className="absolute top-2 right-2">
+                    <CheckCircle2 className="w-5 h-5 text-black" />
+                </div>
             )}
             
-            {isAttended && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-[var(--color-acid)] border border-[var(--color-acid)] px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-[var(--color-acid-text)]">
-                <CheckCircle2 className="h-3 w-3" /> Completado
+            <div className="flex flex-col items-center">
+              <span className="font-mono text-[10px] uppercase opacity-60 mb-0.5">Hora</span>
+              <span className="text-2xl font-bold tracking-tight">
+                  {formatMexicoTime(eventDate)}
               </span>
-            )}
-
-            {isInterested && !isAttended && (
-              <span className="inline-flex items-center gap-1 rounded-md border border-[#373737] bg-white px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-[#373737]">
-                <Star className="h-3 w-3" /> Me interesa
-              </span>
-            )}
-          </div>
-
-          <h3 className="line-clamp-1 text-base sm:text-lg font-bold leading-snug text-[#373737] transition-colors duration-200 group-hover:text-black">
-            {event.title}
-          </h3>
-
-          {/* Links Preview */}
-          {event.custom_links && event.custom_links.length > 0 && (
-            <div className="flex gap-1.5 mt-0.5">
-              {event.custom_links.map((link, idx) => {
-                const IconComp = ICON_MAP[link.icon] || LinkIcon;
-                return (
-                  <div 
-                    key={idx} 
-                    className="p-1 rounded bg-gray-50 border border-gray-100 text-gray-400 group-hover:border-[var(--color-acid)] group-hover:bg-[var(--color-acid)] group-hover:text-[var(--color-acid-text)] transition-all"
-                    title={link.label}
-                  >
-                    <IconComp size={14} />
-                  </div>
-                );
-              })}
             </div>
-          )}
-        </div>
+            
+             <div className="w-8 h-[1px] bg-current opacity-20 my-1"></div>
 
-        {/* Date & Time - Responsive Layout */}
-        <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 sm:gap-2.5 min-w-[130px] w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 mt-1 sm:mt-0">
-          
-          {/* Progress Bar for Multi-day Events - Only on Desktop for simplicity or integrated differently */}
-          {duration > 1 && attendanceCount > 0 && (
-            <div className="hidden sm:flex w-full flex-col items-end gap-1.5">
-              <div className="text-xs font-bold text-[#373737]">
-                <span className="text-[#DBF227]">{attendanceCount}</span>
-                <span className="text-gray-400 mx-1">/</span>
-                <span className="text-gray-500">{duration}</span>
-              </div>
-              <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden border border-gray-200">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min((attendanceCount / duration) * 100, 100)}%` }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
-                  className="h-full bg-[#DBF227]"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Date */}
-          <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
-            <Calendar className="h-3.5 w-3.5 text-gray-400" />
-            <span className="font-mono uppercase tracking-wide">{formatDateRange()}</span>
-          </div>
-          
-          {/* Time */}
-          <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
-            <Clock className="h-3.5 w-3.5 text-gray-400" />
-            <span className="font-mono">
-              {formatMexicoTime(eventDate)}
-            </span>
-          </div>
-        </div>
-      </div>
-    </motion.button>
+             <div className="flex flex-col items-center">
+               <span className="font-mono text-[10px] uppercase opacity-60">
+                 {duration > 1 ? 'Duración' : 'Fecha'}
+               </span>
+               <span className="font-mono text-xs font-bold uppercase">
+                  {formatDateRange()}
+               </span>
+             </div>
+        </motion.div>
+      </motion.button>
+    </div>
   );
 }
+
