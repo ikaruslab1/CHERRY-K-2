@@ -59,6 +59,7 @@ export interface UserProfile {
   short_id: string;
   degree: string;
   role: 'user' | 'staff' | 'admin' | 'ponente' | 'owner' | 'vip';
+  is_owner: boolean;
   email?: string;
   created_at?: string;
   gender?: string;

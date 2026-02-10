@@ -58,28 +58,40 @@ export default function ProfilePage() {
 
         console.log('[PROFILE] ✓ User authenticated, loading profile...');
 
+        // Get current conference ID from localStorage (context fallback)
+        const conferenceId = typeof window !== 'undefined' ? localStorage.getItem('current_conference_id') : null;
+
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role')
+          .select('is_owner')
           .eq('id', user.id)
           .single();
         
-        console.log('[PROFILE] Profile data loaded:', profile?.role);
+        console.log('[PROFILE] Profile data loaded:', profile?.is_owner ? 'owner' : 'user');
         
-        if (profile?.role) {
-            setUserRole(profile.role);
+        let effectiveRole = 'user';
+        if (profile?.is_owner) {
+            effectiveRole = 'owner';
+            setIsOwner(true);
+            setIsAdmin(true);
+        } else if (conferenceId) {
+            // Check conference role
+             const { data: localRole } = await supabase
+              .from('conference_roles')
+              .select('role')
+              .eq('user_id', user.id)
+              .eq('conference_id', conferenceId)
+              .single();
+            
+            if (localRole?.role) {
+                effectiveRole = localRole.role;
+            }
         }
 
-        if (profile?.role === 'admin') {
-           setIsAdmin(true);
-        } else if (profile?.role === 'staff') {
-           setIsStaff(true);
-        } else if (profile?.role === 'ponente') {
-           setIsPonente(true);
-        } else if (profile?.role === 'owner') {
-           setIsOwner(true);
-           setIsAdmin(true);
-        }
+        setUserRole(effectiveRole);
+        setIsAdmin(effectiveRole === 'admin' || effectiveRole === 'owner');
+        setIsStaff(effectiveRole === 'staff');
+        setIsPonente(effectiveRole === 'ponente');
 
         console.log('[PROFILE] ✓ Profile loaded successfully');
         setLoading(false);

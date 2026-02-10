@@ -29,11 +29,11 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
              // 1. Verificar si es Owner Global (Perfil principal)
              const { data: profile } = await supabase
                 .from('profiles')
-                .select('role')
+                .select('is_owner')
                 .eq('id', userId)
                 .single();
              
-             if (profile && profile.role === 'owner') {
+             if (profile && profile.is_owner) {
                  return 'owner';
              }
 

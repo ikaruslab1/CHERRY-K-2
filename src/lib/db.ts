@@ -17,6 +17,7 @@ export interface LocalProfile {
   last_name: string;
   email: string;
   role: string;
+  is_owner?: boolean;
   degree?: string;
   short_id?: string;
   gender?: string;

@@ -18,7 +18,7 @@ const fetcher = async (url: string) => {
     if (!conferenceId || conferenceId === 'null' || conferenceId === 'undefined') {
          let query = supabase
             .from('profiles')
-            .select('id, first_name, last_name, short_id, degree, role, email')
+            .select('id, first_name, last_name, short_id, degree, is_owner, email')
             .order('created_at', { ascending: false })
             .limit(50);
 
@@ -28,7 +28,14 @@ const fetcher = async (url: string) => {
         
         const { data, error } = await query;
         if (error) throw error;
-        return data as unknown as UserProfile[];
+
+        // Map data to include synthetic role
+        const mappedData = (data as any[]).map(u => ({
+            ...u,
+            role: u.is_owner ? 'owner' : 'user'
+        }));
+
+        return mappedData as unknown as UserProfile[];
     }
 
     // Si hay conferencia, usamos la RPC para obtener roles específicos
@@ -42,7 +49,7 @@ const fetcher = async (url: string) => {
         // Fallback logic duplicated from above
         let query = supabase
             .from('profiles')
-            .select('id, first_name, last_name, short_id, degree, role, email')
+            .select('id, first_name, last_name, short_id, degree, is_owner, email')
             .order('created_at', { ascending: false })
             .limit(50);
 
@@ -52,7 +59,14 @@ const fetcher = async (url: string) => {
         
         const { data: fallbackData, error: fallbackError } = await query;
         if (fallbackError) throw fallbackError;
-        return fallbackData as unknown as UserProfile[];
+
+        // Map data to include synthetic role
+        const mappedData = (fallbackData as any[]).map(u => ({
+            ...u,
+            role: u.is_owner ? 'owner' : 'user'
+        }));
+
+        return mappedData as unknown as UserProfile[];
     }
     
     return data as unknown as UserProfile[];

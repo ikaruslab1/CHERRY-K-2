@@ -35,9 +35,24 @@ export function EventsManager() {
   };
 
   const fetchUsers = async () => {
-      const { data } = await supabase.from('profiles').select('*').order('first_name');
+      if (currentConference) {
+          const { data, error } = await supabase.rpc('get_users_for_conference', {
+              p_conference_id: currentConference.id
+          });
+          if (!error && data) {
+              setUsers(data as UserProfile[]);
+              return;
+          }
+      }
+
+      // Fallback
+      const { data } = await supabase.from('profiles').select('id, first_name, last_name, degree, is_owner, gender').order('first_name');
       if (data) {
-          const sorted = (data as UserProfile[]).sort((a, b) => {
+          const mapped = (data as any[]).map(u => ({
+              ...u,
+              role: u.is_owner ? 'owner' : 'user'
+          }));
+          const sorted = (mapped as UserProfile[]).sort((a, b) => {
               if (a.role === 'ponente' && b.role !== 'ponente') return -1;
               if (a.role !== 'ponente' && b.role === 'ponente') return 1;
               return 0;

@@ -57,16 +57,16 @@ import { useConference } from '@/context/ConferenceContext';
         // Asignar Owner Globalmente
         const { error: err } = await supabase
           .from('profiles')
-          .update({ role: 'owner' })
+          .update({ is_owner: true })
           .eq('id', selectedUser.id);
         error = err;
     } else {
         // Si el usuario era owner global y ahora se le asigna otro rol, 
-        // reseteamos su perfil global a 'user' y asignamos el rol local.
-        if (selectedUser.role === 'owner') {
+        // reseteamos su perfil global a is_owner = false y asignamos el rol local.
+        if (selectedUser.is_owner) {
             await supabase
               .from('profiles')
-              .update({ role: 'user' })
+              .update({ is_owner: false })
               .eq('id', selectedUser.id);
         }
 

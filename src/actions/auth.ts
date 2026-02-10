@@ -56,8 +56,7 @@ export async function registerUser(data: {
         degree: data.degree,
         gender: data.gender,
         phone: data.phone,
-        email: data.email,
-        role: 'user'
+        email: data.email
       })
       .select('short_id')
       .single();

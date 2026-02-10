@@ -28,10 +28,10 @@ export function useSyncData() {
           .single();
         
         if (profile) {
-          let effectiveRole = profile.role;
+          let effectiveRole = profile.is_owner ? 'owner' : 'user';
 
           // Si no es owner y hay una conferencia activa, buscar el rol local
-          if (profile.role !== 'owner' && currentConference) {
+          if (!profile.is_owner && currentConference) {
             const { data: localRole } = await supabase
               .from('conference_roles')
               .select('role')
@@ -52,6 +52,7 @@ export function useSyncData() {
             last_name: profile.last_name,
             email: profile.email,
             role: effectiveRole, // Guardamos el rol efectivo para uso offline
+            is_owner: profile.is_owner,
             degree: profile.degree,
             short_id: profile.short_id,
             gender: profile.gender
