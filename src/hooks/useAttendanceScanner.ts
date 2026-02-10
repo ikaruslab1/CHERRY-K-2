@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { IParticipant, attendanceService } from '@/services/attendanceService';
 import { useOfflineSync } from './useOfflineSync';
+import { useConference } from '@/context/ConferenceContext';
 
 interface UseAttendanceScannerProps {
     activityId: string | null;
@@ -8,6 +9,7 @@ interface UseAttendanceScannerProps {
 }
 
 export function useAttendanceScanner({ activityId, onSuccess }: UseAttendanceScannerProps) {
+    const { currentConference } = useConference();
     const [scannedData, setScannedData] = useState<string | null>(null);
     const [participant, setParticipant] = useState<IParticipant | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -54,48 +56,48 @@ export function useAttendanceScanner({ activityId, onSuccess }: UseAttendanceSca
         setIsLoading(true);
         playSound('beep');
 
-        // OFFLINE HANDLING
-        if (!isOnline) {
-            saveOfflineScan(data, activityId);
-            setIsLoading(false);
-            setSuccessMessage("Guardado localmente (Sin conexión)");
-            // playSound('success'); 
-            
-            // Auto reset for fast offline scanning
-            setTimeout(() => {
-                setSuccessMessage(null);
-                setStatus('scanning');
-                // Don't reset lastScanRef immediately to prevent double scan of same person instantly
-            }, 1500);
-            return;
-        }
+    // OFFLINE HANDLING
+    if (!isOnline) {
+        saveOfflineScan(data, activityId);
+        setIsLoading(false);
+        setSuccessMessage("Guardado localmente (Sin conexión)");
+        // playSound('success'); 
+        
+        // Auto reset for fast offline scanning
+        setTimeout(() => {
+            setSuccessMessage(null);
+            setStatus('scanning');
+            // Don't reset lastScanRef immediately to prevent double scan of same person instantly
+        }, 1500);
+        return;
+    }
 
-        // ONLINE HANDLING
-        try {
-            const foundParticipant = await attendanceService.getParticipantByQR(data);
-            
-            setIsLoading(false);
+    // ONLINE HANDLING
+    try {
+        const foundParticipant = await attendanceService.getParticipantByQR(data, currentConference?.id);
+        
+        setIsLoading(false);
     
-            if (foundParticipant) {
-                setParticipant(foundParticipant);
-                setShowModal(true);
-                setStatus('verified'); // Esperando confirmación manual
-            } else {
-                setError("Participante no encontrado.");
-                setStatus('error');
-                setTimeout(() => {
-                    setStatus('scanning');
-                    setError(null);
-                }, 3000);
-            }
-        } catch (err) {
-            console.error(err);
-            setIsLoading(false);
-            // If network error, suggest checking connection
-            setError("Error al consultar servidor.");
+        if (foundParticipant) {
+            setParticipant(foundParticipant);
+            setShowModal(true);
+            setStatus('verified'); // Esperando confirmación manual
+        } else {
+            setError("Participante no encontrado.");
             setStatus('error');
+            setTimeout(() => {
+                setStatus('scanning');
+                setError(null);
+            }, 3000);
         }
-    }, [activityId, playSound, isOnline, saveOfflineScan]);
+    } catch (err) {
+        console.error(err);
+        setIsLoading(false);
+        // If network error, suggest checking connection
+        setError("Error al consultar servidor.");
+        setStatus('error');
+    }
+}, [activityId, playSound, isOnline, saveOfflineScan, currentConference?.id]);
 
     const confirmAttendance = async () => {
         if (!participant || !activityId) return;

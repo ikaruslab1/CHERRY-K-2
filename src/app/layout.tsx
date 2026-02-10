@@ -82,17 +82,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} ${playfairDisplay.variable} ${syne.variable} ${manrope.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        <SyncWrapper>
-          <Suspense fallback={null}>
-            <ConferenceProvider>
+        <Suspense fallback={null}>
+          <ConferenceProvider>
+            <SyncWrapper>
               <DynamicTheme />
               <SidebarProvider>
                 {children}
               </SidebarProvider>
               {process.env.NODE_ENV === 'development' && <DevServiceWorkerUnregister />}
-            </ConferenceProvider>
-          </Suspense>
-        </SyncWrapper>
+            </SyncWrapper>
+          </ConferenceProvider>
+        </Suspense>
       </body>
     </html>
   );

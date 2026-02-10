@@ -61,10 +61,13 @@ export function VerificationModal({ isOpen, participant, isLoading, onConfirm, o
                          <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Estado</span>
                             <span className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider ${
-                                participant.role === 'admin' ? 'bg-purple-100 text-purple-700' : 
-                                participant.role === 'staff' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                                participant.role === 'admin' || participant.role === 'owner' ? 'bg-[#373737] text-white' : 
+                                participant.role === 'staff' ? 'bg-red-100 text-red-700' : 
+                                participant.role === 'ponente' ? 'bg-blue-100 text-blue-700' :
+                                participant.role === 'vip' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-green-100 text-green-700'
                             }`}>
-                                {participant.role}
+                                {participant.role === 'owner' ? 'Desarrollador' : participant.role}
                             </span>
                          </div>
                          <div className="flex items-center gap-2 text-sm text-[#373737] font-medium">

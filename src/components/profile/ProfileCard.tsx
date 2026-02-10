@@ -38,7 +38,8 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   const degreeAbbr = getDegreeAbbreviation(profile.degree, profile.gender);
   const fullName = `${degreeAbbr} ${profile.first_name} ${profile.last_name}`;
   
-  
+  console.log('[ProfileCard] Rendering with profile:', profile);
+
   // Dynamic values from conference or defaults
   const eventTitle = currentConference?.title || 'Semana del Diseño';
   const institution = currentConference?.institution_name || 'Facultad de Estudios Superiores Acatlán';
@@ -53,7 +54,10 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   const badgeIcon = currentConference?.badge_icon || { type: 'default', value: '' };
 
   const getRoleTheme = (role: string) => {
-    switch (role?.toLowerCase()) {
+    const normalizedRole = role?.toLowerCase().trim();
+    console.log(`[ProfileCard] getRoleTheme for: "${role}" -> normalized: "${normalizedRole}"`);
+
+    switch (normalizedRole) {
       case 'ponente':
         return { 
           bg: '#278BF2', 
@@ -71,6 +75,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           animationType: 'pulse'
         };
       case 'admin':
+      case 'administrador':
         return { 
           bg: '#373737', 
           text: '#FFFFFF', 
@@ -87,6 +92,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           animationType: 'glow'
         };
       case 'owner':
+      case 'desarrollador':
         return { 
           bg: 'linear-gradient(45deg, #FFFFFF, #FFD1FF, #CCEAFF, #FFFFFF, #D1FFEA, #FFFAD1, #FFFFFF)', 
           text: '#373737', 
@@ -97,8 +103,8 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           animationType: 'gradient'
         };
       default:
+        console.log(`[ProfileCard] Fallback to Asistente for role: ${normalizedRole}`);
         // Default color for standard users/attendees - uses conference accent color
-        // Support both solid and gradient
         const bgValue = accentColorConfig.value;
         return { 
           bg: bgValue, 
@@ -111,6 +117,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   };
 
   const { bg: themeColor, text: themeTextColor, name: roleName, animation, bgSize, animationType } = getRoleTheme(profile.role);
+  console.log(`[ProfileCard] Final roleName: ${roleName}`);
 
   
   // JSON data for QR

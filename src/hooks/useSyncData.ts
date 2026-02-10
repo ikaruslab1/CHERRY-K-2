@@ -6,11 +6,15 @@ import { useConference } from '@/context/ConferenceContext';
 export function useSyncData() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<Date | null>(null);
-  const { currentConference } = useConference();
+  const { currentConference, loading: conferenceLoading } = useConference();
 
   useEffect(() => {
     const sync = async () => {
       if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+      if (conferenceLoading) {
+        console.log('[useSyncData] Waiting for conference context to load...');
+        return;
+      }
 
       try {
         setIsSyncing(true);
@@ -28,23 +32,32 @@ export function useSyncData() {
           .single();
         
         if (profile) {
+          console.log(`[useSyncData] Processing profile for ${profile.first_name}, global is_owner: ${profile.is_owner}`);
           let effectiveRole = profile.is_owner ? 'owner' : 'user';
 
           // Si no es owner y hay una conferencia activa, buscar el rol local
           if (!profile.is_owner && currentConference) {
-            const { data: localRole } = await supabase
+            console.log(`[useSyncData] Fetching conference role for user ${user.id} in conference ${currentConference.id}`);
+            const { data: localRole, error: roleError } = await supabase
               .from('conference_roles')
               .select('role')
               .eq('user_id', user.id)
               .eq('conference_id', currentConference.id)
-              .single();
+              .maybeSingle();
             
-            if (localRole) {
+            if (roleError) {
+              console.error('[useSyncData] Error fetching conference role:', roleError);
+            } else if (localRole?.role) {
+              console.log(`[useSyncData] Found conference role: ${localRole.role}`);
               effectiveRole = localRole.role;
             } else {
-              effectiveRole = 'user'; // Fallback si no tiene rol en este evento
+              console.log(`[useSyncData] No conference role found for user ${user.id} in ${currentConference.id}, using default 'user'`);
             }
+          } else if (!profile.is_owner && !currentConference) {
+            console.log('[useSyncData] No conference active, skipping local role check');
           }
+
+          console.log(`[useSyncData] Final effective role for local DB: ${effectiveRole}`);
 
           const localProfile: LocalProfile = {
             id: profile.id,
@@ -129,7 +142,7 @@ export function useSyncData() {
     return () => {
       window.removeEventListener('online', handleOnline);
     };
-  }, [currentConference?.id]);
+  }, [currentConference?.id, conferenceLoading]);
 
   return { isSyncing, lastSync };
 }

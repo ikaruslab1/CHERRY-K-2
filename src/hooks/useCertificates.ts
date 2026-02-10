@@ -38,6 +38,24 @@ export function useCertificates(conferenceId: string | undefined): UseCertificat
 
       if (!conferenceData) return;
 
+      // Determine synthesized role
+      let effectiveRole = profileData?.is_owner ? 'owner' : 'user';
+
+      if (!profileData?.is_owner && conferenceId) {
+        const { data: localRole } = await supabase
+          .from('conference_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('conference_id', conferenceId)
+          .maybeSingle();
+        
+        if (localRole?.role) {
+          effectiveRole = localRole.role;
+        }
+      }
+
+      console.log(`[useCertificates] Effective Role for certificates: ${effectiveRole}`);
+
       // --- ATTENDEE CERTIFICATES ---
       const { data, error } = await supabase
         .from('attendance')
@@ -149,7 +167,7 @@ export function useCertificates(conferenceId: string | undefined): UseCertificat
       }
 
       // --- STAFF CERTIFICATES ---
-      if (profileData?.role === 'staff') {
+      if (effectiveRole === 'staff') {
           const { data: allConferenceEvents, error: eventsError } = await supabase
               .from('events')
               .select('date, duration_days')
@@ -210,7 +228,7 @@ export function useCertificates(conferenceId: string | undefined): UseCertificat
 
 
       // --- ORGANIZER CERTIFICATES ---
-      if (profileData?.role === 'admin' || profileData?.role === 'owner') {
+      if (effectiveRole === 'admin' || effectiveRole === 'owner') {
            const organizerCert: Certificate = {
               id: `ORG-${conferenceId}-${user.id}`,
               scanned_at: conferenceData.start_date,
@@ -244,6 +262,7 @@ export function useCertificates(conferenceId: string | undefined): UseCertificat
       } else {
           setOrganizerCertificates([]);
       }
+
 
     } catch (error) {
       console.error('Error in useCertificates:', error);
