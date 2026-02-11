@@ -171,9 +171,17 @@ import { useConference } from '@/context/ConferenceContext';
                                     <tbody className="divide-y divide-gray-100">
                                         {userList.map(user => {
                                             const isTargetOwner = user.role === 'owner';
+                                            const isTargetAdmin = user.role === 'admin';
                                             const isCurrentOwner = currentUserRole === 'owner';
-                                            // Sólo un owner puede ver los datos sensibles (QR, ID) de otro owner
-                                            const canViewDetails = !isTargetOwner || isCurrentOwner;
+                                            const isCurrentAdmin = currentUserRole === 'admin';
+                                            
+                                            // Privacy Logic:
+                                            // 1. Owners: Only seen by Owners
+                                            // 2. Admins: Seen by Owners & Admins (Not Staff)
+                                            // 3. Others: Seen by everyone
+                                            let canViewDetails = true;
+                                            if (isTargetOwner && !isCurrentOwner) canViewDetails = false;
+                                            if (isTargetAdmin && (!isCurrentOwner && !isCurrentAdmin)) canViewDetails = false;
 
                                             return (
                                             <tr key={user.id} className="hover:bg-gray-50 transition-colors">
@@ -225,8 +233,13 @@ import { useConference } from '@/context/ConferenceContext';
                             <div className="grid grid-cols-1 gap-4 md:hidden">
                                 {userList.map(user => {
                                     const isTargetOwner = user.role === 'owner';
+                                    const isTargetAdmin = user.role === 'admin';
                                     const isCurrentOwner = currentUserRole === 'owner';
-                                    const canViewDetails = !isTargetOwner || isCurrentOwner;
+                                    const isCurrentAdmin = currentUserRole === 'admin';
+                                    
+                                    let canViewDetails = true;
+                                    if (isTargetOwner && !isCurrentOwner) canViewDetails = false;
+                                    if (isTargetAdmin && (!isCurrentOwner && !isCurrentAdmin)) canViewDetails = false;
 
                                     return (
                                     <div key={user.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-3">
