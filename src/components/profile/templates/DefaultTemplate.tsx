@@ -157,7 +157,14 @@ export const DefaultTemplate = ({
 
                 {/* Section 3: Signatures */}
                 <div className="w-full flex justify-center mb-6">
-                    <Signatures count={signerCount} signers={signers} align="center" color="#1a1a1a" />
+                    <Signatures 
+                        count={signerCount} 
+                        signers={signers} 
+                        align="center" 
+                        color="#1a1a1a"
+                        scale={config?.signer_style?.scale || 1}
+                        gap={config?.signer_style?.gap || 24}
+                    />
                 </div>
              </div>
         </div>

@@ -99,9 +99,12 @@ export const RealBarcode = ({ value, color = '#000' }: { value: string, color?: 
     </div>
 );
 
-export const Signatures = ({ count, signers, color = '#000000', align = 'center' }: { count: number, signers: any[], color?: string, align?: 'center' | 'left' | 'right' }) => {
+export const Signatures = ({ count, signers, color = '#000000', align = 'center', scale = 1, gap = 24 }: { count: number, signers: any[], color?: string, align?: 'center' | 'left' | 'right', scale?: number, gap?: number }) => {
     return (
-        <div className={`flex gap-6 ${align === 'center' ? 'justify-center' : align === 'left' ? 'justify-start' : 'justify-end'} mt-2 w-full px-0`}>
+        <div 
+            className={`flex ${align === 'center' ? 'justify-center' : align === 'left' ? 'justify-start' : 'justify-end'} mt-2 w-full px-0`}
+            style={{ gap: `${gap}px` }}
+        >
 
             {Array.from({ length: count }).map((_, i) => {
                 const signer = signers[i] || {};
@@ -109,20 +112,22 @@ export const Signatures = ({ count, signers, color = '#000000', align = 'center'
                 const role = signer.role || 'Jefa de carrera en Diseño Gráfico';
                 
                 return (
-                    <div key={i} className={`text-center flex flex-col items-center ${count > 2 ? 'min-w-[150px]' : 'min-w-[200px]'}`}>
+                    <div key={i} className={`text-center flex flex-col items-center`} style={{ minWidth: `${(count > 2 ? 150 : 200) * scale}px` }}>
                         {/* Barcode (replacing QR logic) */}
-                        <div className="mb-1 w-full flex justify-center h-8 items-end overflow-hidden opacity-75">
-                            <RealBarcode value={name ? name.toUpperCase().replace(/[^A-Z0-9]/g, '') : `SIGNER${i+1}`} color={color} />
+                        <div className="mb-1 w-full flex justify-center items-end overflow-hidden opacity-75" style={{ height: `${32 * scale}px` }}>
+                            <div style={{ transform: `scale(${scale})`, transformOrigin: 'bottom center' }}>
+                                <RealBarcode value={name ? name.toUpperCase().replace(/[^A-Z0-9]/g, '') : `SIGNER${i+1}`} color={color} />
+                            </div>
                         </div>
                         
                         {/* Divider Line */}
                         <div className="w-full border-b border-gray-400 mb-2 opacity-50"></div>
                         
                         {/* Name & Role */}
-                        <p className="text-sm font-bold uppercase whitespace-nowrap" style={{ color: color }}>
+                        <p className="font-bold uppercase whitespace-nowrap leading-tight" style={{ color: color, fontSize: `${0.875 * scale}rem` }}>
                             {getDegreeAbbr(signer.degree, signer.gender)} {name}
                         </p>
-                        <p className="text-[10px] opacity-70 whitespace-nowrap" style={{ color: color }}>{role}</p>
+                        <p className="opacity-70 whitespace-nowrap leading-tight" style={{ color: color, fontSize: `${0.625 * scale}rem` }}>{role}</p>
                     </div>
                 );
             })}

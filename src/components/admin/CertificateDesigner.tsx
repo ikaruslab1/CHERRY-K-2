@@ -30,6 +30,10 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                 text_alignment: 'center',
                 content_vertical_position: '40%'
             },
+            signer_style: {
+                scale: 1,
+                gap: 24
+            },
             texts: {
                attendee: "Por su asistencia al evento",
                speaker: "Por impartir la conferencia:",
@@ -61,6 +65,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
             ...initialConfig,
             styles: { ...defaults.styles, ...initialConfig?.styles },
             texts: { ...defaults.texts, ...initialConfig?.texts },
+            signer_style: { ...defaults.signer_style, ...initialConfig?.signer_style },
             name_style: { ...defaults.name_style, ...initialConfig?.name_style },
             event_title_style: { ...defaults.event_title_style, ...initialConfig?.event_title_style },
             logos: initialConfig?.logos || defaults.logos
@@ -273,6 +278,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
         setConfig({
             ...config,
             [element]: { ...config[element], [key]: value }
+        });
+    };
+
+    const updateSignerStyle = (key: string, value: any) => {
+        setConfig({
+            ...config,
+            signer_style: { ...config.signer_style, [key]: value }
         });
     };
 
@@ -993,6 +1005,53 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                 {num}
                                             </button>
                                         ))}
+                                    </div>
+                                </div>
+
+                                {/* Signer Style Controls */}
+                                <div className="bg-white p-3 rounded-lg border border-gray-200 mb-3 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">Apariencia</span>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {/* Scale */}
+                                        <div>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <label className="block text-[10px] font-bold text-gray-400">Tamaño</label>
+                                                <span className="text-[10px] font-mono font-bold text-gray-600">
+                                                    {(config.signer_style?.scale || 1).toFixed(1)}x
+                                                </span>
+                                            </div>
+                                            <input 
+                                                type="range" 
+                                                min="0.5" 
+                                                max="1.5" 
+                                                step="0.1"
+                                                value={config.signer_style?.scale || 1}
+                                                onChange={(e) => updateSignerStyle('scale', parseFloat(e.target.value))}
+                                                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
+                                            />
+                                        </div>
+
+                                        {/* Gap/Spacing */}
+                                        <div>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <label className="block text-[10px] font-bold text-gray-400">Separación</label>
+                                                <span className="text-[10px] font-mono font-bold text-gray-600">
+                                                    {config.signer_style?.gap || 24}px
+                                                </span>
+                                            </div>
+                                            <input 
+                                                type="range" 
+                                                min="0" 
+                                                max="100" 
+                                                step="4"
+                                                value={config.signer_style?.gap || 24}
+                                                onChange={(e) => updateSignerStyle('gap', parseInt(e.target.value))}
+                                                className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 

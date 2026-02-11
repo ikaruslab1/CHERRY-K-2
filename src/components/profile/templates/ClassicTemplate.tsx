@@ -70,7 +70,14 @@ export const ClassicTemplate = ({
                 />
 
                 <div className="w-full flex justify-center mt-4">
-                     <Signatures count={signerCount} signers={signers} align="center" color={textColor} />
+                     <Signatures 
+                        count={signerCount} 
+                        signers={signers} 
+                        align="center" 
+                        color={textColor}
+                        scale={config?.signer_style?.scale || 1}
+                        gap={config?.signer_style?.gap || 24} 
+                    />
                 </div>
             </div>
         </div>
