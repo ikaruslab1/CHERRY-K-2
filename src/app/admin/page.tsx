@@ -8,6 +8,7 @@ import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
 import { useRoleAuth } from '@/hooks/useRoleAuth';
 import { Loader2, User, Calendar, FileText, QrCode, Users, Settings, Award, LayoutDashboard } from 'lucide-react';
+import { FAQView } from '@/components/faq/FAQView';
 
 // ... imports
 
@@ -56,7 +57,7 @@ function AdminContent() {
     const { loading, isAuthorized, userRole } = useRoleAuth(['admin', 'owner']);
     
     // Initialize state from URL params only once
-    const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'constancias' | 'design-certificates'>(
+    const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'constancias' | 'design-certificates' | 'faq'>(
         (searchParams.get('tab') as any) || 'profile'
     );
 
@@ -80,6 +81,8 @@ function AdminContent() {
     ];
 
     const isDesignTab = activeTab === 'design-certificates';
+    const isFAQActive = activeTab === 'faq';
+    const handleFAQClick = () => setActiveTab('faq');
 
     return (
         <SidebarAwareContainer className="min-h-screen bg-gray-50 text-[#373737]">
@@ -91,6 +94,8 @@ function AdminContent() {
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
                         handleSignOut={handleSignOut}
+                        onFAQClick={handleFAQClick}
+                        isFAQActive={isFAQActive}
                     />
                     <div className="mt-12 md:mt-0">
                         <div className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -106,6 +111,8 @@ function AdminContent() {
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
                         handleSignOut={handleSignOut}
+                        onFAQClick={handleFAQClick}
+                        isFAQActive={isFAQActive}
                     />
                     <div className="max-w-6xl mx-auto space-y-6 xs:space-y-8 mt-12 md:mt-0">
                         <div className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -115,6 +122,7 @@ function AdminContent() {
                             {activeTab === 'users' && <UsersTable currentUserRole={userRole || undefined} />}
                             {activeTab === 'events' && <EventsManager />}
                             {activeTab === 'attendance' && <AttendanceView />}
+                            {activeTab === 'faq' && <FAQView defaultRole={userRole || undefined} />}
                         </div>
                     </div>
                 </div>

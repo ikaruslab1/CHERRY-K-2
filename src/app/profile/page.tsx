@@ -12,6 +12,7 @@ import { ParticipationView } from '@/components/profile/ParticipationView';
 import { MetricsView } from '@/components/admin/metrics/MetricsView';
 import { CertificateDesignView } from '@/components/admin/CertificateDesignView';
 import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard, Award, Crown } from 'lucide-react';
+import { FAQView } from '@/components/faq/FAQView';
 import { CertificatesView } from '@/components/profile/CertificatesView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
@@ -25,7 +26,7 @@ export default function ProfilePage() {
   const { currentConference } = useConference();
   const { loading: authLoading, userRole } = useRoleAuth();
   const [sessionLoading, setSessionLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'metrics' | 'attendance' | 'participation' | 'constancias' | 'design-certificates'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'metrics' | 'attendance' | 'participation' | 'constancias' | 'design-certificates' | 'faq'>('profile');
 
   const isAdmin = userRole === 'admin' || userRole === 'owner';
   const isStaff = userRole === 'staff';
@@ -113,6 +114,8 @@ export default function ProfilePage() {
   }
 
   const isDesignTab = activeTab === 'design-certificates';
+  const isFAQActive = activeTab === 'faq';
+  const handleFAQClick = () => setActiveTab('faq');
 
   return (
     <SidebarAwareContainer className="min-h-screen bg-gray-50 text-[#373737]">
@@ -124,6 +127,8 @@ export default function ProfilePage() {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             handleSignOut={handleSignOut}
+            onFAQClick={handleFAQClick}
+            isFAQActive={isFAQActive}
           />
           <div className="mt-12 md:mt-0 h-[calc(100vh-48px)] md:h-screen">
             <CertificateDesignView />
@@ -137,6 +142,8 @@ export default function ProfilePage() {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             handleSignOut={handleSignOut}
+            onFAQClick={handleFAQClick}
+            isFAQActive={isFAQActive}
           />
           
           <div className="max-w-4xl mx-auto space-y-8 mt-12 md:mt-0 flex-1 w-full">
@@ -157,6 +164,7 @@ export default function ProfilePage() {
                         {(isAdmin || isStaff) && activeTab === 'users' && <UsersTable readOnly={isStaff} currentUserRole={userRole || undefined} />}
                         {isAdmin && activeTab === 'events' && <EventsManager />}
                         {isAdmin && activeTab === 'metrics' && <MetricsView />}
+                        {activeTab === 'faq' && <FAQView defaultRole={userRole || undefined} />}
                     </motion.div>
                  </AnimatePresence>
             </div>

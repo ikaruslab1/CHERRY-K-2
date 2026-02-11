@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LogOut, X, Menu, ChevronLeft, ChevronRight, LayoutGrid, Bell, BellOff } from 'lucide-react';
+import { LogOut, X, Menu, ChevronLeft, ChevronRight, LayoutGrid, Bell, BellOff, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '@/context/SidebarContext';
 import { useConference } from '@/context/ConferenceContext';
 import { InstallPWAButton } from '../ui/InstallPWAButton';
-import { usePushSubscription } from '@/hooks/usePushSubscription';
+
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -23,13 +23,15 @@ interface ResponsiveNavProps {
     activeTab: string;
     setActiveTab: (id: any) => void;
     handleSignOut: () => void;
+    onFAQClick?: () => void;
+    isFAQActive?: boolean;
 }
 
-export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }: ResponsiveNavProps) {
+export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, onFAQClick, isFAQActive }: ResponsiveNavProps) {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const { isDesktopCollapsed, setIsDesktopCollapsed } = useSidebar();
     const { currentConference } = useConference();
-    const { isSubscribed, subscribe: handlePushSubscription, isLoading } = usePushSubscription();
+
 
     // Filter visible items
     const visibleItems = items.filter(item => item.show !== false);
@@ -161,19 +163,18 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                             {/* Footer Mobile */}
                             <div className="pt-6 border-t border-gray-100 mt-auto space-y-3">
                                 <InstallPWAButton />
-                                <button
-                                    onClick={handlePushSubscription}
-                                    disabled={isLoading}
-                                    className={cn(
-                                        "w-full flex items-center gap-3 px-4 py-3 transition-colors text-sm font-medium rounded-lg",
-                                        isSubscribed 
-                                            ? "text-green-600 hover:bg-green-50" 
-                                            : "text-gray-500 hover:bg-gray-50 hover:text-black"
-                                    )}
-                                >
-                                    {isSubscribed ? <Bell className="w-5 h-5" /> : <BellOff className="w-5 h-5" />}
-                                    <span>{isLoading ? 'Cargando...' : (isSubscribed ? 'Notificaciones Activadas' : 'Activar Notificaciones')}</span>
-                                </button>
+                                {onFAQClick && (
+                                    <button
+                                        onClick={() => { onFAQClick(); setIsMobileOpen(false); }}
+                                        className={cn(
+                                            "w-full flex items-center gap-3 px-4 py-3 transition-colors text-sm font-medium rounded-lg",
+                                            isFAQActive ? "text-black bg-gray-100" : "text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+                                        )}
+                                    >
+                                        <HelpCircle className="w-4 h-4" />
+                                        <span>Preguntas Frecuentes</span>
+                                    </button>
+                                )}
                                 <button
                                     onClick={handleSignOut}
                                     className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors text-sm font-medium rounded-lg"
@@ -315,35 +316,32 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut }:
                     className="p-3 border-t border-gray-100 space-y-2"
                 >
                     <InstallPWAButton collapsed={isDesktopCollapsed} />
-                    
-                    <button
-                        onClick={handlePushSubscription}
-                        disabled={isLoading}
-                        className={cn(
-                            "w-full flex items-center gap-3 px-3 py-3 transition-colors font-medium rounded-lg",
-                            isSubscribed 
-                                ? "text-green-600 hover:bg-green-50" 
-                                : "text-gray-500 hover:bg-gray-50 hover:text-black",
-                            isDesktopCollapsed ? "justify-center" : ""
-                        )}
-                        title={isDesktopCollapsed ? (isSubscribed ? 'Notificaciones Activadas' : 'Activar Notificaciones') : ''}
-                    >
-                        {isSubscribed ? (
-                            <Bell className="w-5 h-5 shrink-0" />
-                        ) : (
-                            <BellOff className="w-5 h-5 shrink-0" />
-                        )}
-                        {!isDesktopCollapsed && (
-                            <motion.span 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="text-sm truncate"
-                            >
-                                {isLoading ? 'Cargando...' : (isSubscribed ? 'Notificaciones On' : 'Activar Alertas')}
-                            </motion.span>
-                        )}
-                    </button>
+
+                    {onFAQClick && (
+                        <button
+                            onClick={onFAQClick}
+                            className={cn(
+                                "w-full flex items-center gap-3 px-3 py-2.5 transition-colors rounded-lg",
+                                isFAQActive
+                                    ? "text-black bg-gray-100 font-medium"
+                                    : "text-gray-400 hover:bg-gray-50 hover:text-gray-600",
+                                isDesktopCollapsed ? "justify-center" : ""
+                            )}
+                            title={isDesktopCollapsed ? 'Preguntas Frecuentes' : ''}
+                        >
+                            <HelpCircle className="w-4 h-4 shrink-0" />
+                            {!isDesktopCollapsed && (
+                                <motion.span
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="text-sm truncate"
+                                >
+                                    Preguntas Frecuentes
+                                </motion.span>
+                            )}
+                        </button>
+                    )}
 
                     <button
                         onClick={handleSignOut}
