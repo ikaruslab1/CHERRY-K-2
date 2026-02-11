@@ -96,6 +96,27 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
     setLoading(false);
     
   }, [availableConferences, searchParams, currentConference?.id]);
+
+  // 3. Register Access when conference updates
+  useEffect(() => {
+    const registerAccess = async () => {
+      if (!currentConference) return;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+          // Fire and forget
+          supabase.from('conference_access').upsert({
+              user_id: user.id,
+              conference_id: currentConference.id,
+              last_accessed_at: new Date().toISOString()
+          }, { onConflict: 'user_id, conference_id' }).then(({ error }) => {
+              if (error) console.error("Error registrando acceso a conferencia:", error);
+          });
+      }
+    };
+
+    registerAccess();
+  }, [currentConference?.id]);
   // Actually, we need to know when fetch is done. 
   // Let's rely on avaiableConferences being set. Use a separate state for dataLoaded if needed, 
   // but let's assume if fetch runs it updates state.
