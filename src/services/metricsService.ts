@@ -26,6 +26,12 @@ export interface EventAttendee {
   status: 'complete' | 'partial' | 'absent'; // Logic to be defined
 }
 
+export interface InterestedUser {
+  user_id: string;
+  user: UserProfile;
+  interested_at: string;
+}
+
 export const metricsService = {
   /**
    * Obtiene un resumen de métricas para todos los eventos de una conferencia.
@@ -254,6 +260,50 @@ export const metricsService = {
 
       } catch (error) {
           console.error('Error fetching event attendance details:', error);
+          return [];
+      }
+  },
+
+  /**
+   * Obtiene la lista de usuarios interesados en un evento.
+   */
+  async getEventInterestedUsers(eventId: string): Promise<InterestedUser[]> {
+      try {
+          // Specify the foreign key if needed, or rely on auto-detection if unique
+          // "user:profiles!event_interests_user_id_fkey" forces the join on that FK.
+          const { data, error } = await supabase
+              .from('event_interests')
+              .select(`
+                  created_at,
+                  user:profiles!event_interests_user_id_fkey (
+                      id,
+                      first_name,
+                      last_name,
+                      email,
+                      degree,
+                      gender,
+                      phone,
+                      is_owner
+                  )
+              `)
+              .eq('event_id', eventId)
+              .order('created_at', { ascending: false });
+
+          if (error) {
+              console.error("Error query interested:", error);
+              return [];
+          }
+          
+          return (data || []).map((item: any) => ({
+              user_id: item.user?.id,
+              user: {
+                  ...item.user,
+                  role: item.user?.is_owner ? 'owner' : 'user'
+              },
+              interested_at: item.created_at,
+          }));
+      } catch (error) {
+          console.error("Error fetching interested users:", error);
           return [];
       }
   },

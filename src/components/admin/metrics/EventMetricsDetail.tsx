@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { metricsService, EventAttendee, AttendanceDetail } from '@/services/metricsService';
+import { metricsService, EventAttendee, AttendanceDetail, InterestedUser } from '@/services/metricsService';
 import { Event } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
-import { ArrowLeft, Trash2, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Trash2, AlertTriangle, CheckCircle, XCircle, Download } from 'lucide-react';
 import { formatMexicoTime, formatMexicoDate } from '@/lib/dateUtils';
 import { supabase } from '@/lib/supabase';
 
@@ -17,6 +17,7 @@ interface EventMetricsDetailProps {
 export function EventMetricsDetail({ eventId, onBack }: EventMetricsDetailProps) {
   const [event, setEvent] = useState<Event | null>(null);
   const [attendees, setAttendees] = useState<EventAttendee[]>([]);
+  const [interestedUsers, setInterestedUsers] = useState<InterestedUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,11 +39,79 @@ export function EventMetricsDetail({ eventId, onBack }: EventMetricsDetailProps)
             // Fetch Attendees
             const data = await metricsService.getEventAttendanceDetails(eventId, eventData.date);
             setAttendees(data);
+
+            // Fetch Interested Users
+            const interestedData = await metricsService.getEventInterestedUsers(eventId);
+            setInterestedUsers(interestedData);
         }
     } catch (error) {
         console.error("Error loading event details", error);
     } finally {
         setLoading(false);
+    }
+  };
+
+
+
+  const handleDownloadAttendeesCSV = () => {
+    if (!event || attendees.length === 0) return;
+
+    const headers = ['ID', 'Nombre', 'Apellido', 'Email', 'Rol', 'Grado', 'Asistencia'];
+    const rows = attendees.map(a => [
+        a.user.id,
+        a.user.first_name,
+        a.user.last_name,
+        a.user.email || '',
+        a.user.role,
+        a.user.degree || '',
+        a.status // 'complete', 'partial', 'absent'
+    ]);
+
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    downloadCSV(csvContent, `${event.title}_asistentes.csv`);
+  };
+
+  const handleDownloadInterestedCSV = () => {
+    if (!event || interestedUsers.length === 0) return;
+
+    const headers = ['ID', 'Nombre', 'Apellido', 'Email', 'Rol', 'Grado', 'Teléfono', 'Género', 'Fecha Interés'];
+    const rows = interestedUsers.map(i => [
+        i.user.id,
+        i.user.first_name,
+        i.user.last_name,
+        i.user.email || '',
+        i.user.role,
+        i.user.degree || '',
+        // @ts-ignore - phone/gender might be missing from type definition but query fetches it
+        i.user.phone || '',
+        // @ts-ignore
+        i.user.gender || '',
+        formatMexicoDate(i.interested_at) + ' ' + formatMexicoTime(i.interested_at)
+    ]);
+
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    downloadCSV(csvContent, `${event.title}_interesados.csv`);
+  };
+
+  const downloadCSV = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
   };
 
@@ -82,7 +151,21 @@ export function EventMetricsDetail({ eventId, onBack }: EventMetricsDetailProps)
         </div>
       </div>
 
-      {/* Attendees Table */}
+      {/* Attendees Section */}
+      <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-[#373737]">Asistencia ({attendees.length})</h3>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleDownloadAttendeesCSV}
+            disabled={attendees.length === 0}
+            className="gap-2 text-gray-600"
+          >
+              <Download className="h-4 w-4" />
+              Descargar CSV
+          </Button>
+      </div>
+
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
          <div className="overflow-x-auto">
              <table className="w-full text-sm text-left">
@@ -190,6 +273,66 @@ export function EventMetricsDetail({ eventId, onBack }: EventMetricsDetailProps)
                                  </tr>
                              );
                          })
+                     )}
+                 </tbody>
+             </table>
+         </div>
+          </div>
+
+
+      {/* Interested Users Section */}
+      <div className="flex items-center justify-between pt-4">
+          <h3 className="text-lg font-semibold text-[#373737]">Interesados ({interestedUsers.length})</h3>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleDownloadInterestedCSV}
+            disabled={interestedUsers.length === 0}
+            className="gap-2 text-gray-600"
+          >
+              <Download className="h-4 w-4" />
+              Descargar CSV
+          </Button>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+         <div className="overflow-x-auto">
+             <table className="w-full text-sm text-left">
+                 <thead className="bg-gray-50/50 text-gray-500 font-medium border-b border-gray-100">
+                     <tr>
+                         <th className="px-6 py-4">Usuario</th>
+                         <th className="px-6 py-4">Email</th>
+                         <th className="px-6 py-4">Fecha de Interés</th>
+                     </tr>
+                 </thead>
+                 <tbody className="divide-y divide-gray-50">
+                     {interestedUsers.length === 0 ? (
+                         <tr>
+                             <td colSpan={3} className="px-6 py-12 text-center text-gray-400">
+                                 No hay usuarios interesados registrados.
+                             </td>
+                         </tr>
+                     ) : (
+                         interestedUsers.map((item) => (
+                             <tr key={item.user_id} className="hover:bg-gray-50/50 transition-colors">
+                                 <td className="px-6 py-4">
+                                     <div className="flex flex-col">
+                                         <span className="font-bold text-[#373737]">
+                                             {item.user.first_name} {item.user.last_name}
+                                         </span>
+                                         <span className="text-xs text-gray-400 font-mono">
+                                             {item.user.degree} • {item.user.role === 'owner' ? 'Admin' : item.user.role}
+                                         </span>
+                                     </div>
+                                 </td>
+                                 <td className="px-6 py-4 text-gray-600">
+                                     {item.user.email}
+                                 </td>
+                                 <td className="px-6 py-4 text-gray-500 font-mono text-xs">
+                                     {formatMexicoDate(item.interested_at)} {formatMexicoTime(item.interested_at)}
+                                 </td>
+                             </tr>
+                         ))
                      )}
                  </tbody>
              </table>
