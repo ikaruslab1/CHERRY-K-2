@@ -188,8 +188,17 @@ export function EventsManager() {
       setIsCreating(true);
   };
 
-  const generateAndShowCertificate = (event: Event, speaker: any) => {
+  const generateAndShowCertificate = async (event: Event, speaker: any) => {
       if (!currentConference) return;
+
+      // Fetch fresh configuration to ensure we show the latest saved version
+      const { data: confData } = await supabase
+          .from('conferences')
+          .select('title, institution_name, department_name, certificate_config')
+          .eq('id', currentConference.id)
+          .single();
+        
+      const freshConf = confData || currentConference;
 
       const cert: Certificate = {
           id: `SPK-${event.id}-${speaker.id || 'LEGACY'}`,
@@ -198,10 +207,10 @@ export function EventsManager() {
               ...event,
               conference_id: currentConference.id, 
               conferences: {
-                  title: currentConference.title,
-                  institution_name: currentConference.institution_name || 'FES Acatlán',
-                  department_name: currentConference.department_name || 'UNAM', // Fallback
-                  certificate_config: currentConference.certificate_config
+                  title: freshConf.title,
+                  institution_name: freshConf.institution_name || 'FES Acatlán',
+                  department_name: freshConf.department_name || 'UNAM', // Fallback
+                  certificate_config: freshConf.certificate_config
               }
           } as any,
           profiles: {
