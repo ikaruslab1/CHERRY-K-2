@@ -16,6 +16,7 @@ export async function registerUser(data: {
   gender: string;
   email: string;
   phone: string;
+  conferenceId?: string;
 }) {
   let userId: string | null = null;
 
@@ -97,6 +98,22 @@ export async function registerUser(data: {
        // Profile cascades on delete of Auth User usually, but we delete Auth User explicitly.
        await supabaseAdmin.auth.admin.deleteUser(userId);
        return { success: false, error: "Error de sistema al configurar cuenta. Por favor intente de nuevo." };
+    }
+
+    // 4. Register Access to Conference (if provided)
+    if (data.conferenceId) {
+        const { error: accessError } = await supabaseAdmin
+            .from('conference_access')
+            .upsert({
+                user_id: userId,
+                conference_id: data.conferenceId,
+                last_accessed_at: new Date().toISOString()
+            }, { onConflict: 'user_id, conference_id' });
+
+        if (accessError) {
+            console.error("Error linking user to conference on registration:", accessError);
+            // Non-critical error, we continue
+        }
     }
 
     return { success: true, data: { short_id: shortId } };

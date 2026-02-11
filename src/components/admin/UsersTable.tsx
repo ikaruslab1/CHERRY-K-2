@@ -11,12 +11,14 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { UserProfile } from '@/types';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 import { useUsers } from '@/hooks/useUsers';
+import { usePlatformUsers } from '@/hooks/usePlatformUsers';
 import { useConference } from '@/context/ConferenceContext';
 
   export function UsersTable({ readOnly = false, currentUserRole }: { readOnly?: boolean, currentUserRole?: string }) {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 500);
-  const { users, loading, mutate } = useUsers(debouncedSearch);
+  const { users, loading, mutate: mutateUsers } = useUsers(debouncedSearch);
+  const { platformUsers, loading: loadingPlatform, mutate: mutatePlatformUsers } = usePlatformUsers(debouncedSearch);
 
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [selectedQrUser, setSelectedQrUser] = useState<UserProfile | null>(null);
@@ -82,7 +84,8 @@ import { useConference } from '@/context/ConferenceContext';
     }
 
     if (!error) {
-      mutate();
+      mutateUsers();
+      mutatePlatformUsers();
       closeModal();
     } else {
         alert("Error actualizando rol");
@@ -124,7 +127,7 @@ import { useConference } from '@/context/ConferenceContext';
                 className="pl-10 bg-white border-gray-200 text-[#373737] focus:ring-[#DBF227]"
             />
         </div>
-        <Button onClick={() => mutate()} disabled={loading} className="bg-[#373737] text-white hover:bg-black w-full xs:w-auto">
+        <Button onClick={() => { mutateUsers(); mutatePlatformUsers(); }} disabled={loading} className="bg-[#373737] text-white hover:bg-black w-full xs:w-auto">
             {'Buscar'}
         </Button>
       </div>
@@ -254,8 +257,9 @@ import { useConference } from '@/context/ConferenceContext';
                     <div className="space-y-8">
                         <UserList title="Organizadores" userList={organizers} />
                         <UserList title="Usuarios" userList={attendees} />
+                        <UserList title="Usuarios de la plataforma" userList={platformUsers} />
                         
-                        {users.length === 0 && !loading && (
+                        {users.length === 0 && platformUsers.length === 0 && !loading && !loadingPlatform && (
                             <div className="p-8 text-center text-gray-400 bg-white rounded-xl border border-gray-100">
                                 No se encontraron usuarios.
                             </div>

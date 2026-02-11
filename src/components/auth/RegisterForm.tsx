@@ -60,7 +60,7 @@ const formSchema = z
 
 type FormData = z.infer<typeof formSchema>;
 
-export function RegisterForm() {
+export function RegisterForm({ conferenceId }: { conferenceId?: string }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isAutoLoggingIn, setIsAutoLoggingIn] = useState(false);
@@ -109,6 +109,7 @@ export function RegisterForm() {
       ...data,
       firstName: toTitleCase(data.firstName),
       lastName: toTitleCase(data.lastName),
+      conferenceId,
     };
 
     try {

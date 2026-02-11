@@ -211,7 +211,7 @@ export default function LoginPage() {
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                     >
-                        {view === 'login' ? <LoginForm /> : <RegisterForm />}
+                        {view === 'login' ? <LoginForm /> : <RegisterForm conferenceId={currentConference?.id} />}
                     </motion.div>
                 </AnimatePresence>
             </div>
