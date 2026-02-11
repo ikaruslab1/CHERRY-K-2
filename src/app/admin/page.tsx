@@ -79,27 +79,46 @@ function AdminContent() {
         { id: 'design-certificates', label: 'Diseño de Constancias', icon: <Award className="w-5 h-5" />, show: true },
     ];
 
+    const isDesignTab = activeTab === 'design-certificates';
+
     return (
-        <SidebarAwareContainer className="min-h-screen p-4 xs:p-6 md:p-8 bg-gray-50 text-[#373737]">
-            <ResponsiveNav 
-                items={navItems}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                handleSignOut={handleSignOut}
-            />
-
-            <div className="max-w-6xl mx-auto space-y-6 xs:space-y-8 mt-12 md:mt-0">
-
-                <div className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    {activeTab === 'profile' && <UserProfileView />}
-                    {activeTab === 'agenda' && <AgendaView />}
-                    {activeTab === 'constancias' && <CertificatesView />}
-                    {activeTab === 'users' && <UsersTable currentUserRole={userRole || undefined} />}
-                    {activeTab === 'events' && <EventsManager />}
-                    {activeTab === 'attendance' && <AttendanceView />}
-                    {activeTab === 'design-certificates' && <CertificateDesignView />}
+        <SidebarAwareContainer className="min-h-screen bg-gray-50 text-[#373737]">
+            {isDesignTab ? (
+                /* Design tab: zero padding, full width */
+                <>
+                    <ResponsiveNav 
+                        items={navItems}
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        handleSignOut={handleSignOut}
+                    />
+                    <div className="mt-12 md:mt-0">
+                        <div className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <CertificateDesignView />
+                        </div>
+                    </div>
+                </>
+            ) : (
+                /* All other tabs: normal padding and max-width */
+                <div className="p-4 xs:p-6 md:p-8">
+                    <ResponsiveNav 
+                        items={navItems}
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        handleSignOut={handleSignOut}
+                    />
+                    <div className="max-w-6xl mx-auto space-y-6 xs:space-y-8 mt-12 md:mt-0">
+                        <div className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            {activeTab === 'profile' && <UserProfileView />}
+                            {activeTab === 'agenda' && <AgendaView />}
+                            {activeTab === 'constancias' && <CertificatesView />}
+                            {activeTab === 'users' && <UsersTable currentUserRole={userRole || undefined} />}
+                            {activeTab === 'events' && <EventsManager />}
+                            {activeTab === 'attendance' && <AttendanceView />}
+                        </div>
+                    </div>
                 </div>
-            </div>
+            )}
         </SidebarAwareContainer>
     );
 }

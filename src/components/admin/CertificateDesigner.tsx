@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Upload, X, Save, RefreshCw, Eye, ZoomIn, ZoomOut, Plus, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Save, RefreshCw, Eye, ZoomIn, ZoomOut, Plus, Image as ImageIcon, ChevronDown, Palette, Type, FileText, PenTool, Sparkles, LayoutTemplate } from 'lucide-react';
 import NextImage from 'next/image';
 import { CertificateContent } from '@/components/profile/CertificateContent';
 import type { Certificate } from '@/components/profile/CertificateContent';
@@ -84,6 +84,8 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
     const [selectedExampleEventId, setSelectedExampleEventId] = useState<string>('');
     const [activeLogoSlot, setActiveLogoSlot] = useState<number | null>(null);
     const [selectedElement, setSelectedElement] = useState<string | null>(null);
+    const [openSections, setOpenSections] = useState<Record<string, boolean>>({ mode: true, template: true, logos: true, styles: false, typography: false, texts: false, signers: false, preview: false });
+    const toggleSection = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
 
     const handleElementUpdate = (id: string, updates: any) => {
         const currentElements = config.elements || {};
@@ -302,42 +304,57 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:gap-8 bg-gray-50 h-full">
+        <div className="flex flex-col lg:flex-row h-full bg-gray-50 overflow-hidden">
             
             {/* Left Panel: Controls - Independent Scroll */}
-            <div className="lg:col-span-1 border-r border-gray-200 bg-white h-full flex flex-col shadow-xl z-20 overflow-hidden relative">
-                {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 pb-24">
-                    <div className="flex items-center justify-between mb-2">
-                        <h2 className="font-bold text-xl text-gray-800">Editor de Constancia</h2>
+            <div className="w-full lg:w-[480px] xl:w-[520px] flex-shrink-0 border-r border-gray-200 bg-white h-full flex flex-col shadow-xl z-20 relative transition-all duration-300">
+                {/* Panel Header */}
+                <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-[#373737] flex items-center justify-center">
+                            <PenTool className="w-4 h-4 text-[#DBF227]" />
+                        </div>
+                        <div>
+                            <h2 className="font-bold text-sm text-gray-800 tracking-tight">Editor de Constancia</h2>
+                            <p className="text-[10px] text-gray-400">Personaliza el diseño visual</p>
+                        </div>
                     </div>
+                </div>
 
-                    <div className="space-y-6">
-                         {/* Mode Selection */}
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                            <label className="block text-sm font-bold text-gray-700 mb-2">Modo de Diseño</label>
-                            <div className="flex bg-white p-1 rounded-lg border border-gray-200">
-                                <button 
-                                    onClick={() => setConfig({...config, mode: 'template_v1'})}
-                                    className={`flex-1 py-2 px-3 text-xs font-medium rounded-md transition-all ${config.mode === 'template_v1' ? 'bg-[#373737] text-white shadow' : 'text-gray-500 hover:bg-gray-50'}`}
-                                >
-                                    Predeterminado
-                                </button>
-                                <button 
-                                    onClick={() => setConfig({...config, mode: 'custom_background'})}
-                                    className={`flex-1 py-2 px-3 text-xs font-medium rounded-md transition-all ${config.mode === 'custom_background' ? 'bg-[#373737] text-white shadow' : 'text-gray-500 hover:bg-gray-50'}`}
-                                >
-                                    Personalizado
-                                </button>
-                            </div>
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-3 space-y-1.5 pb-24">
+
+                    <div className="space-y-1.5">
+                         {/* Mode Selection - Always visible */}
+                        <div className="flex bg-gray-100 p-1 rounded-lg">
+                            <button 
+                                onClick={() => setConfig({...config, mode: 'template_v1'})}
+                                className={`flex-1 py-2.5 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 ${config.mode === 'template_v1' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                            >
+                                <LayoutTemplate className="w-3.5 h-3.5" />
+                                Plantilla
+                            </button>
+                            <button 
+                                onClick={() => setConfig({...config, mode: 'custom_background'})}
+                                className={`flex-1 py-2.5 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 ${config.mode === 'custom_background' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                            >
+                                <ImageIcon className="w-3.5 h-3.5" />
+                                Fondo Personalizado
+                            </button>
                         </div>
 
                         {/* Template Selection - Only for Default Mode */}
                         {config.mode === 'template_v1' && (
-                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 animate-in fade-in slide-in-from-top-2 space-y-4">
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2">Seleccionar Plantilla</label>
-                                    <div className="grid grid-cols-2 gap-3">
+                            <div className="rounded-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                                <button onClick={() => toggleSection('template')} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
+                                    <div className="flex items-center gap-2.5">
+                                        <span className="w-5 h-5 rounded bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">01</span>
+                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Plantilla</span>
+                                    </div>
+                                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openSections.template ? 'rotate-180' : ''}`} />
+                                </button>
+                                {openSections.template && <div className="p-4 bg-white space-y-4">
+                                    <div className="grid grid-cols-3 gap-2">
                                         {/* Classic/Legacy Template */}
                                         <button 
                                             onClick={() => setConfig({...config, template_id: 'legacy'})}
@@ -386,22 +403,27 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                             </div>
                                         </button>
                                     </div>
-                                </div>
+                                </div>}
                             </div>
                         )}
 
                          {/* Logo Configuration */}
-                         <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4 animate-in fade-in duration-500">
-                             <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
-                                 <span className="w-1.5 h-4 bg-[#DBF227] rounded-full"></span>
-                                 Logos del Encabezado
-                             </h3>
-                             <p className="text-[10px] text-gray-500">
-                                 Selecciona hasta 3 logos. Los logos personalizados deben ser preferentemente SVGs en color negro sólido.
+                         <div className="rounded-xl border border-gray-100 overflow-hidden">
+                             <button onClick={() => toggleSection('logos')} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
+                                 <div className="flex items-center gap-2.5">
+                                     <span className="w-5 h-5 rounded bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">02</span>
+                                     <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Logos del Encabezado</span>
+                                     <span className="text-[9px] text-gray-400 font-medium">{(config.logos || []).filter((l: any) => l.type !== 'none' && l.value).length}/7</span>
+                                 </div>
+                                 <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openSections.logos ? 'rotate-180' : ''}`} />
+                             </button>
+                             {openSections.logos && <div className="p-4 bg-white space-y-3">
+                             <p className="text-[10px] text-gray-400 leading-relaxed">
+                                 Hasta 7 logos. SVGs en color negro sólido recomendado. +4 logos se reducen automáticamente.
                              </p>
                              
-                             <div className="grid grid-cols-3 gap-3">
-                                 {[0, 1, 2].map((slotIndex) => {
+                             <div className="grid grid-cols-4 gap-3">
+                                 {Array.from({ length: 7 }).map((_, slotIndex) => {
                                      const logo = (config.logos && config.logos[slotIndex]) || { type: 'none', value: '' };
                                      const isActive = activeLogoSlot === slotIndex;
                                      const logoUrl = logo.type === 'preset' ? `/assets/${logo.value}.svg` : logo.value;
@@ -436,12 +458,18 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                      );
                                  })}
                              </div>
+                         </div>}
                          </div>
-
                         {/* Background Upload - Only for Custom Mode */}
                         {config.mode === 'custom_background' && (
-                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                                <label className="block text-sm font-bold text-gray-700 mb-2">Imagen de Fondo</label>
+                            <div className="rounded-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                                <div className="px-4 py-3 bg-gray-50/80">
+                                    <div className="flex items-center gap-2.5">
+                                        <span className="w-5 h-5 rounded bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">01</span>
+                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Imagen de Fondo</span>
+                                    </div>
+                                </div>
+                                <div className="p-4 bg-white space-y-3">
                                 <div className="flex gap-2 items-center">
                                      <Button 
                                         type="button" 
@@ -461,10 +489,10 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                         onChange={handleFileUpload}
                                      />
                                 </div>
-                                <p className="text-[10px] text-gray-400 mt-2 text-center">Recomendado: 3300x2550px (300dpi Carta Horizontal)</p>
+                                <p className="text-[10px] text-gray-400 text-center">Recomendado: 3300×2550px (300dpi Carta Horizontal)</p>
                                  
                                  {config.background_url && (
-                                     <div className="mt-4 relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm w-full h-32">
+                                     <div className="relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm w-full h-32">
                                          <NextImage src={config.background_url} alt="Background Preview" fill className="object-cover" sizes="(max-width: 768px) 100vw, 300px" />
                                          <button 
                                             onClick={() => setConfig({...config, background_url: undefined, mode: 'template_v1'})}
@@ -476,15 +504,20 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                          <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] p-1 text-center font-medium backdrop-blur-sm">Vista Previa</div>
                                      </div>
                                  )}
+                                </div>
                             </div>
                         )}
 
-                        {/* Styles Configuration - Always Visible */}
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4 animate-in fade-in duration-500">
-                            <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
-                                <span className="w-1.5 h-4 bg-[#DBF227] rounded-full"></span>
-                                Estilos
-                            </h3>
+                        {/* Styles Configuration */}
+                        <div className="rounded-xl border border-gray-100 overflow-hidden">
+                            <button onClick={() => toggleSection('styles')} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
+                                <div className="flex items-center gap-2.5">
+                                    <span className="w-5 h-5 rounded bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">03</span>
+                                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Colores y Tipografía</span>
+                                </div>
+                                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openSections.styles ? 'rotate-180' : ''}`} />
+                            </button>
+                            {openSections.styles && <div className="p-4 bg-white space-y-4">
                             
                             {config.mode !== 'custom_background' && (
                                 <>
@@ -769,24 +802,29 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     )}
                                 </div>
                             )}
+                        </div>}
                         </div>
 
                         {/* Text Element Typography - Only for Template V1 Mode */}
                         {config.mode !== 'custom_background' && (
-                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-5 animate-in fade-in duration-500 delay-75">
-                                <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
-                                    <span className="w-1.5 h-4 bg-[#DBF227] rounded-full"></span>
-                                    Tipografía de Textos
-                                </h3>
-                                <p className="text-[10px] text-gray-500 -mt-2">
-                                    Personaliza la apariencia del nombre y el título del evento en la constancia.
+                            <div className="rounded-xl border border-gray-100 overflow-hidden">
+                                <button onClick={() => toggleSection('typography')} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
+                                    <div className="flex items-center gap-2.5">
+                                        <span className="w-5 h-5 rounded bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">04</span>
+                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Tipografía</span>
+                                    </div>
+                                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openSections.typography ? 'rotate-180' : ''}`} />
+                                </button>
+                                {openSections.typography && <div className="p-4 bg-white space-y-4">
+                                <p className="text-[10px] text-gray-400 leading-relaxed">
+                                    Personaliza nombre y título del evento en la constancia.
                                 </p>
 
                                 {/* --- Name Style --- */}
-                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                <div className="bg-gray-50/50 p-3 rounded-lg border-l-2 border-l-[#DBF227] border border-gray-100 space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">Nombre de la persona</span>
-                                        <span className="text-[9px] bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded font-bold">NOMBRE</span>
+                                        <span className="text-xs font-bold text-gray-600 tracking-wide">Nombre de la persona</span>
+                                        <span className="text-[9px] bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded-full font-semibold">NOMBRE</span>
                                     </div>
 
                                     {/* Font Family */}
@@ -863,10 +901,10 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 </div>
 
                                 {/* --- Event Title Style --- */}
-                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                <div className="bg-gray-50/50 p-3 rounded-lg border-l-2 border-l-blue-400 border border-gray-100 space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">Título del evento</span>
-                                        <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">EVENTO</span>
+                                        <span className="text-xs font-bold text-gray-600 tracking-wide">Título del evento</span>
+                                        <span className="text-[9px] bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded-full font-semibold">EVENTO</span>
                                     </div>
 
                                     {/* Font Family */}
@@ -941,15 +979,20 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                         />
                                     </div>
                                 </div>
+                            </div>}
                             </div>
                         )}
 
-                        {/* Texts Configuration - Always Visible */}
-                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4 animate-in fade-in duration-500 delay-100">
-                            <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
-                                <span className="w-1.5 h-4 bg-[#DBF227] rounded-full"></span>
-                                Textos Variables
-                            </h3>
+                        {/* Texts Configuration */}
+                        <div className="rounded-xl border border-gray-100 overflow-hidden">
+                            <button onClick={() => toggleSection('texts')} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
+                                <div className="flex items-center gap-2.5">
+                                    <span className="w-5 h-5 rounded bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">05</span>
+                                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Textos Variables</span>
+                                </div>
+                                <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openSections.texts ? 'rotate-180' : ''}`} />
+                            </button>
+                            {openSections.texts && <div className="p-4 bg-white space-y-3">
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">Asistente</label>
                                 <Input 
@@ -978,14 +1021,20 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     className="bg-white text-black"
                                 />
                             </div>
+                            </div>}
                         </div>
 
-                            {/* Signers Configuration (Replaces QR) */}
-                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-4 animate-in fade-in duration-500 delay-200">
-                                <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
-                                    <span className="w-1.5 h-4 bg-[#DBF227] rounded-full"></span>
-                                    Firmantes
-                                </h3>
+                            {/* Signers Configuration */}
+                            <div className="rounded-xl border border-gray-100 overflow-hidden">
+                                <button onClick={() => toggleSection('signers')} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
+                                    <div className="flex items-center gap-2.5">
+                                        <span className="w-5 h-5 rounded bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">06</span>
+                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Firmantes</span>
+                                        <span className="text-[9px] text-gray-400 font-medium">{config.signer_count || 1}</span>
+                                    </div>
+                                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openSections.signers ? 'rotate-180' : ''}`} />
+                                </button>
+                                {openSections.signers && <div className="p-4 bg-white space-y-4">
                                 
                                 {/* Number of Signers */}
                                 <div className="flex justify-between items-center mb-2">
@@ -1009,10 +1058,8 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 </div>
 
                                 {/* Signer Style Controls */}
-                                <div className="bg-white p-3 rounded-lg border border-gray-200 mb-3 space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">Apariencia</span>
-                                    </div>
+                                <div className="bg-gray-50/50 p-3 rounded-lg border border-gray-100 space-y-3">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Apariencia</span>
                                     
                                     <div className="grid grid-cols-2 gap-3">
                                         {/* Scale */}
@@ -1059,10 +1106,8 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 {Array.from({ length: config.signer_count || 1 }).map((_, idx) => {
                                     const signer = (config.signers && config.signers[idx]) || {};
                                     return (
-                                        <div key={idx} className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-xs font-bold text-gray-400 uppercase">Firmante {idx + 1}</span>
-                                            </div>
+                                        <div key={idx} className="bg-gray-50/50 p-3 rounded-lg border-l-2 border-l-gray-300 border border-gray-100 space-y-3">
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Firmante {idx + 1}</span>
                                             
                                             {/* Profile Selector */}
                                             <div>
@@ -1122,35 +1167,37 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                         </div>
                                     );
                                 })}
+                            </div>}
                             </div>
                             
                             {/* Example Activity Selector */}
-                            <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 space-y-3">
-                                <div className="flex items-start gap-3">
-                                    <div className="p-2 bg-blue-100 rounded-lg text-blue-600 mt-1">
-                                        <Eye className="w-4 h-4" />
+                            <div className="rounded-xl border border-gray-100 overflow-hidden">
+                                <button onClick={() => toggleSection('preview')} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
+                                    <div className="flex items-center gap-2.5">
+                                        <span className="w-5 h-5 rounded bg-blue-100 flex items-center justify-center">
+                                            <Eye className="w-3 h-3 text-blue-600" />
+                                        </span>
+                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Datos de Ejemplo</span>
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-gray-800 text-sm">Vista Previa con Datos Reales</h3>
-                                        <p className="text-[10px] text-gray-500 mt-1 leading-relaxed">
-                                            Selecciona una actividad de la agenda para ver cómo luciría su constancia. 
-                                            <span className="block font-semibold text-blue-600 mt-1">Nota: Esto es solo un ejemplo visual. El diseño se aplicará a todas las constancias del evento.</span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <select 
-                                    value={selectedExampleEventId}
-                                    onChange={(e) => setSelectedExampleEventId(e.target.value)}
-                                    className="w-full p-2 border rounded-lg text-xs bg-white focus:ring-2 focus:ring-blue-200 outline-none"
-                                >
-                                    <option value="">-- Usar datos de prueba --</option>
-                                    {exampleEvents.map(evt => (
-                                        <option key={evt.id} value={evt.id}>
-                                            {evt.title} ({new Date(evt.date).toLocaleDateString()})
-                                        </option>
-                                    ))}
-                                </select>
+                                    <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openSections.preview ? 'rotate-180' : ''}`} />
+                                </button>
+                                {openSections.preview && <div className="p-4 bg-white space-y-3">
+                                    <p className="text-[10px] text-gray-400 leading-relaxed">
+                                        Selecciona una actividad para previsualizar con datos reales. El diseño se aplicará a todas las constancias.
+                                    </p>
+                                    <select 
+                                        value={selectedExampleEventId}
+                                        onChange={(e) => setSelectedExampleEventId(e.target.value)}
+                                        className="w-full p-2 border border-gray-200 rounded-lg text-xs bg-gray-50 focus:ring-2 focus:ring-blue-200 focus:bg-white outline-none transition-colors"
+                                    >
+                                        <option value="">-- Usar datos de prueba --</option>
+                                        {exampleEvents.map(evt => (
+                                            <option key={evt.id} value={evt.id}>
+                                                {evt.title} ({new Date(evt.date).toLocaleDateString()})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>}
                             </div>
                     </div>
                 </div>
@@ -1169,7 +1216,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
             </div>
 
             {/* Right Panel: Preview */}
-            <div className="lg:col-span-2 bg-gray-100 flex flex-col h-full overflow-hidden relative">
+            <div className="flex-1 bg-gray-100 flex flex-col h-full overflow-hidden relative">
                 {/* Preview Controls */}
                 <div className="p-4 bg-white/80 backdrop-blur-md border-b border-gray-200 flex justify-between items-center z-10 sticky top-0 shadow-sm">
                     <div className="flex items-center gap-3">
@@ -1212,14 +1259,24 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                 <div className="flex-1 overflow-auto bg-[#e5e5e5] relative">
                     <div className="absolute inset-0 z-0 opacity-40 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
                     
-                    {/* Centering Wrapper that grows with content */}
-                    <div className="min-w-full min-h-full flex items-center justify-center p-8 md:p-12">
+                    {/* Scrollable Canvas - uses inline sizing for proper scroll in all directions */}
+                    <div 
+                        style={{ 
+                            minWidth: `calc(279.4mm * ${scale} + 200px)`,
+                            minHeight: `calc(215.9mm * ${scale} + 120px)`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '60px 100px',
+                        }}
+                    >
                         <div 
                             style={{ 
                                 width: `calc(279.4mm * ${scale})`,
                                 height: `calc(215.9mm * ${scale})`,
-                                transition: 'width 0.2s, height 0.2s',
-                                position: 'relative'
+                                transition: 'width 0.3s ease, height 0.3s ease',
+                                position: 'relative',
+                                flexShrink: 0,
                             }}
                         >
                             <div 

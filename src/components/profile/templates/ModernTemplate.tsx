@@ -75,9 +75,19 @@ export const ModernTemplate = ({
                     background: `linear-gradient(to bottom, ${accent} 0%, #ffffff 100%)` 
                 }}
             >
-                <div className="flex flex-col items-center gap-8 w-full px-6">
+                <div className={`flex flex-col items-center w-full px-6 transition-all duration-300 ${
+                    activeLogos.length >= 7 ? 'gap-3' : 
+                    activeLogos.length === 6 ? 'gap-4' : 
+                    activeLogos.length === 5 ? 'gap-6' : 
+                    'gap-8'
+                }`}>
                     {activeLogos.map((logo: any, index: number) => {
                          const logoUrl = logo.type === 'preset' ? `/assets/${logo.value}.svg` : logo.value;
+                         const maxHeightClass = activeLogos.length >= 7 ? 'max-h-[60px]' : 
+                                              activeLogos.length === 6 ? 'max-h-[80px]' : 
+                                              activeLogos.length === 5 ? 'max-h-[100px]' : 
+                                              'max-h-[120px]';
+                         
                          return (
                              <React.Fragment key={index}>
                                 <NextImage
@@ -85,7 +95,7 @@ export const ModernTemplate = ({
                                     alt={`Logo ${index + 1}`}
                                     width={150}
                                     height={120}
-                                    className="w-full h-auto object-contain max-h-[120px] opacity-90"
+                                    className={`w-full h-auto object-contain ${maxHeightClass} opacity-90 transition-all duration-300`}
                                     style={{ filter: logoContrast === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)' }}
                                 />
                                 {index < activeLogos.length - 1 && (

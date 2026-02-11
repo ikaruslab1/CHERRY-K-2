@@ -10,7 +10,8 @@ export const PRESET_LOGOS = [
   'mac',
   'lema',
   'adsem',
-  'tecmon'
+  'tecmon',
+  'tmarq'
 ] as const;
 
 export type PresetLogo = typeof PRESET_LOGOS[number];

@@ -147,24 +147,44 @@ export const Header = ({ date, id, accent = '#000', variant = 'default', logos }
 
     const activeLogos = effectiveLogos.filter(l => l && l.type !== 'none' && l.value);
 
+    // Determine Logo Size based on count (Progressive reduction > 4)
+    const count = activeLogos.length;
+    let containerHeightClass = "h-16";
+    let logoMaxWidthClass = "max-w-[120px]";
+    let gapClass = "gap-4";
+
+    if (count >= 7) {
+        containerHeightClass = "h-10";
+        logoMaxWidthClass = "max-w-[70px]";
+        gapClass = "gap-2";
+    } else if (count === 6) {
+        containerHeightClass = "h-12";
+        logoMaxWidthClass = "max-w-[90px]";
+        gapClass = "gap-3";
+    } else if (count === 5) {
+        containerHeightClass = "h-14";
+        logoMaxWidthClass = "max-w-[105px]";
+        gapClass = "gap-3";
+    }
+
     return (
         <div className={`flex justify-between items-start w-full mb-8 relative z-10 ${variant === 'classic' ? 'font-serif' : 'font-sans'}`}>
             {/* Logos Left */}
-            <div className="flex items-center gap-4 h-16">
+            <div className={`flex items-center ${gapClass} ${containerHeightClass} transition-all duration-300`}>
                  {activeLogos.map((logo, index) => {
                      const logoUrl = logo.type === 'preset' ? `/assets/${logo.value}.svg` : logo.value;
                      return (
-                         <div key={index} className="flex items-center gap-4 h-full"> 
+                         <div key={index} className={`flex items-center ${gapClass} h-full`}> 
                              <NextImage 
                                 src={logoUrl} 
                                 alt={`Logo ${index + 1}`} 
                                 width={120}
                                 height={64}
-                                className="h-full w-auto object-contain max-w-[120px]" 
+                                className={`h-full w-auto object-contain ${logoMaxWidthClass} transition-all duration-300`} 
                                 style={{ filter: accent === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)' }} 
                              />
                              {index < activeLogos.length - 1 && (
-                                 <div className="h-10 w-[1px] bg-current opacity-20" style={{ backgroundColor: accent }}></div>
+                                 <div className="h-full w-[1px] bg-current opacity-20" style={{ backgroundColor: accent, maxHeight: count > 4 ? '60%' : '80%' }}></div>
                              )}
                          </div>
                      );

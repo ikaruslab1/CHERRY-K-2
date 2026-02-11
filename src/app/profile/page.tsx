@@ -112,9 +112,26 @@ export default function ProfilePage() {
     );
   }
 
+  const isDesignTab = activeTab === 'design-certificates';
+
   return (
     <SidebarAwareContainer className="min-h-screen bg-gray-50 text-[#373737]">
-      <div className="p-4 md:p-8 min-h-screen flex flex-col">
+      {isDesignTab ? (
+        /* Design tab: no padding, no max-width – full available width */
+        <>
+          <ResponsiveNav 
+            items={navItems}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            handleSignOut={handleSignOut}
+          />
+          <div className="mt-12 md:mt-0 h-[calc(100vh-48px)] md:h-screen">
+            <CertificateDesignView />
+          </div>
+        </>
+      ) : (
+        /* All other tabs: normal padding and max-width */
+        <div className="p-4 md:p-8 min-h-screen flex flex-col">
           <ResponsiveNav 
             items={navItems}
             activeTab={activeTab}
@@ -140,12 +157,12 @@ export default function ProfilePage() {
                         {(isAdmin || isStaff) && activeTab === 'users' && <UsersTable readOnly={isStaff} currentUserRole={userRole || undefined} />}
                         {isAdmin && activeTab === 'events' && <EventsManager />}
                         {isAdmin && activeTab === 'metrics' && <MetricsView />}
-                        {isAdmin && activeTab === 'design-certificates' && <CertificateDesignView />}
                     </motion.div>
                  </AnimatePresence>
             </div>
           </div>
-      </div>
+        </div>
+      )}
     </SidebarAwareContainer>
   );
 }
