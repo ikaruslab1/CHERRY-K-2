@@ -169,18 +169,32 @@ import { useConference } from '@/context/ConferenceContext';
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {userList.map(user => (
+                                        {userList.map(user => {
+                                            const isTargetOwner = user.role === 'owner';
+                                            const isCurrentOwner = currentUserRole === 'owner';
+                                            // Sólo un owner puede ver los datos sensibles (QR, ID) de otro owner
+                                            const canViewDetails = !isTargetOwner || isCurrentOwner;
+
+                                            return (
                                             <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                                                 <td className="p-4">
-                                                    <button
-                                                        onClick={() => setSelectedQrUser(user)}
-                                                        className="p-2 bg-gray-50 hover:bg-[#DBF227]/20 text-gray-400 hover:text-[#373737] rounded-lg transition-colors border border-gray-200"
-                                                        title="Ver código QR"
-                                                    >
-                                                        <QrCode className="h-5 w-5" />
-                                                    </button>
+                                                    {canViewDetails ? (
+                                                        <button
+                                                            onClick={() => setSelectedQrUser(user)}
+                                                            className="p-2 bg-gray-50 hover:bg-[#DBF227]/20 text-gray-400 hover:text-[#373737] rounded-lg transition-colors border border-gray-200"
+                                                            title="Ver código QR"
+                                                        >
+                                                            <QrCode className="h-5 w-5" />
+                                                        </button>
+                                                    ) : (
+                                                        <div className="p-2 text-gray-200 cursor-not-allowed">
+                                                            <QrCode className="h-5 w-5" />
+                                                        </div>
+                                                    )}
                                                 </td>
-                                                <td className="p-4 font-mono text-gray-600 font-medium">{user.short_id}</td>
+                                                <td className="p-4 font-mono text-gray-600 font-medium">
+                                                    {canViewDetails ? user.short_id : '••••••'}
+                                                </td>
                                                 <td className="p-4 text-[#373737] font-semibold">{user.first_name} {user.last_name}</td>
                                                 <td className="p-4 text-gray-500">{user.degree}</td>
                                                 <td className="p-4">
@@ -201,14 +215,20 @@ import { useConference } from '@/context/ConferenceContext';
                                                     </td>
                                                 )}
                                             </tr>
-                                        ))}
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
 
                             {/* Mobile Card View */}
                             <div className="grid grid-cols-1 gap-4 md:hidden">
-                                {userList.map(user => (
+                                {userList.map(user => {
+                                    const isTargetOwner = user.role === 'owner';
+                                    const isCurrentOwner = currentUserRole === 'owner';
+                                    const canViewDetails = !isTargetOwner || isCurrentOwner;
+
+                                    return (
                                     <div key={user.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-3">
                                         <div className="flex justify-between items-start">
                                             <div className="flex items-center gap-3">
@@ -217,7 +237,9 @@ import { useConference } from '@/context/ConferenceContext';
                                                 </div>
                                                 <div>
                                                     <h4 className="font-bold text-[#373737]">{user.first_name} {user.last_name}</h4>
-                                                    <p className="text-xs text-gray-500 font-mono">{user.short_id}</p>
+                                                    <p className="text-xs text-gray-500 font-mono">
+                                                        {canViewDetails ? user.short_id : '••••••'}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getRoleBadgeClasses(user.role)} capitalize`}>
@@ -228,12 +250,18 @@ import { useConference } from '@/context/ConferenceContext';
                                         <div className="flex items-center justify-between pt-2 border-t border-gray-50">
                                             <span className="text-xs text-gray-400">{user.degree || 'Sin grado'}</span>
                                             <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => setSelectedQrUser(user)}
-                                                    className="p-2 bg-gray-50 hover:bg-[#DBF227]/20 text-gray-400 hover:text-[#373737] rounded-lg transition-colors border border-gray-200"
-                                                >
-                                                    <QrCode className="h-4 w-4" />
-                                                </button>
+                                                {canViewDetails ? (
+                                                    <button
+                                                        onClick={() => setSelectedQrUser(user)}
+                                                        className="p-2 bg-gray-50 hover:bg-[#DBF227]/20 text-gray-400 hover:text-[#373737] rounded-lg transition-colors border border-gray-200"
+                                                    >
+                                                        <QrCode className="h-4 w-4" />
+                                                    </button>
+                                                ) : (
+                                                    <div className="p-2 text-gray-200 cursor-not-allowed border border-transparent">
+                                                        <QrCode className="h-4 w-4" />
+                                                    </div>
+                                                )}
                                                 {!readOnly && (
                                                     <Button 
                                                         size="sm" 
@@ -247,7 +275,8 @@ import { useConference } from '@/context/ConferenceContext';
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     );
