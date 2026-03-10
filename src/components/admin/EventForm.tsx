@@ -284,7 +284,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                     control={control}
                     defaultValue=""
                     rules={{ 
-                        maxLength: { value: 200, message: "La descripción no puede exceder 200 caracteres" } 
+                        maxLength: { value: 10000, message: "La descripción no puede exceder 10000 caracteres" } 
                     }}
                     render={({ field: { value, onChange } }) => (
                         <RichTextEditor
@@ -293,8 +293,8 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                             onChange={(val) => {
                                 onChange(val);
                             }}
-                            maxLength={200}
-                            placeholder="Breve descripción de la actividad..."
+                            maxLength={1000}
+                            placeholder="Descripción completa de la actividad..."
                         />
                     )}
                  />

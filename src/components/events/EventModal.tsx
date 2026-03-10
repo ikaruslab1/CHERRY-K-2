@@ -12,7 +12,7 @@ import {
   Contact, BadgeAlert, Info, HelpCircle, Share2, MessageCircle, 
   Mail, Printer, MessageSquare, Youtube, Facebook, Twitter, Instagram, 
   Linkedin, Github, Globe, MessageSquareQuote, Settings, Bell, Search, 
-  Heart, Star, Coffee, Briefcase, Home
+  Heart, Star, Coffee, Briefcase, Home, ZoomIn, ZoomOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Event } from '@/types';
@@ -129,6 +129,24 @@ export function EventModal({
   hideActionButtons,
   attendanceCount
 }: EventModalProps) {
+  const [zoomedImageSrc, setZoomedImageSrc] = useState<string | null>(null);
+  const [zoomLevel, setZoomLevel] = useState(1);
+
+  useEffect(() => {
+    const handleDescriptionClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'IMG' && target.classList.contains('zoomable-image')) {
+        setZoomedImageSrc((target as HTMLImageElement).src);
+        setZoomLevel(1);
+      }
+    };
+
+    const container = document.getElementById('event-description-container');
+    if (container) {
+      container.addEventListener('click', handleDescriptionClick);
+      return () => container.removeEventListener('click', handleDescriptionClick);
+    }
+  }, [event?.description, isOpen]);
 
   if (!event) return null;
 
@@ -256,6 +274,7 @@ export function EventModal({
             <div className="space-y-4">
                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Sobre la actividad</h4>
                 <div 
+                    id="event-description-container"
                     className="text-gray-600 text-base leading-relaxed prose prose-neutral max-w-none font-geist-sans"
                     dangerouslySetInnerHTML={{ __html: event.description }}
                 />
@@ -431,9 +450,56 @@ export function EventModal({
                     })()}
                 </div>
             )}
-        </div>
+          </div>
         )}
       </motion.div>
+
+      {/* Fullscreen Image Overlay */}
+      {zoomedImageSrc && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95">
+          {/* Close button */}
+          <button 
+            onClick={() => setZoomedImageSrc(null)}
+            className="absolute top-6 right-6 z-[210] p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          {/* Zoom controls menu */}
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4 p-3 bg-black/30 backdrop-blur-md rounded-2xl border border-white/10 opacity-30 hover:opacity-100 transition-opacity z-[210] shadow-2xl group">
+            <button 
+              onClick={() => setZoomLevel(prev => Math.max(0.2, prev - 0.25))}
+              className="p-3 bg-white/5 hover:bg-white/20 rounded-xl text-white transition-colors"
+              title="Alejar"
+            >
+               <ZoomOut className="w-6 h-6" />
+            </button>
+            <span className="text-white font-mono font-bold w-12 text-center text-sm">
+                {Math.round(zoomLevel * 100)}%
+            </span>
+            <button 
+              onClick={() => setZoomLevel(prev => Math.min(4, prev + 0.25))}
+              className="p-3 bg-white/5 hover:bg-white/20 rounded-xl text-white transition-colors"
+              title="Acercar"
+            >
+               <ZoomIn className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Draggable/Zoomable Image Area */}
+          <div className="w-full h-full overflow-auto flex items-center justify-center custom-scrollbar" onClick={(e) => {
+              if (e.target === e.currentTarget) setZoomedImageSrc(null);
+          }}>
+              <img 
+                src={zoomedImageSrc} 
+                className="max-w-none transition-transform duration-200 ease-out origin-center"
+                style={{ transform: `scale(${zoomLevel})` }}
+                alt="Zoomed"
+              />
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
