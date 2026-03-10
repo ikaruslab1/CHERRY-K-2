@@ -73,6 +73,7 @@ export function RichTextEditor({
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const [charCount, setCharCount] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
+  const [savedRange, setSavedRange] = useState<Range | null>(null);
   
   // Image editing state
   const [showImageDialog, setShowImageDialog] = useState(false);
@@ -224,11 +225,19 @@ export function RichTextEditor({
           } else {
               editingImageNode.outerHTML = html;
           }
+          handleInput();
       } else {
-          execCommand('insertHTML', html + '<p><br></p>');
+          if (contentEditableRef.current) {
+              contentEditableRef.current.focus();
+              const sel = window.getSelection();
+              if (sel && savedRange) {
+                  sel.removeAllRanges();
+                  sel.addRange(savedRange);
+              }
+              execCommand('insertHTML', html + '<p><br></p>');
+          }
       }
 
-      handleInput();
       closeImageDialog();
   };
 
@@ -248,10 +257,21 @@ export function RichTextEditor({
   const closeImageDialog = () => {
       setShowImageDialog(false);
       setEditingImageNode(null);
+      setSavedRange(null);
       setImgUrl('');
       setImgDesc('');
       setImgAlign('center');
       setImgWidth('100%');
+  };
+
+  const openImageDialog = () => {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+          setSavedRange(sel.getRangeAt(0).cloneRange());
+      } else {
+          setSavedRange(null);
+      }
+      setShowImageDialog(true);
   };
 
   return (
@@ -322,7 +342,7 @@ export function RichTextEditor({
           <div className="w-px h-6 bg-gray-300 mx-1" />
           
           <ToolbarButton 
-            onClick={() => setShowImageDialog(true)} 
+            onClick={openImageDialog} 
             icon={<ImageIcon size={16} />} 
             title="Insertar/Editar Imagen" 
           />
