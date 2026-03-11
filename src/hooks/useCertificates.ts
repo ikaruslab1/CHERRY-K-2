@@ -8,6 +8,8 @@ interface UseCertificatesReturn {
   speakerCertificates: Certificate[];
   staffCertificates: Certificate[];
   organizerCertificates: Certificate[];
+  globalCertificate: Certificate | null;
+  globalAttendanceProgress: { current: number; required: number } | null;
   refresh: () => Promise<void>;
 }
 
@@ -17,6 +19,8 @@ export function useCertificates(conferenceId: string | undefined): UseCertificat
   const [speakerCertificates, setSpeakerCertificates] = useState<Certificate[]>([]);
   const [staffCertificates, setStaffCertificates] = useState<Certificate[]>([]);
   const [organizerCertificates, setOrganizerCertificates] = useState<Certificate[]>([]);
+  const [globalCertificate, setGlobalCertificate] = useState<Certificate | null>(null);
+  const [globalAttendanceProgress, setGlobalAttendanceProgress] = useState<{ current: number; required: number } | null>(null);
 
   const fetchCertificates = useCallback(async () => {
     if (!conferenceId) return;
@@ -331,6 +335,63 @@ export function useCertificates(conferenceId: string | undefined): UseCertificat
       }
 
 
+      // --- GLOBAL ATTENDANCE CERTIFICATE ---
+      if (conferenceData.gives_global_certificate && conferenceData.global_certificate_threshold) {
+        const threshold = conferenceData.global_certificate_threshold;
+
+        // Count unique events attended (from all attendance records regardless of gives_certificate flag)
+        const { data: allAttendance } = await supabase
+          .from('attendance')
+          .select('events!inner(id, conference_id)')
+          .eq('user_id', user.id)
+          .eq('events.conference_id', conferenceId)
+          .not('scanned_at', 'is', null);
+
+        const uniqueEventsAttended = new Set(
+          (allAttendance || []).map((a: any) => a.events?.id).filter(Boolean)
+        ).size;
+
+        setGlobalAttendanceProgress({ current: uniqueEventsAttended, required: threshold });
+
+        if (uniqueEventsAttended >= threshold) {
+          const globalCert: Certificate = {
+            id: `GLOBAL-${conferenceId}-${user.id}`,
+            scanned_at: new Date().toISOString(),
+            events: {
+              id: `GLOBAL-ATTENDANCE-${conferenceId}`,
+              title: conferenceData.title,
+              date: conferenceData.end_date || new Date().toISOString(),
+              type: 'Asistencia General',
+              location: conferenceData.institution_name || '',
+              description: `Por haber completado ${threshold} actividades del congreso.`,
+              gives_certificate: true,
+              duration_days: 1,
+              conference_id: conferenceId,
+              conferences: {
+                title: conferenceData.title,
+                institution_name: conferenceData.institution_name || '',
+                department_name: conferenceData.department_name || '',
+                certificate_config: conferenceData.global_certificate_config || conferenceData.certificate_config
+              },
+              certificate_config: conferenceData.global_certificate_config || conferenceData.certificate_config
+            },
+            profiles: {
+              first_name: profileData?.first_name || user.user_metadata?.first_name || '',
+              last_name: profileData?.last_name || user.user_metadata?.last_name || '',
+              degree: profileData?.degree || null,
+              gender: profileData?.gender || null,
+            },
+            isGlobalAttendance: true
+          };
+          setGlobalCertificate(globalCert);
+        } else {
+          setGlobalCertificate(null);
+        }
+      } else {
+        setGlobalCertificate(null);
+        setGlobalAttendanceProgress(null);
+      }
+
     } catch (error) {
       console.error('Error in useCertificates:', error);
     } finally {
@@ -348,6 +409,8 @@ export function useCertificates(conferenceId: string | undefined): UseCertificat
     speakerCertificates,
     staffCertificates,
     organizerCertificates,
+    globalCertificate,
+    globalAttendanceProgress,
     refresh: fetchCertificates
   };
 }

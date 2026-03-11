@@ -32,6 +32,29 @@ export function CertificateDesignView() {
         }
     };
 
+    const handleSaveGlobalConfig = async (config: any) => {
+        if (!currentConference) return;
+
+        const { data, error } = await supabase
+            .from('conferences')
+            .update({ global_certificate_config: config })
+            .eq('id', currentConference.id)
+            .select();
+
+        if (error) {
+            console.error('Error updating global certificate config:', error);
+            throw error;
+        }
+
+        if (!data || data.length === 0) {
+            throw new Error('No se pudieron guardar los cambios de constancia general. Permisos insuficientes (RLS).');
+        }
+        
+        if (refreshConference) {
+            await refreshConference();
+        }
+    };
+
     if (!currentConference) {
         return (
             <div className="flex justify-center items-center py-20 ">
@@ -51,7 +74,9 @@ export function CertificateDesignView() {
                 <CertificateDesigner 
                     eventId={currentConference.id} 
                     initialConfig={currentConference.certificate_config}
+                    initialGlobalConfig={(currentConference as any).global_certificate_config}
                     onSave={handleSaveConfig}
+                    onSaveGlobal={handleSaveGlobalConfig}
                 />
             </div>
         </div>

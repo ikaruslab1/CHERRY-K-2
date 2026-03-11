@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
-import { Trash, Edit, Plus, Eye, Printer, X, Users } from 'lucide-react';
+import { Trash, Edit, Plus, Eye, Printer, X, Users, GraduationCap, ChevronDown, Save, Info } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { CertificateContent, Certificate } from '@/components/profile/CertificateContent';
 import { CertificatePreview } from '@/components/profile/CertificatePreview';
@@ -21,10 +21,15 @@ export function EventsManager() {
   const [isEditing, setIsEditing] = useState<Event | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
-
   const [speakerSelection, setSpeakerSelection] = useState<{event: Event, speakers: any[]} | null>(null);
+  
+  // Global attendance certificate state
+  const [showGlobalCertSection, setShowGlobalCertSection] = useState(false);
+  const [givesGlobalCert, setGivesGlobalCert] = useState(false);
+  const [globalCertThreshold, setGlobalCertThreshold] = useState(1);
+  const [savingGlobalCert, setSavingGlobalCert] = useState(false);
 
-  const { currentConference } = useConference();
+  const { currentConference, refreshConference } = useConference();
 
   const fetchEvents = async () => {
     if (!currentConference) return;
@@ -106,7 +111,32 @@ export function EventsManager() {
   useEffect(() => {
     fetchEvents();
     fetchUsers();
+    // Sync global cert config from conference
+    if (currentConference) {
+      setGivesGlobalCert(currentConference.gives_global_certificate || false);
+      setGlobalCertThreshold(currentConference.global_certificate_threshold || 1);
+    }
   }, [currentConference]);
+
+  const saveGlobalCertSettings = async () => {
+    if (!currentConference) return;
+    setSavingGlobalCert(true);
+    try {
+      const { error } = await supabase
+        .from('conferences')
+        .update({
+          gives_global_certificate: givesGlobalCert,
+          global_certificate_threshold: globalCertThreshold,
+        })
+        .eq('id', currentConference.id);
+      if (error) throw error;
+      if (refreshConference) await refreshConference();
+    } catch (err: any) {
+      alert('Error al guardar configuración: ' + (err.message || 'Error desconocido'));
+    } finally {
+      setSavingGlobalCert(false);
+    }
+  };
 
   const onSubmit = async (data: any) => {
     if (!currentConference) {
@@ -275,6 +305,96 @@ export function EventsManager() {
                 <Plus className="mr-2 h-4 w-4" /> Nuevo Evento
             </Button>
         </div>
+      </div>
+
+      {/* Global Attendance Certificate Panel */}
+      <div className={`rounded-2xl border transition-all duration-300 overflow-hidden ${givesGlobalCert ? 'border-[#DBF227] bg-[#DBF227]/5' : 'border-gray-200 bg-white'}`}>
+        <button
+          type="button"
+          onClick={() => setShowGlobalCertSection(!showGlobalCertSection)}
+          className="w-full flex items-center justify-between p-4 hover:bg-gray-50/50 transition-colors text-left"
+        >
+          <div className="flex items-center gap-3">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${givesGlobalCert ? 'bg-[#DBF227] text-[#373737]' : 'bg-gray-100 text-gray-500'}`}>
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-[#373737]">Constancia General de Participación</p>
+              <p className="text-xs text-gray-500">
+                {givesGlobalCert
+                  ? `Activa — se requieren ${globalCertThreshold} evento${globalCertThreshold !== 1 ? 's' : ''} por asistencia`
+                  : 'No se otorga constancia por asistencia general al congreso'
+                }
+              </p>
+            </div>
+          </div>
+          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${showGlobalCertSection ? 'rotate-180' : ''}`} />
+        </button>
+
+        {showGlobalCertSection && (
+          <div className="px-4 pb-4 pt-0 space-y-4 animate-in slide-in-from-top-2 duration-200">
+            <div className="h-px bg-gray-100" />
+
+            {/* Toggle Switch */}
+            <div className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${givesGlobalCert ? 'bg-[#DBF227]/20 border-[#DBF227]' : 'bg-gray-50/50 border-gray-100 hover:border-gray-200'}`}>
+              <div className="flex-1">
+                <label className="text-sm font-bold text-[#373737] block">Dar constancias por asistencia total al congreso</label>
+                <p className={`text-xs transition-colors ${givesGlobalCert ? 'text-gray-600' : 'text-gray-400'}`}>
+                  Activa si los asistentes pueden ganar una constancia por participar en múltiples eventos del congreso.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={givesGlobalCert}
+                  onChange={(e) => setGivesGlobalCert(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#DBF227]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#DBF227]"></div>
+              </label>
+            </div>
+
+            {/* Threshold Input - shown when enabled */}
+            {givesGlobalCert && (
+              <div className="animate-in slide-in-from-top-2 duration-300 space-y-2">
+                <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100 text-blue-800 text-xs">
+                  <Info size={14} className="shrink-0 mt-0.5" />
+                  <p>
+                    Este contador es <strong>por congreso</strong>. Cada congreso activo lleva la cuenta de asistencias de forma independiente.
+                  </p>
+                </div>
+                <label className="text-sm font-bold text-[#373737] block">
+                  Número mínimo de eventos con asistencia registrada:
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    min={1}
+                    max={999}
+                    value={globalCertThreshold}
+                    onChange={(e) => setGlobalCertThreshold(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-28 px-4 py-3 rounded-xl border border-gray-200 text-[#373737] text-center font-bold focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent transition-all bg-gray-50/50 text-lg"
+                  />
+                  <p className="text-sm text-gray-500">
+                    evento{globalCertThreshold !== 1 ? 's' : ''} con asistencia marcada para obtener la constancia
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <Button
+              onClick={saveGlobalCertSettings}
+              disabled={savingGlobalCert}
+              className="w-full sm:w-auto bg-[#373737] text-white hover:bg-black gap-2"
+            >
+              {savingGlobalCert ? (
+                <span className="flex items-center gap-2"><span className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full"></span> Guardando...</span>
+              ) : (
+                <><Save className="w-4 h-4" /> Guardar Configuración</>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
 
 

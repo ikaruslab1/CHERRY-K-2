@@ -14,15 +14,17 @@ import { PRESET_LOGOS } from '@/lib/constants';
 interface CertificateDesignerProps {
     eventId?: string; // Optional, if modifying a specific event
     initialConfig: any;
+    initialGlobalConfig?: any; // Global attendance certificate config
     onSave: (config: any) => Promise<void>;
+    onSaveGlobal?: (config: any) => Promise<void>; // Save global attendance cert config
 }
 
-export function CertificateDesigner({ eventId, initialConfig, onSave }: CertificateDesignerProps) {
+export function CertificateDesigner({ eventId, initialConfig, initialGlobalConfig, onSave, onSaveGlobal }: CertificateDesignerProps) {
     const { currentConference } = useConference();
     
-    const [config, setConfig] = useState(() => {
+    const makeDefaultConfig = (base?: any) => {
         const defaults = {
-            mode: 'template_v1', // default
+            mode: 'template_v1',
             styles: {
                 text_color: '#000000',
                 accent_color: '#dbf227',
@@ -30,28 +32,15 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                 text_alignment: 'center',
                 content_vertical_position: '40%'
             },
-            signer_style: {
-                scale: 1,
-                gap: 24
-            },
+            signer_style: { scale: 1, gap: 24 },
             texts: {
                attendee: "Por su asistencia al evento",
                speaker: "Por impartir la conferencia:",
                staff: "Por su valiosa participación en la logística del evento:",
                organizer: "Por su liderazgo en la organización del evento:"
             },
-            name_style: {
-                fontSize: '5xl',
-                textAlign: 'center',
-                lineHeight: '1',
-                fontFamily: 'sans'
-            },
-            event_title_style: {
-                fontSize: '3xl',
-                textAlign: 'center',
-                lineHeight: '1.1',
-                fontFamily: 'sans'
-            },
+            name_style: { fontSize: '5xl', textAlign: 'center', lineHeight: '1', fontFamily: 'sans' },
+            event_title_style: { fontSize: '3xl', textAlign: 'center', lineHeight: '1.1', fontFamily: 'sans' },
             show_qr: true,
             qr_position: 'bottom-right',
             logos: [
@@ -62,20 +51,23 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
         };
         return {
             ...defaults,
-            ...initialConfig,
-            styles: { ...defaults.styles, ...initialConfig?.styles },
-            texts: { ...defaults.texts, ...initialConfig?.texts },
-            signer_style: { ...defaults.signer_style, ...initialConfig?.signer_style },
-            name_style: { ...defaults.name_style, ...initialConfig?.name_style },
-            event_title_style: { ...defaults.event_title_style, ...initialConfig?.event_title_style },
-            logos: initialConfig?.logos || defaults.logos
+            ...base,
+            styles: { ...defaults.styles, ...base?.styles },
+            texts: { ...defaults.texts, ...base?.texts },
+            signer_style: { ...defaults.signer_style, ...base?.signer_style },
+            name_style: { ...defaults.name_style, ...base?.name_style },
+            event_title_style: { ...defaults.event_title_style, ...base?.event_title_style },
+            logos: base?.logos || defaults.logos
         };
-    });
+    };
+
+    const [config, setConfig] = useState(() => makeDefaultConfig(initialConfig));
+    const [globalConfig, setGlobalConfig] = useState(() => makeDefaultConfig(initialGlobalConfig));
 
     const [uploading, setUploading] = useState(false);
     const [logoUploading, setLogoUploading] = useState<number | null>(null);
     const [saving, setSaving] = useState(false);
-    const [previewRole, setPreviewRole] = useState<'attendee'|'speaker'|'staff'>('attendee');
+    const [previewRole, setPreviewRole] = useState<'attendee'|'speaker'|'general_attendance'>('attendee');
     const [scale, setScale] = useState(0.6); // Default scale
     const fileInputRef = useRef<HTMLInputElement>(null);
     const logoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -87,8 +79,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
     const [openSections, setOpenSections] = useState<Record<string, boolean>>({ mode: true, template: true, logos: true, styles: false, typography: false, texts: false, signers: false, preview: false });
     const toggleSection = (key: string) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
 
+    // --- ACTIVE CONFIG: switches between regular and global based on preview mode ---
+    const isGeneralMode = previewRole === 'general_attendance';
+    const activeConfig = isGeneralMode ? globalConfig : config;
+    const setActiveConfig = isGeneralMode ? setGlobalConfig : setConfig;
+
     const handleElementUpdate = (id: string, updates: any) => {
-        const currentElements = config.elements || {};
+        const currentElements = activeConfig.elements || {};
         const newElements = {
             ...currentElements,
             [id]: {
@@ -96,7 +93,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                 ...updates
             }
         };
-        setConfig({ ...config, elements: newElements });
+        setActiveConfig({ ...activeConfig, elements: newElements });
     };
 
     useEffect(() => {
@@ -145,17 +142,20 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
     // Determine event data for preview
     const selectedEvent = exampleEvents.find(e => e.id === selectedExampleEventId);
     
-    // Dummy certificate for preview
     const previewCertificate: Certificate = {
         id: 'PREVIEW-123456',
         scanned_at: selectedEvent ? selectedEvent.date : new Date().toISOString(),
         events: {
             id: selectedEvent ? selectedEvent.id : (eventId || 'evt-preview'),
-            title: selectedEvent ? selectedEvent.title : 'Evento de Prueba',
+            title: previewRole === 'general_attendance'
+                ? (currentConference?.title || 'XI Congreso Internacional')
+                : (selectedEvent ? selectedEvent.title : 'Evento de Prueba'),
             date: selectedEvent ? selectedEvent.date : new Date().toISOString(),
-            type: selectedEvent ? selectedEvent.type : 'Conferencia',
+            type: previewRole === 'general_attendance' ? 'Asistencia General' : (selectedEvent ? selectedEvent.type : 'Conferencia'),
             location: selectedEvent ? selectedEvent.location : 'Auditorio Principal',
-            description: selectedEvent ? selectedEvent.description : 'Descripción del evento de prueba.',
+            description: previewRole === 'general_attendance'
+                ? 'Por haber completado la asistencia general al congreso.'
+                : (selectedEvent ? selectedEvent.description : 'DescripciÃ³n del evento de prueba.'),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             start_time: '09:00',
@@ -169,19 +169,19 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
             conferences: {
                 title: currentConference?.title || 'XI Congreso Internacional',
                 institution_name: currentConference?.institution_name || 'Universidad Ejemplo',
-                department_name: currentConference?.department_name || 'Facultad de Diseño',
-                certificate_config: config
+                department_name: currentConference?.department_name || 'Facultad de DiseÃ±o',
+                certificate_config: activeConfig
             },
-            certificate_config: config
+            certificate_config: activeConfig
         },
         profiles: {
             first_name: 'Juan',
-            last_name: 'Pérez García',
+            last_name: 'PÃ©rez GarcÃ­a',
             degree: 'Licenciatura',
             gender: 'Masculino'
         },
         isSpeaker: previewRole === 'speaker',
-        isStaff: previewRole === 'staff',
+        isStaff: false,
         isOrganizer: false
     };
 
@@ -205,8 +205,8 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                 .from('events')
                 .getPublicUrl(fileName);
 
-            setConfig({
-                ...config,
+            setActiveConfig({
+                ...activeConfig,
                 mode: 'custom_background',
                 background_url: publicUrl
             });
@@ -245,11 +245,11 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                 .from('events')
                 .getPublicUrl(fileName);
             
-            const newLogos = [...(config.logos || [])];
+            const newLogos = [...(activeConfig.logos || [])];
             newLogos[slotIndex] = { type: 'custom', value: publicUrl };
             
-            setConfig({
-                ...config,
+            setActiveConfig({
+                ...activeConfig,
                 logos: newLogos
             });
             setActiveLogoSlot(null); // Close selection
@@ -263,41 +263,34 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
     };
 
     const updateStyle = (key: string, value: string) => {
-        setConfig({
-            ...config,
-            styles: { ...config.styles, [key]: value }
-        });
+        setActiveConfig({ ...activeConfig, styles: { ...activeConfig.styles, [key]: value } });
     };
 
     const updateText = (key: string, value: string) => {
-        setConfig({
-            ...config,
-            texts: { ...config.texts, [key]: value }
-        });
+        setActiveConfig({ ...activeConfig, texts: { ...activeConfig.texts, [key]: value } });
     };
 
     const updateTextElementStyle = (element: 'name_style' | 'event_title_style', key: string, value: string) => {
-        setConfig({
-            ...config,
-            [element]: { ...config[element], [key]: value }
-        });
+        setActiveConfig({ ...activeConfig, [element]: { ...activeConfig[element], [key]: value } });
     };
 
     const updateSignerStyle = (key: string, value: any) => {
-        setConfig({
-            ...config,
-            signer_style: { ...config.signer_style, [key]: value }
-        });
+        setActiveConfig({ ...activeConfig, signer_style: { ...activeConfig.signer_style, [key]: value } });
     };
 
     const handleSave = async () => {
         setSaving(true);
         try {
-            await onSave(config);
-            alert('Diseño guardado correctamente');
+            if (isGeneralMode && onSaveGlobal) {
+                await onSaveGlobal(globalConfig);
+                alert('DiseÃ±o de constancia general guardado correctamente');
+            } else {
+                await onSave(config);
+                alert('DiseÃ±o guardado correctamente');
+            }
         } catch (error: any) {
             console.error(error);
-            alert(error.message || 'Error al guardar el diseño');
+            alert(error.message || 'Error al guardar el diseÃ±o');
         } finally {
             setSaving(false);
         }
@@ -316,7 +309,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                         </div>
                         <div>
                             <h2 className="font-bold text-sm text-gray-800 tracking-tight">Editor de Constancia</h2>
-                            <p className="text-[10px] text-gray-400">Personaliza el diseño visual</p>
+                            <p className="text-[10px] text-gray-400">Personaliza el diseÃ±o visual</p>
                         </div>
                     </div>
                 </div>
@@ -328,15 +321,15 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                          {/* Mode Selection - Always visible */}
                         <div className="flex bg-gray-100 p-1 rounded-lg">
                             <button 
-                                onClick={() => setConfig({...config, mode: 'template_v1'})}
-                                className={`flex-1 py-2.5 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 ${config.mode === 'template_v1' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                                onClick={() => setActiveConfig({...activeConfig, mode: 'template_v1'})}
+                                className={`flex-1 py-2.5 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 ${activeConfig.mode === 'template_v1' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
                             >
                                 <LayoutTemplate className="w-3.5 h-3.5" />
                                 Plantilla
                             </button>
                             <button 
-                                onClick={() => setConfig({...config, mode: 'custom_background'})}
-                                className={`flex-1 py-2.5 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 ${config.mode === 'custom_background' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                                onClick={() => setActiveConfig({...activeConfig, mode: 'custom_background'})}
+                                className={`flex-1 py-2.5 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-1.5 ${activeConfig.mode === 'custom_background' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
                             >
                                 <ImageIcon className="w-3.5 h-3.5" />
                                 Fondo Personalizado
@@ -344,7 +337,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                         </div>
 
                         {/* Template Selection - Only for Default Mode */}
-                        {config.mode === 'template_v1' && (
+                        {activeConfig.mode === 'template_v1' && (
                             <div className="rounded-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2">
                                 <button onClick={() => toggleSection('template')} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
                                     <div className="flex items-center gap-2.5">
@@ -357,22 +350,22 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     <div className="grid grid-cols-3 gap-2">
                                         {/* Classic/Legacy Template */}
                                         <button 
-                                            onClick={() => setConfig({...config, template_id: 'legacy'})}
-                                            className={`relative group p-2 rounded-lg text-left shadow-sm transition-all ${(!config.template_id || config.template_id === 'legacy') ? 'border-2 border-[#DBF227] bg-white ring-1 ring-[#DBF227]/20' : 'border border-gray-200 bg-white hover:border-gray-300'}`}
+                                            onClick={() => setActiveConfig({...activeConfig, template_id: 'legacy'})}
+                                            className={`relative group p-2 rounded-lg text-left shadow-sm transition-all ${(!activeConfig.template_id || activeConfig.template_id === 'legacy') ? 'border-2 border-[#DBF227] bg-white ring-1 ring-[#DBF227]/20' : 'border border-gray-200 bg-white hover:border-gray-300'}`}
                                         >
                                             <div className="h-16 bg-[#1a1a1a] w-full rounded mb-2 overflow-hidden relative border border-gray-100">
                                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[8px] text-gray-400 font-serif">CONSTANCIA</div>
                                             </div>
                                             <div className="flex items-center justify-between">
                                                 <span className="text-xs font-bold text-gray-800">Original</span>
-                                                {(!config.template_id || config.template_id === 'legacy') && <div className="w-2 h-2 rounded-full bg-[#DBF227]"></div>}
+                                                {(!activeConfig.template_id || activeConfig.template_id === 'legacy') && <div className="w-2 h-2 rounded-full bg-[#DBF227]"></div>}
                                             </div>
                                         </button>
                                         
                                         {/* Elegant/Classic Template */}
                                         <button 
-                                            onClick={() => setConfig({...config, template_id: 'classic'})}
-                                            className={`relative group p-2 rounded-lg text-left shadow-sm transition-all ${config.template_id === 'classic' ? 'border-2 border-[#DBF227] bg-white ring-1 ring-[#DBF227]/20' : 'border border-gray-200 bg-white hover:border-gray-300'}`}
+                                            onClick={() => setActiveConfig({...activeConfig, template_id: 'classic'})}
+                                            className={`relative group p-2 rounded-lg text-left shadow-sm transition-all ${activeConfig.template_id === 'classic' ? 'border-2 border-[#DBF227] bg-white ring-1 ring-[#DBF227]/20' : 'border border-gray-200 bg-white hover:border-gray-300'}`}
                                         >
                                             <div className="h-16 bg-white w-full rounded mb-2 overflow-hidden relative border border-gray-200 p-2 flex flex-col items-center justify-center">
                                                 <div className="w-[80%] h-[1px] bg-gray-300 mb-1"></div>
@@ -381,14 +374,14 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                             </div>
                                             <div className="flex items-center justify-between">
                                                 <span className="text-xs font-bold text-gray-800">Elegante</span>
-                                                {config.template_id === 'classic' && <div className="w-2 h-2 rounded-full bg-[#DBF227]"></div>}
+                                                {activeConfig.template_id === 'classic' && <div className="w-2 h-2 rounded-full bg-[#DBF227]"></div>}
                                             </div>
                                         </button>
                                         
                                         {/* Modern Template */}
                                         <button 
-                                            onClick={() => setConfig({...config, template_id: 'modern'})}
-                                            className={`relative group p-2 rounded-lg text-left shadow-sm transition-all ${config.template_id === 'modern' ? 'border-2 border-[#DBF227] bg-white ring-1 ring-[#DBF227]/20' : 'border border-gray-200 bg-white hover:border-gray-300'}`}
+                                            onClick={() => setActiveConfig({...activeConfig, template_id: 'modern'})}
+                                            className={`relative group p-2 rounded-lg text-left shadow-sm transition-all ${activeConfig.template_id === 'modern' ? 'border-2 border-[#DBF227] bg-white ring-1 ring-[#DBF227]/20' : 'border border-gray-200 bg-white hover:border-gray-300'}`}
                                         >
                                             <div className="h-16 bg-white w-full rounded mb-2 overflow-hidden relative border border-gray-200 flex">
                                                 <div className="w-4 h-full bg-gradient-to-b from-blue-100 to-purple-100"></div>
@@ -399,7 +392,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                             </div>
                                             <div className="flex items-center justify-between">
                                                 <span className="text-xs font-bold text-gray-800">Moderno</span>
-                                                {config.template_id === 'modern' && <div className="w-2 h-2 rounded-full bg-[#DBF227]"></div>}
+                                                {activeConfig.template_id === 'modern' && <div className="w-2 h-2 rounded-full bg-[#DBF227]"></div>}
                                             </div>
                                         </button>
                                     </div>
@@ -413,18 +406,18 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                  <div className="flex items-center gap-2.5">
                                      <span className="w-5 h-5 rounded bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">02</span>
                                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Logos del Encabezado</span>
-                                     <span className="text-[9px] text-gray-400 font-medium">{(config.logos || []).filter((l: any) => l.type !== 'none' && l.value).length}/7</span>
+                                 <span className="text-[9px] text-gray-400 font-medium">{(activeConfig.logos || []).filter((l: any) => l.type !== 'none' && l.value).length}/7</span>
                                  </div>
                                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openSections.logos ? 'rotate-180' : ''}`} />
                              </button>
                              {openSections.logos && <div className="p-4 bg-white space-y-3">
                              <p className="text-[10px] text-gray-400 leading-relaxed">
-                                 Hasta 7 logos. SVGs en color negro sólido recomendado. +4 logos se reducen automáticamente.
+                                 Hasta 7 logos. SVGs en color negro sÃ³lido recomendado. +4 logos se reducen automÃ¡ticamente.
                              </p>
                              
                              <div className="grid grid-cols-4 gap-3">
                                  {Array.from({ length: 7 }).map((_, slotIndex) => {
-                                     const logo = (config.logos && config.logos[slotIndex]) || { type: 'none', value: '' };
+                                     const logo = (activeConfig.logos && activeConfig.logos[slotIndex]) || { type: 'none', value: '' };
                                      const isActive = activeLogoSlot === slotIndex;
                                      const logoUrl = logo.type === 'preset' ? `/assets/${logo.value}.svg` : logo.value;
 
@@ -445,7 +438,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                          <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
                                                              <Plus className="w-4 h-4" />
                                                          </div>
-                                                         <span className="text-[9px] text-gray-400 font-medium">Vacío</span>
+                                                         <span className="text-[9px] text-gray-400 font-medium">VacÃ­o</span>
                                                      </>
                                                  )}
                                                  <div className="absolute top-1 left-1 text-[8px] font-bold text-gray-300 bg-white/80 px-1 rounded">
@@ -461,7 +454,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                          </div>}
                          </div>
                         {/* Background Upload - Only for Custom Mode */}
-                        {config.mode === 'custom_background' && (
+                        {activeConfig.mode === 'custom_background' && (
                             <div className="rounded-xl border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-2">
                                 <div className="px-4 py-3 bg-gray-50/80">
                                     <div className="flex items-center gap-2.5">
@@ -489,13 +482,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                         onChange={handleFileUpload}
                                      />
                                 </div>
-                                <p className="text-[10px] text-gray-400 text-center">Recomendado: 3300×2550px (300dpi Carta Horizontal)</p>
+                                <p className="text-[10px] text-gray-400 text-center">Recomendado: 3300Ã—2550px (300dpi Carta Horizontal)</p>
                                  
-                                 {config.background_url && (
+                                 {activeConfig.background_url && (
                                      <div className="relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm w-full h-32">
-                                         <NextImage src={config.background_url} alt="Background Preview" fill className="object-cover" sizes="(max-width: 768px) 100vw, 300px" />
+                                         <NextImage src={activeConfig.background_url} alt="Background Preview" fill className="object-cover" sizes="(max-width: 768px) 100vw, 300px" />
                                          <button 
-                                            onClick={() => setConfig({...config, background_url: undefined, mode: 'template_v1'})}
+                                            onClick={() => setActiveConfig({...activeConfig, background_url: undefined, mode: 'template_v1'})}
                                             className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg hover:bg-red-600 transition-colors z-10"
                                             title="Eliminar fondo"
                                          >
@@ -513,13 +506,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                             <button onClick={() => toggleSection('styles')} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
                                 <div className="flex items-center gap-2.5">
                                     <span className="w-5 h-5 rounded bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">03</span>
-                                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Colores y Tipografía</span>
+                                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Colores y TipografÃ­a</span>
                                 </div>
                                 <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openSections.styles ? 'rotate-180' : ''}`} />
                             </button>
                             {openSections.styles && <div className="p-4 bg-white space-y-4">
                             
-                            {config.mode !== 'custom_background' && (
+                            {activeConfig.mode !== 'custom_background' && (
                                 <>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
@@ -528,13 +521,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                 <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-gray-200">
                                                     <input 
                                                         type="color" 
-                                                        value={config.styles?.text_color || '#000000'}
+                                                        value={activeConfig.styles?.text_color || '#000000'}
                                                         onChange={(e) => updateStyle('text_color', e.target.value)}
                                                         className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] cursor-pointer p-0 m-0"
                                                     />
                                                 </div>
                                                 <input 
-                                                    value={config.styles?.text_color || '#000000'}
+                                                    value={activeConfig.styles?.text_color || '#000000'}
                                                     onChange={(e) => updateStyle('text_color', e.target.value)}
                                                     className="uppercase text-xs font-mono w-20 p-1.5 border rounded"
                                                 />
@@ -546,13 +539,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                 <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-gray-200">
                                                         <input 
                                                         type="color" 
-                                                        value={config.styles?.accent_color || '#dbf227'}
+                                                        value={activeConfig.styles?.accent_color || '#dbf227'}
                                                         onChange={(e) => updateStyle('accent_color', e.target.value)}
                                                         className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] cursor-pointer p-0 m-0"
                                                     />
                                                 </div>
                                                 <input 
-                                                        value={config.styles?.accent_color || '#dbf227'}
+                                                        value={activeConfig.styles?.accent_color || '#dbf227'}
                                                         onChange={(e) => updateStyle('accent_color', e.target.value)}
                                                         className="uppercase text-xs font-mono w-20 p-1.5 border rounded"
                                                 />
@@ -561,26 +554,26 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-semibold text-gray-500 mb-1.5">Tipografía</label>
+                                        <label className="block text-xs font-semibold text-gray-500 mb-1.5">TipografÃ­a</label>
                                         <select 
-                                            value={config.styles?.font_family || 'sans'}
+                                            value={activeConfig.styles?.font_family || 'sans'}
                                             onChange={(e) => updateStyle('font_family', e.target.value)}
                                             className="w-full p-2 border rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#DBF227] focus:border-transparent outline-none text-black"
                                         >
                                             <option value="sans">Geist Sans (Moderna)</option>
                                             <option value="serif">Playfair Display (Elegante)</option>
-                                            <option value="mono">Geist Mono (Técnica)</option>
-                                            <option value="cursive">Dancing Script (Caligrafía)</option>
+                                            <option value="mono">Geist Mono (TÃ©cnica)</option>
+                                            <option value="cursive">Dancing Script (CaligrafÃ­a)</option>
                                         </select>
                                     </div>
                                 </>
                             )}
 
-                            {config.mode === 'custom_background' && (
+                            {activeConfig.mode === 'custom_background' && (
                                 <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 mt-4 animate-in fade-in slide-in-from-left-2">
                                     <h4 className="text-xs font-bold text-blue-800 mb-2 uppercase tracking-wide">Editor de Elementos</h4>
                                     <p className="text-[10px] text-blue-600 mb-3 leading-relaxed">
-                                        Haz clic en los elementos del diseño para seleccionarlos y arrástralos para moverlos.
+                                        Haz clic en los elementos del diseÃ±o para seleccionarlos y arrÃ¡stralos para moverlos.
                                     </p>
                                     
                                     {selectedElement ? (
@@ -602,12 +595,12 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                             min="0.5" 
                                                             max="3" 
                                                             step="0.1"
-                                                            value={config.elements?.[selectedElement]?.scale || 1}
+                                                            value={activeConfig.elements?.[selectedElement]?.scale || 1}
                                                             onChange={(e) => handleElementUpdate(selectedElement, { scale: parseFloat(e.target.value) })}
                                                             className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
                                                         />
                                                         <span className="text-[10px] font-mono w-8 text-right font-bold text-gray-600">
-                                                            {(config.elements?.[selectedElement]?.scale || 1).toFixed(1)}x
+                                                            {(activeConfig.elements?.[selectedElement]?.scale || 1).toFixed(1)}x
                                                         </span>
                                                     </div>
                                                 </div>
@@ -619,7 +612,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                             <div>
                                                                 <label className="block text-[10px] font-bold text-gray-400 mb-1">Fuente</label>
                                                                 <select 
-                                                                    value={config.elements?.[selectedElement]?.fontFamily || 'inherit'}
+                                                                    value={activeConfig.elements?.[selectedElement]?.fontFamily || 'inherit'}
                                                                     onChange={(e) => handleElementUpdate(selectedElement, { fontFamily: e.target.value })}
                                                                     className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227]"
                                                                 >
@@ -635,25 +628,25 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                                 <div className="flex gap-2 items-center">
                                                                     <input 
                                                                         type="color" 
-                                                                        value={config.elements?.[selectedElement]?.color || config.styles?.text_color || '#000000'}
+                                                                        value={activeConfig.elements?.[selectedElement]?.color || activeConfig.styles?.text_color || '#000000'}
                                                                         onChange={(e) => handleElementUpdate(selectedElement, { color: e.target.value })}
                                                                         className="w-8 h-8 rounded border border-gray-200 cursor-pointer p-0"
                                                                     />
                                                                     <div className="text-[10px] font-mono uppercase bg-gray-100 px-1.5 py-0.5 rounded text-gray-500">
-                                                                        {config.elements?.[selectedElement]?.color || 'AUTO'}
+                                                                        {activeConfig.elements?.[selectedElement]?.color || 'AUTO'}
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
 
                                                         <div>
-                                                            <label className="block text-[10px] font-bold text-gray-400 mb-1">Alineación</label>
+                                                            <label className="block text-[10px] font-bold text-gray-400 mb-1">AlineaciÃ³n</label>
                                                             <div className="flex bg-gray-50 p-1 rounded border border-gray-200">
                                                                 {['left', 'center', 'right'].map((align) => (
                                                                     <button 
                                                                         key={align}
                                                                         onClick={() => handleElementUpdate(selectedElement, { textAlign: align })}
-                                                                        className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${config.elements?.[selectedElement]?.textAlign === align ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                        className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${activeConfig.elements?.[selectedElement]?.textAlign === align ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
                                                                     >
                                                                         {align === 'left' ? 'Izq' : align === 'center' ? 'Cen' : 'Der'}
                                                                     </button>
@@ -665,7 +658,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                             <div>
                                                                 <label className="block text-[10px] font-bold text-gray-400 mb-1">Peso</label>
                                                                 <select 
-                                                                    value={config.elements?.[selectedElement]?.fontWeight || 'inherit'}
+                                                                    value={activeConfig.elements?.[selectedElement]?.fontWeight || 'inherit'}
                                                                     onChange={(e) => handleElementUpdate(selectedElement, { fontWeight: e.target.value })}
                                                                     className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227]"
                                                                 >
@@ -681,15 +674,15 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                                 <label className="block text-[10px] font-bold text-gray-400 mb-1">Estilo</label>
                                                                 <div className="flex bg-gray-50 p-1 rounded border border-gray-200 gap-1">
                                                                     <button 
-                                                                        onClick={() => handleElementUpdate(selectedElement, { fontStyle: config.elements?.[selectedElement]?.fontStyle === 'italic' ? 'normal' : 'italic' })}
-                                                                        className={`flex-1 py-1 text-sm font-serif italic rounded transition-all ${config.elements?.[selectedElement]?.fontStyle === 'italic' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                        onClick={() => handleElementUpdate(selectedElement, { fontStyle: activeConfig.elements?.[selectedElement]?.fontStyle === 'italic' ? 'normal' : 'italic' })}
+                                                                        className={`flex-1 py-1 text-sm font-serif italic rounded transition-all ${activeConfig.elements?.[selectedElement]?.fontStyle === 'italic' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
                                                                         title="Cursiva"
                                                                     >
                                                                         I
                                                                     </button>
                                                                     <button 
-                                                                        onClick={() => handleElementUpdate(selectedElement, { textDecoration: config.elements?.[selectedElement]?.textDecoration === 'underline' ? 'none' : 'underline' })}
-                                                                        className={`flex-1 py-1 text-sm font-sans underline rounded transition-all ${config.elements?.[selectedElement]?.textDecoration === 'underline' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                        onClick={() => handleElementUpdate(selectedElement, { textDecoration: activeConfig.elements?.[selectedElement]?.textDecoration === 'underline' ? 'none' : 'underline' })}
+                                                                        className={`flex-1 py-1 text-sm font-sans underline rounded transition-all ${activeConfig.elements?.[selectedElement]?.textDecoration === 'underline' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
                                                                         title="Subrayado"
                                                                     >
                                                                         U
@@ -700,9 +693,9 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                         
                                                         <div>
                                                             <div className="flex items-center justify-between mb-1">
-                                                                <label className="block text-[10px] font-bold text-gray-400">Ancho Máximo (Quiebre)</label>
+                                                                <label className="block text-[10px] font-bold text-gray-400">Ancho MÃ¡ximo (Quiebre)</label>
                                                                 <span className="text-[10px] font-mono font-bold text-gray-600">
-                                                                    {config.elements?.[selectedElement]?.maxWidth ? `${config.elements?.[selectedElement]?.maxWidth}px` : 'Auto'}
+                                                                    {activeConfig.elements?.[selectedElement]?.maxWidth ? `${activeConfig.elements?.[selectedElement]?.maxWidth}px` : 'Auto'}
                                                                 </span>
                                                             </div>
                                                             <input 
@@ -710,7 +703,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                                 min="200" 
                                                                 max="1000" 
                                                                 step="10"
-                                                                value={config.elements?.[selectedElement]?.maxWidth || 800}
+                                                                value={activeConfig.elements?.[selectedElement]?.maxWidth || 800}
                                                                 onChange={(e) => handleElementUpdate(selectedElement, { maxWidth: parseInt(e.target.value) })}
                                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
                                                             />
@@ -728,7 +721,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                                         step="0.1"
                                                                         min="0.8"
                                                                         max="3"
-                                                                        value={config.elements?.[selectedElement]?.lineHeight || '1.1'}
+                                                                        value={activeConfig.elements?.[selectedElement]?.lineHeight || '1.1'}
                                                                         onChange={(e) => handleElementUpdate(selectedElement, { lineHeight: e.target.value })}
                                                                         className="w-full p-1 border rounded text-xs outline-none focus:border-[#DBF227]"
                                                                     />
@@ -740,7 +733,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                                          step="0.5"
                                                                          min="-2"
                                                                          max="20"
-                                                                        value={parseFloat(config.elements?.[selectedElement]?.letterSpacing || '0')}
+                                                                        value={parseFloat(activeConfig.elements?.[selectedElement]?.letterSpacing || '0')}
                                                                         onChange={(e) => handleElementUpdate(selectedElement, { letterSpacing: `${e.target.value}px` })}
                                                                         className="w-full p-1 border rounded text-xs outline-none focus:border-[#DBF227]"
                                                                     />
@@ -758,13 +751,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                             <div className="flex bg-gray-50 p-1 rounded border border-gray-200">
                                                                 <button 
                                                                     onClick={() => handleElementUpdate(selectedElement, { contrast: 'black' })}
-                                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${(!config.elements?.[selectedElement]?.contrast || config.elements?.[selectedElement]?.contrast === 'black') ? 'bg-black text-white shadow' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${(!activeConfig.elements?.[selectedElement]?.contrast || activeConfig.elements?.[selectedElement]?.contrast === 'black') ? 'bg-black text-white shadow' : 'text-gray-400 hover:text-gray-600'}`}
                                                                 >
                                                                     Negro (Original)
                                                                 </button>
                                                                 <button 
                                                                     onClick={() => handleElementUpdate(selectedElement, { contrast: 'white' })}
-                                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${config.elements?.[selectedElement]?.contrast === 'white' ? 'bg-white text-black border border-gray-200 shadow' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${activeConfig.elements?.[selectedElement]?.contrast === 'white' ? 'bg-white text-black border border-gray-200 shadow' : 'text-gray-400 hover:text-gray-600'}`}
                                                                 >
                                                                     Blanco / Invertido
                                                                 </button>
@@ -773,17 +766,17 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
 
                                                         {selectedElement === 'logos' && (
                                                             <div>
-                                                                <label className="block text-[10px] font-bold text-gray-400 mb-1">Disposición</label>
+                                                                <label className="block text-[10px] font-bold text-gray-400 mb-1">DisposiciÃ³n</label>
                                                                 <div className="flex bg-gray-50 p-1 rounded border border-gray-200">
                                                                     <button 
                                                                         onClick={() => handleElementUpdate(selectedElement, { direction: 'horizontal' })}
-                                                                        className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${(!config.elements?.[selectedElement]?.direction || config.elements?.[selectedElement]?.direction === 'horizontal') ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                        className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${(!activeConfig.elements?.[selectedElement]?.direction || activeConfig.elements?.[selectedElement]?.direction === 'horizontal') ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
                                                                     >
                                                                         Horizontal
                                                                     </button>
                                                                     <button 
                                                                         onClick={() => handleElementUpdate(selectedElement, { direction: 'vertical' })}
-                                                                        className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${config.elements?.[selectedElement]?.direction === 'vertical' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                                        className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${activeConfig.elements?.[selectedElement]?.direction === 'vertical' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
                                                                     >
                                                                         Vertical
                                                                     </button>
@@ -797,7 +790,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                         </div>
                                     ) : (
                                         <div className="text-[10px] text-gray-400 italic text-center py-4 border border-dashed border-blue-200 rounded bg-white/50">
-                                            Ningún elemento seleccionado
+                                            NingÃºn elemento seleccionado
                                         </div>
                                     )}
                                 </div>
@@ -806,18 +799,18 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                         </div>
 
                         {/* Text Element Typography - Only for Template V1 Mode */}
-                        {config.mode !== 'custom_background' && (
+                        {activeConfig.mode !== 'custom_background' && (
                             <div className="rounded-xl border border-gray-100 overflow-hidden">
                                 <button onClick={() => toggleSection('typography')} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
                                     <div className="flex items-center gap-2.5">
                                         <span className="w-5 h-5 rounded bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">04</span>
-                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Tipografía</span>
+                                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">TipografÃ­a</span>
                                     </div>
                                     <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openSections.typography ? 'rotate-180' : ''}`} />
                                 </button>
                                 {openSections.typography && <div className="p-4 bg-white space-y-4">
                                 <p className="text-[10px] text-gray-400 leading-relaxed">
-                                    Personaliza nombre y título del evento en la constancia.
+                                    Personaliza nombre y tÃ­tulo del evento en la constancia.
                                 </p>
 
                                 {/* --- Name Style --- */}
@@ -831,32 +824,32 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     <div>
                                         <label className="block text-[10px] font-bold text-gray-400 mb-1">Tipo de letra</label>
                                         <select
-                                            value={config.name_style?.fontFamily || 'sans'}
+                                            value={activeConfig.name_style?.fontFamily || 'sans'}
                                             onChange={(e) => updateTextElementStyle('name_style', 'fontFamily', e.target.value)}
                                             className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227] text-black"
                                         >
                                             <option value="sans">Geist Sans (Moderna)</option>
                                             <option value="serif">Playfair Display (Elegante)</option>
-                                            <option value="mono">Geist Mono (Técnica)</option>
-                                            <option value="cursive">Dancing Script (Caligrafía)</option>
+                                            <option value="mono">Geist Mono (TÃ©cnica)</option>
+                                            <option value="cursive">Dancing Script (CaligrafÃ­a)</option>
                                         </select>
                                     </div>
 
                                     {/* Font Size */}
                                     <div>
                                         <div className="flex items-center justify-between mb-1">
-                                            <label className="block text-[10px] font-bold text-gray-400">Tamaño de fuente</label>
+                                            <label className="block text-[10px] font-bold text-gray-400">TamaÃ±o de fuente</label>
                                             <span className="text-[10px] font-mono font-bold text-gray-600">
-                                                {config.name_style?.fontSize || '5xl'}
+                                                {activeConfig.name_style?.fontSize || '5xl'}
                                             </span>
                                         </div>
                                         <select
-                                            value={config.name_style?.fontSize || '5xl'}
+                                            value={activeConfig.name_style?.fontSize || '5xl'}
                                             onChange={(e) => updateTextElementStyle('name_style', 'fontSize', e.target.value)}
                                             className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227] text-black"
                                         >
-                                            <option value="2xl">Muy pequeño (2xl)</option>
-                                            <option value="3xl">Pequeño (3xl)</option>
+                                            <option value="2xl">Muy pequeÃ±o (2xl)</option>
+                                            <option value="3xl">PequeÃ±o (3xl)</option>
                                             <option value="4xl">Mediano (4xl)</option>
                                             <option value="5xl">Grande (5xl)</option>
                                             <option value="6xl">Muy grande (6xl)</option>
@@ -866,13 +859,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
 
                                     {/* Alignment */}
                                     <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 mb-1">Alineación</label>
+                                        <label className="block text-[10px] font-bold text-gray-400 mb-1">AlineaciÃ³n</label>
                                         <div className="flex bg-gray-50 p-1 rounded border border-gray-200">
                                             {['left', 'center', 'right'].map((align) => (
                                                 <button
                                                     key={align}
                                                     onClick={() => updateTextElementStyle('name_style', 'textAlign', align)}
-                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${config.name_style?.textAlign === align ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${activeConfig.name_style?.textAlign === align ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
                                                 >
                                                     {align === 'left' ? 'Izquierda' : align === 'center' ? 'Centro' : 'Derecha'}
                                                 </button>
@@ -883,9 +876,9 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     {/* Line Height */}
                                     <div>
                                         <div className="flex items-center justify-between mb-1">
-                                            <label className="block text-[10px] font-bold text-gray-400">Espacio entre líneas</label>
+                                            <label className="block text-[10px] font-bold text-gray-400">Espacio entre lÃ­neas</label>
                                             <span className="text-[10px] font-mono font-bold text-gray-600">
-                                                {config.name_style?.lineHeight || '1'}
+                                                {activeConfig.name_style?.lineHeight || '1'}
                                             </span>
                                         </div>
                                         <input
@@ -893,7 +886,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                             min="0.8"
                                             max="2.5"
                                             step="0.1"
-                                            value={config.name_style?.lineHeight || '1'}
+                                            value={activeConfig.name_style?.lineHeight || '1'}
                                             onChange={(e) => updateTextElementStyle('name_style', 'lineHeight', e.target.value)}
                                             className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
                                         />
@@ -903,7 +896,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 {/* --- Event Title Style --- */}
                                 <div className="bg-gray-50/50 p-3 rounded-lg border-l-2 border-l-blue-400 border border-gray-100 space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-gray-600 tracking-wide">Título del evento</span>
+                                        <span className="text-xs font-bold text-gray-600 tracking-wide">TÃ­tulo del evento</span>
                                         <span className="text-[9px] bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded-full font-semibold">EVENTO</span>
                                     </div>
 
@@ -911,32 +904,32 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     <div>
                                         <label className="block text-[10px] font-bold text-gray-400 mb-1">Tipo de letra</label>
                                         <select
-                                            value={config.event_title_style?.fontFamily || 'sans'}
+                                            value={activeConfig.event_title_style?.fontFamily || 'sans'}
                                             onChange={(e) => updateTextElementStyle('event_title_style', 'fontFamily', e.target.value)}
                                             className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227] text-black"
                                         >
                                             <option value="sans">Geist Sans (Moderna)</option>
                                             <option value="serif">Playfair Display (Elegante)</option>
-                                            <option value="mono">Geist Mono (Técnica)</option>
-                                            <option value="cursive">Dancing Script (Caligrafía)</option>
+                                            <option value="mono">Geist Mono (TÃ©cnica)</option>
+                                            <option value="cursive">Dancing Script (CaligrafÃ­a)</option>
                                         </select>
                                     </div>
 
                                     {/* Font Size */}
                                     <div>
                                         <div className="flex items-center justify-between mb-1">
-                                            <label className="block text-[10px] font-bold text-gray-400">Tamaño de fuente</label>
+                                            <label className="block text-[10px] font-bold text-gray-400">TamaÃ±o de fuente</label>
                                             <span className="text-[10px] font-mono font-bold text-gray-600">
-                                                {config.event_title_style?.fontSize || '3xl'}
+                                                {activeConfig.event_title_style?.fontSize || '3xl'}
                                             </span>
                                         </div>
                                         <select
-                                            value={config.event_title_style?.fontSize || '3xl'}
+                                            value={activeConfig.event_title_style?.fontSize || '3xl'}
                                             onChange={(e) => updateTextElementStyle('event_title_style', 'fontSize', e.target.value)}
                                             className="w-full p-1.5 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227] text-black"
                                         >
-                                            <option value="xl">Muy pequeño (xl)</option>
-                                            <option value="2xl">Pequeño (2xl)</option>
+                                            <option value="xl">Muy pequeÃ±o (xl)</option>
+                                            <option value="2xl">PequeÃ±o (2xl)</option>
                                             <option value="3xl">Mediano (3xl)</option>
                                             <option value="4xl">Grande (4xl)</option>
                                             <option value="5xl">Muy grande (5xl)</option>
@@ -946,13 +939,13 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
 
                                     {/* Alignment */}
                                     <div>
-                                        <label className="block text-[10px] font-bold text-gray-400 mb-1">Alineación</label>
+                                        <label className="block text-[10px] font-bold text-gray-400 mb-1">AlineaciÃ³n</label>
                                         <div className="flex bg-gray-50 p-1 rounded border border-gray-200">
                                             {['left', 'center', 'right'].map((align) => (
                                                 <button
                                                     key={align}
                                                     onClick={() => updateTextElementStyle('event_title_style', 'textAlign', align)}
-                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${config.event_title_style?.textAlign === align ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
+                                                    className={`flex-1 py-1 text-[10px] font-medium rounded capitalize transition-all ${activeConfig.event_title_style?.textAlign === align ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
                                                 >
                                                     {align === 'left' ? 'Izquierda' : align === 'center' ? 'Centro' : 'Derecha'}
                                                 </button>
@@ -963,9 +956,9 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     {/* Line Height */}
                                     <div>
                                         <div className="flex items-center justify-between mb-1">
-                                            <label className="block text-[10px] font-bold text-gray-400">Espacio entre líneas</label>
+                                            <label className="block text-[10px] font-bold text-gray-400">Espacio entre lÃ­neas</label>
                                             <span className="text-[10px] font-mono font-bold text-gray-600">
-                                                {config.event_title_style?.lineHeight || '1.1'}
+                                                {activeConfig.event_title_style?.lineHeight || '1.1'}
                                             </span>
                                         </div>
                                         <input
@@ -973,7 +966,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                             min="0.8"
                                             max="2.5"
                                             step="0.1"
-                                            value={config.event_title_style?.lineHeight || '1.1'}
+                                            value={activeConfig.event_title_style?.lineHeight || '1.1'}
                                             onChange={(e) => updateTextElementStyle('event_title_style', 'lineHeight', e.target.value)}
                                             className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
                                         />
@@ -996,7 +989,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">Asistente</label>
                                 <Input 
-                                    value={config.texts?.attendee || ''}
+                                    value={activeConfig.texts?.attendee || ''}
                                     onChange={(e) => updateText('attendee', e.target.value)}
                                     placeholder="Por su asistencia..."
                                     className="bg-white text-black"
@@ -1005,7 +998,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">Ponente</label>
                                 <Input 
-                                    value={config.texts?.speaker || ''}
+                                    value={activeConfig.texts?.speaker || ''}
                                     onChange={(e) => updateText('speaker', e.target.value)}
                                     placeholder="Por impartir..."
                                     className="bg-white text-black"
@@ -1015,7 +1008,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 mb-1.5">Contexto Global</label>
                                 <Input 
-                                    value={config.texts?.context || ''}
+                                    value={activeConfig.texts?.context || ''}
                                     onChange={(e) => updateText('context', e.target.value)}
                                     placeholder="En el marco del / de / la..."
                                     className="bg-white text-black"
@@ -1030,7 +1023,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     <div className="flex items-center gap-2.5">
                                         <span className="w-5 h-5 rounded bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500">06</span>
                                         <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Firmantes</span>
-                                        <span className="text-[9px] text-gray-400 font-medium">{config.signer_count || 1}</span>
+                                        <span className="text-[9px] text-gray-400 font-medium">{activeConfig.signer_count || 1}</span>
                                     </div>
                                     <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${openSections.signers ? 'rotate-180' : ''}`} />
                                 </button>
@@ -1044,12 +1037,12 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                             <button 
                                                 key={num}
                                                 onClick={() => {
-                                                    const currentSigners = config.signers || [];
+                                                    const currentSigners = activeConfig.signers || [];
                                                     // Ensure array length matches count
                                                     const newSigners = Array(num).fill(null).map((_, i) => currentSigners[i] || { role: 'Jefa de carrera', profile_id: '' });
-                                                    setConfig({...config, signer_count: num, signers: newSigners});
+                                                    setActiveConfig({...activeConfig, signer_count: num, signers: newSigners});
                                                 }}
-                                                className={`w-8 h-8 flex items-center justify-center rounded text-sm font-bold transition-colors ${config.signer_count === num ? 'bg-[#DBF227] text-black' : 'hover:bg-gray-100 text-gray-600'}`}
+                                                className={`w-8 h-8 flex items-center justify-center rounded text-sm font-bold transition-colors ${activeConfig.signer_count === num ? 'bg-[#DBF227] text-black' : 'hover:bg-gray-100 text-gray-600'}`}
                                             >
                                                 {num}
                                             </button>
@@ -1067,7 +1060,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                             <div className="flex items-center justify-between mb-1">
                                                 <label className="block text-[10px] font-bold text-gray-400">Tamaño</label>
                                                 <span className="text-[10px] font-mono font-bold text-gray-600">
-                                                    {(config.signer_style?.scale || 1).toFixed(1)}x
+                                                    {(activeConfig.signer_style?.scale || 1).toFixed(1)}x
                                                 </span>
                                             </div>
                                             <input 
@@ -1075,7 +1068,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                 min="0.5" 
                                                 max="1.5" 
                                                 step="0.1"
-                                                value={config.signer_style?.scale || 1}
+                                                value={activeConfig.signer_style?.scale || 1}
                                                 onChange={(e) => updateSignerStyle('scale', parseFloat(e.target.value))}
                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
                                             />
@@ -1086,7 +1079,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                             <div className="flex items-center justify-between mb-1">
                                                 <label className="block text-[10px] font-bold text-gray-400">Separación</label>
                                                 <span className="text-[10px] font-mono font-bold text-gray-600">
-                                                    {config.signer_style?.gap || 24}px
+                                                    {activeConfig.signer_style?.gap || 24}px
                                                 </span>
                                             </div>
                                             <input 
@@ -1094,7 +1087,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                 min="0" 
                                                 max="100" 
                                                 step="4"
-                                                value={config.signer_style?.gap || 24}
+                                                value={activeConfig.signer_style?.gap || 24}
                                                 onChange={(e) => updateSignerStyle('gap', parseInt(e.target.value))}
                                                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#DBF227]"
                                             />
@@ -1103,8 +1096,8 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 </div>
 
                                 {/* Signer Slots */}
-                                {Array.from({ length: config.signer_count || 1 }).map((_, idx) => {
-                                    const signer = (config.signers && config.signers[idx]) || {};
+                                {Array.from({ length: activeConfig.signer_count || 1 }).map((_, idx) => {
+                                    const signer = (activeConfig.signers && activeConfig.signers[idx]) || {};
                                     return (
                                         <div key={idx} className="bg-gray-50/50 p-3 rounded-lg border-l-2 border-l-gray-300 border border-gray-100 space-y-3">
                                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Firmante {idx + 1}</span>
@@ -1119,7 +1112,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                         const selectedProfile = profiles.find(p => p.id === selectedId);
                                                         
                                                         // Create a copy of signers, filling gaps if necessary
-                                                        const currentSigners = config.signers || [];
+                                                        const currentSigners = activeConfig.signers || [];
                                                         const newSigners = [...currentSigners];
                                                         
                                                         // Ensure the specific index exists
@@ -1136,7 +1129,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                             gender: selectedProfile ? selectedProfile.gender : ''
                                                         };
                                                         
-                                                        setConfig({ ...config, signers: newSigners });
+                                                        setActiveConfig({ ...activeConfig, signers: newSigners });
                                                     }}
                                                     className="w-full p-2 border rounded text-xs bg-gray-50 outline-none focus:border-[#DBF227] text-black"
                                                 >
@@ -1155,10 +1148,10 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                                 <Input 
                                                     value={signer.role || ''}
                                                     onChange={(e) => {
-                                                        const newSigners = [...(config.signers || [])];
+                                                        const newSigners = [...(activeConfig.signers || [])];
                                                         if (!newSigners[idx]) newSigners[idx] = {};
                                                         newSigners[idx].role = e.target.value;
-                                                        setConfig({...config, signers: newSigners});
+                                                        setActiveConfig({...activeConfig, signers: newSigners});
                                                     }}
                                                     placeholder="Ej. Director General"
                                                     className="h-8 text-xs text-black bg-white border border-gray-300"
@@ -1170,7 +1163,8 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                             </div>}
                             </div>
                             
-                            {/* Example Activity Selector */}
+                            {/* Example Activity Selector - hidden for general_attendance mode */}
+                            {previewRole !== 'general_attendance' && (
                             <div className="rounded-xl border border-gray-100 overflow-hidden">
                                 <button onClick={() => toggleSection('preview')} className="w-full flex items-center justify-between px-4 py-3 bg-gray-50/80 hover:bg-gray-100/80 transition-colors">
                                     <div className="flex items-center gap-2.5">
@@ -1183,7 +1177,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 </button>
                                 {openSections.preview && <div className="p-4 bg-white space-y-3">
                                     <p className="text-[10px] text-gray-400 leading-relaxed">
-                                        Selecciona una actividad para previsualizar con datos reales. El diseño se aplicará a todas las constancias.
+                                        Selecciona una actividad para previsualizar con datos reales. El diseÃ±o se aplicarÃ¡ a todas las constancias.
                                     </p>
                                     <select 
                                         value={selectedExampleEventId}
@@ -1199,6 +1193,15 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                     </select>
                                 </div>}
                             </div>
+                            )}
+                            {previewRole === 'general_attendance' && (
+                                <div className="rounded-xl border border-[#DBF227]/60 bg-[#DBF227]/10 p-4">
+                                    <p className="text-xs font-bold text-[#373737] mb-1">Modo: Asistencia General</p>
+                                    <p className="text-[10px] text-gray-600 leading-relaxed">
+                                        EstÃ¡s editando la constancia que se entregarÃ¡ a los asistentes que completen el nÃºmero mÃ­nimo de eventos del congreso. El tÃ­tulo del evento en la constancia mostrarÃ¡ el nombre del congreso.
+                                    </p>
+                                </div>
+                            )}
                     </div>
                 </div>
 
@@ -1210,7 +1213,7 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                         disabled={saving}
                     >
                         {saving ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                        Guardar Diseño
+                        Guardar DiseÃ±o
                     </Button>
                 </div>
             </div>
@@ -1233,6 +1236,12 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${previewRole === 'speaker' ? 'bg-white shadow text-black' : 'text-gray-400 hover:text-gray-600'}`}
                              >
                                  Ponente
+                             </button>
+                             <button
+                                onClick={() => setPreviewRole('general_attendance')}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${previewRole === 'general_attendance' ? 'bg-[#DBF227] shadow text-[#373737] font-bold' : 'text-gray-400 hover:text-gray-600'}`}
+                             >
+                                 Asistencia General
                              </button>
                         </div>
                     </div>
@@ -1326,22 +1335,22 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                             <div className="flex items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-100">
                                 <div className="flex items-center gap-3">
                                     <span className="text-sm font-medium text-gray-500">Estado actual:</span>
-                                    {config.logos && config.logos[activeLogoSlot]?.type !== 'none' ? (
+                                    {activeConfig.logos && activeConfig.logos[activeLogoSlot]?.type !== 'none' ? (
                                         <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
                                             Seleccionado
                                         </span>
                                     ) : (
                                         <span className="text-xs bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full font-bold">
-                                            Vacío
+                                            VacÃ­o
                                         </span>
                                     )}
                                 </div>
                                 
                                 <button 
                                     onClick={() => {
-                                        const newLogos = [...(config.logos || [])];
+                                        const newLogos = [...(activeConfig.logos || [])];
                                         newLogos[activeLogoSlot] = { type: 'none', value: '' };
-                                        setConfig({...config, logos: newLogos});
+                                        setActiveConfig({...activeConfig, logos: newLogos});
                                         setActiveLogoSlot(null);
                                     }}
                                     className="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1 hover:bg-red-50 px-2 py-1 rounded transition-colors"
@@ -1359,12 +1368,12 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
                                         <button
                                             key={preset}
                                             onClick={() => {
-                                                const newLogos = [...(config.logos || [])];
+                                                const newLogos = [...(activeConfig.logos || [])];
                                                 newLogos[activeLogoSlot] = { type: 'preset', value: preset };
-                                                setConfig({...config, logos: newLogos});
+                                                setActiveConfig({...activeConfig, logos: newLogos});
                                                 setActiveLogoSlot(null);
                                             }}
-                                            className={`aspect-square rounded-xl border-2 p-2 hover:border-[#DBF227] hover:bg-gray-50 transition-all flex items-center justify-center ${config.logos?.[activeLogoSlot]?.type === 'preset' && config.logos?.[activeLogoSlot]?.value === preset ? 'border-[#DBF227] bg-yellow-50' : 'border-gray-100'}`}
+                                            className={`aspect-square rounded-xl border-2 p-2 hover:border-[#DBF227] hover:bg-gray-50 transition-all flex items-center justify-center ${activeConfig.logos?.[activeLogoSlot]?.type === 'preset' && activeConfig.logos?.[activeLogoSlot]?.value === preset ? 'border-[#DBF227] bg-yellow-50' : 'border-gray-100'}`}
                                             title={preset}
                                         >
                                             <img src={`/assets/${preset}.svg`} alt={preset} className="w-full h-full object-contain" />
@@ -1400,3 +1409,4 @@ export function CertificateDesigner({ eventId, initialConfig, onSave }: Certific
         </div>
     );
 }
+

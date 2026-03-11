@@ -115,6 +115,10 @@ export interface Conference {
     show_qr?: boolean;
     qr_position?: 'bottom-left' | 'bottom-right';
   } | null;
+  // Global attendance certificate (per conference)
+  gives_global_certificate?: boolean;
+  global_certificate_threshold?: number; // Number of events user must attend
+  global_certificate_config?: any | null; // Same structure as certificate_config
 }
 
 export interface Attendance {

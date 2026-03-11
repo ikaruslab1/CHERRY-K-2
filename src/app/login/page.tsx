@@ -7,6 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from "next/navigation";
 import { useConference } from '@/context/ConferenceContext';
 import { supabase } from '@/lib/supabase';
+import { ShareEventModal } from '@/components/ui/ShareEventModal';
+import { Share2 } from 'lucide-react';
+import { Conference } from '@/types';
 
 const features = [
   {
@@ -35,6 +38,7 @@ export default function LoginPage() {
   const [view, setView] = useState<'login' | 'register'>('login');
   const [currentFeature, setCurrentFeature] = useState(0);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [shareConference, setShareConference] = useState<Conference | null>(null);
   const router = useRouter();
   const { currentConference, availableConferences, selectConference } = useConference();
   const searchParams = useSearchParams();
@@ -145,7 +149,7 @@ export default function LoginPage() {
                     Prof. Adrián Torres
                 </a>
              </div>
-             <p className="text-xs text-gray-500 font-mono">v2.0.0</p>
+             <p className="text-xs text-gray-500 font-mono">v3.7.1</p>
           </div>
         </div>
       </div>
@@ -276,38 +280,52 @@ export default function LoginPage() {
                         
                         <div className="overflow-y-auto p-6 grid gap-4 grid-cols-1 md:grid-cols-2">
                              {availableConferences.map((conf) => (
-                                 <button
-                                    key={conf.id}
-                                    onClick={() => {
-                                        selectConference(conf, `/login?event=${conf.id}`);
-                                        setShowEventModal(false);
-                                    }}
-                                    className={`text-left p-4 rounded-xl border transition-all hover:shadow-md relative overflow-hidden group ${
-                                        currentConference?.id === conf.id 
-                                        ? 'border-blue-500 bg-blue-50/50' 
-                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                    }`}
-                                 >
-                                      <div className={`absolute top-0 left-0 w-1 h-full transition-colors ${
-                                          currentConference?.id === conf.id ? 'bg-blue-500' : 'bg-transparent group-hover:bg-gray-300'
-                                      }`} />
-                                      
-                                      <h4 className={`font-bold font-syne mb-1 ${
-                                          currentConference?.id === conf.id ? 'text-blue-700' : 'text-gray-900'
-                                      }`}>
-                                          {conf.title}
-                                      </h4>
-                                      <p className="text-xs text-gray-500 line-clamp-2 font-manrope mb-3">
-                                          {conf.description}
-                                      </p>
-                                      
-                                      <div className="flex items-center gap-2 text-[10px] text-gray-400 font-mono uppercase">
-                                          <span>{new Date(conf.start_date).toLocaleDateString()}</span>
-                                          {currentConference?.id === conf.id && (
-                                              <span className="ml-auto text-blue-600 font-bold bg-white px-2 py-0.5 rounded-full shadow-sm">Activo</span>
-                                          )}
-                                      </div>
-                                 </button>
+                                 <div key={conf.id} className="relative group/card">
+                                     {/* Main card button */}
+                                     <button
+                                        onClick={() => {
+                                            selectConference(conf, `/login?event=${conf.id}`);
+                                            setShowEventModal(false);
+                                        }}
+                                        className={`w-full text-left p-4 rounded-xl border transition-all hover:shadow-md relative overflow-hidden ${
+                                            currentConference?.id === conf.id 
+                                            ? 'border-blue-500 bg-blue-50/50' 
+                                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                     >
+                                           <div className={`absolute top-0 left-0 w-1 h-full transition-colors ${
+                                               currentConference?.id === conf.id ? 'bg-blue-500' : 'bg-transparent group-hover/card:bg-gray-300'
+                                           }`} />
+                                           
+                                           <h4 className={`font-bold font-syne mb-1 pr-8 ${
+                                               currentConference?.id === conf.id ? 'text-blue-700' : 'text-gray-900'
+                                           }`}>
+                                               {conf.title}
+                                           </h4>
+                                           <p className="text-xs text-gray-500 line-clamp-2 font-manrope mb-3">
+                                               {conf.description}
+                                           </p>
+                                           
+                                           <div className="flex items-center gap-2 text-[10px] text-gray-400 font-mono uppercase">
+                                               <span>{new Date(conf.start_date).toLocaleDateString()}</span>
+                                               {currentConference?.id === conf.id && (
+                                                   <span className="ml-auto text-blue-600 font-bold bg-white px-2 py-0.5 rounded-full shadow-sm">Activo</span>
+                                               )}
+                                           </div>
+                                     </button>
+
+                                     {/* Share button — appears on hover */}
+                                     <button
+                                         onClick={(e) => {
+                                             e.stopPropagation();
+                                             setShareConference(conf as Conference);
+                                         }}
+                                         title="Compartir evento"
+                                         className="absolute top-2 right-2 p-1.5 rounded-lg bg-white border border-gray-100 text-gray-400 hover:text-gray-900 hover:border-[#DBF227] hover:bg-[#DBF227]/10 opacity-0 group-hover/card:opacity-100 transition-all shadow-sm z-10"
+                                     >
+                                         <Share2 className="w-3.5 h-3.5" />
+                                     </button>
+                                 </div>
                              ))}
                              
                              {availableConferences.length === 0 && (
@@ -320,7 +338,15 @@ export default function LoginPage() {
               </motion.div>
           )}
       </AnimatePresence>
+
+      {/* Share Event Modal */}
+      {shareConference && (
+          <ShareEventModal
+              conference={shareConference}
+              isOpen={!!shareConference}
+              onClose={() => setShareConference(null)}
+          />
+      )}
     </div>
   );
 }
-

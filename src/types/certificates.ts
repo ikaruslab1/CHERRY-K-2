@@ -75,4 +75,5 @@ export interface Certificate {
     isSpeaker?: boolean;
     isStaff?: boolean;
     isOrganizer?: boolean;
+    isGlobalAttendance?: boolean;
 }
