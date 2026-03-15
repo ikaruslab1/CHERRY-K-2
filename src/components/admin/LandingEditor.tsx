@@ -144,6 +144,7 @@ export function LandingEditor() {
         saving={saving}
         onCopyLink={handleCopyLink}
         conferenceId={currentConference?.id}
+        certificateConfig={currentConference?.certificate_config}
       />
 
       {/* Main Preview Area */}

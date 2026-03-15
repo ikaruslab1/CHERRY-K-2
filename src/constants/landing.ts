@@ -12,8 +12,15 @@ export const DEFAULT_LANDING_CONFIG: ConferenceLandingConfig = {
       content: {
         title: "Gestión Integral de Eventos Académicos",
         subtitle: "Plataforma Cherry-K-2: Innovación en la organización de congresos, talleres y actividades académicas.",
-        gradient_start: "#FFFFFF",
-        gradient_end: "#CCEAFF",
+        background_type: 'gradient',
+        background_value: 'linear-gradient(135deg, #FFFFFF 0%, #CCEAFF 100%)',
+        buttons: [
+          { label: "Comenzar Registro", url: "#register" }
+        ],
+        logos: [],
+        split_alignment: 'left',
+        feature_area_background_type: 'color',
+        feature_area_background_value: '#F8FAFC'
       }
     },
     {
@@ -60,8 +67,6 @@ export const DEFAULT_LANDING_CONFIG: ConferenceLandingConfig = {
     }
   ],
   global_styles: {
-    primary_color: "#373737",
-    accent_color: "#DBF227",
     font_family: 'inter',
   }
 };
@@ -79,8 +84,15 @@ export const BLOCK_DEFAULTS: Record<string, any> = {
     content: {
       title: "Título del Hero",
       subtitle: "Subtítulo informativo",
-      gradient_start: "#FFFFFF",
-      gradient_end: "#F3F4F6",
+      background_type: 'color',
+      background_value: '#F3F4F6',
+      buttons: [
+        { label: "Botón Principal", url: "#" }
+      ],
+      logos: [],
+      split_alignment: 'left',
+      feature_area_background_type: 'color',
+      feature_area_background_value: '#FFFFFF'
     }
   },
   features: {

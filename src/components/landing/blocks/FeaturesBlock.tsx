@@ -6,14 +6,13 @@ import { motion } from 'framer-motion';
 
 interface FeaturesBlockProps {
   block: LandingBlock;
-  globalStyles: any;
 }
 
 const ICONS = {
   Target, Zap, Users, Globe, Shield, Trophy
 };
 
-export function FeaturesBlock({ block, globalStyles }: FeaturesBlockProps) {
+export function FeaturesBlock({ block }: FeaturesBlockProps) {
   const { title: sectionTitle, items = [] } = block.content;
   const variant = block.variant || 'grid';
 

@@ -127,19 +127,55 @@ export interface Conference {
 
 export type LandingBlockType = 'hero' | 'features' | 'auth' | 'cta' | 'speakers' | 'agenda';
 
+export interface HeroButton {
+  label: string;
+  url: string;
+  color?: string;
+  variant?: 'primary' | 'secondary' | 'outline';
+}
+
+export interface HeroBlockContent {
+  // Global Typography & Colors
+  logos?: string[];
+  title: string;
+  title_font?: 'inter' | 'syne' | 'manrope' | 'mono';
+  title_color?: string;
+  subtitle: string;
+  subtitle_font?: 'inter' | 'syne' | 'manrope' | 'mono';
+  subtitle_color?: string;
+
+  // Backgrounds
+  background_type?: 'color' | 'gradient' | 'image';
+  background_value?: string; // Hex, Gradient CSS, or URL
+  
+  // Legacy support (to be migrated or kept as fallback)
+  gradient_start?: string;
+  gradient_end?: string;
+  gradient_direction?: string;
+
+  // Variant Centered
+  buttons?: HeroButton[];
+
+  // Variant Split
+  split_alignment?: 'left' | 'right';
+  feature_area_background_type?: 'color' | 'gradient' | 'image';
+  feature_area_background_value?: string;
+  feature_area_gradient_start?: string;
+  feature_area_gradient_end?: string;
+  feature_area_gradient_direction?: string;
+}
+
 export interface LandingBlock {
   id: string;
   type: LandingBlockType;
   variant: string;
   is_visible: boolean;
-  content: any; // We'll keep it as any for flexibility, but could be specific per type
+  content: HeroBlockContent | any; // HeroBlockContent used when type is 'hero'
 }
 
 export interface ConferenceLandingConfig {
   blocks: LandingBlock[];
   global_styles: {
-    primary_color: string;
-    accent_color: string;
     font_family: 'inter' | 'syne' | 'manrope' | 'mono';
   };
 }

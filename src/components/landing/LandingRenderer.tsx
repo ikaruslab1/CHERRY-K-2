@@ -71,8 +71,7 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
               ¿Aún no tienes cuenta?{' '}
               <button 
                 onClick={() => setView('register')}
-                className="font-bold hover:underline transition-all"
-                style={{ color: config.global_styles?.primary_color || '#373737' }}
+                className="font-bold hover:underline transition-all text-[#373737]"
               >
                 Regístrate aquí
               </button>
@@ -82,8 +81,7 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
               ¿Ya tienes tu ID?{' '}
               <button 
                 onClick={() => setView('login')}
-                className="font-bold hover:underline transition-all"
-                style={{ color: config.global_styles?.primary_color || '#373737' }}
+                className="font-bold hover:underline transition-all text-[#373737]"
               >
                 Inicia sesión
               </button>
@@ -108,7 +106,6 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                   <HeroBlock 
                     key={block.id} 
                     block={block} 
-                    globalStyles={config.global_styles}
                     authForms={block.variant === 'split' ? renderAuthForms() : undefined}
                   />
                 );
@@ -117,7 +114,6 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                   <FeaturesBlock 
                     key={block.id} 
                     block={block} 
-                    globalStyles={config.global_styles} 
                   />
                 );
               case 'auth':
