@@ -7,9 +7,9 @@ import { ConferenceLandingConfig } from '@/types';
 export const revalidate = 60; // Revalidate every minute
 
 interface Props {
-  params: {
+  params: Promise<{
     conferenceId: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
