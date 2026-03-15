@@ -119,6 +119,54 @@ export interface Conference {
   gives_global_certificate?: boolean;
   global_certificate_threshold?: number; // Number of events user must attend
   global_certificate_config?: any | null; // Same structure as certificate_config
+  custom_landing_enabled?: boolean;
+  conference_landing_config?: ConferenceLandingConfig | null;
+}
+
+// --- New Modular Landing Types ---
+
+export type LandingBlockType = 'hero' | 'features' | 'auth' | 'cta' | 'speakers' | 'agenda';
+
+export interface LandingBlock {
+  id: string;
+  type: LandingBlockType;
+  variant: string;
+  is_visible: boolean;
+  content: any; // We'll keep it as any for flexibility, but could be specific per type
+}
+
+export interface ConferenceLandingConfig {
+  blocks: LandingBlock[];
+  global_styles: {
+    primary_color: string;
+    accent_color: string;
+    font_family: 'inter' | 'syne' | 'manrope' | 'mono';
+  };
+}
+
+// Keep legacy interface for migration reference if needed
+export interface LegacyConferenceLandingConfig {
+  hero: {
+    title: string;
+    subtitle: string;
+    gradient_start: string;
+    gradient_end: string;
+  };
+  features: Array<{
+    title: string;
+    description: string;
+  }>;
+  cta: {
+    login_label: string;
+    register_label: string;
+  };
+  colors: {
+    primary: string;
+    accent: string;
+  };
+  typography: {
+    font_family: 'inter' | 'syne' | 'manrope' | 'mono';
+  };
 }
 
 export interface Attendance {

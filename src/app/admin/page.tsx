@@ -7,10 +7,8 @@ import { supabase } from '@/lib/supabase';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
 import { useRoleAuth } from '@/hooks/useRoleAuth';
-import { Loader2, User, Calendar, FileText, QrCode, Users, Settings, Award, LayoutDashboard } from 'lucide-react';
+import { Loader2, User, Calendar, FileText, QrCode, Users, Settings, Award, LayoutDashboard, Palette } from 'lucide-react';
 import { FAQView } from '@/components/faq/FAQView';
-
-// ... imports
 
 const UsersTable = dynamic(() => import('@/components/admin/UsersTable').then(mod => mod.UsersTable), {
     loading: () => <LoadingSpinner />,
@@ -40,8 +38,10 @@ const CertificateDesignView = dynamic(() => import('@/components/admin/Certifica
     loading: () => <LoadingSpinner />,
     ssr: false
 });
-
-// ... rest of the file
+const LandingEditor = dynamic(() => import('@/components/admin/LandingEditor').then(mod => mod.LandingEditor), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
 
 function LoadingSpinner() {
     return (
@@ -57,7 +57,7 @@ function AdminContent() {
     const { loading, isAuthorized, userRole } = useRoleAuth(['admin', 'owner']);
     
     // Initialize state from URL params only once
-    const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'constancias' | 'design-certificates' | 'faq'>(
+    const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'attendance' | 'constancias' | 'design-certificates' | 'landing-editor' | 'faq'>(
         (searchParams.get('tab') as any) || 'profile'
     );
 
@@ -78,16 +78,17 @@ function AdminContent() {
         { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: true },
         { id: 'events', label: 'Gestión Eventos', icon: <Settings className="w-5 h-5" />, show: true },
         { id: 'design-certificates', label: 'Diseño de Constancias', icon: <Award className="w-5 h-5" />, show: true },
+        { id: 'landing-editor', label: 'Diseño de Landing', icon: <Palette className="w-5 h-5" />, show: true },
     ];
 
-    const isDesignTab = activeTab === 'design-certificates';
+    const isFullWidthTab = activeTab === 'design-certificates' || activeTab === 'landing-editor';
     const isFAQActive = activeTab === 'faq';
     const handleFAQClick = () => setActiveTab('faq');
 
     return (
         <SidebarAwareContainer className="min-h-screen bg-gray-50 text-[#373737]">
-            {isDesignTab ? (
-                /* Design tab: zero padding, full width */
+            {isFullWidthTab ? (
+                /* Full width tabs: zero padding, full layout */
                 <>
                     <ResponsiveNav 
                         items={navItems}
@@ -99,7 +100,8 @@ function AdminContent() {
                     />
                     <div className="mt-12 md:mt-0">
                         <div className="p-0 min-h-[500px] animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <CertificateDesignView />
+                            {activeTab === 'design-certificates' && <CertificateDesignView />}
+                            {activeTab === 'landing-editor' && <LandingEditor />}
                         </div>
                     </div>
                 </>

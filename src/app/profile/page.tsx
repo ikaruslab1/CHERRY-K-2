@@ -11,7 +11,8 @@ import AttendanceView from '@/views/admin/AttendanceView';
 import { ParticipationView } from '@/components/profile/ParticipationView';
 import { MetricsView } from '@/components/admin/metrics/MetricsView';
 import { CertificateDesignView } from '@/components/admin/CertificateDesignView';
-import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard, Award, Crown } from 'lucide-react';
+import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard, Award, Crown, Palette } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { FAQView } from '@/components/faq/FAQView';
 import { CertificatesView } from '@/components/profile/CertificatesView';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,19 +22,22 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { useConference } from '@/context/ConferenceContext';
 import { useRoleAuth } from '@/hooks/useRoleAuth';
 
+const LandingEditor = dynamic(() => import('@/components/admin/LandingEditor').then(mod => mod.LandingEditor), {
+    loading: () => <div className="p-8 flex justify-center"><Calendar className="animate-spin text-red-500" /></div>,
+    ssr: false
+});
+
 export default function ProfilePage() {
   const router = useRouter();
   const { currentConference } = useConference();
   const { loading: authLoading, userRole } = useRoleAuth();
   const [sessionLoading, setSessionLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'metrics' | 'attendance' | 'participation' | 'constancias' | 'design-certificates' | 'faq'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'metrics' | 'attendance' | 'participation' | 'constancias' | 'design-certificates' | 'landing-editor' | 'faq'>('profile');
 
   const isAdmin = userRole === 'admin' || userRole === 'owner';
   const isStaff = userRole === 'staff';
   const isPonente = userRole === 'ponente';
   const isOwner = userRole === 'owner';
-
-  console.log('[ProfilePage] Current State -> userRole:', userRole, 'isAdmin:', isAdmin, 'isStaff:', isStaff);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -69,6 +73,12 @@ export default function ProfilePage() {
         id: 'design-certificates', 
         label: 'Diseño de Constancias', 
         icon: <Award className="w-5 h-5" />, 
+        show: isAdmin
+    },
+    { 
+        id: 'landing-editor', 
+        label: 'Diseño de Landing', 
+        icon: <Palette className="w-5 h-5" />, 
         show: isAdmin
     },
     { id: 'divider-owner', label: 'Herramienta de Owner', show: isOwner, isDivider: true },
@@ -113,14 +123,14 @@ export default function ProfilePage() {
     );
   }
 
-  const isDesignTab = activeTab === 'design-certificates';
+  const isFullWidthTab = activeTab === 'design-certificates' || activeTab === 'landing-editor';
   const isFAQActive = activeTab === 'faq';
   const handleFAQClick = () => setActiveTab('faq');
 
   return (
     <SidebarAwareContainer className="min-h-screen bg-gray-50 text-[#373737]">
-      {isDesignTab ? (
-        /* Design tab: no padding, no max-width – full available width */
+      {isFullWidthTab ? (
+        /* Design tabs: no padding, no max-width – full available width */
         <>
           <ResponsiveNav 
             items={navItems}
@@ -131,7 +141,8 @@ export default function ProfilePage() {
             isFAQActive={isFAQActive}
           />
           <div className="mt-12 md:mt-0 h-[calc(100vh-48px)] md:h-screen">
-            <CertificateDesignView />
+            {activeTab === 'design-certificates' && <CertificateDesignView />}
+            {activeTab === 'landing-editor' && <LandingEditor />}
           </div>
         </>
       ) : (

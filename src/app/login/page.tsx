@@ -158,20 +158,21 @@ export default function LoginPage() {
       <div className="relative flex flex-col items-center justify-center p-6 md:p-12 lg:p-24 bg-white">
         
         {/* Event Selection Button */}
+        {/* Event Selection Button — Always show on login to avoid getting stuck */}
         <div className="w-full flex justify-end mb-6 lg:absolute lg:top-6 lg:right-6 lg:mb-0 z-20">
-            <button
-                onClick={() => setShowEventModal(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors text-sm font-medium text-slate-700"
-            >
-                <div className={`w-2 h-2 rounded-full ${currentConference ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`} />
-                {currentConference ? (
-                    "Cambiar de evento"
-                ) : (
-                    "Seleccionar Evento"
-                )}
-                <span className="text-xs text-slate-400">▼</span>
-            </button>
-        </div>
+                <button
+                    onClick={() => setShowEventModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors text-sm font-medium text-slate-700"
+                >
+                    <div className={`w-2 h-2 rounded-full ${currentConference ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`} />
+                    {currentConference ? (
+                        "Cambiar de evento"
+                    ) : (
+                        "Seleccionar Evento"
+                    )}
+                    <span className="text-xs text-slate-400">▼</span>
+                </button>
+            </div>
 
         <div className="w-full max-w-[420px] space-y-8 relative z-10">
             
@@ -186,7 +187,6 @@ export default function LoginPage() {
                         : 'Completa tus datos para generar tu ID digital'}
                 </p>
                 {/* Show active event in form header too if valid */}
-                {/* Elegant Badge */}
                 {currentConference && (
                     <div className="flex justify-center mb-6">
                         <button 
@@ -215,7 +215,7 @@ export default function LoginPage() {
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                     >
-                        {view === 'login' ? <LoginForm /> : <RegisterForm conferenceId={currentConference?.id} />}
+                        {view === 'login' ? <LoginForm conferenceId={currentConference?.id} /> : <RegisterForm conferenceId={currentConference?.id} />}
                     </motion.div>
                 </AnimatePresence>
             </div>
@@ -284,8 +284,13 @@ export default function LoginPage() {
                                      {/* Main card button */}
                                      <button
                                         onClick={() => {
-                                            selectConference(conf, `/login?event=${conf.id}`);
-                                            setShowEventModal(false);
+                                            if (conf.custom_landing_enabled) {
+                                                router.push(`/event/${conf.id}`);
+                                                setShowEventModal(false);
+                                            } else {
+                                                selectConference(conf, `/login?event=${conf.id}`);
+                                                setShowEventModal(false);
+                                            }
                                         }}
                                         className={`w-full text-left p-4 rounded-xl border transition-all hover:shadow-md relative overflow-hidden ${
                                             currentConference?.id === conf.id 

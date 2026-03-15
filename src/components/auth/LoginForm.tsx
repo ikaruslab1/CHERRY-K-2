@@ -17,7 +17,11 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export function LoginForm() {
+interface LoginFormProps {
+  conferenceId?: string;
+}
+
+export function LoginForm({ conferenceId }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRecoverModalOpen, setIsRecoverModalOpen] = useState(false);
@@ -40,6 +44,13 @@ export function LoginForm() {
       const result = await loginWithId(data.shortId);
       
       if (result.success) {
+        // Si hay una conferencia específica en el contexto (ej. landing personalizada), 
+        // nos aseguramos de que sea la seleccionada al entrar al perfil.
+        if (conferenceId && typeof window !== 'undefined') {
+            localStorage.setItem('conference_id', conferenceId);
+            document.cookie = `conference_id=${conferenceId}; path=/; max-age=31536000; SameSite=Lax`;
+        }
+
         // Redirigir usando window.location para asegurar que las cookies se procesen correctamente
         window.location.href = '/profile'; 
       } else {

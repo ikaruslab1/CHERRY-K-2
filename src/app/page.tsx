@@ -38,7 +38,21 @@ export default async function Home(props: {
     return redirect('/profile');
   }
 
-  // Redirect to login page, preserving any query parameters
+  // 2. Custom Landing Check
+  const confId = cookieStore.get('conference_id')?.value;
+  if (confId) {
+     const { data: conf } = await supabase
+        .from('conferences')
+        .select('id, custom_landing_enabled')
+        .eq('id', confId)
+        .single();
+     
+     if (conf?.custom_landing_enabled) {
+        return redirect(`/event/${confId}`);
+     }
+  }
+
+  // 3. Redirect to login page, preserving any query parameters
   const searchParams = await props.searchParams;
   let queryString = '';
   if (searchParams) {

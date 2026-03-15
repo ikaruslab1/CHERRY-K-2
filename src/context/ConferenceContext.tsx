@@ -124,6 +124,10 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
   const selectConference = (conference: Conference, redirectPath: string = '/profile') => {
     setCurrentConference(conference);
     localStorage.setItem('conference_id', conference.id);
+    // Set cookie for server-side redirects
+    if (typeof window !== 'undefined') {
+        document.cookie = `conference_id=${conference.id}; path=/; max-age=31536000; SameSite=Lax`;
+    }
     router.push(redirectPath);
   };
   
