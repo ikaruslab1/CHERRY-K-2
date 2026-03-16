@@ -62,9 +62,7 @@ export function LandingEditor() {
               }
             ],
             global_styles: {
-              primary_color: currentConfig.colors?.primary || '#373737',
-              accent_color: currentConfig.colors?.accent || '#DBF227',
-              font_family: currentConfig.typography?.font_family || 'inter',
+              font_family: currentConfig.typography?.font_family || 'sans',
             }
           };
           setConfig(migrated);

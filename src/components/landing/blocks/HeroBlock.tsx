@@ -66,16 +66,20 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
     sans: 'font-geist-sans',
     serif: 'font-playfair',
     mono: 'font-geist-mono',
-    cursive: 'font-dancing-script'
+    cursive: 'font-dancing-script',
+    // Legacy support
+    inter: 'font-geist-sans',
+    syne: 'font-geist-sans',
+    manrope: 'font-geist-sans'
   };
 
   const titleStyle = {
-    color: title_color || '#FFFFFF',
+    color: title_color || '#000000',
     fontFamily: title_font ? undefined : 'inherit'
   };
 
   const subtitleStyle = {
-    color: subtitle_color || 'rgba(255, 255, 255, 0.7)',
+    color: subtitle_color || '#000000',
     fontFamily: subtitle_font ? undefined : 'inherit'
   };
 
@@ -89,13 +93,13 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
     const isCentered = variant === 'centered';
     
     return (
-      <div className={`flex flex-wrap gap-6 mb-8 ${isCentered ? 'justify-center' : 'lg:justify-start justify-center'}`}>
+      <div className={`flex flex-wrap gap-6 mb-8 ${isCentered ? 'justify-center' : '@lg:justify-start justify-center'}`}>
         {validLogos.map((logo, idx) => (
           <motion.img 
             key={`${logo}-${idx}`}
             src={logo}
             alt={`Logo ${idx}`}
-            className={`h-8 md:h-12 w-auto object-contain brightness-0 ${isWhite ? 'invert' : ''} transition-all duration-300`}
+            className={`h-8 @md:h-12 w-auto object-contain brightness-0 ${isWhite ? 'invert' : ''} transition-all duration-300`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -117,8 +121,8 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
     );
 
     return (
-      <section className="relative min-h-[90vh] grid lg:grid-cols-2 overflow-hidden" style={containerStyle}>
-        <div className={`flex flex-col justify-center px-6 lg:px-16 py-20 relative z-10 ${isRightAligned ? 'lg:order-2' : ''}`}>
+      <section className="relative min-h-[90vh] grid @lg:grid-cols-2 overflow-hidden" style={containerStyle}>
+        <div className={`flex flex-col justify-center px-6 @lg:px-16 py-20 relative z-10 ${isRightAligned ? '@lg:order-2' : ''}`}>
           <motion.div
             initial={{ opacity: 0, x: isRightAligned ? 20 : -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -128,13 +132,13 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
             {renderLogos()}
             <h1 
               style={titleStyle}
-              className={`text-4xl md:text-6xl lg:text-7xl font-bold leading-none tracking-tighter ${title_font ? fontClasses[title_font] : ''}`}
+              className={`text-4xl @md:text-6xl @lg:text-7xl font-bold leading-none tracking-tighter ${title_font ? fontClasses[title_font] : ''}`}
             >
               {title}
             </h1>
             <p 
               style={subtitleStyle}
-              className={`text-lg md:text-xl max-w-xl leading-relaxed ${subtitle_font ? fontClasses[subtitle_font] : ''}`}
+              className={`text-lg @md:text-xl max-w-xl leading-relaxed ${subtitle_font ? fontClasses[subtitle_font] : ''}`}
             >
               {subtitle}
             </p>
@@ -143,9 +147,10 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
         
         <div 
           style={featureBgStyle}
-          className={`flex flex-col justify-center p-6 lg:p-12 min-h-[300px] lg:min-h-full ${isRightAligned ? 'lg:order-1 lg:border-r' : 'lg:border-l'} border-black/10`}
+          className={`flex flex-col justify-center p-6 @lg:p-12 min-h-[300px] @lg:min-h-full ${isRightAligned ? '@lg:order-1 @lg:border-r' : '@lg:border-l'} border-black/10 scroll-mt-20`}
+          id={authForms ? "auth-section" : undefined}
         >
-          {/* Feature Area content (Empty or customizable in future) */}
+          {authForms}
         </div>
       </section>
     );
@@ -172,7 +177,7 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
           transition={{ duration: 0.8, ease: "easeOut" }}
           viewport={{ once: true }}
           style={titleStyle}
-          className={`text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.9] tracking-tighter max-w-5xl mx-auto ${title_font ? fontClasses[title_font] : ''}`}
+          className={`text-5xl @md:text-7xl @lg:text-8xl font-bold leading-[0.9] tracking-tighter max-w-5xl mx-auto ${title_font ? fontClasses[title_font] : ''}`}
         >
           {title}
         </motion.h1>
@@ -183,7 +188,7 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           viewport={{ once: true }}
           style={subtitleStyle}
-          className={`text-xl md:text-2xl mt-8 max-w-3xl mx-auto leading-relaxed ${subtitle_font ? fontClasses[subtitle_font] : ''}`}
+          className={`text-xl @md:text-2xl mt-8 max-w-3xl mx-auto leading-relaxed ${subtitle_font ? fontClasses[subtitle_font] : ''}`}
         >
           {subtitle}
         </motion.p>
@@ -200,8 +205,11 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
                 <button 
                   key={idx}
                   onClick={() => btn.url.startsWith('#') ? document.getElementById(btn.url.replace('#', ''))?.scrollIntoView({ behavior: 'smooth' }) : window.open(btn.url, '_blank')}
-                  style={{ backgroundColor: btn.color || (idx === 0 ? '#DBF227' : 'rgba(255,255,255,0.1)') }}
-                  className={`px-8 py-4 ${idx === 0 ? 'text-black' : 'text-white border border-white/10 backdrop-blur-md'} font-bold rounded-xl hover:scale-105 transition-transform text-sm md:text-base w-full sm:w-auto shadow-xl shadow-black/5`}
+                  style={{ 
+                    backgroundColor: btn.color || (idx === 0 ? '#000000' : 'rgba(255,255,255,0.1)'),
+                    color: getContrastColor(btn.color || (idx === 0 ? '#000000' : '#FFFFFF'))
+                  }}
+                  className="px-8 py-4 font-bold rounded-xl hover:scale-105 transition-transform text-sm @md:text-base w-full @sm:w-auto shadow-xl shadow-black/5 flex items-center justify-center gap-2"
                 >
                   {btn.label}
                 </button>

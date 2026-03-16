@@ -37,8 +37,11 @@ import {
   ArrowLeft,
   ArrowUpLeft,
   ArrowUp,
-  ArrowUpRight
+  ArrowUpRight,
+  Search,
+  Grid,
 } from 'lucide-react';
+import * as Icons from 'lucide-react';
 import {
   DndContext, 
   closestCenter,
@@ -106,7 +109,6 @@ function SortableLayerItem({
     hero: Type,
     features: Layers,
     cta: MousePointer2,
-    speakers: Users,
     agenda: Calendar
   }[block.type as string] || Layout;
 
@@ -131,7 +133,7 @@ function SortableLayerItem({
 
       <div className="flex-1 min-w-0">
         <p className="text-[11px] font-bold truncate uppercase tracking-tight">
-          {block.type} <span className="opacity-40 font-normal">#{block.id.slice(0,4)}</span>
+          {block.type === 'cta' ? 'Links' : block.type} <span className="opacity-40 font-normal">#{block.id.slice(0,4)}</span>
         </p>
       </div>
 
@@ -174,6 +176,7 @@ export function LandingEditorSidebar({
 }: SidebarProps) {
   const [activeBlockId, setActiveBlockId] = useState<string | null>(config.blocks?.[0]?.id || null);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const [expandedIconIdx, setExpandedIconIdx] = useState<number | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -296,7 +299,7 @@ export function LandingEditorSidebar({
                   onMouseLeave={() => setIsAddMenuOpen(false)}
                 >
                   <p className="px-3 py-2 text-[9px] font-bold text-gray-400 uppercase">Selecciona un bloque</p>
-                  {(Object.keys(BLOCK_DEFAULTS) as any[]).map(type => (
+                  {(Object.keys(BLOCK_DEFAULTS) as any[]).filter(type => type !== 'auth').map(type => (
                     <button 
                       key={type}
                       onClick={() => addBlock(type)}
@@ -306,10 +309,9 @@ export function LandingEditorSidebar({
                         {type === 'hero' && <Type className="w-3 h-3" />}
                         {type === 'features' && <Layers className="w-3 h-3" />}
                         {type === 'cta' && <MousePointer2 className="w-3 h-3" />}
-                        {type === 'speakers' && <Users className="w-3 h-3" />}
                         {type === 'agenda' && <Calendar className="w-3 h-3" />}
                       </div>
-                      <span className="text-[11px] font-bold text-gray-700 capitalize">{type}</span>
+                      <span className="text-[11px] font-bold text-gray-700 capitalize">{type === 'cta' ? 'Links' : type}</span>
                     </button>
                   ))}
                 </div>
@@ -350,7 +352,7 @@ export function LandingEditorSidebar({
                     <Settings className="w-4 h-4 text-[#DBF227]" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-gray-800 uppercase">Editando {activeBlock.type}</h4>
+                    <h4 className="text-xs font-bold text-gray-800 uppercase">Editando {activeBlock.type === 'cta' ? 'Links' : activeBlock.type}</h4>
                     <p className="text-[10px] text-gray-400">ID: {activeBlock.id}</p>
                   </div>
                </div>
@@ -450,7 +452,7 @@ export function LandingEditorSidebar({
                           </select>
                           <Input 
                             type="color"
-                            value={activeBlock.content.title_color || '#FFFFFF'}
+                            value={activeBlock.content.title_color || '#000000'}
                             onChange={(e) => updateBlockContent(activeBlock.id, { title_color: e.target.value })}
                             className="h-8 p-0 border-none bg-transparent"
                           />
@@ -478,7 +480,7 @@ export function LandingEditorSidebar({
                           </select>
                           <Input 
                             type="color"
-                            value={activeBlock.content.subtitle_color || 'rgba(255,255,255,0.7)'}
+                            value={activeBlock.content.subtitle_color || '#000000'}
                             onChange={(e) => updateBlockContent(activeBlock.id, { subtitle_color: e.target.value })}
                             className="h-8 p-0 border-none bg-transparent"
                           />
@@ -617,9 +619,10 @@ export function LandingEditorSidebar({
                                   const newButtons = activeBlock.content.buttons.filter((_: any, i: number) => i !== idx);
                                   updateBlockContent(activeBlock.id, { buttons: newButtons });
                                 }}
-                                className="absolute top-2 right-2 p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                                className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                title="Eliminar botón"
                               >
-                                <Trash2 className="w-3 h-3" />
+                                <X className="w-3.5 h-3.5" />
                               </button>
                               <div className="grid grid-cols-2 gap-2 mb-2">
                                 <Input 
@@ -630,11 +633,11 @@ export function LandingEditorSidebar({
                                     updateBlockContent(activeBlock.id, { buttons: newBtns });
                                   }}
                                   placeholder="Texto"
-                                  className="text-[10px] h-8 bg-white"
+                                  className="text-[10px] h-8 bg-white text-black"
                                 />
                                 <Input 
                                   type="color"
-                                  value={btn.color || '#DBF227'}
+                                  value={btn.color || '#000000'}
                                   onChange={(e) => {
                                     const newBtns = [...activeBlock.content.buttons];
                                     newBtns[idx] = { ...btn, color: e.target.value };
@@ -651,7 +654,7 @@ export function LandingEditorSidebar({
                                   updateBlockContent(activeBlock.id, { buttons: newBtns });
                                 }}
                                 placeholder="URL (ej: #register o https://...)"
-                                className="text-[10px] h-8 bg-white"
+                                className="text-[10px] h-8 bg-white text-black"
                               />
                             </div>
                           ))}
@@ -660,7 +663,7 @@ export function LandingEditorSidebar({
                               const newButtons = [...(activeBlock.content.buttons || []), { label: 'Nuevo Botón', url: '#', color: '#DBF227' }];
                               updateBlockContent(activeBlock.id, { buttons: newButtons });
                             }}
-                            variant="outline" size="sm" className="w-full text-[10px] h-9 border-dashed"
+                            variant="outline" size="sm" className="w-full text-[10px] h-9 border-dashed text-black hover:bg-gray-50"
                           >
                             <Plus className="w-3 h-3 mr-2" /> Añadir Botón
                           </Button>
@@ -767,64 +770,205 @@ export function LandingEditorSidebar({
                  </div>
                )}
 
-               {activeBlock.type === 'features' && (
-                 <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Título de Sección</label>
-                      <Input 
-                        value={activeBlock.content.title}
-                        onChange={(e) => updateBlockContent(activeBlock.id, { title: e.target.value })}
-                        className="text-xs"
-                      />
-                    </div>
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Ítems de Características</label>
-                      {activeBlock.content.items?.map((item: any, idx: number) => (
-                        <div key={idx} className="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-2 relative group">
-                           <button 
-                             onClick={() => {
-                               const newItems = activeBlock.content.items.filter((_: any, i: number) => i !== idx);
-                               updateBlockContent(activeBlock.id, { items: newItems });
-                             }}
-                             className="absolute top-2 right-2 p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                           >
-                             <Trash2 className="w-3 h-3" />
-                           </button>
-                           <Input 
-                             value={item.title}
-                             onChange={(e) => {
-                               const newItems = [...activeBlock.content.items];
-                               newItems[idx] = { ...item, title: e.target.value };
-                               updateBlockContent(activeBlock.id, { items: newItems });
-                             }}
-                             placeholder="Título"
-                             className="text-[11px] font-bold h-8 bg-white"
-                           />
-                           <textarea 
-                             value={item.description}
-                             onChange={(e) => {
-                               const newItems = [...activeBlock.content.items];
-                               newItems[idx] = { ...item, description: e.target.value };
-                               updateBlockContent(activeBlock.id, { items: newItems });
-                             }}
-                             rows={2}
-                             className="w-full p-2 text-[10px] border border-gray-200 rounded-lg bg-white outline-none resize-none"
-                             placeholder="Descripción..."
-                           />
-                        </div>
-                      ))}
-                      <Button 
-                        onClick={() => {
-                          const newItems = [...(activeBlock.content.items || []), { title: 'Nueva Característica', description: '', icon: 'Zap' }];
-                          updateBlockContent(activeBlock.id, { items: newItems });
-                        }}
-                        variant="outline" size="sm" className="w-full border-dashed py-4 h-auto text-[10px] font-bold bg-white"
-                      >
-                         <Plus className="w-3 h-3 mr-2" /> Añadir Item
-                      </Button>
-                    </div>
-                 </div>
-               )}
+                {activeBlock.type === 'features' && (
+                  <div className="space-y-4">
+                     <div className="space-y-1.5">
+                       <label className="text-[10px] font-bold text-gray-400 uppercase">Título de Sección</label>
+                       <Input 
+                         value={activeBlock.content.title}
+                         onChange={(e) => updateBlockContent(activeBlock.id, { title: e.target.value })}
+                         className="text-xs text-black"
+                       />
+                     </div>
+
+                     <div className="grid grid-cols-2 gap-3 pb-2">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase">Alineación Tarjetas</label>
+                        <select 
+                          value={activeBlock.content.text_align || 'left'}
+                          onChange={(e) => updateBlockContent(activeBlock.id, { text_align: e.target.value })}
+                          className="w-full p-2.5 text-xs border border-gray-200 rounded-xl bg-gray-50 outline-none focus:border-black transition-all text-black"
+                        >
+                          <option value="left">Izquierda</option>
+                          <option value="center">Centro</option>
+                          <option value="right">Derecha</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase">Alineación Cuadrícula</label>
+                        <select 
+                          value={activeBlock.content.grid_align || 'left'}
+                          onChange={(e) => updateBlockContent(activeBlock.id, { grid_align: e.target.value })}
+                          className="w-full p-2.5 text-xs border border-gray-200 rounded-xl bg-gray-50 outline-none focus:border-black transition-all text-black"
+                        >
+                          <option value="left">Izquierda</option>
+                          <option value="center">Centro</option>
+                          <option value="right">Derecha</option>
+                        </select>
+                      </div>
+                     </div>
+
+                     <div className="space-y-3">
+                       <label className="text-[10px] font-bold text-gray-400 uppercase">Ítems de Características</label>
+                       {activeBlock.content.items?.map((item: any, idx: number) => (
+                         <div key={idx} className="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-2 relative group">
+                            <button 
+                              onClick={() => {
+                                const newItems = activeBlock.content.items.filter((_: any, i: number) => i !== idx);
+                                updateBlockContent(activeBlock.id, { items: newItems });
+                              }}
+                              className="absolute top-2 right-2 p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                            <Input 
+                              value={item.title}
+                              onChange={(e) => {
+                                const newItems = [...activeBlock.content.items];
+                                newItems[idx] = { ...item, title: e.target.value };
+                                updateBlockContent(activeBlock.id, { items: newItems });
+                              }}
+                              placeholder="Título"
+                              className="text-[11px] font-bold h-8 bg-white text-black"
+                            />
+                            <textarea 
+                              value={item.description}
+                              onChange={(e) => {
+                                const newItems = [...activeBlock.content.items];
+                                newItems[idx] = { ...item, description: e.target.value };
+                                updateBlockContent(activeBlock.id, { items: newItems });
+                              }}
+                              rows={2}
+                              className="w-full p-2 text-[10px] border border-gray-200 rounded-lg bg-white outline-none resize-none text-black"
+                              placeholder="Descripción..."
+                            />
+                            
+                            <div className="pt-2">
+                               <button 
+                                 onClick={() => setExpandedIconIdx(expandedIconIdx === idx ? null : idx)}
+                                 className="w-full flex items-center justify-between p-2.5 bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition-all text-[10px] font-bold text-gray-500 uppercase"
+                               >
+                                 <span className="flex items-center gap-2">
+                                   <Grid className="w-3.5 h-3.5 text-black" /> Personalizar Icono
+                                 </span>
+                                 {expandedIconIdx === idx ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                               </button>
+
+                               {expandedIconIdx === idx && (
+                                 <div className="mt-2 p-3 bg-white rounded-2xl border border-gray-100 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                                   <div className="space-y-2">
+                                     <label className="text-[9px] font-bold text-gray-400 uppercase flex items-center gap-1.5">
+                                       <Search className="w-3 h-3" /> Selecciona un Icono
+                                     </label>
+                                     <div className="grid grid-cols-7 gap-1.5 max-h-48 overflow-y-auto p-1 custom-scrollbar">
+                                       {[
+                                         'Zap', 'Target', 'Users', 'Globe', 'Shield', 'Trophy', 
+                                         'Star', 'Heart', 'CheckCircle', 'Award', 'Lightbulb', 'Rocket', 
+                                         'TrendingUp', 'Settings', 'Lock', 'Phone', 'Mail', 'Calendar', 
+                                         'MapPin', 'Music', 'Camera', 'Video', 'Mic', 'Headphones',
+                                         'Cpu', 'Database', 'Cloud', 'Chrome', 'Github', 'Twitter',
+                                         'Linkedin', 'Youtube', 'Briefcase', 'BookOpen', 'GraduationCap', 'Coffee',
+                                         'Utensils', 'Pizza', 'GlassWater', 'Anchor', 'Compass', 'Flag',
+                                         'Bell', 'MessageSquare', 'Share2', 'ZapOff', 'Sun', 'Moon',
+                                         'Activity', 'Airplay', 'Aperture', 'Archive', 'AtSign', 'BarChart', 
+                                         'Battery', 'Bluetooth', 'Book', 'Bookmark', 'Box', 'Cast', 
+                                         'Check', 'Clipboard', 'Clock', 'Code', 'Command', 'Copy', 
+                                         'CreditCard', 'Crop', 'Crosshair', 'Disc', 'DollarSign', 'Download', 
+                                         'Droplet', 'Edit', 'Eye', 'Facebook', 'FastForward', 'Feather', 
+                                         'Figma', 'File', 'Film', 'Filter', 'Folder', 'Framer', 
+                                         'Frown', 'Gift', 'GitBranch', 'GitCommit', 'GitMerge', 'GitPullRequest', 
+                                         'HardDrive', 'Hash', 'Hexagon', 'Home', 'Image', 'Inbox', 
+                                         'Info', 'Instagram', 'Key', 'LifeBuoy', 'Link', 'List', 
+                                         'Loader', 'LogIn', 'LogOut', 'Map', 'Maximize', 'Meh', 
+                                         'Menu', 'MessageCircle', 'Minimize', 'Minus', 'Monitor', 'Octagon', 
+                                         'Package', 'Paperclip', 'Pause', 'PenTool', 'Percent', 'PieChart', 
+                                         'Play', 'Pocket', 'Power', 'Printer', 'Radio', 'RefreshCcw', 
+                                         'Repeat', 'Rewind', 'Rss', 'Scissors', 'Send', 'Server', 
+                                         'Share', 'ShoppingBag', 'ShoppingCart', 'Shuffle', 'Sidebar', 
+                                         'SkipBack', 'SkipForward', 'Slack', 'Slash', 'Sliders', 'Smartphone', 
+                                         'Smile', 'Speaker', 'Square', 'StopCircle', 'Sunrise', 'Sunset', 
+                                         'Tablet', 'Tag', 'Terminal', 'Thermometer', 'ThumbsDown', 'ThumbsUp', 
+                                         'ToggleLeft', 'ToggleRight', 'Tool', 'Trash', 'Trello', 'TrendingDown', 
+                                         'Triangle', 'Truck', 'Tv', 'Twitch', 'Umbrella', 'Underline', 
+                                         'Unlock', 'User', 'Voicemail', 'Volume', 'Watch', 'Wifi', 
+                                         'Wind', 'ZoomIn', 'ZoomOut'
+                                       ].map((iconName) => {
+                                         const IconComp = (Icons as any)[iconName] || Icons.HelpCircle;
+                                         const isSelected = item.icon === iconName || (!item.icon && iconName === 'Zap');
+                                         
+                                         return (
+                                           <button
+                                             key={iconName}
+                                             onClick={() => {
+                                               const newItems = [...activeBlock.content.items];
+                                               newItems[idx] = { ...item, icon: iconName };
+                                               updateBlockContent(activeBlock.id, { items: newItems });
+                                             }}
+                                             className={`aspect-square rounded-lg border flex items-center justify-center transition-all hover:scale-110 ${
+                                               isSelected 
+                                                 ? 'border-black bg-black text-white shadow-lg' 
+                                                 : 'border-transparent bg-gray-50 text-gray-400 hover:border-gray-200 hover:text-gray-600'
+                                             }`}
+                                             title={iconName}
+                                           >
+                                             <IconComp className="w-3.5 h-3.5" />
+                                           </button>
+                                         );
+                                       })}
+                                     </div>
+                                   </div>
+                                   
+                                   <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-50">
+                                     <div className="space-y-1.5">
+                                       <label className="text-[8px] text-gray-400 uppercase font-bold px-1">Color Icono</label>
+                                       <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-lg border border-gray-100">
+                                         <Input 
+                                           type="color"
+                                           value={item.icon_color || '#DBF227'}
+                                           onChange={(e) => {
+                                             const newItems = [...activeBlock.content.items];
+                                             newItems[idx] = { ...item, icon_color: e.target.value };
+                                             updateBlockContent(activeBlock.id, { items: newItems });
+                                           }}
+                                           className="h-5 w-5 p-0 border-none bg-transparent cursor-pointer rounded"
+                                         />
+                                         <span className="text-[9px] font-mono text-gray-400 truncate">{item.icon_color || '#DBF227'}</span>
+                                       </div>
+                                     </div>
+                                     <div className="space-y-1.5">
+                                       <label className="text-[8px] text-gray-400 uppercase font-bold px-1">Fondo Icono</label>
+                                       <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-lg border border-gray-100">
+                                         <Input 
+                                           type="color"
+                                           value={item.icon_bg_color || '#000000'}
+                                           onChange={(e) => {
+                                             const newItems = [...activeBlock.content.items];
+                                             newItems[idx] = { ...item, icon_bg_color: e.target.value };
+                                             updateBlockContent(activeBlock.id, { items: newItems });
+                                           }}
+                                           className="h-5 w-5 p-0 border-none bg-transparent cursor-pointer rounded"
+                                         />
+                                         <span className="text-[9px] font-mono text-gray-400 truncate">{item.icon_bg_color || '#000000'}</span>
+                                       </div>
+                                     </div>
+                                   </div>
+                                 </div>
+                               )}
+                            </div>
+                         </div>
+                       ))}
+                       <Button 
+                         onClick={() => {
+                           const newItems = [...(activeBlock.content.items || []), { title: 'Nueva Característica', description: '', icon: 'Zap' }];
+                           updateBlockContent(activeBlock.id, { items: newItems });
+                         }}
+                         variant="outline" size="sm" className="w-full border-dashed py-4 h-auto text-[10px] font-bold bg-white text-black"
+                       >
+                          <Plus className="w-3 h-3 mr-2" /> Añadir Item
+                       </Button>
+                     </div>
+                  </div>
+                )}
 
                {activeBlock.type === 'auth' && (
                  <div className="space-y-4">
@@ -850,53 +994,182 @@ export function LandingEditorSidebar({
 
                {activeBlock.type === 'cta' && (
                   <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Título de Acción</label>
-                      <Input 
-                        value={activeBlock.content.title}
-                        onChange={(e) => updateBlockContent(activeBlock.id, { title: e.target.value })}
-                        className="text-xs"
-                      />
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase">Título de Sección</label>
+                        <Input 
+                          value={activeBlock.content.title}
+                          onChange={(e) => updateBlockContent(activeBlock.id, { title: e.target.value })}
+                          className="text-xs bg-gray-50 text-black border-gray-200"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase">Subtítulo</label>
+                        <textarea 
+                          value={activeBlock.content.subtitle || ''}
+                          onChange={(e) => updateBlockContent(activeBlock.id, { subtitle: e.target.value })}
+                          rows={2}
+                          className="w-full p-2 text-xs border border-gray-200 rounded-lg bg-gray-50 text-black outline-none resize-none"
+                        />
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-gray-400 uppercase">Etiqueta Registro</label>
+
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                       <div className="space-y-1.5">
+                         <label className="text-[10px] font-bold text-gray-400 uppercase">Alineación Texto</label>
+                         <select 
+                           value={activeBlock.content.text_align || 'center'}
+                           onChange={(e) => updateBlockContent(activeBlock.id, { text_align: e.target.value })}
+                           className="w-full p-2.5 text-xs border border-gray-200 rounded-xl bg-gray-50 text-black outline-none"
+                         >
+                           <option value="left">Izquierda</option>
+                           <option value="center">Centro</option>
+                           <option value="right">Derecha</option>
+                         </select>
+                       </div>
+                       <div className="space-y-1.5">
+                         <label className="text-[10px] font-bold text-gray-400 uppercase">Alineación Botones</label>
+                         <select 
+                           value={activeBlock.content.button_align || 'center'}
+                           onChange={(e) => updateBlockContent(activeBlock.id, { button_align: e.target.value })}
+                           className="w-full p-2.5 text-xs border border-gray-200 rounded-xl bg-gray-50 text-black outline-none"
+                         >
+                           <option value="left">Izquierda</option>
+                           <option value="center">Centro</option>
+                           <option value="right">Derecha</option>
+                         </select>
+                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 pb-2 border-b border-gray-100">
+                      <div className="space-y-1.5 mb-4">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase">Color de Fondo</label>
+                        <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200">
                           <Input 
-                            value={activeBlock.content.register_label}
-                            onChange={(e) => updateBlockContent(activeBlock.id, { register_label: e.target.value })}
-                            className="text-xs"
+                            type="color"
+                            value={activeBlock.content.background_color || '#000000'}
+                            onChange={(e) => updateBlockContent(activeBlock.id, { background_color: e.target.value })}
+                            className="h-6 w-6 p-0 border-none bg-transparent cursor-pointer rounded"
                           />
+                          <span className="text-[10px] font-mono text-black">{activeBlock.content.background_color || '#000000'}</span>
                         </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-gray-400 uppercase">Etiqueta Login</label>
+                      </div>
+                      <div className="space-y-1.5 mb-4">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase">Color de Textos</label>
+                        <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200">
                           <Input 
-                            value={activeBlock.content.login_label}
-                            onChange={(e) => updateBlockContent(activeBlock.id, { login_label: e.target.value })}
-                            className="text-xs"
+                            type="color"
+                            value={activeBlock.content.text_color || '#FFFFFF'}
+                            onChange={(e) => updateBlockContent(activeBlock.id, { text_color: e.target.value })}
+                            className="h-6 w-6 p-0 border-none bg-transparent cursor-pointer rounded"
                           />
+                          <span className="text-[10px] font-mono text-black">{activeBlock.content.text_color || '#FFFFFF'}</span>
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 pt-2">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase flex items-center justify-between">
+                        Botones
+                      </label>
+                      <div className="space-y-3">
+                        {activeBlock.content.buttons?.map((btn: any, idx: number) => (
+                          <div key={idx} className="p-3 bg-gray-50 rounded-xl border border-gray-200 relative group">
+                            <button 
+                              onClick={() => {
+                                const newButtons = activeBlock.content.buttons.filter((_: any, i: number) => i !== idx);
+                                updateBlockContent(activeBlock.id, { buttons: newButtons });
+                              }}
+                              className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition-all"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                            <div className="flex gap-2 mb-2 pr-6">
+                              <Input 
+                                value={btn.label}
+                                onChange={(e) => {
+                                  const newBtns = [...activeBlock.content.buttons];
+                                  newBtns[idx] = { ...btn, label: e.target.value };
+                                  updateBlockContent(activeBlock.id, { buttons: newBtns });
+                                }}
+                                placeholder="Texto"
+                                className="text-[10px] h-8 bg-gray-100 text-black border-gray-200 flex-1"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 mb-2">
+                               <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-lg border border-gray-200">
+                                 <Input 
+                                   type="color"
+                                   value={btn.color || '#FFFFFF'}
+                                   onChange={(e) => {
+                                     const newBtns = [...activeBlock.content.buttons];
+                                     newBtns[idx] = { ...btn, color: e.target.value };
+                                     updateBlockContent(activeBlock.id, { buttons: newBtns });
+                                   }}
+                                   className="w-5 h-5 p-0 border-none bg-transparent cursor-pointer"
+                                 />
+                                 <span className="text-[9px] font-mono text-black">Fondo</span>
+                               </div>
+                               <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-lg border border-gray-200">
+                                 <Input 
+                                   type="color"
+                                   value={btn.text_color || '#000000'}
+                                   onChange={(e) => {
+                                     const newBtns = [...activeBlock.content.buttons];
+                                     newBtns[idx] = { ...btn, text_color: e.target.value };
+                                     updateBlockContent(activeBlock.id, { buttons: newBtns });
+                                   }}
+                                   className="w-5 h-5 p-0 border-none bg-transparent cursor-pointer"
+                                 />
+                                 <span className="text-[9px] font-mono text-black">Texto</span>
+                               </div>
+                            </div>
+                            <Input 
+                              value={btn.url}
+                              onChange={(e) => {
+                                const newBtns = [...activeBlock.content.buttons];
+                                newBtns[idx] = { ...btn, url: e.target.value };
+                                updateBlockContent(activeBlock.id, { buttons: newBtns });
+                              }}
+                              placeholder="URL (ej: #register, http://...)"
+                              className="text-[10px] h-8 bg-gray-100 text-black border-gray-200"
+                            />
+                          </div>
+                        ))}
+                        <Button 
+                          onClick={() => {
+                            const newButtons = [...(activeBlock.content.buttons || []), { label: 'Nuevo Botón', url: '#', color: '#000000', text_color: '#FFFFFF' }];
+                            updateBlockContent(activeBlock.id, { buttons: newButtons });
+                          }}
+                          variant="outline" size="sm" className="w-full text-[10px] h-9 border-dashed text-black hover:bg-gray-50 bg-white"
+                        >
+                          <Plus className="w-3 h-3 mr-2" /> Añadir Botón
+                        </Button>
+                      </div>
                     </div>
                   </div>
                )}
 
                {/* VARIANT SELECTOR */}
-               <div className="space-y-1.5 pt-4 border-t border-gray-50">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Diseño de Bloque (Layout)</label>
-                  <select 
-                    value={activeBlock.variant}
-                    onChange={(e) => {
-                      onConfigChange({
-                        ...config,
-                        blocks: config.blocks.map(b => b.id === activeBlock!.id ? { ...b, variant: e.target.value } : b)
-                      });
-                    }}
-                    className="w-full p-2.5 text-xs border border-gray-200 rounded-xl bg-gray-50 outline-none focus:border-black transition-all"
-                  >
-                    <option value="centered">Centrado (Default)</option>
-                    <option value="split">Dividido (Split)</option>
-                    <option value="minimal">Minimalista</option>
-                  </select>
-               </div>
+               {activeBlock.type !== 'features' && activeBlock.type !== 'cta' && activeBlock.type !== 'agenda' && (
+                 <div className="space-y-1.5 pt-4 border-t border-gray-50">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase">Diseño de Bloque (Layout)</label>
+                    <select 
+                      value={activeBlock.variant}
+                      onChange={(e) => {
+                        onConfigChange({
+                          ...config,
+                          blocks: config.blocks.map(b => b.id === activeBlock!.id ? { ...b, variant: e.target.value } : b)
+                        });
+                      }}
+                      className="w-full p-2.5 text-xs border border-gray-200 rounded-xl bg-gray-50 outline-none focus:border-black transition-all"
+                    >
+                      <option value="centered">Centrado (Default)</option>
+                      <option value="split">Dividido (Split)</option>
+                      <option value="minimal">Minimalista</option>
+                    </select>
+                 </div>
+               )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-center opacity-40">
@@ -914,19 +1187,47 @@ export function LandingEditorSidebar({
         {/* Toggle Public Visibility (Legacy or general setting) */}
         <div className="flex items-center justify-between p-3 bg-blue-50/50 rounded-xl mb-2">
           <div>
-             <p className="text-[10px] font-bold text-blue-900">Landing Activa</p>
-             <p className="text-[9px] text-blue-600">Visible para el público</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input 
-                type="checkbox" 
-                className="sr-only peer" 
-                checked={enabled}
-                onChange={(e) => onEnabledChange(e.target.checked)}
-            />
-            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
+              <p className="text-[10px] font-bold text-blue-900">Landing Activa</p>
+              <p className="text-[9px] text-blue-600">Visible para el público</p>
+           </div>
+           
+
+           <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={enabled}
+                  onChange={(e) => onEnabledChange(e.target.checked)}
+              />
+              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+           </label>
         </div>
+
+        {enabled && (
+          <div className="px-3 py-3 bg-blue-50 border border-blue-100 rounded-2xl mb-2 animate-in fade-in slide-in-from-top-1 duration-300 space-y-3">
+             <div className="flex gap-2">
+                <Icons.Info className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
+                <p className="text-[10px] leading-relaxed text-blue-700 font-medium">
+                  Este es el enlace para acceder de forma rápida y personalizada al index de tu evento.
+                </p>
+             </div>
+
+             <div className="flex flex-col gap-1.5">
+                <label className="text-[9px] font-bold text-blue-400 uppercase px-1">Enlace del Evento</label>
+                <div 
+                  onClick={onCopyLink}
+                   className="w-full bg-white border border-blue-200 rounded-xl px-3 py-2 flex items-center justify-between cursor-pointer hover:border-blue-400 transition-all group overflow-hidden"
+                >
+                  <div className="flex-1 overflow-x-auto custom-scrollbar-hide whitespace-nowrap mr-2">
+                    <span className="text-[10px] text-blue-900 font-mono">
+                      {typeof window !== 'undefined' ? `${window.location.origin}/event/${conferenceId}` : '...'}
+                    </span>
+                  </div>
+                  <CopyIcon className="w-3.5 h-3.5 text-blue-400 group-hover:text-blue-600 shrink-0" />
+                </div>
+             </div>
+          </div>
+        )}
 
         <div className="flex gap-2">
           <Button 

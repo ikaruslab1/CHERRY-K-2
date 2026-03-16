@@ -176,7 +176,7 @@ export interface LandingBlock {
 export interface ConferenceLandingConfig {
   blocks: LandingBlock[];
   global_styles: {
-    font_family: 'inter' | 'syne' | 'manrope' | 'mono';
+    font_family: 'sans' | 'serif' | 'mono' | 'cursive';
   };
 }
 

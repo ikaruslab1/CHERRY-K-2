@@ -5,7 +5,6 @@ import { ConferenceLandingConfig, LandingBlock, Conference } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HeroBlock } from './blocks/HeroBlock';
 import { FeaturesBlock } from './blocks/FeaturesBlock';
-import { SpeakersBlock } from './blocks/SpeakersBlock';
 import { AgendaBlock } from './blocks/AgendaBlock';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterForm } from '@/components/auth/RegisterForm';
@@ -26,18 +25,22 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
 
   // Determinar la fuente seleccionada
   const fontMap: Record<string, string> = {
+    sans: 'font-sans',
+    serif: 'font-playfair',
+    mono: 'font-geist-mono',
+    cursive: 'font-dancing-script',
+    // Legacy support
     inter: 'font-sans',
-    syne: 'font-syne',
-    manrope: 'font-manrope',
-    mono: 'font-mono'
+    syne: 'font-sans',
+    manrope: 'font-sans'
   };
-  const selectedFont = fontMap[config.global_styles?.font_family || 'inter'] || 'font-sans';
+  const selectedFont = fontMap[config.global_styles?.font_family || 'sans'] || 'font-sans';
 
   // Helper para renderizar los formularios de autenticación dentro de los bloques que lo soporten (como Hero Split)
   const renderAuthForms = () => (
     <div className="w-full max-w-[420px] mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
        <div className="text-center space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 font-syne">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
             {view === 'login' ? 'Bienvenido de nuevo' : 'Crear cuenta'}
           </h2>
           <p className="text-sm text-gray-500 font-medium tracking-tight">
@@ -92,7 +95,7 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
   );
 
   return (
-    <div className={`min-h-screen bg-white selection:bg-[#DBF227] selection:text-black ${selectedFont}`}>
+    <div className={`min-h-screen bg-white selection:bg-[#DBF227] selection:text-black @container ${selectedFont}`}>
       
       {/* Dynamic Blocks Rendering Loop */}
       {config.blocks && config.blocks.length > 0 ? (
@@ -118,44 +121,85 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                 );
               case 'auth':
                 return (
-                  <section key={block.id} className="py-20 bg-gray-50 flex items-center justify-center border-y border-gray-100">
+                  <section key={block.id} id="auth-section" className="py-20 bg-gray-50 flex items-center justify-center border-y border-gray-100 scroll-mt-20">
                     {renderAuthForms()}
                   </section>
                 );
-              case 'speakers':
-                return <SpeakersBlock key={block.id} block={block} />;
               case 'agenda':
-                return <AgendaBlock key={block.id} block={block} />;
+                return <AgendaBlock key={block.id} block={block} conferenceId={conference.id} />;
               case 'cta':
+                const ctaBg = block.content.background_color || '#000000';
+                const ctaColor = block.content.text_color || '#FFFFFF';
+                const textJustify = block.content.text_align === 'left' ? 'text-left' : block.content.text_align === 'right' ? 'text-right' : 'text-center';
+                const flexJustify = block.content.button_align === 'left' ? 'justify-start' : block.content.button_align === 'right' ? 'justify-end' : 'justify-center';
+                
+                const ctaButtons = block.content.buttons || [
+                  { label: block.content.register_label || "Obtener Entrada", url: "#register" },
+                  { label: block.content.login_label || "Acceder a mi Portal", url: "#login" }
+                ];
+
                 return (
-                  <section key={block.id} className="py-24 bg-gray-950 text-white relative overflow-hidden">
-                     {/* Background Glow */}
-                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#DBF227]/5 blur-[120px] rounded-full"></div>
-                     
-                     <div className="container mx-auto px-6 text-center relative z-10">
+                  <section key={block.id} className="py-24 relative overflow-hidden" style={{ backgroundColor: ctaBg, color: ctaColor }}>                     
+                     <div className={`container mx-auto px-6 relative z-10 ${textJustify}`}>
                         <motion.h2 
                           initial={{ opacity: 0, y: 20 }}
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
-                          className="text-4xl md:text-6xl font-black mb-12 tracking-tighter"
+                          className="text-4xl @md:text-5xl font-black mb-4 tracking-tighter"
                         >
                           {block.content.title || 'Únete al Futuro de la Legislación'}
                         </motion.h2>
+
+                        {block.content.subtitle && (
+                          <motion.p 
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className={`text-lg @md:text-xl font-medium mb-12 max-w-2xl opacity-80 ${block.content.text_align === 'center' || !block.content.text_align ? 'mx-auto' : ''}`}
+                          >
+                            {block.content.subtitle}
+                          </motion.p>
+                        )}
                         
-                        <div className="flex flex-wrap justify-center gap-6">
-                           <button 
-                             onClick={() => setView('register')}
-                             className="px-12 py-5 bg-[#DBF227] text-black font-black text-sm uppercase tracking-wider rounded-2xl hover:scale-105 transition-transform shadow-xl shadow-[#DBF227]/20"
-                           >
-                             Obtener Entrada
-                           </button>
-                           <button 
-                             onClick={() => setView('login')}
-                             className="px-12 py-5 bg-white/5 text-white font-black text-sm uppercase tracking-wider rounded-2xl hover:bg-white/10 transition-colors border border-white/10"
-                           >
-                             Acceder a mi Portal
-                           </button>
-                        </div>
+                        {(ctaButtons.length > 0) && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.2 }}
+                            className={`flex flex-wrap gap-4 ${flexJustify}`}
+                          >
+                             {ctaButtons.map((btn: any, idx: number) => {
+                               const btnBg = btn.color || (idx === 0 ? '#DBF227' : 'rgba(255,255,255,0.1)');
+                               const btnText = btn.text_color || (idx === 0 ? '#000000' : ctaColor);
+
+                               if (btn.url === '#register' || btn.url === '#login') {
+                                 return (
+                                   <button 
+                                     key={idx}
+                                     onClick={() => setView(btn.url === '#register' ? 'register' : 'login')}
+                                     className="px-10 py-4 font-bold text-sm uppercase tracking-wider rounded-xl transition-all hover:scale-105 shadow-xl"
+                                     style={{ backgroundColor: btnBg, color: btnText }}
+                                   >
+                                     {btn.label}
+                                   </button>
+                                 );
+                               }
+                               
+                               return (
+                                 <a 
+                                   key={idx}
+                                   href={btn.url}
+                                   className="px-10 py-4 font-bold text-sm uppercase tracking-wider rounded-xl transition-all inline-block hover:scale-105 shadow-xl"
+                                   style={{ backgroundColor: btnBg, color: btnText }}
+                                 >
+                                   {btn.label}
+                                 </a>
+                               );
+                             })}
+                          </motion.div>
+                        )}
                      </div>
                   </section>
                 );
@@ -180,8 +224,8 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
 
       {/* Institutional Branding (Persistent) */}
       <footer className="py-12 bg-white border-t border-gray-50 relative z-20">
-         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex flex-col items-center md:items-start gap-2">
+         <div className="container mx-auto px-6 flex flex-col @md:flex-row justify-between items-center gap-8">
+            <div className="flex flex-col items-center @md:items-start gap-2">
                <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center shadow-lg shadow-gray-200">
                      <Cherry className="w-4 h-4 text-white" />
@@ -193,7 +237,7 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                <p className="text-[10px] text-gray-400 font-mono">Sistema de Gestión de Eventos Académicos v2.5</p>
             </div>
 
-            <div className="flex flex-col items-center md:items-end gap-1">
+            <div className="flex flex-col items-center @md:items-end gap-1">
                <span className="text-[10px] text-gray-400 font-mono uppercase tracking-widest">Desarrollado por</span>
                <a href="https://torrhez.myportfolio.com/" className="text-xs font-bold text-gray-900 border-b-2 border-[#DBF227] hover:bg-[#DBF227] transition-all px-1">
                   Prof. Adrián Torres
