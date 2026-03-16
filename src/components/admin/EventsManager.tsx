@@ -308,14 +308,26 @@ export function EventsManager() {
       </div>
 
       {/* Global Attendance Certificate Panel */}
-      <div className={`rounded-2xl border transition-all duration-300 overflow-hidden ${givesGlobalCert ? 'border-[#DBF227] bg-[#DBF227]/5' : 'border-gray-200 bg-white'}`}>
+      <div 
+        className="rounded-2xl border transition-all duration-300 overflow-hidden"
+        style={{ 
+          borderColor: givesGlobalCert ? 'var(--color-acid)' : 'rgb(229 231 235)',
+          backgroundColor: givesGlobalCert ? 'rgb(var(--color-acid-rgb) / 0.05)' : 'white'
+        }}
+      >
         <button
           type="button"
           onClick={() => setShowGlobalCertSection(!showGlobalCertSection)}
           className="w-full flex items-center justify-between p-4 hover:bg-gray-50/50 transition-colors text-left"
         >
           <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${givesGlobalCert ? 'bg-[#DBF227] text-[#373737]' : 'bg-gray-100 text-gray-500'}`}>
+            <div 
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
+              style={{ 
+                backgroundColor: givesGlobalCert ? 'var(--color-acid)' : 'rgb(243 244 246)',
+                color: givesGlobalCert ? 'var(--color-acid-text)' : 'rgb(107 114 128)'
+              }}
+            >
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
@@ -336,7 +348,13 @@ export function EventsManager() {
             <div className="h-px bg-gray-100" />
 
             {/* Toggle Switch */}
-            <div className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${givesGlobalCert ? 'bg-[#DBF227]/20 border-[#DBF227]' : 'bg-gray-50/50 border-gray-100 hover:border-gray-200'}`}>
+            <div 
+              className="flex items-center gap-3 p-3 rounded-xl border transition-all duration-300"
+              style={{ 
+                backgroundColor: givesGlobalCert ? 'rgb(var(--color-acid-rgb) / 0.2)' : 'rgb(249 250 251 / 0.5)',
+                borderColor: givesGlobalCert ? 'var(--color-acid)' : 'rgb(243 244 246)'
+              }}
+            >
               <div className="flex-1">
                 <label className="text-sm font-bold text-[#373737] block">Dar constancias por asistencia total al congreso</label>
                 <p className={`text-xs transition-colors ${givesGlobalCert ? 'text-gray-600' : 'text-gray-400'}`}>
@@ -350,7 +368,13 @@ export function EventsManager() {
                   onChange={(e) => setGivesGlobalCert(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#DBF227]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#DBF227]"></div>
+                <div 
+                  className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all transition-colors"
+                  style={{ 
+                    backgroundColor: givesGlobalCert ? 'var(--color-acid)' : undefined,
+                    boxShadow: givesGlobalCert ? '0 0 0 4px rgb(var(--color-acid-rgb) / 0.2)' : undefined
+                  }}
+                ></div>
               </label>
             </div>
 
@@ -373,7 +397,10 @@ export function EventsManager() {
                     max={999}
                     value={globalCertThreshold}
                     onChange={(e) => setGlobalCertThreshold(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-28 px-4 py-3 rounded-xl border border-gray-200 text-[#373737] text-center font-bold focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent transition-all bg-gray-50/50 text-lg"
+                    className="w-28 px-4 py-3 rounded-xl border border-gray-200 text-[#373737] text-center font-bold focus:outline-none transition-all bg-gray-50/50 text-lg"
+                    style={{ 
+                      boxShadow: '0 0 0 2px var(--color-acid)'
+                    }}
                   />
                   <p className="text-sm text-gray-500">
                     evento{globalCertThreshold !== 1 ? 's' : ''} con asistencia marcada para obtener la constancia
@@ -405,7 +432,10 @@ export function EventsManager() {
                 
                 {/* Progress Bar Detail */}
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
-                    <div className="h-full bg-[#DBF227] w-1/3 rounded-r-full" />
+                    <div 
+                      className="h-full w-1/3 rounded-r-full" 
+                      style={{ backgroundColor: 'var(--color-acid)' }}
+                    />
                 </div>
 
                 <div className="p-5 xs:p-6 md:p-8 pt-6 xs:pt-8 md:pt-10">
@@ -445,11 +475,20 @@ export function EventsManager() {
                       <h4 className="font-bold text-lg text-[#373737] leading-tight mb-1">{event.title}</h4>
                       <div className="flex items-center gap-2">
                         <p className="text-sm text-gray-500 flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#DBF227] shrink-0"></span> 
+                          <span 
+                            className="w-1.5 h-1.5 rounded-full shrink-0"
+                            style={{ backgroundColor: 'var(--color-acid)' }}
+                          ></span> 
                           <span className="truncate">{event.location}</span>
                         </p>
                         {event.speakers && event.speakers.length > 0 && (
-                          <span className="text-[10px] font-bold text-[#aacc00] bg-[#DBF227]/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                          <span 
+                            className="text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1"
+                            style={{ 
+                              backgroundColor: 'rgb(var(--color-acid-rgb) / 0.1)',
+                              color: 'var(--color-acid-text)'
+                            }}
+                          >
                             <Users className="h-3 w-3" />
                             {event.speakers.length} ponente{event.speakers.length !== 1 ? 's' : ''}
                           </span>

@@ -13,6 +13,7 @@ import { getContrastColorHex } from '@/lib/colorUtils';
  * 
  * Supports both solid colors and gradients.
  * Automatically calculates optimal text color for contrast.
+ * Exposes RGB components for Tailwind opacity support.
  */
 export function DynamicTheme() {
   const { currentConference } = useConference();
@@ -34,12 +35,28 @@ export function DynamicTheme() {
       colorValue = accentColorConfig.value;
     }
     
+    function hexToRgb(hex: string) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
+    }
+    
     // Calculate optimal text color for contrast
     const textColor = getContrastColorHex(gradientValue || colorValue);
     
     // Inject the color as CSS variables on the document root
     document.documentElement.style.setProperty('--color-acid', colorValue);
     document.documentElement.style.setProperty('--color-acid-text', textColor);
+    
+    // Also provide RGB components for Tailwind opacity support (e.g. bg-[rgb(var(--color-acid-rgb)/0.5)])
+    const rgb = hexToRgb(colorValue);
+    if (rgb) {
+      document.documentElement.style.setProperty('--color-acid-rgb', `${rgb.r} ${rgb.g} ${rgb.b}`);
+    }
+
     if (gradientValue) {
       document.documentElement.style.setProperty('--color-acid-gradient', gradientValue);
     } else {
@@ -50,6 +67,7 @@ export function DynamicTheme() {
     return () => {
       document.documentElement.style.setProperty('--color-acid', '#D9F528');
       document.documentElement.style.setProperty('--color-acid-text', '#000000');
+      document.documentElement.style.setProperty('--color-acid-rgb', '217 245 40');
       document.documentElement.style.setProperty('--color-acid-gradient', '#D9F528');
     };
   }, [currentConference?.accent_color]);

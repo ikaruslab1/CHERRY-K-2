@@ -42,10 +42,19 @@ export function CertificatesView() {
     <div className="space-y-6">
        {/* Global Attendance Certificate Section */}
        {globalAttendanceProgress && (
-         <div className="rounded-2xl border border-[#DBF227]/40 bg-gradient-to-br from-[#DBF227]/10 to-transparent p-5 space-y-3">
+         <div 
+           className="rounded-2xl border p-5 space-y-3 transition-colors duration-300"
+           style={{ 
+             borderColor: 'rgb(var(--color-acid-rgb) / 0.4)',
+             background: 'linear-gradient(to bottom right, rgb(var(--color-acid-rgb) / 0.1), transparent)'
+           }}
+         >
            <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-xl bg-[#DBF227]/20 flex items-center justify-center">
-               <Award className="w-5 h-5 text-[#373737]" />
+             <div 
+               className="w-10 h-10 rounded-xl flex items-center justify-center"
+               style={{ backgroundColor: 'rgb(var(--color-acid-rgb) / 0.2)' }}
+             >
+               <Award className="w-5 h-5" style={{ color: 'var(--color-acid-text, #373737)' }} />
              </div>
              <div>
                <h3 className="font-bold text-sm text-gray-900">Constancia de Participación General</h3>
@@ -70,8 +79,11 @@ export function CertificatesView() {
              </div>
              <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
                <div 
-                 className="h-full bg-[#DBF227] rounded-full transition-all duration-500"
-                 style={{ width: `${Math.min(100, (globalAttendanceProgress.current / globalAttendanceProgress.required) * 100)}%` }}
+                 className="h-full rounded-full transition-all duration-500"
+                 style={{ 
+                    width: `${Math.min(100, (globalAttendanceProgress.current / globalAttendanceProgress.required) * 100)}%`,
+                    backgroundColor: 'var(--color-acid)'
+                 }}
                />
              </div>
            </div>

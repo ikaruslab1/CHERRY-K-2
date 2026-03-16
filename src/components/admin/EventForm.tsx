@@ -209,13 +209,14 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                                     key={type}
                                     type="button"
                                     onClick={() => setEventType(type)}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all border ${
-                                        isSelected 
-                                        ? 'bg-[#DBF227]/20 border-[#DBF227] text-[#373737]' 
-                                        : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50'
-                                    }`}
+                                    className="px-4 py-2 rounded-full text-sm font-medium transition-all border"
+                                    style={{ 
+                                        backgroundColor: isSelected ? 'rgb(var(--color-acid-rgb) / 0.2)' : 'white',
+                                        borderColor: isSelected ? 'var(--color-acid)' : 'rgb(229 231 235)',
+                                        color: '#373737'
+                                    }}
                                 >
-                                    {isSelected && <span className="mr-2 text-[#aacc00]">●</span>}
+                                    {isSelected && <span className="mr-2" style={{ color: 'var(--color-acid)' }}>●</span>}
                                     {type}
                                 </button>
                             );
@@ -228,7 +229,8 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                 <label className="text-sm font-bold text-[#373737]">Título:</label>
                 <input 
                     {...register('title', { required: true })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent transition-all bg-gray-50/50"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all bg-gray-50/50"
+                    style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
                     placeholder="Ej. Keynote: Futuro de la Tecnología"
                 />
             </div>
@@ -238,7 +240,8 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                 <label className="text-sm font-bold text-[#373737]">URL de Imagen de Portada (Opcional):</label>
                 <input 
                     {...register('image_url')}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent transition-all bg-gray-50/50"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all bg-gray-50/50"
+                    style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
                     placeholder="Ej. https://ejemplo.com/imagen.jpg"
                 />
             </div>
@@ -246,7 +249,10 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
             {/* Tags Input */}
             <div className="space-y-2">
                 <label className="text-sm font-bold text-[#373737]">Etiquetas (Tags):</label>
-                <div className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus-within:ring-2 focus-within:ring-[#DBF227] focus-within:border-transparent transition-all flex flex-wrap gap-2 items-center">
+                <div 
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus-within:ring-2 focus-within:border-transparent transition-all flex flex-wrap gap-2 items-center"
+                    style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
+                >
                     {tags.map(tag => (
                         <span key={tag} className="bg-white border border-gray-200 text-[#373737] text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 animate-in zoom-in-50 duration-200">
                             {tag}
@@ -267,7 +273,11 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                             type="button" 
                             onClick={addTag}
                             disabled={!tagInput.trim()}
-                            className="p-1 rounded-full bg-gray-200 text-gray-500 hover:bg-[#DBF227] hover:text-[#373737] disabled:opacity-50 disabled:hover:bg-gray-200 disabled:hover:text-gray-500 transition-colors"
+                            className="p-1 rounded-full bg-gray-200 text-gray-500 hover:text-[var(--color-acid-text)] disabled:opacity-50 disabled:hover:bg-gray-200 disabled:hover:text-gray-500 transition-colors"
+                            style={{ 
+                                backgroundColor: tagInput.trim() ? 'var(--color-acid)' : undefined,
+                                color: tagInput.trim() ? 'var(--color-acid-text)' : undefined
+                            }}
                             title="Agregar etiqueta"
                         >
                             <Plus size={14} />
@@ -308,7 +318,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                         <button 
                             type="button" 
                             onClick={() => append({ icon: 'link', label: '', url: '' })}
-                            className="text-xs font-bold text-[#aacc00] hover:text-[#373737] flex items-center gap-1 transition-colors"
+                            className="text-xs font-bold text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
                         >
                             <Plus size={14} /> Agregar Link
                         </button>
@@ -323,7 +333,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                                 <button
                                     type="button"
                                     onClick={() => setOpenIconPicker(openIconPicker === index ? null : index)}
-                                    className="p-3 rounded-xl border border-gray-200 bg-white hover:border-[#DBF227] transition-all text-[#373737] flex items-center justify-center min-w-[50px] h-[46px]"
+                                    className="p-3 rounded-xl border border-gray-200 bg-white transition-all text-[#373737] flex items-center justify-center min-w-[50px] h-[46px] hover:border-[var(--color-acid)]"
                                     title="Seleccionar icono"
                                 >
                                     {(() => {
@@ -340,7 +350,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                                         <div className="space-y-4">
                                             {ICON_CATEGORIES.map((category, catIdx) => (
                                                 <div key={catIdx} className="space-y-2">
-                                                    <div className="text-[10px] font-bold text-[#aacc00] uppercase tracking-widest px-1 flex items-center gap-2">
+                                                    <div className="text-[10px] font-bold uppercase tracking-widest px-1 flex items-center gap-2" style={{ color: 'var(--color-acid)' }}>
                                                         {category.name}
                                                         <div className="h-px flex-1 bg-gray-100" />
                                                     </div>
@@ -357,8 +367,12 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                                                                         setOpenIconPicker(null);
                                                                     }}
                                                                     className={`p-2 rounded-lg flex items-center justify-center transition-all ${
-                                                                        isSelected ? 'bg-[#DBF227] text-[#373737]' : 'hover:bg-gray-100 text-gray-500'
+                                                                        isSelected ? '' : 'hover:bg-gray-100 text-gray-500'
                                                                     }`}
+                                                                    style={{ 
+                                                                        backgroundColor: isSelected ? 'var(--color-acid)' : undefined,
+                                                                        color: isSelected ? 'var(--color-acid-text)' : undefined
+                                                                    }}
                                                                     title={opt.label}
                                                                 >
                                                                     <IconComp size={18} />
@@ -376,12 +390,14 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                             <div className="flex-1 space-y-2">
                                 <input 
                                     {...register(`custom_links.${index}.label` as const, { required: true })}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent transition-all bg-gray-50/50"
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all bg-gray-50/50"
+                                    style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
                                     placeholder="Texto del link (ej. Sesión Zoom)"
                                 />
                                 <input 
                                     {...register(`custom_links.${index}.url` as const, { required: true })}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent transition-all bg-gray-50/50"
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all bg-gray-50/50"
+                                    style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
                                     placeholder="URL (ej. https://...)"
                                 />
                             </div>
@@ -402,13 +418,14 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                 </div>
              </div>
 
-    {/* Location & Date */}
+            {/* Location & Date */}
             <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
                  <div className="space-y-2">
                     <label className="text-sm font-bold text-[#373737]">Ubicación:</label>
                      <input 
                         {...register('location')}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent bg-gray-50/50"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent bg-gray-50/50"
+                        style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
                         placeholder="Ej. Auditorio A"
                     />
                  </div>
@@ -417,7 +434,8 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                      <input 
                         {...register('date')}
                         type="datetime-local"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent bg-gray-50/50"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] focus:outline-none focus:ring-2 focus:border-transparent bg-gray-50/50"
+                        style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
                     />
                  </div>
             </div>
@@ -430,13 +448,20 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                     type="number"
                     min="1"
                     defaultValue={1}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent bg-gray-50/50"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] focus:outline-none focus:ring-2 focus:border-transparent bg-gray-50/50"
+                    style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
                 />
             </div>
 
             {/* Certificate Switch */}
              <div className="space-y-4">
-                <div className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${watch('gives_certificate') ? 'bg-[#DBF227]/20 border-[#DBF227]' : 'bg-gray-50/50 border-gray-100 hover:border-gray-200'}`}>
+                <div 
+                    className="flex items-center gap-3 p-3 rounded-xl border transition-all duration-300"
+                    style={{ 
+                        backgroundColor: watch('gives_certificate') ? 'rgb(var(--color-acid-rgb) / 0.1)' : 'rgb(249 250 251 / 0.5)',
+                        borderColor: watch('gives_certificate') ? 'var(--color-acid)' : 'rgb(243 244 246)'
+                    }}
+                 >
                     <div className="flex-1">
                         <label className="text-sm font-bold text-[#373737] block">Dar constancia</label>
                         <p className={`text-xs transition-colors ${watch('gives_certificate') ? 'text-gray-600' : 'text-gray-400'}`}>Activar si este evento otorga constancia de participación.</p>
@@ -447,7 +472,13 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                             {...register('gives_certificate')} 
                             className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#DBF227]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#DBF227]"></div>
+                        <div 
+                            className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all transition-colors"
+                            style={{ 
+                                backgroundColor: watch('gives_certificate') ? 'var(--color-acid)' : undefined,
+                                boxShadow: watch('gives_certificate') ? '0 0 0 4px rgb(var(--color-acid-rgb) / 0.1)' : undefined
+                            }}
+                         ></div>
                     </label>
                 </div>
 
@@ -532,12 +563,16 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                 </button>
                  <button 
                     type="submit"
-                    className="w-full xs:w-auto px-8 py-3 rounded-xl text-sm font-bold bg-[#DBF227] text-[#373737] hover:bg-[#d4e626] hover:shadow-lg hover:shadow-[#DBF227]/20 transition-all transform hover:-translate-y-0.5"
-                >
+                    className="w-full xs:w-auto px-8 py-3 rounded-xl text-sm font-bold transition-all transform hover:-translate-y-0.5"
+                    style={{ 
+                        backgroundColor: 'var(--color-acid)',
+                        color: 'var(--color-acid-text)',
+                        boxShadow: '0 4px 12px rgb(var(--color-acid-rgb) / 0.15)'
+                    }}
+                 >
                     {isEditing ? 'Guardar Cambios' : 'Crear Evento'}
                 </button>
             </div>
-
 
         </form>
     );

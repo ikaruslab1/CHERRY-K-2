@@ -174,16 +174,32 @@ export function EventModal({
       >
         
         {/* Header Image Area - Full Clarity */}
-        <div className="relative h-64 shrink-0 bg-gray-100">
-          <Image 
-            src={event.image_url || "/assets/event-header.png"}
-            alt="Event Header"
-            fill
-            className="object-cover"
-            priority
-            unoptimized={!!event.image_url}
-            sizes="(max-width: 640px) 100vw, 600px"
-          />
+        <div 
+          className="relative h-64 shrink-0 overflow-hidden"
+          style={{ backgroundColor: !event.image_url ? 'var(--color-acid)' : '#f3f4f6' }}
+        >
+          {event.image_url ? (
+            <Image 
+              src={event.image_url}
+              alt={event.title}
+              fill
+              className="object-cover"
+              priority
+              unoptimized
+              sizes="(max-width: 640px) 100vw, 600px"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+              <div 
+                className="p-4 rounded-full border-2 border-[var(--color-acid-text)] opacity-10 flex items-center justify-center"
+              >
+                <ImageIcon size={48} className="text-[var(--color-acid-text)]" />
+              </div>
+              <span className="text-[10px] font-black text-[var(--color-acid-text)] uppercase tracking-[0.3em] opacity-30">
+                {event.type}
+              </span>
+            </div>
+          )}
           {/* Subtle Gradient from bottom for text readability if needed */}
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent"></div>
 

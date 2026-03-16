@@ -70,12 +70,19 @@ export function MultipleSpeakerSelector({
             
             {/* Selected Speakers - Compact Grid */}
             {selectedUsers.length > 0 && (
-                <div className="p-3 bg-[#DBF227]/5 rounded-xl border border-[#DBF227]/20">
+                <div 
+                    className="p-3 rounded-xl border"
+                    style={{ 
+                        backgroundColor: 'rgb(var(--color-acid-rgb) / 0.05)',
+                        borderColor: 'rgb(var(--color-acid-rgb) / 0.2)'
+                    }}
+                >
                     <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 max-h-[200px] overflow-y-auto custom-scrollbar">
                         {selectedUsers.map((user, index) => (
                             <div 
                                 key={user.id}
-                                className="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs group hover:border-[#DBF227]/50 transition-all animate-in zoom-in-95 duration-200"
+                                className="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs group transition-all animate-in zoom-in-95 duration-200"
+                                style={{ '--hover-border-color': 'rgb(var(--color-acid-rgb) / 0.5)' } as any}
                             >
                                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
                                     <span className="text-[10px] font-bold text-gray-400 shrink-0">#{index + 1}</span>
@@ -111,7 +118,8 @@ export function MultipleSpeakerSelector({
                         value={speakerSearch}
                         placeholder={selectedSpeakerIds.length >= maxSpeakers ? `Máximo ${maxSpeakers} ponentes` : "Buscar y agregar ponente..."}
                         disabled={selectedSpeakerIds.length >= maxSpeakers}
-                        className="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#DBF227] focus:border-transparent bg-gray-50/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent bg-gray-50/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
                         onFocus={() => {
                             if (selectedSpeakerIds.length < maxSpeakers) {
                                 setIsSpeakerOpen(true);
@@ -123,7 +131,10 @@ export function MultipleSpeakerSelector({
                         }}
                     />
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <UserPlus className={`h-4 w-4 transition-colors ${isSpeakerOpen ? 'text-[#aacc00]' : 'text-gray-400'}`} />
+                        <UserPlus 
+                            className="h-4 w-4 transition-colors" 
+                            style={{ color: isSpeakerOpen ? 'var(--color-acid)' : '#9ca3af' }} 
+                        />
                     </div>
                 </div>
 
@@ -146,7 +157,8 @@ export function MultipleSpeakerSelector({
                                                     toggleSpeaker(user.id);
                                                     setSpeakerSearch('');
                                                 }}
-                                                className="px-4 py-3 hover:bg-[#DBF227]/10 cursor-pointer flex items-center justify-between group transition-colors"
+                                                className="px-4 py-3 cursor-pointer flex items-center justify-between group transition-colors hover:bg-[var(--hover-bg)]"
+                                                style={{ '--hover-bg': 'rgb(var(--color-acid-rgb) / 0.1)' } as any}
                                             >
                                                 <div>
                                                     <div className="font-bold text-[#373737] text-sm group-hover:text-black">{user.first_name} {user.last_name}</div>
@@ -171,7 +183,8 @@ export function MultipleSpeakerSelector({
                                                     toggleSpeaker(user.id);
                                                     setSpeakerSearch('');
                                                 }}
-                                                className="px-4 py-3 hover:bg-[#DBF227]/10 cursor-pointer flex items-center justify-between group transition-colors"
+                                                className="px-4 py-3 cursor-pointer flex items-center justify-between group transition-colors hover:bg-[var(--hover-bg)]"
+                                                style={{ '--hover-bg': 'rgb(var(--color-acid-rgb) / 0.1)' } as any}
                                             >
                                                 <div>
                                                     <div className="font-bold text-[#373737] text-sm group-hover:text-black">{user.first_name} {user.last_name}</div>
