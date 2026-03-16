@@ -6,10 +6,25 @@
       "sourceType": "github",
       "computedHash": "7fe64193429f501d63828fbbde0e20f4ee49e5254a3226ece7ff004bf8e7f348"
     },
+    "codebase-documenter": {
+      "source": "ailabs-393/ai-labs-claude-skills",
+      "sourceType": "github",
+      "computedHash": "6b62f6146fa67d84a9459419127c5a55507a29e25f4987ef4cb2fe79889713a6"
+    },
+    "codebase-study-guide": {
+      "source": "petekp/agent-skills",
+      "sourceType": "github",
+      "computedHash": "d2e58192ed5926a54c5a0fbe75ff8b9fc75568d82e7c3fd277cb710f1a0d957f"
+    },
     "create-implementation-plan": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
       "computedHash": "4764bacd34af8e5c27a85ca01a90197afcf1f1ed1785975ba91d9b80dff60e2d"
+    },
+    "project-map-builder": {
+      "source": "yunshu0909/yunshu_skillshub",
+      "sourceType": "github",
+      "computedHash": "86a965ce9280bc4c794eeeae694da6f226ff3bdc2fbb53e18784281cae06af06"
     }
   }
 }

@@ -230,7 +230,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                 <input 
                     {...register('title', { required: true })}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all bg-gray-50/50"
-                    style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
+                    style={{ '--tw-ring-color': 'var(--color-acid)' } as React.CSSProperties}
                     placeholder="Ej. Keynote: Futuro de la Tecnología"
                 />
             </div>
@@ -251,7 +251,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                 <label className="text-sm font-bold text-[#373737]">Etiquetas (Tags):</label>
                 <div 
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 focus-within:ring-2 focus-within:border-transparent transition-all flex flex-wrap gap-2 items-center"
-                    style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
+                    style={{ '--tw-ring-color': 'var(--color-acid)' } as React.CSSProperties}
                 >
                     {tags.map(tag => (
                         <span key={tag} className="bg-white border border-gray-200 text-[#373737] text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 animate-in zoom-in-50 duration-200">
@@ -340,7 +340,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                                         const iconVal = watch(`custom_links.${index}.icon`);
                                         const iconOption = ALL_ICONS.find(o => o.icon === iconVal) || ALL_ICONS[0]; 
                                         const IconComp = iconOption.component;
-                                        return <IconComp size={20} />;
+                                        return (<IconComp size={20} />);
                                     })()}
                                     <ChevronDown size={12} className="ml-1 text-gray-400" />
                                 </button>
