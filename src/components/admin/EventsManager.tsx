@@ -27,6 +27,7 @@ export function EventsManager() {
   const [showGlobalCertSection, setShowGlobalCertSection] = useState(false);
   const [givesGlobalCert, setGivesGlobalCert] = useState(false);
   const [globalCertThreshold, setGlobalCertThreshold] = useState(1);
+  const [deliverGlobalCert, setDeliverGlobalCert] = useState(false);
   const [savingGlobalCert, setSavingGlobalCert] = useState(false);
 
   const { currentConference, refreshConference } = useConference();
@@ -115,6 +116,7 @@ export function EventsManager() {
     if (currentConference) {
       setGivesGlobalCert(currentConference.gives_global_certificate || false);
       setGlobalCertThreshold(currentConference.global_certificate_threshold || 1);
+      setDeliverGlobalCert(currentConference.deliver_global_certificate || false);
     }
   }, [currentConference]);
 
@@ -127,6 +129,7 @@ export function EventsManager() {
         .update({
           gives_global_certificate: givesGlobalCert,
           global_certificate_threshold: globalCertThreshold,
+          deliver_global_certificate: deliverGlobalCert,
         })
         .eq('id', currentConference.id);
       if (error) throw error;
@@ -378,9 +381,9 @@ export function EventsManager() {
               </label>
             </div>
 
-            {/* Threshold Input - shown when enabled */}
+            {/* Threshold Input + Deliver Toggle - shown when enabled */}
             {givesGlobalCert && (
-              <div className="animate-in slide-in-from-top-2 duration-300 space-y-2">
+              <div className="animate-in slide-in-from-top-2 duration-300 space-y-3">
                 <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-100 text-blue-800 text-xs">
                   <Info size={14} className="shrink-0 mt-0.5" />
                   <p>
@@ -405,6 +408,39 @@ export function EventsManager() {
                   <p className="text-sm text-gray-500">
                     evento{globalCertThreshold !== 1 ? 's' : ''} con asistencia marcada para obtener la constancia
                   </p>
+                </div>
+
+                {/* Sub-option: Entregar constancia */}
+                <div 
+                  className="flex items-center gap-3 p-3 rounded-xl border transition-all duration-300"
+                  style={{ 
+                    backgroundColor: deliverGlobalCert ? 'rgb(var(--color-acid-rgb) / 0.1)' : 'rgb(249 250 251)',
+                    borderColor: deliverGlobalCert ? 'var(--color-acid)' : 'rgb(229 231 235)'
+                  }}
+                >
+                  <div className="flex-1">
+                    <label className="text-sm font-bold text-[#373737] block">Entregar constancia general</label>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {deliverGlobalCert
+                        ? 'Los usuarios podrán descargar su constancia directamente desde su perfil.'
+                        : 'Se mostrará un aviso de que la constancia será enviada a su correo electrónico.'}
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={deliverGlobalCert}
+                      onChange={(e) => setDeliverGlobalCert(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div 
+                      className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all transition-colors"
+                      style={{ 
+                        backgroundColor: deliverGlobalCert ? 'var(--color-acid)' : undefined,
+                        boxShadow: deliverGlobalCert ? '0 0 0 4px rgb(var(--color-acid-rgb) / 0.2)' : undefined
+                      }}
+                    ></div>
+                  </label>
                 </div>
               </div>
             )}

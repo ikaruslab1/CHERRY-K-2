@@ -6,7 +6,7 @@ import { CertificateList } from './certificates/CertificateList';
 import { CertificateModal } from './certificates/CertificateModal';
 import { useCertificates } from '@/hooks/useCertificates';
 import { Certificate } from '@/types/certificates';
-import { Loader2, Award, CheckCircle2 } from 'lucide-react';
+import { Loader2, Award, CheckCircle2, Mail, Info } from 'lucide-react';
 
 export function CertificatesView() {
   const { currentConference } = useConference();
@@ -21,6 +21,9 @@ export function CertificatesView() {
   } = useCertificates(currentConference?.id);
   
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
+
+  // Check if the admin wants to deliver the cert directly or via email
+  const deliverGlobalCert = currentConference?.deliver_global_certificate ?? false;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-MX', {
@@ -88,16 +91,60 @@ export function CertificatesView() {
              </div>
            </div>
 
-           {/* Earned Certificate */}
+           {/* Earned Certificate or Email Banner */}
            {globalCertificate && (
-             <CertificateList
-               title=""
-               description=""
-               certificates={[globalCertificate]}
-               onView={setSelectedCertificate}
-               formatDate={formatDate}
-               type="attendee"
-             />
+             <>
+               {deliverGlobalCert ? (
+                 <CertificateList
+                   title=""
+                   description=""
+                   certificates={[globalCertificate]}
+                   onView={setSelectedCertificate}
+                   formatDate={formatDate}
+                   type="attendee"
+                 />
+               ) : (
+                 /* Email banner: constancia will be sent via email */
+                 <div 
+                   className="rounded-xl border p-4 space-y-2 animate-in fade-in duration-300"
+                   style={{
+                     background: 'linear-gradient(135deg, rgb(var(--color-acid-rgb) / 0.12), rgb(var(--color-acid-rgb) / 0.05))',
+                     borderColor: 'rgb(var(--color-acid-rgb) / 0.35)'
+                   }}
+                 >
+                   <div className="flex items-start gap-3">
+                     <div 
+                       className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                       style={{ backgroundColor: 'rgb(var(--color-acid-rgb) / 0.25)' }}
+                     >
+                       <Mail className="w-4 h-4" style={{ color: 'var(--color-acid-text, #373737)' }} />
+                     </div>
+                     <div className="flex-1 min-w-0">
+                       <p className="font-bold text-sm text-gray-900">¡Felicidades, cumpliste el requisito!</p>
+                       <p className="text-xs text-gray-600 mt-0.5">
+                         Tu constancia general de participación te será enviada al correo electrónico con el que te registraste:
+                       </p>
+                       <div 
+                         className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-mono font-semibold"
+                         style={{ 
+                           backgroundColor: 'rgb(var(--color-acid-rgb) / 0.2)',
+                           color: 'var(--color-acid-text, #373737)'
+                         }}
+                       >
+                         <Mail className="w-3.5 h-3.5 shrink-0" />
+                         <span className="truncate">{/* email will be pulled from auth */}
+                           {(globalCertificate as any)?._userEmail || 'tu correo registrado'}
+                         </span>
+                       </div>
+                       <p className="text-[11px] text-gray-400 mt-2 flex items-center gap-1">
+                         <Info className="w-3 h-3 shrink-0" />
+                         Si no recibes el correo en los próximos días, contacta al equipo organizador.
+                       </p>
+                     </div>
+                   </div>
+                 </div>
+               )}
+             </>
            )}
          </div>
        )}

@@ -119,6 +119,7 @@ export interface Conference {
   gives_global_certificate?: boolean;
   global_certificate_threshold?: number; // Number of events user must attend
   global_certificate_config?: any | null; // Same structure as certificate_config
+  deliver_global_certificate?: boolean; // If false, show email banner instead of certificate
   custom_landing_enabled?: boolean;
   conference_landing_config?: ConferenceLandingConfig | null;
 }

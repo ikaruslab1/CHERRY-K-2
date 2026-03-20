@@ -102,7 +102,9 @@ export function EventMetricsDetail({ eventId, onBack }: EventMetricsDetailProps)
   };
 
   const downloadCSV = (content: string, filename: string) => {
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    // Prepend UTF-8 BOM so Excel/Sheets correctly interprets accents and Ñ
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + content], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     if (link.download !== undefined) {
         const url = URL.createObjectURL(blob);
@@ -112,6 +114,7 @@ export function EventMetricsDetail({ eventId, onBack }: EventMetricsDetailProps)
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
   };
 

@@ -381,8 +381,10 @@ export function useCertificates(conferenceId: string | undefined): UseCertificat
               degree: profileData?.degree || null,
               gender: profileData?.gender || null,
             },
-            isGlobalAttendance: true
-          };
+            isGlobalAttendance: true,
+            // Attach user email so CertificatesView can show it in the email-delivery banner
+            _userEmail: user.email || ''
+          } as any;
           setGlobalCertificate(globalCert);
         } else {
           setGlobalCertificate(null);
