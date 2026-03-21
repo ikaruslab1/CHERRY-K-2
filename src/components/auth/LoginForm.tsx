@@ -19,9 +19,10 @@ type FormData = z.infer<typeof formSchema>;
 
 interface LoginFormProps {
   conferenceId?: string;
+  isEmbedded?: boolean;
 }
 
-export function LoginForm({ conferenceId }: LoginFormProps) {
+export function LoginForm({ conferenceId, isEmbedded }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRecoverModalOpen, setIsRecoverModalOpen] = useState(false);
@@ -51,8 +52,12 @@ export function LoginForm({ conferenceId }: LoginFormProps) {
             document.cookie = `conference_id=${conferenceId}; path=/; max-age=31536000; SameSite=Lax`;
         }
 
-        // Redirigir usando window.location para asegurar que las cookies se procesen correctamente
-        window.location.href = '/profile'; 
+        // Redirigir usando window.top.location.href si es un iframe, o window.location.href normal.
+        if (isEmbedded && window.top) {
+            window.top.location.href = window.location.origin + '/profile';
+        } else {
+            window.location.href = '/profile'; 
+        }
       } else {
         setError(result.error || 'Error al iniciar sesión');
       }

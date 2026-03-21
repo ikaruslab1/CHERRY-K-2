@@ -17,6 +17,7 @@ export async function registerUser(data: {
   email: string;
   phone: string;
   conferenceId?: string;
+  customData?: Record<string, any>;
 }) {
   let userId: string | null = null;
 
@@ -31,6 +32,7 @@ export async function registerUser(data: {
       user_metadata: {
         first_name: data.firstName,
         last_name: data.lastName,
+        custom_data: data.customData
       }
     });
 

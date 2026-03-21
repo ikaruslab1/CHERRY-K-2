@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Loader2, Search, Edit2, X, UserCog, Check, QrCode } from 'lucide-react';
+import { Loader2, Search, Edit2, X, UserCog, Check, QrCode, Download } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
 import { useDebounce } from '@/hooks/useDebounce';
@@ -13,6 +13,7 @@ import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 import { useUsers } from '@/hooks/useUsers';
 import { usePlatformUsers } from '@/hooks/usePlatformUsers';
 import { useConference } from '@/context/ConferenceContext';
+import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
 
   export function UsersTable({ readOnly = false, currentUserRole }: { readOnly?: boolean, currentUserRole?: string }) {
   const [search, setSearch] = useState('');
@@ -25,6 +26,7 @@ import { useConference } from '@/context/ConferenceContext';
   const [selectedRole, setSelectedRole] = useState<UserProfile['role'] | ''>('');
   const [updating, setUpdating] = useState(false);
   const [origin, setOrigin] = useState('');
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const { currentConference } = useConference();
 
   useEffect(() => {
@@ -127,9 +129,22 @@ import { useConference } from '@/context/ConferenceContext';
                 className="pl-10 bg-white border-gray-200 text-[#373737] focus:ring-[#DBF227]"
             />
         </div>
-        <Button onClick={() => { mutateUsers(); mutatePlatformUsers(); }} disabled={loading} className="bg-[#373737] text-white hover:bg-black w-full xs:w-auto">
-            {'Buscar'}
-        </Button>
+        <div className="flex gap-2 w-full xs:w-auto">
+            <Button onClick={() => { mutateUsers(); mutatePlatformUsers(); }} disabled={loading} className="bg-[#373737] text-white hover:bg-black flex-1 xs:flex-initial">
+                {'Buscar'}
+            </Button>
+            {(currentUserRole === 'admin' || currentUserRole === 'owner') && (
+                <Button 
+                    onClick={() => setIsDownloadModalOpen(true)} 
+                    variant="outline" 
+                    className="border-gray-200 text-[#373737] hover:bg-gray-50 gap-2 flex-1 xs:flex-initial shadow-sm"
+                    title="Descargar Base de Datos"
+                >
+                    <Download className="h-4 w-4" />
+                    <span className="hidden sm:inline">Descargar DB</span>
+                </Button>
+            )}
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -451,6 +466,14 @@ import { useConference } from '@/context/ConferenceContext';
                   </div>
               </div>
           </div>
+      )}
+      {/* Download Database Modal */}
+      {currentConference && (
+        <DownloadParticipantsModal 
+          isOpen={isDownloadModalOpen}
+          onClose={() => setIsDownloadModalOpen(false)}
+          conference={currentConference}
+        />
       )}
     </div>
   );

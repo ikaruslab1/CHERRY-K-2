@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { registerUser, loginWithId } from "@/actions/auth";
 import { Loader2, CheckCircle } from "lucide-react";
+import * as Icons from 'lucide-react';
 import { useRouter } from "next/navigation";
 
 // Helper for Title Case
@@ -58,9 +59,16 @@ const formSchema = z
     path: ["confirmEmail"],
   });
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema> & Record<string, any>;
 
-export function RegisterForm({ conferenceId }: { conferenceId?: string }) {
+interface RegisterFormProps {
+  conferenceId?: string;
+  isEmbedded?: boolean;
+  customInputs?: any[];
+  fieldsOrder?: string[];
+}
+
+export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fieldsOrder = [] }: RegisterFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isAutoLoggingIn, setIsAutoLoggingIn] = useState(false);
@@ -101,8 +109,21 @@ export function RegisterForm({ conferenceId }: { conferenceId?: string }) {
     return () => subscription.unsubscribe();
   }, [watch]);
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormData, e?: React.BaseSyntheticEvent) => {
     setIsLoading(true);
+
+    const customData: Record<string, any> = {};
+    if (e?.target && customInputs && customInputs.length > 0) {
+      const formData = new window.FormData(e.target);
+      customInputs.forEach((input: any) => {
+        const key = input.id;
+        if (input.type === 'checkbox') {
+          customData[input.label] = formData.get(key) === 'on';
+        } else {
+          customData[input.label] = formData.get(key);
+        }
+      });
+    }
 
     // Auto-formatting to Title Case
     const formattedData = {
@@ -110,6 +131,7 @@ export function RegisterForm({ conferenceId }: { conferenceId?: string }) {
       firstName: toTitleCase(data.firstName),
       lastName: toTitleCase(data.lastName),
       conferenceId,
+      customData,
     };
 
     try {
@@ -126,14 +148,19 @@ export function RegisterForm({ conferenceId }: { conferenceId?: string }) {
           name: fullName,
         });
         
-        // Auto-login after a short delay to show the success message
+        // Auto-login after a short delay
         setIsAutoLoggingIn(true);
         setTimeout(async () => {
           const loginResult = await loginWithId(shortId);
           
           if (loginResult.success) {
-            // Redirigir usando window.location para asegurar que las cookies se procesen correctamente
-            window.location.href = '/profile';
+            if (isEmbedded) {
+                // If embedded, stop spinning and show the button to continue manually
+                setIsAutoLoggingIn(false);
+            } else {
+                // Redirigir usando window.location para asegurar que las cookies se procesen correctamente
+                window.location.href = '/profile';
+            }
           } else {
             // If auto-login fails, keep showing the success message
             // User can manually login with their ID
@@ -203,11 +230,18 @@ export function RegisterForm({ conferenceId }: { conferenceId?: string }) {
             </p>
 
             <Button
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                  if (isEmbedded && window.top) {
+                      window.top.location.href = window.location.origin + '/profile';
+                  } else {
+                      window.location.reload();
+                  }
+              }}
               variant="primary"
-              className="w-full"
+              className="w-full font-bold"
+              size="lg"
             >
-              Entendido
+              {isEmbedded ? 'Ir a la plataforma' : 'Entendido'}
             </Button>
           </>
         )}
@@ -224,158 +258,256 @@ export function RegisterForm({ conferenceId }: { conferenceId?: string }) {
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-5 w-full text-left"
     >
-      <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <label className="text-sm font-bold text-[#373737] ml-1">
-            Nombre <span className="text-red-500">*</span>
-          </label>
-          <Input
-            {...firstNameReg}
-            onBlur={(e) =>
-              handleBlur(e, "firstName", firstNameReg.onBlur)
+      <div className="space-y-5">
+        {(() => {
+          const defaultOrder = ['nombre', 'apellidos', 'grado', 'genero', 'email', 'confirmEmail', 'telefono'];
+          const orderToUse = fieldsOrder && fieldsOrder.length > 0 ? fieldsOrder : [...defaultOrder, ...customInputs.map(ci => ci.id)];
+
+          return orderToUse.map((fieldId) => {
+            // Render fixed fields
+            if (fieldId === 'nombre' || fieldId === 'apellidos') {
+              // Special case: Name and Last Name are in a grid
+              if (fieldId === 'apellidos') return null; // Skip if we hit apellidos, handled in nombre case
+
+              return (
+                <div key="name-grid" className="grid grid-cols-1 xs:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-bold text-[#373737] ml-1">
+                      Nombre <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      {...firstNameReg}
+                      onBlur={(e) => handleBlur(e, "firstName", firstNameReg.onBlur)}
+                      placeholder="Ej. Juan"
+                      className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
+                        errors.firstName ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"
+                      }`}
+                    />
+                    {errors.firstName && <p className="text-red-500 text-xs ml-1">{errors.firstName.message}</p>}
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-bold text-[#373737] ml-1">
+                      Apellidos <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      {...lastNameReg}
+                      onBlur={(e) => handleBlur(e, "lastName", lastNameReg.onBlur)}
+                      placeholder="Ej. Pérez López"
+                      className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
+                        errors.lastName ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"
+                      }`}
+                    />
+                    {errors.lastName && <p className="text-red-500 text-xs ml-1">{errors.lastName.message}</p>}
+                  </div>
+                </div>
+              );
             }
-            placeholder="Ej. Juan"
-            className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
-              errors.firstName 
-              ? "border-red-500 bg-red-50" 
-              : "border-gray-200 bg-white focus:bg-white focus:border-black focus:ring-1 focus:ring-black"
-            }`}
-          />
-          {errors.firstName && (
-            <p className="text-red-500 text-xs ml-1">
-              {errors.firstName.message}
-            </p>
-          )}
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-sm font-bold text-[#373737] ml-1">
-            Apellidos <span className="text-red-500">*</span>
-          </label>
-          <Input
-            {...lastNameReg}
-            onBlur={(e) =>
-              handleBlur(e, "lastName", lastNameReg.onBlur)
+
+            if (fieldId === 'grado') {
+              return (
+                <div key="grado" className="space-y-1.5">
+                  <label className="text-sm font-bold text-[#373737] ml-1">
+                    Grado Académico <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    {...register("degree")}
+                    className={`w-full h-12 rounded-xl border transition-all px-3 text-black bg-white focus:border-black outline-none ${
+                        errors.degree ? "border-red-500 bg-red-50" : "border-gray-200"
+                    }`}
+                  >
+                    <option value="">Seleccione un grado</option>
+                    <option value="Licenciatura">Licenciatura</option>
+                    <option value="Maestría">Maestría</option>
+                    <option value="Doctorado">Doctorado</option>
+                    <option value="Especialidad">Especialidad</option>
+                    <option value="Estudiante">Estudiante</option>
+                    <option value="Profesor">Profesor</option>
+                  </select>
+                  {errors.degree && <p className="text-red-500 text-xs ml-1">{errors.degree.message}</p>}
+                </div>
+              );
             }
-            placeholder="Ej. Pérez López"
-            className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
-              errors.lastName 
-              ? "border-red-500 bg-red-50" 
-              : "border-gray-200 bg-white focus:bg-white focus:border-black focus:ring-1 focus:ring-black"
-            }`}
-          />
-          {errors.lastName && (
-            <p className="text-red-500 text-xs ml-1">
-              {errors.lastName.message}
-            </p>
-          )}
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <label className="text-sm font-bold text-[#373737] ml-1">
-            Grado Académico <span className="text-red-500">*</span>
-          </label>
-          <select
-            {...register("degree")}
-            className={`flex h-12 w-full rounded-xl border px-3 py-2 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black text-black ${
-              errors.degree 
-              ? "border-red-500 bg-red-50 text-[#373737]" 
-              : "border-gray-200 bg-white focus:bg-white"
-            }`}
-          >
-            <option value="">Seleccionar...</option>
-            <option value="Estudiante">Estudiante</option>
-            <option value="Licenciatura">Licenciatura</option>
-            <option value="Especialidad">Especialidad</option>
-            <option value="Maestría">Maestría</option>
-            <option value="Doctorado">Doctorado</option>
-            <option value="Profesor">Profesor</option>
-          </select>
-          {errors.degree && (
-            <p className="text-red-500 text-xs ml-1">{errors.degree.message}</p>
-          )}
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-sm font-bold text-[#373737] ml-1">
-            Género <span className="text-red-500">*</span>
-          </label>
-          <select
-            {...register("gender")}
-             className={`flex h-12 w-full rounded-xl border px-3 py-2 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black text-black ${
-              errors.gender 
-              ? "border-red-500 bg-red-50" 
-              : "border-gray-200 bg-white focus:bg-white"
-            }`}
-          >
-            <option value="">Seleccionar...</option>
-            <option value="Masculino">Masculino</option>
-            <option value="Femenino">Femenino</option>
-            <option value="Neutro">Neutro</option>
-          </select>
-          {errors.gender && (
-            <p className="text-red-500 text-xs ml-1">{errors.gender.message}</p>
-          )}
-        </div>
-      </div>
+            if (fieldId === 'genero') {
+              return (
+                <div key="genero" className="space-y-1.5">
+                  <label className="text-sm font-bold text-[#373737] ml-1">
+                    Género <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    {...register("gender")}
+                    className={`w-full h-12 rounded-xl border transition-all px-3 text-black bg-white focus:border-black outline-none ${
+                        errors.gender ? "border-red-500 bg-red-50" : "border-gray-200"
+                    }`}
+                  >
+                    <option value="">Seleccione un género</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Neutro">Neutro</option>
+                  </select>
+                  {errors.gender && <p className="text-red-500 text-xs ml-1">{errors.gender.message}</p>}
+                </div>
+              );
+            }
+            if (fieldId === 'email') {
 
-      <div className="space-y-1.5">
-        <label className="text-sm font-bold text-[#373737] ml-1">
-          Email <span className="text-red-500">*</span>
-        </label>
-        <Input
-          {...register("email")}
-          type="email"
-          placeholder="juan@ejemplo.com"
-          className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
-            errors.email 
-            ? "border-red-500 bg-red-50" 
-            : "border-gray-200 bg-white focus:bg-white focus:border-black focus:ring-1 focus:ring-black"
-          }`}
-        />
-        {errors.email && (
-          <p className="text-red-500 text-xs ml-1">{errors.email.message}</p>
-        )}
-      </div>
+              return (
+                <div key="email" className="space-y-1.5">
+                  <label className="text-sm font-bold text-[#373737] ml-1">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    {...register("email")}
+                    type="email"
+                    placeholder="juan@example.com"
+                    className={`rounded-xl border h-12 text-black ${errors.email ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"}`}
+                  />
+                  {errors.email && <p className="text-red-500 text-xs ml-1">{errors.email.message}</p>}
+                </div>
+              );
+            }
 
-      <div className="space-y-1.5">
-        <label className="text-sm font-bold text-[#373737] ml-1">
-          Confirmar Email <span className="text-red-500">*</span>
-        </label>
-        <Input
-          {...register("confirmEmail")}
-          type="email"
-          placeholder="juan@example.com"
-          className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
-            errors.confirmEmail
-              ? "border-red-500 bg-red-50"
-              : "border-gray-200 bg-white focus:bg-white focus:border-black focus:ring-1 focus:ring-black"
-          }`}
-        />
-        {errors.confirmEmail && (
-          <p className="text-red-500 text-xs ml-1">
-            {errors.confirmEmail.message}
-          </p>
-        )}
-      </div>
+            if (fieldId === 'confirmEmail') {
+              return (
+                <div key="confirmEmail" className="space-y-1.5">
+                  <label className="text-sm font-bold text-[#373737] ml-1">
+                    Confirmar Email <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    {...register("confirmEmail")}
+                    type="email"
+                    placeholder="juan@example.com"
+                    className={`rounded-xl border h-12 text-black ${errors.confirmEmail ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"}`}
+                  />
+                  {errors.confirmEmail && <p className="text-red-500 text-xs ml-1">{errors.confirmEmail.message}</p>}
+                </div>
+              );
+            }
 
-      <div className="space-y-1.5">
-        <label className="text-sm font-bold text-[#373737] ml-1">
-          Teléfono <span className="text-red-500">*</span>
-        </label>
-        <Input
-          {...register("phone")}
-          type="tel"
-          placeholder="Minimo 10 digitos. Sin lada."
-          className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
-            errors.phone 
-            ? "border-red-500 bg-red-50" 
-            : "border-gray-200 bg-white focus:bg-white focus:border-black focus:ring-1 focus:ring-black"
-          }`}
-        />
-        {errors.phone && (
-          <p className="text-red-500 text-xs ml-1">{errors.phone.message}</p>
-        )}
+            if (fieldId === 'telefono') {
+              return (
+                <div key="telefono" className="space-y-1.5">
+                  <label className="text-sm font-bold text-[#373737] ml-1">
+                    Teléfono <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    {...register("phone")}
+                    type="tel"
+                    placeholder="Minimo 10 digitos. Sin lada."
+                    className={`rounded-xl border h-12 text-black ${errors.phone ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"}`}
+                  />
+                  {errors.phone && <p className="text-red-500 text-xs ml-1">{errors.phone.message}</p>}
+                </div>
+              );
+            }
+
+            // Render custom fields
+            const input = customInputs.find(ci => ci.id === fieldId);
+            if (input) {
+              return (
+                <div key={input.id} className="space-y-1.5 animate-in fade-in slide-in-from-bottom-1 duration-300">
+                  {input.type !== "checkbox" && (
+                    <label className="text-sm font-bold text-[#373737] ml-1">
+                      {input.label} {input.required && <span className="text-red-500">*</span>}
+                    </label>
+                  )}
+                  {input.type === "text" && (
+                    <Input 
+                      name={input.id} 
+                      placeholder={input.placeholder} 
+                      className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all" 
+                      required={input.required}
+                      maxLength={50}
+                    />
+                  )}
+                  {input.type === "number" && (
+                    <Input 
+                      name={input.id} 
+                      type="text" 
+                      placeholder={input.placeholder} 
+                      className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all" 
+                      required={input.required}
+                      onKeyDown={(e) => {
+                        const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', '-', '(', ')', '+', '{', '}', ' '];
+                        if (!/^\d$/.test(e.key) && !allowedKeys.includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
+                    />
+                  )}
+                  {input.type === "url" && (
+                    <div className="space-y-1.5">
+                      <Input 
+                        name={input.id} 
+                        type="url" 
+                        placeholder={input.placeholder} 
+                        className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all" 
+                        required={input.required}
+                        onBlur={(e) => {
+                          const val = e.target.value;
+                          const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
+                          if (val && !urlPattern.test(val)) {
+                            const p = e.target.parentElement?.querySelector('.url-error');
+                            if (p) p.classList.remove('hidden');
+                          } else {
+                            const p = e.target.parentElement?.querySelector('.url-error');
+                            if (p) p.classList.add('hidden');
+                          }
+                        }}
+                      />
+                      <p className="url-error hidden text-red-500 text-xs ml-1 font-bold animate-in fade-in slide-in-from-top-1 duration-200">Esta no es una URL válida</p>
+                    </div>
+                  )}
+                  {input.type === "dropdown" && (
+                    <select 
+                      name={input.id} 
+                      className="h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-black focus:ring-0 transition-all text-black outline-none" 
+                      required={input.required}
+                    >
+                      <option value="">Seleccionar...</option>
+                      {input.placeholder?.split(",").map((opt: string, i: number) => (
+                        <option key={i} value={opt.trim()}>{opt.trim()}</option>
+                      ))}
+                    </select>
+                  )}
+                  {input.type === "checkbox" && (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 ml-1">
+                        <input type="checkbox" name={input.id} className="h-5 w-5 rounded border-gray-300 text-black accent-black" required={input.required} />
+                        <label className="text-sm font-bold text-[#373737]">
+                           {input.label} {input.required && <span className="text-red-500">*</span>}
+                        </label>
+                      </div>
+                      {input.placeholder && (
+                        <p className="text-[11px] text-gray-500 ml-8 leading-tight font-medium opacity-70">{input.placeholder}</p>
+                      )}
+                    </div>
+                  )}
+                  {input.banner_active && input.banner_text && (
+                    <div className={`mt-2 p-3 rounded-xl text-xs font-semibold border flex flex-col sm:flex-row items-center sm:items-start gap-3 whitespace-normal break-words leading-relaxed ${
+                      input.banner_color === "red" ? "bg-red-50 text-red-700 border-red-100" :
+                      input.banner_color === "green" ? "bg-green-50 text-green-700 border-green-100" :
+                      input.banner_color === "yellow" ? "bg-yellow-50 text-yellow-800 border-yellow-100" :
+                      "bg-blue-50 text-blue-700 border-blue-100"
+                    }`}>
+                      <div className="shrink-0 pt-0.5">
+                        <CheckCircle className={`w-4 h-4 ${
+                          input.banner_color === "red" ? "text-red-400" :
+                          input.banner_color === "green" ? "text-green-400" :
+                          input.banner_color === "yellow" ? "text-yellow-500" :
+                          "text-blue-400"
+                        }`} />
+                      </div>
+                      <span className="flex-1 text-center sm:text-left">{input.banner_text}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            return null;
+          });
+        })()}
       </div>
 
       <Button
@@ -395,4 +527,3 @@ export function RegisterForm({ conferenceId }: { conferenceId?: string }) {
     </form>
   );
 }
-

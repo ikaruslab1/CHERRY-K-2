@@ -162,6 +162,172 @@ function SortableLayerItem({
     </div>
   );
 }
+function SortableRegistrationField({ 
+  id, 
+  item, 
+  onUpdate, 
+  onRemove,
+  isFixed = false 
+}: { 
+  id: string, 
+  item: any, 
+  onUpdate?: (updates: any) => void, 
+  onRemove?: () => void,
+  isFixed?: boolean 
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  if (isFixed) {
+    return (
+      <div 
+        ref={setNodeRef} 
+        style={style}
+        className={`flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 opacity-60 ${isDragging ? 'ring-2 ring-black bg-white opacity-100 z-50' : ''}`}
+      >
+        <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-black p-1">
+          <Icons.GripVertical className="w-4 h-4" />
+        </div>
+        <div className="p-1.5 bg-white rounded-lg border border-gray-100">
+          {id === 'nombre' && <Icons.User className="w-3 h-3 text-gray-400" />}
+          {id === 'apellidos' && <Icons.User className="w-3 h-3 text-gray-400" />}
+          {id === 'grado' && <Icons.BookOpen className="w-3 h-3 text-gray-400" />}
+          {id === 'genero' && <Icons.Users className="w-3 h-3 text-gray-400" />}
+          {id === 'email' && <Icons.Mail className="w-3 h-3 text-gray-400" />}
+          {id === 'confirmEmail' && <Icons.Mail className="w-3 h-3 text-gray-400" />}
+          {id === 'telefono' && <Icons.Phone className="w-3 h-3 text-gray-400" />}
+        </div>
+        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-tight flex-1">{item.label}</span>
+        <Icons.Lock className="w-3 h-3 text-gray-300 mr-1" />
+      </div>
+    );
+  }
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style}
+      className={`p-3 bg-white rounded-xl border border-gray-200 shadow-sm relative space-y-3 ${isDragging ? 'ring-2 ring-black border-transparent z-50' : ''}`}
+    >
+      <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-2">
+        <div className="flex items-center gap-2">
+          <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-black p-1">
+            <Icons.GripVertical className="w-4 h-4" />
+          </div>
+          <div className="p-1 px-2 bg-gray-50 rounded text-[9px] font-bold text-gray-400 flex items-center gap-1.5 border border-gray-100 uppercase tracking-tight">
+            {item.type === 'text' && <Icons.Type className="w-2.5 h-2.5" />}
+            {item.type === 'number' && <Icons.Hash className="w-2.5 h-2.5" />}
+            {item.type === 'url' && <Icons.Link className="w-2.5 h-2.5" />}
+            {item.type === 'checkbox' && <Icons.CheckSquare className="w-2.5 h-2.5" />}
+            {item.type === 'dropdown' && <Icons.List className="w-2.5 h-2.5" />}
+            {item.label || 'Campo Personalizado'}
+          </div>
+        </div>
+        <button 
+          onClick={onRemove}
+          className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+        >
+          <Icons.Trash2 className="w-3 h-3" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Tipo</label>
+          <select 
+            value={item.type || 'text'}
+            onChange={(e) => onUpdate?.({ type: e.target.value })}
+            className="w-full text-[10px] p-1.5 rounded-lg border border-gray-200 bg-white text-black outline-none h-8 font-medium"
+          >
+            <option value="text">Texto simple</option>
+            <option value="number">Número</option>
+            <option value="url">URL</option>
+            <option value="checkbox">Checkbox</option>
+            <option value="dropdown">Dropdown</option>
+          </select>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Título</label>
+          <Input 
+            value={item.label || ''}
+            onChange={(e) => onUpdate?.({ label: e.target.value })}
+            placeholder="Ej: Organización"
+            className="text-[10px] h-8 bg-white text-black border-gray-200 font-medium"
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex-1 space-y-1.5">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Placeholder {item.type === 'dropdown' && '(Opciones con coma)'}</label>
+          <Input 
+            value={item.placeholder || ''}
+            onChange={(e) => onUpdate?.({ placeholder: e.target.value })}
+            placeholder={item.type === 'dropdown' ? 'Ej: Opción 1, Opción 2' : item.type === 'checkbox' ? 'Texto secundario...' : "Ej: Escribe tu org..."}
+            className="text-[10px] h-8 bg-white text-black border-gray-200 font-medium"
+          />
+        </div>
+        <div className="space-y-1.5 shrink-0">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block text-right">Obligatorio</label>
+          <div className="flex justify-end pt-1">
+            <input 
+              type="checkbox" 
+              checked={item.required || false}
+              onChange={(e) => onUpdate?.({ required: e.target.checked })}
+              className="rounded text-black border-gray-300 focus:ring-black h-4 w-4"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="p-2.5 bg-gray-50 rounded-lg space-y-2 border border-gray-100">
+        <div className="flex items-center gap-2">
+          <input 
+            type="checkbox" 
+            checked={item.banner_active || false}
+            onChange={(e) => onUpdate?.({ banner_active: e.target.checked })}
+            className="rounded text-black border-gray-300 focus:ring-black h-3 w-3"
+          />
+          <label className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">Mostrar Banner Info</label>
+        </div>
+        
+        {item.banner_active && (
+          <div className="space-y-2 pt-1 animate-in fade-in slide-in-from-top-1 duration-200">
+            <Input 
+              value={item.banner_text || ''}
+              onChange={(e) => onUpdate?.({ banner_text: e.target.value })}
+              placeholder="Texto del banner..."
+              className="text-[10px] h-8 bg-white text-black border-gray-200 font-medium"
+            />
+            <select 
+              value={item.banner_color || 'blue'}
+              onChange={(e) => onUpdate?.({ banner_color: e.target.value })}
+              className="w-full text-[10px] p-1.5 border border-gray-200 rounded-lg bg-white text-black outline-none h-8 font-medium"
+            >
+              <option value="blue">Azul (Informativo)</option>
+              <option value="green">Verde (Éxito)</option>
+              <option value="yellow">Amarillo (Advertencia)</option>
+              <option value="red">Rojo (Importante)</option>
+            </select>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function LandingEditorSidebar({ 
   config, 
@@ -814,7 +980,8 @@ export function LandingEditorSidebar({
                          <div key={idx} className="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-2 relative group">
                             <button 
                               onClick={() => {
-                                const newItems = activeBlock.content.items.filter((_: any, i: number) => i !== idx);
+                                const newItems = [...activeBlock.content.items];
+                                newItems.splice(idx, 1);
                                 updateBlockContent(activeBlock.id, { items: newItems });
                               }}
                               className="absolute top-2 right-2 p-1 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
@@ -973,23 +1140,126 @@ export function LandingEditorSidebar({
                {activeBlock.type === 'auth' && (
                  <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Título del Portal</label>
+                      <label className="text-[10px] font-bold text-gray-400 uppercase">Título del Portal (Registro)</label>
                       <Input 
                         value={activeBlock.content.title}
                         onChange={(e) => updateBlockContent(activeBlock.id, { title: e.target.value })}
                         className="text-xs"
+                        placeholder="Ej: Bienvenido de nuevo"
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Subtítulo del Portal</label>
-                      <textarea 
-                        value={activeBlock.content.subtitle}
-                        onChange={(e) => updateBlockContent(activeBlock.id, { subtitle: e.target.value })}
-                        rows={3}
-                        className="w-full p-3 text-xs border border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:border-black outline-none transition-all resize-none"
-                      />
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase">Configuración de Campos (Registro)</label>
+                        <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full font-bold text-gray-600">{(activeBlock.content.custom_inputs || []).length}/5 Extras</span>
+                      </div>
+
+                      {/* Unified Draggable Section */}
+                      <DndContext 
+                        sensors={sensors} 
+                        collisionDetection={closestCenter} 
+                        onDragEnd={(event) => {
+                          const { active, over } = event;
+                          if (over && active.id !== over.id) {
+                            const fixedIds = ['nombre', 'apellidos', 'grado', 'genero', 'email', 'confirmEmail', 'telefono'];
+                            const customInputs = activeBlock.content.custom_inputs || [];
+                            
+                            // Create a combined list of IDs to find current order
+                            // We use activeBlock.content.fields_order if it exists, or a default order
+                            const currentOrder = activeBlock.content.fields_order || [...fixedIds, ...customInputs.map((ci: any) => ci.id)];
+                            
+                            const oldIndex = currentOrder.indexOf(active.id);
+                            const newIndex = currentOrder.indexOf(over.id);
+                            
+                            const newOrder = arrayMove(currentOrder, oldIndex, newIndex);
+                            updateBlockContent(activeBlock.id, { fields_order: newOrder });
+                          }
+                        }}
+                        modifiers={[restrictToVerticalAxis]}
+                      >
+                        <SortableContext 
+                          items={activeBlock.content.fields_order || ['nombre', 'apellidos', 'grado', 'genero', 'email', 'confirmEmail', 'telefono', ...(activeBlock.content.custom_inputs || []).map((ci: any) => ci.id)]} 
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <div className="space-y-2">
+                            {(activeBlock.content.fields_order || ['nombre', 'apellidos', 'grado', 'genero', 'email', 'confirmEmail', 'telefono', ...(activeBlock.content.custom_inputs || []).map((ci: any) => ci.id)]).map((fieldId: string) => {
+                              const fixedFields: Record<string, any> = {
+                                nombre: { label: 'Nombre' },
+                                apellidos: { label: 'Apellidos' },
+                                grado: { label: 'Grado Académico' },
+                                genero: { label: 'Género' },
+                                email: { label: 'Email' },
+                                confirmEmail: { label: 'Confirmar Email' },
+                                telefono: { label: 'Teléfono' },
+                              };
+
+                              if (fixedFields[fieldId]) {
+                                return (
+                                  <SortableRegistrationField 
+                                    key={fieldId}
+                                    id={fieldId}
+                                    item={fixedFields[fieldId]}
+                                    isFixed={true}
+                                  />
+                                );
+                              }
+
+                              const customInput = (activeBlock.content.custom_inputs || []).find((ci: any) => ci.id === fieldId);
+                              if (customInput) {
+                                const idx = activeBlock.content.custom_inputs.indexOf(customInput);
+                                return (
+                                  <SortableRegistrationField 
+                                    key={fieldId}
+                                    id={fieldId}
+                                    item={customInput}
+                                    onUpdate={(updates) => {
+                                      const newInputs = [...activeBlock.content.custom_inputs];
+                                      newInputs[idx] = { ...customInput, ...updates };
+                                      updateBlockContent(activeBlock.id, { custom_inputs: newInputs });
+                                    }}
+                                    onRemove={() => {
+                                      const newInputs = activeBlock.content.custom_inputs.filter((_: any, i: number) => i !== idx);
+                                      const newOrder = (activeBlock.content.fields_order || []).filter((id: string) => id !== fieldId);
+                                      updateBlockContent(activeBlock.id, { 
+                                        custom_inputs: newInputs,
+                                        fields_order: newOrder
+                                      });
+                                    }}
+                                  />
+                                );
+                              }
+                              return null;
+                            })}
+                          </div>
+                        </SortableContext>
+                      </DndContext>
                     </div>
-                 </div>
+
+                    {(activeBlock.content.custom_inputs || []).length < 5 && (
+                      <Button 
+                        onClick={() => {
+                          const newId = `input-${Math.random().toString(36).substr(2, 9)}`;
+                          const newInputs = [...(activeBlock.content.custom_inputs || []), { 
+                            id: newId,
+                            type: 'text', 
+                            label: 'Nuevo Campo', 
+                            placeholder: '',
+                            banner_active: false,
+                            banner_color: 'blue' 
+                          }];
+                          const newOrder = [...(activeBlock.content.fields_order || ['nombre', 'apellidos', 'grado', 'genero', 'email', 'confirmEmail', 'telefono', ...((activeBlock.content.custom_inputs || []).map((ci: any) => ci.id))]), newId];
+                          updateBlockContent(activeBlock.id, { 
+                            custom_inputs: newInputs,
+                            fields_order: newOrder
+                          });
+                        }}
+                        variant="outline" size="sm" className="w-full border-dashed py-4 h-auto text-[10px] font-bold bg-white text-black hover:bg-gray-50 mt-4"
+                      >
+                        <Icons.Plus className="w-3 h-3 mr-2" /> Agregar Campo Personalizado
+                      </Button>
+                    )}
+                  </div>
                )}
 
                {activeBlock.type === 'cta' && (
@@ -1151,7 +1421,7 @@ export function LandingEditorSidebar({
                )}
 
                {/* VARIANT SELECTOR */}
-               {activeBlock.type !== 'features' && activeBlock.type !== 'cta' && activeBlock.type !== 'agenda' && (
+               {activeBlock.type !== 'features' && activeBlock.type !== 'cta' && activeBlock.type !== 'agenda' && activeBlock.type !== 'auth' && (
                  <div className="space-y-1.5 pt-4 border-t border-gray-50">
                     <label className="text-[10px] font-bold text-gray-400 uppercase">Diseño de Bloque (Layout)</label>
                     <select 

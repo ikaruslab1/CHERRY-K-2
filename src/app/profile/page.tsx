@@ -11,7 +11,8 @@ import AttendanceView from '@/views/admin/AttendanceView';
 import { ParticipationView } from '@/components/profile/ParticipationView';
 import { MetricsView } from '@/components/admin/metrics/MetricsView';
 import { CertificateDesignView } from '@/components/admin/CertificateDesignView';
-import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard, Award, Crown, Palette } from 'lucide-react';
+import { EmbeddingsView } from '@/components/admin/EmbeddingsView';
+import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard, Award, Crown, Palette, Code } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { FAQView } from '@/components/faq/FAQView';
 import { CertificatesView } from '@/components/profile/CertificatesView';
@@ -32,7 +33,7 @@ export default function ProfilePage() {
   const { currentConference } = useConference();
   const { loading: authLoading, userRole } = useRoleAuth();
   const [sessionLoading, setSessionLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'metrics' | 'attendance' | 'participation' | 'constancias' | 'design-certificates' | 'landing-editor' | 'faq'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'metrics' | 'attendance' | 'participation' | 'constancias' | 'design-certificates' | 'landing-editor' | 'embeddings' | 'faq'>('profile');
 
   const isAdmin = userRole === 'admin' || userRole === 'owner';
   const isStaff = userRole === 'staff';
@@ -69,6 +70,7 @@ export default function ProfilePage() {
     { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: isAdmin || isStaff },
     { id: 'events', label: 'Gestión Eventos', icon: <Settings className="w-5 h-5" />, show: isAdmin },
     { id: 'metrics', label: 'Dashboard Métricas', icon: <LayoutDashboard className="w-5 h-5" />, show: isAdmin },
+    { id: 'embeddings', label: 'Embeddings', icon: <Code className="w-5 h-5" />, show: isAdmin },
     { 
         id: 'design-certificates', 
         label: 'Diseño de Constancias', 
@@ -175,6 +177,7 @@ export default function ProfilePage() {
                         {(isAdmin || isStaff) && activeTab === 'users' && <UsersTable readOnly={isStaff} currentUserRole={userRole || undefined} />}
                         {isAdmin && activeTab === 'events' && <EventsManager />}
                         {isAdmin && activeTab === 'metrics' && <MetricsView />}
+                        {isAdmin && activeTab === 'embeddings' && <EmbeddingsView />}
                         {activeTab === 'faq' && <FAQView defaultRole={userRole || undefined} />}
                     </motion.div>
                  </AnimatePresence>

@@ -37,11 +37,17 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
   const selectedFont = fontMap[config.global_styles?.font_family || 'sans'] || 'font-sans';
 
   // Helper para renderizar los formularios de autenticación dentro de los bloques que lo soporten (como Hero Split)
-  const renderAuthForms = () => (
+  const renderAuthForms = () => {
+    // Buscar el bloque de auth actual dentro de la lista de bloques
+    const authBlock = config.blocks?.find(b => b.type === 'auth');
+    const customTitle = authBlock?.content?.title;
+    const customInputs = authBlock?.content?.custom_inputs || [];
+
+    return (
     <div className="w-full max-w-[420px] mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
        <div className="text-center space-y-2">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-            {view === 'login' ? 'Bienvenido de nuevo' : 'Crear cuenta'}
+            {customTitle || (view === 'login' ? 'Bienvenido de nuevo' : 'Crear cuenta')}
           </h2>
           <p className="text-sm text-gray-500 font-medium tracking-tight">
             {view === 'login' 
@@ -62,7 +68,11 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
               {view === 'login' ? (
                 <LoginForm conferenceId={conference.id} />
               ) : (
-                <RegisterForm conferenceId={conference.id} />
+                <RegisterForm 
+                  conferenceId={conference.id} 
+                  customInputs={customInputs}
+                  fieldsOrder={authBlock?.content?.fields_order}
+                />
               )}
             </motion.div>
           </AnimatePresence>
@@ -93,6 +103,7 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
        </div>
     </div>
   );
+  };
 
   return (
     <div className={`min-h-screen bg-white selection:bg-[#DBF227] selection:text-black @container ${selectedFont}`}>
