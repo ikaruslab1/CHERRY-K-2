@@ -134,7 +134,7 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
   // Navigation Guard
   useEffect(() => {
     if (!loading) {
-       const publicRoutes = ['/', '/auth', '/select-conference', '/login', '/register'];
+       const publicRoutes = ['/', '/auth', '/select-conference', '/login', '/register', '/event'];
        const isPublic = publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
        
        if (!isPublic && !currentConference) {
