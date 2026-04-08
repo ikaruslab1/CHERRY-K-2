@@ -113,7 +113,8 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
         control,
         name: "custom_links"
     });
-    const [eventType, setEventType] = useState('Conferencia Magistral');
+    const [eventType, setEventType] = useState('Mesa de dialogo');
+    const [customType, setCustomType] = useState('');
     const [tags, setTags] = useState<string[]>([]);
     const [tagInput, setTagInput] = useState('');
     const [openIconPicker, setOpenIconPicker] = useState<number | null>(null);
@@ -146,7 +147,14 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
             setAutoAttendHours(Math.floor(totalMins / 60));
             setAutoAttendMins(totalMins % 60);
             
-            setEventType(initialData.type || 'Conferencia Magistral');
+            const standardTypes = ['Mesa de dialogo', 'Sesión', 'Conferencia Magistral', 'Conferencia', 'Ponencia', 'Taller', 'Actividad'];
+            if (standardTypes.includes(initialData.type || '')) {
+                setEventType(initialData.type || 'Mesa de dialogo');
+                setCustomType('');
+            } else {
+                setEventType('Otra');
+                setCustomType(initialData.type || '');
+            }
             setTags(initialData.tags || []);
             
             // Load multiple speakers (new system) or fallback to legacy speaker_id
@@ -158,7 +166,8 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
             setSpeakerIds(loadedSpeakerIds);
         } else {
             reset();
-            setEventType('Conferencia Magistral');
+            setEventType('Mesa de dialogo');
+            setCustomType('');
             setTags([]);
             setSpeakerIds([]);
             setValue('speaker_id', '');
@@ -168,8 +177,8 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
     }, [initialData, reset, setValue]);
 
     useEffect(() => {
-        setValue('type', eventType);
-    }, [eventType, setValue]);
+        setValue('type', eventType === 'Otra' ? customType : eventType);
+    }, [eventType, customType, setValue]);
 
     const handleFormSubmit = async (data: any) => {
         const formattedDate = data.date ? parseMexicoDateTimeLocal(data.date).toISOString() : null;
@@ -177,7 +186,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
         await onSubmit({ 
             ...data, 
             date: formattedDate, 
-            type: eventType, 
+            type: eventType === 'Otra' ? customType : eventType, 
             tags,
             speakerIds, // Multiple speakers
             auto_attendance_limit: totalAutoMins
@@ -207,7 +216,7 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                 <label className="text-sm font-bold text-[#373737]">Tipo de Actividad:</label>
                 <div className="flex flex-col gap-3">
                     <div className="flex flex-wrap gap-2">
-                        {['Conferencia Magistral', 'Conferencia', 'Ponencia', 'Taller', 'Actividad'].map(type => {
+                        {['Mesa de dialogo', 'Sesión', 'Conferencia Magistral', 'Conferencia', 'Ponencia', 'Taller', 'Actividad', 'Otra'].map(type => {
                             const isSelected = eventType === type;
                             
                             return (
@@ -228,6 +237,18 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                             );
                         })}
                     </div>
+
+                    {eventType === 'Otra' && (
+                        <div className="animate-in slide-in-from-top-2 duration-200">
+                            <input 
+                                value={customType}
+                                onChange={(e) => setCustomType(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent bg-gray-50/50"
+                                style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
+                                placeholder="Escribe el tipo de actividad personalizado..."
+                            />
+                        </div>
+                    )}
                 </div>
                 {currentConference?.enable_translation && (
                     <input 
