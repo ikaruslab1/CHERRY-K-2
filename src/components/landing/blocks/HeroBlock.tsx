@@ -7,9 +7,10 @@ import { getContrastColor } from '@/lib/colorUtils';
 interface HeroBlockProps {
   block: LandingBlock;
   authForms?: React.ReactNode;
+  locale?: string;
 }
 
-export function HeroBlock({ block, authForms }: HeroBlockProps) {
+export function HeroBlock({ block, authForms, locale = 'es' }: HeroBlockProps) {
   const content = block.content as HeroBlockContent;
   const { 
     title, 
@@ -134,13 +135,13 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
               style={titleStyle}
               className={`text-4xl @md:text-6xl @lg:text-7xl font-bold leading-none tracking-tighter ${title_font ? fontClasses[title_font] : ''}`}
             >
-              {title}
+              {locale === 'en' && content.title_en ? content.title_en : title}
             </h1>
             <p 
               style={subtitleStyle}
               className={`text-lg @md:text-xl max-w-xl leading-relaxed ${subtitle_font ? fontClasses[subtitle_font] : ''}`}
             >
-              {subtitle}
+              {locale === 'en' && content.subtitle_en ? content.subtitle_en : subtitle}
             </p>
           </motion.div>
         </div>
@@ -179,7 +180,7 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
           style={titleStyle}
           className={`text-5xl @md:text-7xl @lg:text-8xl font-bold leading-[0.9] tracking-tighter max-w-5xl mx-auto ${title_font ? fontClasses[title_font] : ''}`}
         >
-          {title}
+          {locale === 'en' && content.title_en ? content.title_en : title}
         </motion.h1>
         
         <motion.p 
@@ -190,7 +191,7 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
           style={subtitleStyle}
           className={`text-xl @md:text-2xl mt-8 max-w-3xl mx-auto leading-relaxed ${subtitle_font ? fontClasses[subtitle_font] : ''}`}
         >
-          {subtitle}
+          {locale === 'en' && content.subtitle_en ? content.subtitle_en : subtitle}
         </motion.p>
 
         {variant === 'centered' && buttons && buttons.length > 0 && (
@@ -211,7 +212,7 @@ export function HeroBlock({ block, authForms }: HeroBlockProps) {
                   }}
                   className="px-8 py-4 font-bold rounded-xl hover:scale-105 transition-transform text-sm @md:text-base w-full @sm:w-auto shadow-xl shadow-black/5 flex items-center justify-center gap-2"
                 >
-                  {btn.label}
+                  {locale === 'en' && btn.label_en ? btn.label_en : btn.label}
                 </button>
               ))}
            </motion.div>

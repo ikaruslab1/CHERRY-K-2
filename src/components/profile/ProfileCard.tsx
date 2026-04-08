@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { getDegreeAbbreviation } from '@/utils/degreeHelper';
 import { Printer, Link, Check } from 'lucide-react';
 import { useConference } from '@/context/ConferenceContext';
+import { useLanguage } from '@/context/LanguageContext';
+import { getTranslatedField } from '@/utils/i18nHelpers';
 import { motion, useAnimation } from 'framer-motion';
 import { ParticleBadge } from './ParticleBadge';
 import { getContrastColorHex } from '@/lib/colorUtils';
@@ -34,6 +37,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   const [particles, setParticles] = useState<Particle[]>([]);
   const controls = useAnimation();
   const { currentConference } = useConference();
+  const { language, t } = useLanguage();
   
   const degreeAbbr = getDegreeAbbreviation(profile.degree, profile.gender);
   const fullName = `${degreeAbbr} ${profile.first_name} ${profile.last_name}`;
@@ -41,9 +45,17 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   console.log('[ProfileCard] Rendering with profile:', profile);
 
   // Dynamic values from conference or defaults
-  const eventTitle = currentConference?.title || 'Semana del Diseño';
-  const institution = currentConference?.institution_name || 'Facultad de Estudios Superiores Acatlán';
-  const department = currentConference?.department_name || 'Licenciatura en Diseño Gráfico';
+  const eventTitle = (currentConference?.enable_translation 
+    ? getTranslatedField(currentConference, 'title', language) 
+    : currentConference?.title) || 'Semana del Diseño';
+    
+  const institution = (currentConference?.enable_translation
+    ? getTranslatedField(currentConference, 'institution_name', language)
+    : currentConference?.institution_name) || 'Facultad de Estudios Superiores Acatlán';
+    
+  const department = (currentConference?.enable_translation
+    ? getTranslatedField(currentConference, 'department_name', language)
+    : currentConference?.department_name) || 'Licenciatura en Diseño Gráfico';
   
   // Extract color value from accent_color object
   const accentColorConfig = currentConference?.accent_color || { type: 'solid', value: '#DBF227' };
@@ -62,7 +74,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
         return { 
           bg: '#278BF2', 
           text: '#FFFFFF', 
-          name: 'Ponente',
+          name: t('profile.roles.ponente'),
           animation: 'shimmer 2s ease-in-out infinite',
           animationType: 'shimmer'
         };
@@ -70,7 +82,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
         return { 
           bg: '#F23527', 
           text: '#FFFFFF', 
-          name: 'Staff',
+          name: t('profile.roles.staff'),
           animation: 'pulse 2s ease-in-out infinite',
           animationType: 'pulse'
         };
@@ -79,7 +91,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
         return { 
           bg: '#373737', 
           text: '#FFFFFF', 
-          name: 'Administrador',
+          name: t('profile.roles.admin'),
           animation: 'breathing 3s ease-in-out infinite',
           animationType: 'breathing'
         };
@@ -87,7 +99,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
         return { 
           bg: '#F2D027', 
           text: '#373737', 
-          name: 'VIP',
+          name: t('profile.roles.vip'),
           animation: 'glow 2s ease-in-out infinite',
           animationType: 'glow'
         };
@@ -96,7 +108,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
         return { 
           bg: 'linear-gradient(45deg, #FFFFFF, #FFD1FF, #CCEAFF, #FFFFFF, #D1FFEA, #FFFAD1, #FFFFFF)', 
           text: '#373737', 
-          name: 'Desarrollador',
+          name: t('profile.roles.owner'),
           border: '1px solid rgba(255, 255, 255, 0.5)',
           animation: 'gradient 10s ease infinite',
           bgSize: '300% 300%',
@@ -109,7 +121,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
         return { 
           bg: bgValue, 
           text: getContrastColorHex(bgValue), 
-          name: 'Asistente',
+          name: t('profile.roles.asistente'),
           animation: 'wave 3s ease-in-out infinite',
           animationType: 'wave'
         };
@@ -135,7 +147,17 @@ export function ProfileCard({ profile }: ProfileCardProps) {
 
   const handleCopyLink = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const link = `${window.location.origin}/?code=${profile.short_id}`;
+    
+    const baseUrl = currentConference?.custom_landing_enabled 
+      ? `${window.location.origin}/event/${currentConference.id}`
+      : `${window.location.origin}/login`;
+      
+    const params = new URLSearchParams();
+    if (currentConference?.id) params.set('event', currentConference.id);
+    params.set('code', profile.short_id);
+    
+    const link = `${baseUrl}?${params.toString()}`;
+    
     navigator.clipboard.writeText(link);
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
@@ -179,12 +201,12 @@ export function ProfileCard({ profile }: ProfileCardProps) {
     }, 300);
   };
 
-  // Reusable Front Face Content
-  const FrontFaceContent = (
-    <div className="flex flex-col h-full w-full bg-white select-none">
+  // Reusable Front Face Content Component
+  const BadgeFront = ({ isPrint = false }: { isPrint?: boolean }) => (
+    <div className={`flex flex-col h-full w-full bg-white select-none ${isPrint ? 'print-badge-content' : ''}`}>
       {/* Header - Accent Color - Safe Zone Top */}
       <div 
-        className="relative shrink-0 flex flex-col items-center justify-center pt-6 pb-4 px-4 overflow-hidden transition-colors duration-300"
+        className={`relative shrink-0 flex flex-col items-center justify-center overflow-hidden transition-colors duration-300 ${isPrint ? 'pt-12 pb-8 px-8' : 'pt-6 pb-4 px-4'}`}
         style={{ 
           background: themeColor,
           ...(animationType === 'gradient' && {
@@ -248,13 +270,13 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           
           <div className="relative z-10 flex flex-col items-center">
             <span 
-              className="text-[10px] xs:text-[11px] font-black uppercase tracking-[0.25em] mb-1 opacity-80"
+              className={`${isPrint ? 'text-xs' : 'text-[10px] xs:text-[11px]'} font-black uppercase tracking-[0.25em] mb-1 opacity-80`}
               style={{ color: themeTextColor }}
             >
-              ID de Acceso
+              {t('profile.access_id')}
             </span>
             <h2 
-              className="text-3xl xs:text-4xl font-mono font-black tracking-widest drop-shadow-sm"
+              className={`${isPrint ? 'text-6xl mb-2' : 'text-3xl xs:text-4xl'} font-mono font-black tracking-widest drop-shadow-sm`}
               style={{ color: themeTextColor }}
             >
               {profile.short_id}
@@ -263,45 +285,45 @@ export function ProfileCard({ profile }: ProfileCardProps) {
       </div>
 
       {/* Main Content Body - Flexible Space */}
-      <div className="flex-1 flex flex-col items-center justify-between px-6 py-4 w-full min-h-0">
+      <div className={`flex-1 flex flex-col items-center justify-between w-full min-h-0 ${isPrint ? 'px-12 py-12 gap-8' : 'px-6 py-4'}`}>
           
           {/* Title Section */}
-          <div className="flex flex-col items-center justify-center space-y-2 mt-2">
-              <h3 className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] text-center">{eventTitle}</h3>
-              <h1 className="text-[#373737] text-center leading-tight">
-                  <span className="block text-xl xs:text-2xl font-bold text-gray-700">
+          <div className={`flex flex-col items-center justify-center text-center ${isPrint ? 'space-y-4' : 'space-y-2 mt-2'}`}>
+              <h3 className={`${isPrint ? 'text-sm' : 'text-[10px]'} text-gray-400 font-bold uppercase tracking-[0.2em]`}>{eventTitle}</h3>
+              <h1 className="text-[#373737] leading-tight">
+                  <span className={`block font-bold text-gray-700 ${isPrint ? 'text-4xl' : 'text-xl xs:text-2xl'}`}>
                     {degreeAbbr} {profile.first_name}
                   </span>
-                  <span className="block text-lg xs:text-xl font-medium text-gray-500 mt-1">
+                  <span className={`block font-medium text-gray-500 mt-1 ${isPrint ? 'text-3xl mt-2' : 'text-lg xs:text-xl'}`}>
                     {profile.last_name}
                   </span>
               </h1>
           </div>
 
           {/* QR Section - Maximized & Elegant */}
-          <div className="relative flex-1 flex items-center justify-center py-2 w-full">
-              <div className="relative p-3 bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100">
+          <div className={`relative flex items-center justify-center w-full ${isPrint ? 'flex-1 py-10' : 'flex-1 py-2'}`}>
+              <div className={`relative bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 ${isPrint ? 'p-6 shadow-none border-gray-200' : 'p-3'}`}>
                   <div className="absolute inset-0 rounded-2xl border border-black/5" />
                   <QRCodeSVG 
                       value={qrData} 
-                      size={180}
+                      size={isPrint ? 320 : 180}
                       level="H"
                       includeMargin={true}
-                      className="w-full h-full object-contain max-w-[180px] max-h-[180px]"
+                      className="object-contain"
                   />
                   {/* Decorative corners */}
-                  <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-black/10 rounded-tl-lg" />
-                  <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-black/10 rounded-tr-lg" />
-                  <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-black/10 rounded-bl-lg" />
-                  <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-black/10 rounded-br-lg" />
+                  <div className={`absolute border-black/10 rounded-tl-lg ${isPrint ? 'top-6 left-6 w-8 h-8 border-t-4 border-l-4' : 'top-3 left-3 w-4 h-4 border-t-2 border-l-2'}`} />
+                  <div className={`absolute border-black/10 rounded-tr-lg ${isPrint ? 'top-6 right-6 w-8 h-8 border-t-4 border-r-4' : 'top-3 right-3 w-4 h-4 border-t-2 border-r-2'}`} />
+                  <div className={`absolute border-black/10 rounded-bl-lg ${isPrint ? 'bottom-6 left-6 w-8 h-8 border-b-4 border-l-4' : 'bottom-3 left-3 w-4 h-4 border-b-2 border-l-2'}`} />
+                  <div className={`absolute border-black/10 rounded-br-lg ${isPrint ? 'bottom-6 right-6 w-8 h-8 border-b-4 border-r-4' : 'bottom-3 right-3 w-4 h-4 border-b-2 border-r-2'}`} />
               </div>
           </div>
 
           {/* Role Badge - Subtle & Clean */}
-          <div className="flex flex-col items-center mb-4">
+          <div className={`flex flex-col items-center ${isPrint ? 'mb-10' : 'mb-4'}`}>
               {profile.role !== 'owner' && (
-                  <span className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mb-1.5 opacity-60">
-                      Rol en este evento
+                  <span className={`${isPrint ? 'text-sm mb-4' : 'text-[8px] mb-1.5'} text-gray-400 font-bold uppercase tracking-widest opacity-60`}>
+                      {t('profile.role_in_event')}
                   </span>
               )}
               <ParticleBadge 
@@ -311,19 +333,19 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                 animation={animation}
                 bgSize={bgSize}
                 animationType={animationType}
-                className="scale-90"
+                className={isPrint ? 'scale-150' : 'scale-90'}
               />
           </div>
       </div>
 
       {/* Footer - Safe Zone Bottom */}
-      <div className="shrink-0 pb-6 pt-2 px-6 text-center">
-          <div className=" opacity-60 grayscale transition-all duration-500 hover:grayscale-0 hover:opacity-100">
-            <p className="text-[#373737] text-[10px] font-bold uppercase tracking-widest leading-relaxed mb-1">
+      <div className={`shrink-0 text-center ${isPrint ? 'pb-16 pt-4 px-12' : 'pb-6 pt-2 px-6'}`}>
+          <div className="opacity-60 grayscale transition-all duration-500 hover:grayscale-0 hover:opacity-100">
+            <p className={`text-[#373737] font-bold uppercase tracking-widest leading-relaxed mb-1 ${isPrint ? 'text-sm' : 'text-[10px]'}`}>
                 {institution}
             </p>
-            <div className="w-8 h-px bg-gray-200 mx-auto my-2" />
-            <p className="text-gray-400 text-[9px] font-medium tracking-[0.2em] uppercase">
+            <div className={`bg-gray-200 mx-auto ${isPrint ? 'w-24 h-px my-6' : 'w-8 h-px my-2'}`} />
+            <p className={`text-gray-400 font-medium tracking-[0.2em] uppercase ${isPrint ? 'text-xs' : 'text-[9px]'}`}>
                 {department}
             </p>
           </div>
@@ -380,7 +402,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
           
           {/* Front Face */}
           <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-white rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col border border-gray-100">
-              {FrontFaceContent}
+              <BadgeFront />
           </div>
 
           {/* Back Face */}
@@ -492,7 +514,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                 className="flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] text-gray-500 hover:text-black hover:border-black/10 hover:shadow-lg transition-all active:scale-95 text-xs font-bold uppercase tracking-wider group"
             >
                 <Printer className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                <span>Imprimir</span>
+                <span>{t('profile.print')}</span>
             </button>
             
             <button 
@@ -500,56 +522,55 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                 className="flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] text-gray-500 hover:text-black hover:border-black/10 hover:shadow-lg transition-all active:scale-95 text-xs font-bold uppercase tracking-wider group"
             >
                 {showCopied ? <Check className="w-4 h-4 text-green-500" /> : <Link className="w-4 h-4 group-hover:scale-110 transition-transform" />}
-                <span>{showCopied ? 'Copiado' : 'Compartir'}</span>
+                <span>{showCopied ? t('profile.copied') : t('profile.share')}</span>
             </button>
         </div>
       </div>
 
-      {/* Print View Only - Hidden normally, visible on print */}
-      <div id="print-container" className="hidden fixed inset-0 z-[9999] bg-white items-center justify-center h-screen w-screen p-0 m-0">
-         <div className="print-card w-[320px] h-[569px] border border-gray-200 rounded-[2.5rem] overflow-hidden flex flex-col shadow-none bg-white relative">
-            {FrontFaceContent}
-         </div>
-      </div>
+      {/* PRINT PORTAL - Renders outside the react root for cleaner printing */}
+      {typeof window !== 'undefined' && createPortal(
+        <div className="print-only fixed inset-0 flex items-center justify-center bg-white z-[9999] p-[5vh]">
+          <div className="h-full aspect-[9/15] border-[6px] border-gray-100 rounded-[4rem] overflow-hidden flex flex-col shadow-none bg-white relative">
+            <BadgeFront isPrint={true} />
+          </div>
+        </div>,
+        document.body
+      )}
       
       {/* Global Print Styles to Hide everything else */}
       <style jsx global>{`
         @media print {
-          /* Hide everything by default */
-          body > * {
-            visibility: hidden;
+          @page {
+            size: portrait;
+            margin: 0;
           }
+
+          /* Hide everything by default via globals.css .print-only pattern */
           
-          /* Show only the print container and its children */
-          #print-container, 
-          #print-container * {
-            visibility: visible;
+          body {
+            background: white !important;
+            background-image: none !important;
           }
 
-          /* Position the print container */
-          #print-container {
-            display: flex !important;
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100vw;
-            height: 100vh;
-            background: white;
-            align-items: center;
-            justify-content: center;
-          }
-
-          /* Force background graphics */
+          /* Force high quality printing of backgrounds */
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
           }
           
-          /* Hide non-printable elements explicitly */
-          .print-hidden, .no-print {
-            display: none !important;
-            print-color-adjust: exact !important;
+          /* Centering helper */
+          .print-only {
+            display: flex !important;
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: white !important;
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
           }
         }
       `}</style>

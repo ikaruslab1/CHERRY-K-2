@@ -14,6 +14,8 @@ import {
 import { Event } from "@/types";
 import { motion } from "framer-motion";
 import { formatMexicoTime, formatMexicoDate } from "@/lib/dateUtils";
+import { useLanguage } from '@/context/LanguageContext';
+import { getTranslatedField } from '@/utils/i18nHelpers';
 
 interface AgendaItemProps {
   event: Event;
@@ -101,6 +103,8 @@ export function AgendaItem({
   searchQuery,
   onClick,
 }: AgendaItemProps) {
+  const { language, t } = useLanguage();
+  const locale = language === 'es' ? 'es-MX' : 'en-US';
   const eventDate = new Date(event.date);
   const duration = event.duration_days || 1;
 
@@ -124,7 +128,7 @@ export function AgendaItem({
       weekday: "short",
       day: "numeric",
       month: "short",
-    });
+    }, locale);
 
     if (duration > 1) {
       const endDate = new Date(eventDate);
@@ -133,14 +137,14 @@ export function AgendaItem({
       const startDayStr = formatMexicoDate(eventDate, {
         weekday: "short",
         day: "numeric",
-      });
+      }, locale);
       const endDayStr = formatMexicoDate(endDate, {
         weekday: "short",
         day: "numeric",
-      });
+      }, locale);
       const monthStr = formatMexicoDate(eventDate, {
         month: "short",
-      });
+      }, locale);
 
       return `${startDayStr} - ${endDayStr}, ${monthStr}`;
     }
@@ -182,14 +186,14 @@ export function AgendaItem({
                   <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border ${
                     isDark ? "bg-white text-black border-white" : "bg-black text-white border-black"
                   }`}>
-                      {event.type}
+                      {getTranslatedField(event, 'type', language)}
                   </span>
 
                   {event.gives_certificate && (
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
                         isDark ? "border-gray-700 bg-[#1f1f1f] text-gray-300" : "border-gray-200 bg-gray-50 text-gray-600"
                       }`}>
-                          <Medal className="h-3 w-3" /> Constancia
+                          <Medal className="h-3 w-3" /> {t('agenda.certificate')}
                       </span>
                   )}
                   
@@ -222,7 +226,7 @@ export function AgendaItem({
                          <Clock className="h-3.5 w-3.5" />
                       )}
                       <span className="text-[10px] font-bold uppercase tracking-wider">
-                          Asistencias: {Math.min(attendanceCount, event.duration_days || 1)}/{event.duration_days || 1}
+                          {t('agenda.attendance_count')} {Math.min(attendanceCount, event.duration_days || 1)}/{event.duration_days || 1}
                       </span>
                   </div>
               )}
@@ -237,13 +241,13 @@ export function AgendaItem({
 
           <div className="space-y-1.5">
               <h3 className={`pb-4 text-xl sm:text-2xl font-bold leading-tight tracking-tight ${isDark ? "text-white" : "text-[#121212]"}`}>
-                  {event.title}
+                  {getTranslatedField(event, 'title', language)}
               </h3>
               
               {event.location && (
                   <div className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide mt-1 ${isDark ? "text-gray-500" : "text-gray-400"}`}>
                       <MapPin className="h-3.5 w-3.5" />
-                      {event.location}
+                      {getTranslatedField(event, 'location', language)}
                   </div>
                 )}
           </div>
@@ -303,9 +307,9 @@ export function AgendaItem({
             )}
             
             <div className="flex flex-col items-center">
-              <span className="font-mono text-[10px] uppercase opacity-60 mb-0.5">Hora</span>
+              <span className="font-mono text-[10px] uppercase opacity-60 mb-0.5">{t('agenda.time')}</span>
               <span className="text-2xl font-bold tracking-tight">
-                  {formatMexicoTime(eventDate)}
+                  {formatMexicoTime(eventDate, locale)}
               </span>
             </div>
             
@@ -313,7 +317,7 @@ export function AgendaItem({
 
              <div className="flex flex-col items-center">
                <span className="font-mono text-[10px] uppercase opacity-60">
-                 {duration > 1 ? 'Duración' : 'Fecha'}
+                 {duration > 1 ? t('agenda.duration') : t('agenda.date')}
                </span>
                <span className="font-mono text-xs font-bold uppercase">
                   {formatDateRange()}

@@ -7,10 +7,14 @@ export interface EventLink {
 export interface Event {
   id: string;
   title: string;
+  title_en?: string;
   description: string;
+  description_en?: string;
   location: string;
+  location_en?: string;
   date: string;
   type: string;
+  type_en?: string;
   image_url?: string;
   speaker_id?: string | null; // Primary speaker (legacy)
   speaker?: {
@@ -75,13 +79,18 @@ export interface UserProfile {
 export interface Conference {
   id: string;
   title: string;
+  title_en?: string;
   description: string;
+  description_en?: string;
   start_date: string;
   end_date: string;
   is_active: boolean;
   event_type?: string;
   institution_name?: string;
+  institution_name_en?: string;
   department_name?: string;
+  department_name_en?: string;
+  enable_translation?: boolean;
   created_at?: string;
   accent_color?: {
     type: 'solid' | 'gradient';
@@ -130,6 +139,7 @@ export type LandingBlockType = 'hero' | 'features' | 'auth' | 'cta' | 'speakers'
 
 export interface HeroButton {
   label: string;
+  label_en?: string;
   url: string;
   color?: string;
   variant?: 'primary' | 'secondary' | 'outline';
@@ -139,9 +149,11 @@ export interface HeroBlockContent {
   // Global Typography & Colors
   logos?: string[];
   title: string;
+  title_en?: string;
   title_font?: 'inter' | 'syne' | 'manrope' | 'mono';
   title_color?: string;
   subtitle: string;
+  subtitle_en?: string;
   subtitle_font?: 'inter' | 'syne' | 'manrope' | 'mono';
   subtitle_color?: string;
 

@@ -60,8 +60,8 @@ export function parseMexicoDateTimeLocal(dateTimeStr: string): Date {
 /**
  * Formats a date for display in Spanish (Mexico)
  */
-export function formatMexicoTime(date: Date | string | number): string {
-  return new Date(date).toLocaleTimeString('es-MX', {
+export function formatMexicoTime(date: Date | string | number, locale: string = 'es-MX'): string {
+  return new Date(date).toLocaleTimeString(locale, {
     timeZone: 'America/Mexico_City',
     hour: '2-digit',
     minute: '2-digit',
@@ -69,8 +69,8 @@ export function formatMexicoTime(date: Date | string | number): string {
   });
 }
 
-export function formatMexicoDate(date: Date | string | number, options: Intl.DateTimeFormatOptions = {}): string {
-  return new Date(date).toLocaleDateString('es-MX', {
+export function formatMexicoDate(date: Date | string | number, options: Intl.DateTimeFormatOptions = {}, locale: string = 'es-MX'): string {
+  return new Date(date).toLocaleDateString(locale, {
     timeZone: 'America/Mexico_City',
     ...options
   });

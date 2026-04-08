@@ -91,8 +91,25 @@ export function EmbeddingsView() {
                     const isSpecialAuth = embed.id === 'login' && isSpecialAuthCase;
                     const isAuth = embed.id === 'login';
                     
+                    const getUrlWithLang = (url: string, lang: string) => {
+                        try {
+                            const u = new URL(url);
+                            u.searchParams.set('lang', lang);
+                            return u.toString();
+                        } catch (e) {
+                            const separator = url.includes('?') ? '&' : '?';
+                            return `${url}${separator}lang=${lang}`;
+                        }
+                    };
+
+                    const urlEs = getUrlWithLang(embed.url, 'es');
+                    const urlEn = getUrlWithLang(embed.url, 'en');
                     const iframeCode = generateIframe(embed.url, embed.height);
+                    const iframeCodeEs = generateIframe(urlEs, embed.height);
+                    const iframeCodeEn = generateIframe(urlEn, embed.height);
                     const isCopied = copied === embed.id;
+                    const isCopiedEs = copied === `${embed.id}_es`;
+                    const isCopiedEn = copied === `${embed.id}_en`;
 
                     return (
                         <div 
@@ -119,7 +136,7 @@ export function EmbeddingsView() {
                                             : embed.description}
                                     </p>
                                 </div>
-                                {!isLandingDisabled && (
+                                {!isLandingDisabled && !currentConference.enable_translation && (
                                     <Button 
                                         variant="outline" 
                                         size="sm" 
@@ -169,31 +186,116 @@ export function EmbeddingsView() {
                                     </div>
                                 )}
 
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Código HTML (Iframe)</label>
-                                <div className="relative group">
-                                    {!isLandingDisabled && (
-                                        <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button
-                                                size="sm"
-                                                className={`h-8 px-3 gap-2 ${isCopied ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-[#373737] hover:bg-black text-white'}`}
-                                                onClick={() => copyToClipboard(iframeCode, embed.id)}
-                                            >
-                                                {isCopied ? (
-                                                    <><Check className="w-3 h-3" /> Copiado</>
-                                                ) : (
-                                                    <><Copy className="w-3 h-3" /> Copiar Código</>
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Código HTML (Iframe)</label>
+                                {currentConference.enable_translation ? (
+                                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center bg-gray-100 px-3 py-1.5 rounded-t-lg border border-gray-200 border-b-0">
+                                                <span className="text-xs font-bold text-gray-700">🇪🇸 Versión en Español</span>
+                                                {!isLandingDisabled && (
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        className="text-[10px] h-6 px-2 gap-1 text-gray-500 hover:text-black hover:bg-gray-200"
+                                                        onClick={() => window.open(`${baseUrl}/admin/preview?url=${encodeURIComponent(urlEs)}&height=${embed.height}`, '_blank')}
+                                                    >
+                                                        <ExternalLink className="w-3 h-3" />
+                                                        Vista Previa
+                                                    </Button>
                                                 )}
-                                            </Button>
+                                            </div>
+                                            <div className="relative group mt-0">
+                                                {!isLandingDisabled && (
+                                                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button
+                                                            size="sm"
+                                                            className={`h-8 px-3 gap-2 ${isCopiedEs ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-[#373737] hover:bg-black text-white'}`}
+                                                            onClick={() => copyToClipboard(iframeCodeEs, `${embed.id}_es`)}
+                                                        >
+                                                            {isCopiedEs ? (
+                                                                <><Check className="w-3 h-3" /> Copiado</>
+                                                            ) : (
+                                                                <><Copy className="w-3 h-3" /> Copiar Código</>
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                                <pre className={`p-4 rounded-b-xl rounded-tr-xl overflow-x-auto text-sm font-mono border shadow-inner ${
+                                                    isLandingDisabled 
+                                                        ? 'bg-gray-100 text-gray-400 border-gray-200' 
+                                                        : 'bg-gray-900 text-gray-100 border-gray-800'
+                                                }`}>
+                                                    <code>{isLandingDisabled ? 'Opción desactivada' : iframeCodeEs}</code>
+                                                </pre>
+                                            </div>
                                         </div>
-                                    )}
-                                    <pre className={`p-4 rounded-xl overflow-x-auto text-sm font-mono border shadow-inner ${
-                                        isLandingDisabled 
-                                            ? 'bg-gray-100 text-gray-400 border-gray-200' 
-                                            : 'bg-gray-900 text-gray-100 border-gray-800'
-                                    }`}>
-                                        <code>{isLandingDisabled ? 'Opcion desactivada' : iframeCode}</code>
-                                    </pre>
-                                </div>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center bg-gray-100 px-3 py-1.5 rounded-t-lg border border-gray-200 border-b-0">
+                                                <span className="text-xs font-bold text-gray-700">🇺🇸 Versión en Inglés</span>
+                                                {!isLandingDisabled && (
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        className="text-[10px] h-6 px-2 gap-1 text-gray-500 hover:text-black hover:bg-gray-200"
+                                                        onClick={() => window.open(`${baseUrl}/admin/preview?url=${encodeURIComponent(urlEn)}&height=${embed.height}`, '_blank')}
+                                                    >
+                                                        <ExternalLink className="w-3 h-3" />
+                                                        Vista Previa
+                                                    </Button>
+                                                )}
+                                            </div>
+                                            <div className="relative group mt-0">
+                                                {!isLandingDisabled && (
+                                                    <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button
+                                                            size="sm"
+                                                            className={`h-8 px-3 gap-2 ${isCopiedEn ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-[#373737] hover:bg-black text-white'}`}
+                                                            onClick={() => copyToClipboard(iframeCodeEn, `${embed.id}_en`)}
+                                                        >
+                                                            {isCopiedEn ? (
+                                                                <><Check className="w-3 h-3" /> Copiado</>
+                                                            ) : (
+                                                                <><Copy className="w-3 h-3" /> Copiar Código</>
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                                <pre className={`p-4 rounded-b-xl rounded-tr-xl overflow-x-auto text-sm font-mono border shadow-inner ${
+                                                    isLandingDisabled 
+                                                        ? 'bg-gray-100 text-gray-400 border-gray-200' 
+                                                        : 'bg-gray-900 text-gray-100 border-gray-800'
+                                                }`}>
+                                                    <code>{isLandingDisabled ? 'Opción desactivada' : iframeCodeEn}</code>
+                                                </pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="relative group mt-2">
+                                        {!isLandingDisabled && (
+                                            <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button
+                                                    size="sm"
+                                                    className={`h-8 px-3 gap-2 ${isCopied ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-[#373737] hover:bg-black text-white'}`}
+                                                    onClick={() => copyToClipboard(iframeCode, embed.id)}
+                                                >
+                                                    {isCopied ? (
+                                                        <><Check className="w-3 h-3" /> Copiado</>
+                                                    ) : (
+                                                        <><Copy className="w-3 h-3" /> Copiar Código</>
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        )}
+                                        <pre className={`p-4 rounded-xl overflow-x-auto text-sm font-mono border shadow-inner ${
+                                            isLandingDisabled 
+                                                ? 'bg-gray-100 text-gray-400 border-gray-200' 
+                                                : 'bg-gray-900 text-gray-100 border-gray-800'
+                                        }`}>
+                                            <code>{isLandingDisabled ? 'Opcion desactivada' : iframeCode}</code>
+                                        </pre>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     );

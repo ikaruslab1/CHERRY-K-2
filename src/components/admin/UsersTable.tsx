@@ -446,7 +446,10 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                       {/* QR Code */}
                       <div className="p-4 bg-white rounded-2xl border-2 border-dashed border-gray-200">
                            <QRCodeSVG 
-                                value={`${origin}/?code=${selectedQrUser.short_id}`}
+                                value={currentConference?.custom_landing_enabled 
+                                    ? `${origin}/event/${currentConference.id}?code=${selectedQrUser.short_id}`
+                                    : `${origin}/login?event=${currentConference?.id || ''}&code=${selectedQrUser.short_id}`
+                                }
                                 size={180}
                                 level="M"
                                 className="text-[#373737]"

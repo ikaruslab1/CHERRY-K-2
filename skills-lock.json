@@ -21,6 +21,11 @@
       "sourceType": "github",
       "computedHash": "4764bacd34af8e5c27a85ca01a90197afcf1f1ed1785975ba91d9b80dff60e2d"
     },
+    "i18n-expert": {
+      "source": "daymade/claude-code-skills",
+      "sourceType": "github",
+      "computedHash": "f0a6684e0187a98c1e16f3d6481349fd4f57fce2d8f56cd7624b0e5200adf8c3"
+    },
     "project-map-builder": {
       "source": "yunshu0909/yunshu_skillshub",
       "sourceType": "github",

@@ -71,6 +71,7 @@ interface SidebarProps {
   onCopyLink: () => void;
   conferenceId?: string;
   certificateConfig?: any;
+  enableTranslation?: boolean;
 }
 
 // Sub-component for Sortable Layer Item
@@ -167,13 +168,15 @@ function SortableRegistrationField({
   item, 
   onUpdate, 
   onRemove,
-  isFixed = false 
+  isFixed = false,
+  showTranslations = false
 }: { 
   id: string, 
   item: any, 
   onUpdate?: (updates: any) => void, 
   onRemove?: () => void,
-  isFixed?: boolean 
+  isFixed?: boolean,
+  showTranslations?: boolean 
 }) {
   const {
     attributes,
@@ -269,6 +272,18 @@ function SortableRegistrationField({
           />
         </div>
       </div>
+      
+      {showTranslations && (
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-bold text-blue-400 uppercase tracking-widest">Título (Inglés)</label>
+          <Input 
+            value={item.label_en || ''}
+            onChange={(e) => onUpdate?.({ label_en: e.target.value })}
+            placeholder="Ej: Organization"
+            className="text-[10px] h-8 bg-white text-black border-blue-200 font-medium"
+          />
+        </div>
+      )}
 
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 space-y-1.5">
@@ -338,8 +353,10 @@ export function LandingEditorSidebar({
   saving, 
   onCopyLink,
   conferenceId,
-  certificateConfig
+  certificateConfig,
+  enableTranslation
 }: SidebarProps) {
+  const showTranslations = enabled && enableTranslation;
   const [activeBlockId, setActiveBlockId] = useState<string | null>(config.blocks?.[0]?.id || null);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const [expandedIconIdx, setExpandedIconIdx] = useState<number | null>(null);
@@ -605,6 +622,14 @@ export function LandingEditorSidebar({
                           onChange={(e) => updateBlockContent(activeBlock.id, { title: e.target.value })}
                           className="text-xs h-9"
                         />
+                        {showTranslations && (
+                          <Input 
+                            value={activeBlock.content.title_en || ''}
+                            onChange={(e) => updateBlockContent(activeBlock.id, { title_en: e.target.value })}
+                            className="text-xs h-9 border-blue-200 mt-2"
+                            placeholder="Título Principal (Inglés)"
+                          />
+                        )}
                         <div className="grid grid-cols-2 gap-2 mt-2">
                           <select 
                             value={activeBlock.content.title_font || 'sans'}
@@ -633,6 +658,15 @@ export function LandingEditorSidebar({
                           rows={2}
                           className="w-full p-2 text-xs border border-gray-200 rounded-lg bg-white outline-none resize-none"
                         />
+                        {showTranslations && (
+                          <textarea 
+                            value={activeBlock.content.subtitle_en || ''}
+                            onChange={(e) => updateBlockContent(activeBlock.id, { subtitle_en: e.target.value })}
+                            rows={2}
+                            placeholder="Subtítulo (Inglés)"
+                            className="w-full p-2 text-xs border border-blue-200 rounded-lg bg-white outline-none resize-none mt-2"
+                          />
+                        )}
                         <div className="grid grid-cols-2 gap-2 mt-2">
                           <select 
                             value={activeBlock.content.subtitle_font || 'sans'}
@@ -945,6 +979,14 @@ export function LandingEditorSidebar({
                          onChange={(e) => updateBlockContent(activeBlock.id, { title: e.target.value })}
                          className="text-xs text-black"
                        />
+                       {showTranslations && (
+                         <Input 
+                           value={activeBlock.content.title_en || ''}
+                           onChange={(e) => updateBlockContent(activeBlock.id, { title_en: e.target.value })}
+                           className="text-xs text-black border-blue-200 mt-2"
+                           placeholder="Título de Sección (Inglés)"
+                         />
+                       )}
                      </div>
 
                      <div className="grid grid-cols-2 gap-3 pb-2">
@@ -998,6 +1040,18 @@ export function LandingEditorSidebar({
                               placeholder="Título"
                               className="text-[11px] font-bold h-8 bg-white text-black"
                             />
+                            {showTranslations && (
+                              <Input 
+                                value={item.title_en || ''}
+                                onChange={(e) => {
+                                  const newItems = [...activeBlock.content.items];
+                                  newItems[idx] = { ...item, title_en: e.target.value };
+                                  updateBlockContent(activeBlock.id, { items: newItems });
+                                }}
+                                placeholder="Título (Inglés)"
+                                className="text-[11px] font-bold h-8 bg-white text-black border-blue-200"
+                              />
+                            )}
                             <textarea 
                               value={item.description}
                               onChange={(e) => {
@@ -1009,6 +1063,19 @@ export function LandingEditorSidebar({
                               className="w-full p-2 text-[10px] border border-gray-200 rounded-lg bg-white outline-none resize-none text-black"
                               placeholder="Descripción..."
                             />
+                            {showTranslations && (
+                              <textarea 
+                                value={item.description_en || ''}
+                                onChange={(e) => {
+                                  const newItems = [...activeBlock.content.items];
+                                  newItems[idx] = { ...item, description_en: e.target.value };
+                                  updateBlockContent(activeBlock.id, { items: newItems });
+                                }}
+                                rows={2}
+                                className="w-full p-2 text-[10px] border border-blue-200 rounded-lg bg-white outline-none resize-none text-black"
+                                placeholder="Descripción (Inglés)..."
+                              />
+                            )}
                             
                             <div className="pt-2">
                                <button 
@@ -1147,6 +1214,14 @@ export function LandingEditorSidebar({
                         className="text-xs"
                         placeholder="Ej: Bienvenido de nuevo"
                       />
+                      {showTranslations && (
+                        <Input 
+                          value={activeBlock.content.title_en || ''}
+                          onChange={(e) => updateBlockContent(activeBlock.id, { title_en: e.target.value })}
+                          className="text-xs border-blue-200 mt-2"
+                          placeholder="Título del Portal (Inglés)"
+                        />
+                      )}
                     </div>
 
                     <div className="space-y-4">
@@ -1213,6 +1288,7 @@ export function LandingEditorSidebar({
                                     key={fieldId}
                                     id={fieldId}
                                     item={customInput}
+                                    showTranslations={showTranslations}
                                     onUpdate={(updates) => {
                                       const newInputs = [...activeBlock.content.custom_inputs];
                                       newInputs[idx] = { ...customInput, ...updates };
@@ -1272,6 +1348,14 @@ export function LandingEditorSidebar({
                           onChange={(e) => updateBlockContent(activeBlock.id, { title: e.target.value })}
                           className="text-xs bg-gray-50 text-black border-gray-200"
                         />
+                        {showTranslations && (
+                          <Input 
+                            value={activeBlock.content.title_en || ''}
+                            onChange={(e) => updateBlockContent(activeBlock.id, { title_en: e.target.value })}
+                            className="text-xs bg-gray-50 text-black border-blue-200 mt-2"
+                            placeholder="Título de Sección (Inglés)"
+                          />
+                        )}
                       </div>
                       <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-gray-400 uppercase">Subtítulo</label>
@@ -1281,6 +1365,15 @@ export function LandingEditorSidebar({
                           rows={2}
                           className="w-full p-2 text-xs border border-gray-200 rounded-lg bg-gray-50 text-black outline-none resize-none"
                         />
+                        {showTranslations && (
+                          <textarea 
+                            value={activeBlock.content.subtitle_en || ''}
+                            onChange={(e) => updateBlockContent(activeBlock.id, { subtitle_en: e.target.value })}
+                            rows={2}
+                            placeholder="Subtítulo (Inglés)"
+                            className="w-full p-2 text-xs border border-blue-200 rounded-lg bg-gray-50 text-black outline-none resize-none mt-2"
+                          />
+                        )}
                       </div>
                     </div>
 
@@ -1366,6 +1459,20 @@ export function LandingEditorSidebar({
                                 className="text-[10px] h-8 bg-gray-100 text-black border-gray-200 flex-1"
                               />
                             </div>
+                            {showTranslations && (
+                              <div className="flex gap-2 mb-2 pr-6">
+                                <Input 
+                                  value={btn.label_en || ''}
+                                  onChange={(e) => {
+                                    const newBtns = [...activeBlock.content.buttons];
+                                    newBtns[idx] = { ...btn, label_en: e.target.value };
+                                    updateBlockContent(activeBlock.id, { buttons: newBtns });
+                                  }}
+                                  placeholder="Texto (Inglés)"
+                                  className="text-[10px] h-8 bg-gray-100 text-black border-blue-200 flex-1"
+                                />
+                              </div>
+                            )}
                             <div className="grid grid-cols-2 gap-2 mb-2">
                                <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-lg border border-gray-200">
                                  <Input 

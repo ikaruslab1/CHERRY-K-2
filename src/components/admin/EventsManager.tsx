@@ -152,10 +152,14 @@ export function EventsManager() {
         
         const eventData = {
             title: data.title,
+            title_en: data.title_en,
             description: data.description,
+            description_en: data.description_en,
             location: data.location,
+            location_en: data.location_en,
             date: data.date,
             type: data.type,
+            type_en: data.type_en,
             speaker_id: data.speakerIds?.[0] || null, // First speaker as primary (legacy)
             image_url: data.image_url || null,
             duration_days: data.duration_days,

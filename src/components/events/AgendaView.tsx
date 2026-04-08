@@ -5,7 +5,9 @@ import { supabase } from '@/lib/supabase';
 import { Calendar, Search, Star, CheckCircle2 } from 'lucide-react';
 import { ContentPlaceholder } from '@/components/ui/ContentPlaceholder';
 import { useConference } from '@/context/ConferenceContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { formatMexicoDate } from '@/lib/dateUtils';
+import { getTranslatedField } from '@/utils/i18nHelpers';
 
 import { Event } from '@/types';
 import { EventModal } from './EventModal';
@@ -15,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export function AgendaView() {
   const { currentConference } = useConference();
+  const { language, t } = useLanguage();
   const [events, setEvents] = useState<Event[]>([]);
   const [attendance, setAttendance] = useState<Record<string, number>>({});
   const [interests, setInterests] = useState<Set<string>>(new Set());
@@ -23,7 +26,8 @@ export function AgendaView() {
 
   const filteredEvents = events.filter(event => {
     const query = searchQuery.toLowerCase();
-    const titleMatch = event.title?.toLowerCase().includes(query);
+    const translatedTitle = getTranslatedField(event, 'title', language);
+    const titleMatch = translatedTitle.toLowerCase().includes(query);
     const tagMatch = event.tags && Array.isArray(event.tags) 
       ? event.tags.some(tag => tag.toLowerCase().includes(query))
       : false;
@@ -43,7 +47,7 @@ export function AgendaView() {
           let eventsQuery = supabase
           .from('events')
           .select(`
-            id, title, description, location, date, type, tags, image_url, 
+            id, title, title_en, description, description_en, location, location_en, date, type, type_en, tags, image_url, 
             gives_certificate, auto_attendance, auto_attendance_limit, duration_days, custom_links, 
             speaker:profiles!speaker_id(first_name, last_name, degree, gender),
             event_speakers(
@@ -225,10 +229,10 @@ export function AgendaView() {
             </div>
             <div>
               <h2 className="text-2xl xs:text-3xl font-bold text-[#373737]">
-                Agenda del Evento
+                Agenda {getTranslatedField(currentConference, 'title', language) ? `- ${getTranslatedField(currentConference, 'title', language)}` : ''}
               </h2>
               <p className="text-sm text-gray-500 mt-0.5">
-                Explora y organiza tus actividades
+                {t('agenda.subtitle')}
               </p>
             </div>
           </div>
@@ -241,7 +245,7 @@ export function AgendaView() {
             <input
               type="text"
               className="block w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-acid)] focus:border-transparent text-sm transition-all"
-              placeholder="Buscar por nombre o etiqueta..."
+              placeholder={t('agenda.search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -258,8 +262,8 @@ export function AgendaView() {
           >
             <div className="bg-white border border-gray-200 rounded-lg p-3.5">
               <div className="flex items-center gap-2 mb-1">
-                <Star className="h-3.5 w-3.5 text-gray-500" />
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Interés</span>
+                < Star className="h-3.5 w-3.5 text-gray-500" />
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('agenda.interest')}</span>
               </div>
               <p className="text-xl font-bold text-[#373737]">{interests.size}</p>
             </div>
@@ -267,7 +271,7 @@ export function AgendaView() {
             <div className="bg-[var(--color-acid)]/50 border border-[var(--color-acid)] rounded-lg p-3.5">
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle2 className="h-3.5 w-3.5" style={{ color: 'var(--color-acid-text)' }} />
-                <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--color-acid-text)' }}>Asistidos</span>
+                <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--color-acid-text)' }}>{t('agenda.attended')}</span>
               </div>
               <p className="text-xl font-bold" style={{ color: 'var(--color-acid-text)' }}>
                 {filteredEvents.filter(e => (attendance[e.id] || 0) >= (e.duration_days || 1)).length}
@@ -288,16 +292,16 @@ export function AgendaView() {
                <div className="p-4 bg-white rounded-full border border-gray-200">
                  <Calendar className="h-8 w-8 text-gray-400" />
                </div>
-               <p className="text-gray-600 font-semibold">No hay eventos programados aún</p>
-               <p className="text-gray-500 text-sm">Los eventos aparecerán aquí cuando se agreguen</p>
+               <p className="text-gray-600 font-semibold">{t('agenda.no_events')}</p>
+               <p className="text-gray-500 text-sm">{t('agenda.no_events_desc')}</p>
              </div>
           ) : (
              <div className="flex flex-col items-center gap-3">
                 <div className="p-4 bg-white rounded-full border border-gray-200">
                   <Search className="h-8 w-8 text-gray-400" />
                 </div>
-                <p className="text-gray-600 font-semibold">No se encontraron eventos</p>
-                <p className="text-sm text-gray-500">Intenta con otros términos de búsqueda</p>
+                <p className="text-gray-600 font-semibold">{t('agenda.no_results')}</p>
+                <p className="text-sm text-gray-500">{t('agenda.no_results_desc')}</p>
              </div>
           )}
         </motion.div>
@@ -368,7 +372,7 @@ export function AgendaView() {
                     <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
                       <Star className="h-4 w-4 text-[#373737]" />
                       <h3 className="text-lg font-bold text-[#373737]">
-                        De tu interés
+                        {t('agenda.interested_section')}
                       </h3>
                       <span className="text-xs text-gray-500 ml-auto">
                         {interestedEvents.length}
@@ -390,7 +394,7 @@ export function AgendaView() {
                     <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
                       <CheckCircle2 className="h-4 w-4 text-[var(--color-acid)]" />
                       <h3 className="text-lg font-bold text-[#373737]">
-                        Completados
+                        {t('agenda.completed_section')}
                       </h3>
                       <span className="text-xs text-gray-500 ml-auto">
                         {attendedEvents.length}
@@ -412,7 +416,7 @@ export function AgendaView() {
                       <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
                         <Calendar className="h-4 w-4 text-gray-400" />
                         <h3 className="text-lg font-bold text-[#373737]">
-                          Todos los eventos
+                          {t('agenda.all_events_section')}
                         </h3>
                         <span className="text-xs text-gray-500 ml-auto">
                           {otherEvents.length}
@@ -425,7 +429,8 @@ export function AgendaView() {
                       const dates: string[] = [];
 
                       otherEvents.forEach(event => {
-                        const dateKey = formatMexicoDate(event.date, { weekday: 'long', day: 'numeric', month: 'long' });
+                        const locale = language === 'es' ? 'es-MX' : 'en-US';
+                        const dateKey = formatMexicoDate(event.date, { weekday: 'long', day: 'numeric', month: 'long' }, locale);
                         const formattedDate = dateKey.charAt(0).toUpperCase() + dateKey.slice(1);
                         
                         if (!groupedEvents[formattedDate]) {
@@ -459,7 +464,7 @@ export function AgendaView() {
                                     </div>
                                     
                                      <span className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest bg-gray-100 px-2 py-1 rounded-full border border-gray-200">
-                                      {count} {count === 1 ? 'EVENTO' : 'EVENTOS'}
+                                      {count} {count === 1 ? t('agenda.event_count_one') : t('agenda.event_count_other')}
                                     </span>
                                   </div>
                                 </div>

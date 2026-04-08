@@ -45,8 +45,14 @@ export default function LoginPage() {
 
   useEffect(() => {
       const action = searchParams.get('action');
+      const code = searchParams.get('code');
+      
       if (action === 'select_event') {
           setShowEventModal(true);
+      }
+      
+      if (code) {
+          setView('login');
       }
   }, [searchParams]);
 

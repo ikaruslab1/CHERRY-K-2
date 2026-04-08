@@ -6,12 +6,13 @@ import { motion } from 'framer-motion';
 
 interface FeaturesBlockProps {
   block: LandingBlock;
+  locale?: string;
 }
 
 const ICONS = Icons;
 
-export function FeaturesBlock({ block }: FeaturesBlockProps) {
-  const { title: sectionTitle, items = [], text_align = 'left', grid_align = 'left' } = block.content;
+export function FeaturesBlock({ block, locale = 'es' }: FeaturesBlockProps) {
+  const { title: sectionTitle, title_en: sectionTitleEn, items = [], text_align = 'left', grid_align = 'left' } = block.content;
   const variant = block.variant || 'grid';
 
   const containerVariants = {
@@ -39,7 +40,7 @@ export function FeaturesBlock({ block }: FeaturesBlockProps) {
         }`}>
            <div className="max-w-2xl">
               <h2 className="text-4xl @md:text-5xl font-bold text-gray-900 leading-[0.9] tracking-tighter mb-4">
-                {sectionTitle || 'Características Principales'}
+                {locale === 'en' ? (sectionTitleEn || 'Main Features') : (sectionTitle || 'Características Principales')}
               </h2>
               <div className={`h-1.5 w-24 bg-[#adacac] rounded-full ${
                 grid_align === 'center' ? 'mx-auto' : 
@@ -90,11 +91,11 @@ export function FeaturesBlock({ block }: FeaturesBlockProps) {
                 </div>
                 
                 <h3 className="text-xl font-bold text-gray-900 mb-3 tracking-tight">
-                  {item.title}
+                  {locale === 'en' && item.title_en ? item.title_en : item.title}
                 </h3>
                 
                 <p className="text-gray-500 leading-relaxed text-sm">
-                  {item.description}
+                  {locale === 'en' && item.description_en ? item.description_en : item.description}
                 </p>
               </motion.div>
             );

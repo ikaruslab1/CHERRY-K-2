@@ -13,6 +13,7 @@ import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { useFieldArray } from 'react-hook-form';
 import { SpeakerSelector } from '@/components/admin/SpeakerSelector';
 import { MultipleSpeakerSelector } from '@/components/admin/MultipleSpeakerSelector';
+import { useConference } from '@/context/ConferenceContext';
 import { Event, UserProfile } from '@/types';
 import { formatToMexicoDateTimeLocal, parseMexicoDateTimeLocal } from '@/lib/dateUtils';
 
@@ -106,6 +107,7 @@ interface EventFormProps {
 }
 
 export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }: EventFormProps) {
+    const { currentConference } = useConference();
     const { register, handleSubmit, reset, setValue, control, watch } = useForm<Event>();
     const { fields, append, remove } = useFieldArray({
         control,
@@ -122,10 +124,14 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
     useEffect(() => {
         if (initialData) {
             setValue('title', initialData.title || '');
+            setValue('title_en', initialData.title_en || '');
             setValue('description', initialData.description || '');
+            setValue('description_en', initialData.description_en || '');
             setValue('location', initialData.location || '');
+            setValue('location_en', initialData.location_en || '');
             setValue('date', initialData.date ? formatToMexicoDateTimeLocal(initialData.date) : '');
             setValue('type', initialData.type || 'Conferencia Magistral');
+            setValue('type_en', initialData.type_en || '');
             setValue('speaker_id', initialData.speaker_id || '');
             setValue('image_url', initialData.image_url || '');
             setValue('gives_certificate', initialData.gives_certificate || false);
@@ -223,6 +229,14 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                         })}
                     </div>
                 </div>
+                {currentConference?.enable_translation && (
+                    <input 
+                        {...register('type_en')}
+                        className="w-full mt-2 px-4 py-3 rounded-xl border border-[var(--color-acid)]/50 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent bg-[var(--color-acid)]/10"
+                        style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
+                        placeholder="Tipo de Actividad en Inglés (Ej. Keynote, Workshop, etc.)"
+                    />
+                )}
             </div>
 
             <div className="space-y-2">
@@ -233,6 +247,15 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                     style={{ '--tw-ring-color': 'var(--color-acid)' } as React.CSSProperties}
                     placeholder="Ej. Keynote: Futuro de la Tecnología"
                 />
+                
+                {currentConference?.enable_translation && (
+                    <input 
+                        {...register('title_en')}
+                        className="w-full px-4 py-3 mt-2 rounded-xl border border-[var(--color-acid)]/50 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all bg-[var(--color-acid)]/10"
+                        style={{ '--tw-ring-color': 'var(--color-acid)' } as React.CSSProperties}
+                        placeholder="Ej. Keynote: Future of Technology (Inglés)"
+                    />
+                )}
             </div>
 
             {/* Image URL Input */}
@@ -308,6 +331,29 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                         />
                     )}
                  />
+                 
+                 {currentConference?.enable_translation && (
+                     <Controller
+                        name="description_en"
+                        control={control}
+                        defaultValue=""
+                        rules={{ maxLength: { value: 50000, message: "La descripción no puede exceder 50000 caracteres" } }}
+                        render={({ field: { value, onChange } }) => (
+                            <div className="mt-4 border border-[var(--color-acid)]/30 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(219,242,39,0.1)]">
+                                <div className="bg-[var(--color-acid)]/20 px-4 py-2 border-b border-[var(--color-acid)]/20">
+                                    <span className="text-xs font-bold text-gray-800 uppercase tracking-wider">Descripción (Inglés)</span>
+                                </div>
+                                <RichTextEditor
+                                    label=""
+                                    value={value || ''}
+                                    onChange={(val) => { onChange(val); }}
+                                    maxLength={50000}
+                                    placeholder="Conference description in English..."
+                                />
+                            </div>
+                        )}
+                     />
+                 )}
              </div>
 
              {/* Custom Links Section */}
@@ -428,6 +474,14 @@ export function EventForm({ initialData, isEditing, users, onSubmit, onCancel }:
                         style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
                         placeholder="Ej. Auditorio A"
                     />
+                    {currentConference?.enable_translation && (
+                        <input 
+                            {...register('location_en')}
+                            className="w-full mt-2 px-4 py-3 rounded-xl border border-[var(--color-acid)]/50 text-[#373737] placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent bg-[var(--color-acid)]/10"
+                            style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
+                            placeholder="Ej. Auditorium A (Inglés)"
+                        />
+                    )}
                  </div>
                  <div className="space-y-2">
                     <label className="text-sm font-bold text-[#373737]">Horario:</label>

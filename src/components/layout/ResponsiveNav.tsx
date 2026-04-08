@@ -5,7 +5,9 @@ import { LogOut, X, Menu, ChevronLeft, ChevronRight, LayoutGrid, Bell, BellOff, 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '@/context/SidebarContext';
 import { useConference } from '@/context/ConferenceContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { InstallPWAButton } from '../ui/InstallPWAButton';
+import { LanguageToggle } from '../ui/LanguageToggle';
 
 import { cn } from '@/lib/utils';
 
@@ -31,6 +33,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const { isDesktopCollapsed, setIsDesktopCollapsed } = useSidebar();
     const { currentConference } = useConference();
+    const { t } = useLanguage();
 
 
     // Filter visible items
@@ -110,7 +113,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                                         <LayoutGrid className="w-4 h-4" style={{ color: 'var(--color-acid-text)' }} />
                                     </div>
                                     <div className="flex flex-col overflow-hidden min-w-0">
-                                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Menu</span>
+                                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">{t('nav.menu')}</span>
                                        <h2 className="text-sm font-bold text-black uppercase tracking-wider leading-tight opacity-90 break-words">
                                           {currentConference?.title || 'Cherry-K'}
                                        </h2>
@@ -162,6 +165,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
 
                             {/* Footer Mobile */}
                             <div className="pt-6 border-t border-gray-100 mt-auto space-y-3">
+                                {currentConference?.enable_translation && <LanguageToggle mobile />}
                                 <InstallPWAButton />
                                 {onFAQClick && (
                                     <button
@@ -172,7 +176,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                                         )}
                                     >
                                         <HelpCircle className="w-4 h-4" />
-                                        <span>Preguntas Frecuentes</span>
+                                        <span>{t('nav.faq')}</span>
                                     </button>
                                 )}
                                 <button
@@ -180,7 +184,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                                     className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors text-sm font-medium rounded-lg"
                                 >
                                     <LogOut className="w-5 h-5" />
-                                    <span>Cerrar Sesión</span>
+                                    <span>{t('nav.logout')}</span>
                                 </button>
                             </div>
                         </motion.div>
@@ -223,7 +227,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                                     className="flex flex-col overflow-hidden min-w-0"
                                 >
                                     <div className="min-w-[160px]">
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1 ml-1 whitespace-nowrap">Menu</span>
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1 ml-1 whitespace-nowrap">{t('nav.menu')}</span>
                                         <h2 className="text-xs font-bold text-black uppercase tracking-wider leading-tight ml-1 break-words" title={currentConference?.title || 'Cherry-K'}>
                                             {currentConference?.title || 'Cherry-K'}
                                         </h2>
@@ -315,6 +319,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                     layout
                     className="p-3 border-t border-gray-100 space-y-2"
                 >
+                    {currentConference?.enable_translation && <LanguageToggle collapsed={isDesktopCollapsed} />}
                     <InstallPWAButton collapsed={isDesktopCollapsed} />
 
                     {onFAQClick && (
@@ -337,7 +342,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                                     exit={{ opacity: 0 }}
                                     className="text-sm truncate"
                                 >
-                                    Preguntas Frecuentes
+                                    {t('nav.faq')}
                                 </motion.span>
                             )}
                         </button>
@@ -349,7 +354,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                             "w-full flex items-center gap-3 px-3 py-3 text-red-500 hover:bg-red-50 transition-colors font-medium rounded-lg",
                             isDesktopCollapsed ? "justify-center" : ""
                         )}
-                        title={isDesktopCollapsed ? 'Cerrar Sesión' : ''}
+                        title={isDesktopCollapsed ? t('nav.logout') : ''}
                     >
                         <LogOut className="w-5 h-5 shrink-0" />
                         {!isDesktopCollapsed && (
@@ -359,7 +364,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                                 exit={{ opacity: 0 }}
                                 className="text-sm truncate"
                             >
-                                Cerrar Sesión
+                                {t('nav.logout')}
                             </motion.span>
                         )}
                     </button>

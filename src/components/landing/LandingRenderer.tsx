@@ -11,17 +11,27 @@ import { RegisterForm } from '@/components/auth/RegisterForm';
 import { DEFAULT_LANDING_CONFIG } from '@/constants/landing';
 import { Cherry } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface LandingRendererProps {
   config?: ConferenceLandingConfig | null;
   conference: Conference;
+  forcedLocale?: 'en' | 'es';
 }
 
-export function LandingRenderer({ config: propConfig, conference }: LandingRendererProps) {
+export function LandingRenderer({ config: propConfig, conference, forcedLocale }: LandingRendererProps) {
+  const searchParams = useSearchParams();
   const [view, setView] = useState<'login' | 'register'>('login');
+  const locale = forcedLocale || (searchParams.get('lang') === 'en' ? 'en' : 'es');
   
   // Usar la config del prop o la por defecto si no existe
   const config = propConfig || DEFAULT_LANDING_CONFIG;
+
+  useEffect(() => {
+    if (searchParams.get('code')) {
+      setView('login');
+    }
+  }, [searchParams]);
 
   // Determinar la fuente seleccionada
   const fontMap: Record<string, string> = {
@@ -47,12 +57,14 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
     <div className="w-full max-w-[420px] mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
        <div className="text-center space-y-2">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-            {customTitle || (view === 'login' ? 'Bienvenido de nuevo' : 'Crear cuenta')}
+            {locale === 'en' 
+              ? (authBlock?.content?.title_en || (customTitle === 'Portal de Acceso' ? 'Access Portal' : customTitle) || (view === 'login' ? 'Welcome back' : 'Create account')) 
+              : (customTitle || (view === 'login' ? 'Bienvenido de nuevo' : 'Crear cuenta'))}
           </h2>
           <p className="text-sm text-gray-500 font-medium tracking-tight">
             {view === 'login' 
-              ? 'Ingresa tu ID de acceso para continuar' 
-              : 'Completa tus datos para obtener tu ID digital'}
+              ? (locale === 'en' ? 'Enter your access ID to continue' : 'Ingresa tu ID de acceso para continuar')
+              : (locale === 'en' ? 'Complete your details to get your digital ID' : 'Completa tus datos para obtener tu ID digital')}
           </p>
        </div>
        
@@ -66,12 +78,13 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
               transition={{ duration: 0.3 }}
             >
               {view === 'login' ? (
-                <LoginForm conferenceId={conference.id} />
+                <LoginForm conferenceId={conference.id} locale={locale} />
               ) : (
                 <RegisterForm 
                   conferenceId={conference.id} 
                   customInputs={customInputs}
                   fieldsOrder={authBlock?.content?.fields_order}
+                  locale={locale}
                 />
               )}
             </motion.div>
@@ -81,22 +94,22 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
        <div className="text-center text-sm font-medium">
           {view === 'login' ? (
             <p className="text-gray-500">
-              ¿Aún no tienes cuenta?{' '}
+              {locale === 'en' ? "Don't have an account yet?" : "¿Aún no tienes cuenta?"}{' '}
               <button 
                 onClick={() => setView('register')}
                 className="font-bold hover:underline transition-all text-[#373737]"
               >
-                Regístrate aquí
+                {locale === 'en' ? "Register here" : "Regístrate aquí"}
               </button>
             </p>
           ) : (
             <p className="text-gray-500">
-              ¿Ya tienes tu ID?{' '}
+              {locale === 'en' ? "Already have your ID?" : "¿Ya tienes tu ID?"}{' '}
               <button 
                 onClick={() => setView('login')}
                 className="font-bold hover:underline transition-all text-[#373737]"
               >
-                Inicia sesión
+                {locale === 'en' ? "Log in" : "Inicia sesión"}
               </button>
             </p>
           )}
@@ -121,6 +134,7 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                     key={block.id} 
                     block={block} 
                     authForms={block.variant === 'split' ? renderAuthForms() : undefined}
+                    locale={locale}
                   />
                 );
               case 'features':
@@ -128,6 +142,7 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                   <FeaturesBlock 
                     key={block.id} 
                     block={block} 
+                    locale={locale}
                   />
                 );
               case 'auth':
@@ -137,7 +152,7 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                   </section>
                 );
               case 'agenda':
-                return <AgendaBlock key={block.id} block={block} conferenceId={conference.id} />;
+                return <AgendaBlock key={block.id} block={block} conferenceId={conference.id} locale={locale} />;
               case 'cta':
                 const ctaBg = block.content.background_color || '#000000';
                 const ctaColor = block.content.text_color || '#FFFFFF';
@@ -145,8 +160,18 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                 const flexJustify = block.content.button_align === 'left' ? 'justify-start' : block.content.button_align === 'right' ? 'justify-end' : 'justify-center';
                 
                 const ctaButtons = block.content.buttons || [
-                  { label: block.content.register_label || "Obtener Entrada", url: "#register" },
-                  { label: block.content.login_label || "Acceder a mi Portal", url: "#login" }
+                  { 
+                    label: locale === 'en' 
+                      ? (block.content.register_label_en || block.content.register_label || "Get Ticket") 
+                      : (block.content.register_label || "Obtener Entrada"), 
+                    url: "#register" 
+                  },
+                  { 
+                    label: locale === 'en' 
+                      ? (block.content.login_label_en || block.content.login_label || "Access Portal") 
+                      : (block.content.login_label || "Acceder a mi Portal"), 
+                    url: "#login" 
+                  }
                 ];
 
                 return (
@@ -158,10 +183,10 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                           viewport={{ once: true }}
                           className="text-4xl @md:text-5xl font-black mb-4 tracking-tighter"
                         >
-                          {block.content.title || 'Únete al Futuro de la Legislación'}
+                          {locale === 'en' ? (block.content.title_en || 'Join the Future of Legislation') : (block.content.title || 'Únete al Futuro de la Legislación')}
                         </motion.h2>
 
-                        {block.content.subtitle && (
+                        {(block.content.subtitle || block.content.subtitle_en) && (
                           <motion.p 
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -169,7 +194,7 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                             transition={{ delay: 0.1 }}
                             className={`text-lg @md:text-xl font-medium mb-12 max-w-2xl opacity-80 ${block.content.text_align === 'center' || !block.content.text_align ? 'mx-auto' : ''}`}
                           >
-                            {block.content.subtitle}
+                            {locale === 'en' && block.content.subtitle_en ? block.content.subtitle_en : block.content.subtitle}
                           </motion.p>
                         )}
                         
@@ -193,7 +218,7 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                                      className="px-10 py-4 font-bold text-sm uppercase tracking-wider rounded-xl transition-all hover:scale-105 shadow-xl"
                                      style={{ backgroundColor: btnBg, color: btnText }}
                                    >
-                                     {btn.label}
+                                     {locale === 'en' && btn.label_en ? btn.label_en : btn.label}
                                    </button>
                                  );
                                }
@@ -205,7 +230,7 @@ export function LandingRenderer({ config: propConfig, conference }: LandingRende
                                    className="px-10 py-4 font-bold text-sm uppercase tracking-wider rounded-xl transition-all inline-block hover:scale-105 shadow-xl"
                                    style={{ backgroundColor: btnBg, color: btnText }}
                                  >
-                                   {btn.label}
+                                   {locale === 'en' && btn.label_en ? btn.label_en : btn.label}
                                  </a>
                                );
                              })}

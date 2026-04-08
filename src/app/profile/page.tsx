@@ -21,6 +21,7 @@ import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useConference } from '@/context/ConferenceContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { useRoleAuth } from '@/hooks/useRoleAuth';
 
 const LandingEditor = dynamic(() => import('@/components/admin/LandingEditor').then(mod => mod.LandingEditor), {
@@ -31,6 +32,7 @@ const LandingEditor = dynamic(() => import('@/components/admin/LandingEditor').t
 export default function ProfilePage() {
   const router = useRouter();
   const { currentConference } = useConference();
+  const { t } = useLanguage();
   const { loading: authLoading, userRole } = useRoleAuth();
   const [sessionLoading, setSessionLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'users' | 'events' | 'metrics' | 'attendance' | 'participation' | 'constancias' | 'design-certificates' | 'landing-editor' | 'embeddings' | 'faq'>('profile');
@@ -60,33 +62,33 @@ export default function ProfilePage() {
   };
 
   const navItems = [
-    { id: 'profile', label: 'Mi Perfil', icon: <User className="w-5 h-5" />, show: true },
-    { id: 'agenda', label: 'Agenda', icon: <Calendar className="w-5 h-5" />, show: true },
-    { id: 'constancias', label: 'Constancias', icon: <FileText className="w-5 h-5" />, show: true },
-    { id: 'divider-ponente', label: 'Herramientas del Ponente', show: isPonente, isDivider: true },
-    { id: 'participation', label: 'Participación', icon: <Mic className="w-5 h-5" />, show: isPonente },
-    { id: 'divider-admin', label: isStaff ? 'Herramientas del Staff' : 'Herramientas de Administrador', show: isAdmin || isStaff, isDivider: true },
-    { id: 'attendance', label: 'Asistencia', icon: <QrCode className="w-5 h-5" />, show: isAdmin || isStaff },
-    { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: isAdmin || isStaff },
-    { id: 'events', label: 'Gestión Eventos', icon: <Settings className="w-5 h-5" />, show: isAdmin },
-    { id: 'metrics', label: 'Dashboard Métricas', icon: <LayoutDashboard className="w-5 h-5" />, show: isAdmin },
-    { id: 'embeddings', label: 'Embeddings', icon: <Code className="w-5 h-5" />, show: isAdmin },
+    { id: 'profile', label: t('nav.profile'), icon: <User className="w-5 h-5" />, show: true },
+    { id: 'agenda', label: t('nav.agenda'), icon: <Calendar className="w-5 h-5" />, show: true },
+    { id: 'constancias', label: t('nav.certificates'), icon: <FileText className="w-5 h-5" />, show: true },
+    { id: 'divider-ponente', label: t('nav.tools_speaker'), show: isPonente, isDivider: true },
+    { id: 'participation', label: t('nav.participation'), icon: <Mic className="w-5 h-5" />, show: isPonente },
+    { id: 'divider-admin', label: isStaff ? t('nav.tools_staff') : t('nav.tools_admin'), show: isAdmin || isStaff, isDivider: true },
+    { id: 'attendance', label: t('nav.attendance'), icon: <QrCode className="w-5 h-5" />, show: isAdmin || isStaff },
+    { id: 'users', label: t('nav.users'), icon: <Users className="w-5 h-5" />, show: isAdmin || isStaff },
+    { id: 'events', label: t('nav.events_management'), icon: <Settings className="w-5 h-5" />, show: isAdmin },
+    { id: 'metrics', label: t('nav.dashboard_metrics'), icon: <LayoutDashboard className="w-5 h-5" />, show: isAdmin },
+    { id: 'embeddings', label: t('nav.embeddings'), icon: <Code className="w-5 h-5" />, show: isAdmin },
     { 
         id: 'design-certificates', 
-        label: 'Diseño de Constancias', 
+        label: t('nav.design_certificates'), 
         icon: <Award className="w-5 h-5" />, 
         show: isAdmin
     },
     { 
         id: 'landing-editor', 
-        label: 'Diseño de Landing', 
+        label: t('nav.design_landing'), 
         icon: <Palette className="w-5 h-5" />, 
         show: isAdmin
     },
-    { id: 'divider-owner', label: 'Herramienta de Owner', show: isOwner, isDivider: true },
+    { id: 'divider-owner', label: t('nav.tools_owner'), show: isOwner, isDivider: true },
     { 
         id: 'owner_link', 
-        label: 'Panel Owner', 
+        label: t('nav.panel_owner'), 
         icon: <Crown className="w-5 h-5" />, 
         show: isOwner,
         onClick: () => router.push('/owner') 

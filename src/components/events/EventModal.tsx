@@ -20,6 +20,8 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { formatMexicoTime, formatMexicoDate } from '@/lib/dateUtils';
+import { useLanguage } from '@/context/LanguageContext';
+import { getTranslatedField } from '@/utils/i18nHelpers';
 
 interface EventModalProps {
   event: Event | null;
@@ -129,6 +131,8 @@ export function EventModal({
   hideActionButtons,
   attendanceCount
 }: EventModalProps) {
+  const { language, t } = useLanguage();
+  const locale = language === 'es' ? 'es-MX' : 'en-US';
   const [zoomedImageSrc, setZoomedImageSrc] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
 
@@ -196,7 +200,7 @@ export function EventModal({
                 <ImageIcon size={48} className="text-[var(--color-acid-text)]" />
               </div>
               <span className="text-[10px] font-black text-[var(--color-acid-text)] uppercase tracking-[0.3em] opacity-30">
-                {event.type}
+                {getTranslatedField(event, 'type', language)}
               </span>
             </div>
           )}
@@ -206,7 +210,7 @@ export function EventModal({
           {/* Type Badge (Top Right) */}
           <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
             <div className="bg-white text-black border border-gray-200 text-xs font-bold uppercase tracking-widest px-4 py-2 shadow-sm">
-              {event.type}
+              {getTranslatedField(event, 'type', language)}
             </div>
             
             {/* Multi-day Progress Badge */}
@@ -237,7 +241,7 @@ export function EventModal({
                   {/* Date Part */}
                   <div className="p-3 px-5 flex flex-col items-center justify-center bg-white">
                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">
-                          {formatMexicoDate(eventDate, { month: 'short' }).replace('.', '')}
+                          {formatMexicoDate(eventDate, { month: 'short' }, locale).replace('.', '')}
                        </span>
                        <span className="text-3xl font-black text-[#373737] tracking-tight leading-none font-geist-sans">
                           {(() => {
@@ -255,10 +259,10 @@ export function EventModal({
                   {/* Time Part */}
                   <div className="p-3 px-5 flex flex-col justify-center items-start min-w-[110px] bg-white">
                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                          <Clock className="h-3 w-3" /> Hora
+                          <Clock className="h-3 w-3" /> {t('event.time')}
                        </span>
                        <span className="text-xl font-bold text-[#373737] tracking-tight leading-none font-geist-sans">
-                          {formatMexicoTime(eventDate)}
+                          {formatMexicoTime(eventDate, locale)}
                        </span>
                   </div>
               </div>
@@ -271,7 +275,7 @@ export function EventModal({
           {/* Title & Tags */}
           <div className="space-y-4">
              <h2 className="text-3xl md:text-4xl font-bold text-black leading-[0.95] tracking-tight uppercase break-words text-balance">
-               {event.title}
+               {getTranslatedField(event, 'title', language)}
              </h2>
 
             {event.tags && event.tags.length > 0 && (
@@ -286,13 +290,13 @@ export function EventModal({
           </div>
 
           {/* Description */}
-          {event.description && (
+          {getTranslatedField(event, 'description', language) && (
             <div className="space-y-4">
-                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Sobre la actividad</h4>
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('event.about')}</h4>
                 <div 
                     id="event-description-container"
                     className="text-gray-600 text-base leading-relaxed prose prose-neutral max-w-none font-geist-sans"
-                    dangerouslySetInnerHTML={{ __html: event.description }}
+                    dangerouslySetInnerHTML={{ __html: getTranslatedField(event, 'description', language) }}
                 />
             </div>
           )}
@@ -332,17 +336,17 @@ export function EventModal({
           {/* Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                {/* Location */}
-               <div className="flex gap-4 group">
-                    <div className="p-3 bg-gray-50 text-black border border-gray-100 h-fit">
-                        <MapPin className="h-5 w-5" />
-                    </div>
-                    <div>
-                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Ubicación</h4>
-                        <p className="text-base text-black font-medium group-hover:underline decoration-[var(--color-acid)] decoration-2 underline-offset-4 transition-all">
-                            {event.location}
-                        </p>
-                    </div>
-               </div>
+                <div className="flex gap-4 group">
+                     <div className="p-3 bg-gray-50 text-black border border-gray-100 h-fit">
+                         <MapPin className="h-5 w-5" />
+                     </div>
+                     <div>
+                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{t('event.location')}</h4>
+                         <p className="text-base text-black font-medium group-hover:underline decoration-[var(--color-acid)] decoration-2 underline-offset-4 transition-all">
+                             {getTranslatedField(event, 'location', language)}
+                         </p>
+                     </div>
+                </div>
 
                {/* Speaker */}
                {/* Speakers */}
@@ -415,7 +419,7 @@ export function EventModal({
             {isAttended ? (
               <div className="w-full py-4 text-sm font-bold text-black bg-gray-100 border border-gray-200 flex items-center justify-center gap-3 uppercase tracking-widest cursor-default">
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
-                Asistencia confirmada
+                {t('event.attendance_confirmed')}
               </div>
             ) : (
               <Button 
@@ -426,7 +430,7 @@ export function EventModal({
                       : "bg-black text-white hover:bg-[var(--color-acid)] hover:text-[var(--color-acid-text)] hover:shadow-xl border border-transparent hover:border-black/10"
                   }`}
               >
-                  {isInterested ? "Remover de mi agenda" : "Me interesa asistir"}
+                  {isInterested ? t('event.remove_interested_btn') : t('event.interested_btn')}
               </Button>
             )}
 
@@ -447,19 +451,19 @@ export function EventModal({
                                     className="w-full h-12 text-sm font-bold bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-200/50 flex items-center justify-center gap-2 uppercase tracking-widest transition-all animate-pulse-subtle"
                                 >
                                     <CheckCircle2 className="h-5 w-5" />
-                                    Pasar asistencia ahora
+                                    {t('event.mark_attendance_btn')}
                                 </Button>
                             );
                         } else if (now < eventStart) {
                             return (
                                 <p className="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest">
-                                    La auto-asistencia se activará al iniciar el evento
+                                    {t('event.auto_attendance_soon')}
                                 </p>
                             );
                         } else {
                             return (
                                 <p className="text-[10px] text-center text-red-400 font-bold uppercase tracking-widest">
-                                    El tiempo de auto-asistencia ha expirado
+                                    {t('event.auto_attendance_expired')}
                                 </p>
                             );
                         }

@@ -19,14 +19,14 @@ const toTitleCase = (str: string) => {
   );
 };
 
-const formSchema = z
+const createFormSchema = (locale: string) => z
   .object({
-    firstName: z.string().min(1, "El nombre es obligatorio"),
+    firstName: z.string().min(1, locale === 'en' ? "Name is required" : "El nombre es obligatorio"),
     lastName: z
       .string()
-      .min(1, "El apellido es obligatorio")
+      .min(1, locale === 'en' ? "Last name is required" : "El apellido es obligatorio")
       .refine((val) => val.trim().split(/\s+/).length >= 2, {
-        message: "Debe ingresar al menos dos apellidos (paterno y materno)",
+        message: locale === 'en' ? "Please enter at least two last names" : "Debe ingresar al menos dos apellidos (paterno y materno)",
       }),
     degree: z.enum(
       [
@@ -38,38 +38,38 @@ const formSchema = z
         "Profesor",
       ],
       {
-        message: "Seleccione un grado académico",
+        message: locale === 'en' ? "Select an academic degree" : "Seleccione un grado académico",
       }
     ),
     gender: z.enum(["Masculino", "Femenino", "Neutro"], {
-      message: "Seleccione un género",
+      message: locale === 'en' ? "Select a gender" : "Seleccione un género",
     }),
-    email: z.string().min(1, "El email es obligatorio").email("Email inválido"),
+    email: z.string().min(1, locale === 'en' ? "Email is required" : "El email es obligatorio").email(locale === 'en' ? "Invalid email" : "Email inválido"),
     confirmEmail: z
       .string()
-      .min(1, "Confirme su email")
-      .email("Email inválido"),
+      .min(1, locale === 'en' ? "Confirm your email" : "Confirme su email")
+      .email(locale === 'en' ? "Invalid email" : "Email inválido"),
     phone: z
       .string()
-      .min(1, "El teléfono es obligatorio")
-      .regex(/^\d{10}$/, "El teléfono debe ser de 10 dígitos y sin lada"),
+      .min(1, locale === 'en' ? "Phone is required" : "El teléfono es obligatorio")
+      .regex(/^\d{10}$/, locale === 'en' ? "Phone must be 10 digits" : "El teléfono debe ser de 10 dígitos y sin lada"),
   })
   .refine((data) => data.email === data.confirmEmail, {
-    message: "Los correos no coinciden",
+    message: locale === 'en' ? "Emails do not match" : "Los correos no coinciden",
     path: ["confirmEmail"],
   });
 
-type FormData = z.infer<typeof formSchema> & Record<string, any>;
+type FormData = z.infer<ReturnType<typeof createFormSchema>> & Record<string, any>;
 
 interface RegisterFormProps {
   conferenceId?: string;
   isEmbedded?: boolean;
   customInputs?: any[];
   fieldsOrder?: string[];
+  locale?: string;
 }
 
-export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fieldsOrder = [] }: RegisterFormProps) {
-  const router = useRouter();
+export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fieldsOrder = [], locale = 'es' }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isAutoLoggingIn, setIsAutoLoggingIn] = useState(false);
   const [successData, setSuccessData] = useState<{
@@ -85,7 +85,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
     setValue,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(createFormSchema(locale)),
   });
 
   // Load from LocalStorage
@@ -158,22 +158,19 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                 // If embedded, stop spinning and show the button to continue manually
                 setIsAutoLoggingIn(false);
             } else {
-                // Redirigir usando window.location para asegurar que las cookies se procesen correctamente
                 window.location.href = '/profile';
             }
           } else {
-            // If auto-login fails, keep showing the success message
-            // User can manually login with their ID
             setIsAutoLoggingIn(false);
             console.error("Auto-login failed:", loginResult.error);
           }
         }, 2000); // 2 second delay to show success message
         
       } else {
-        alert("Error al registrar: " + result.error);
+        alert((locale === 'en' ? "Error registering: " : "Error al registrar: ") + result.error);
       }
     } catch (error) {
-      alert("Error de conexión");
+      alert(locale === 'en' ? "Connection error" : "Error de conexión");
     } finally {
       setIsLoading(false);
     }
@@ -195,15 +192,15 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
           <CheckCircle className="h-10 w-10 text-[#373737]" />
         </div>
         <h2 className="text-3xl font-bold text-[#373737] mb-2">
-          ¡Registro Exitoso!
+          {locale === 'en' ? 'Registration Successful!' : '¡Registro Exitoso!'}
         </h2>
         <p className="text-gray-500 mb-6">
-          Tu identidad digital ha sido generada.
+          {locale === 'en' ? 'Your digital identity has been generated.' : 'Tu identidad digital ha sido generada.'}
         </p>
 
         <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 w-full mb-6">
           <p className="text-sm text-gray-400 uppercase tracking-wider mb-2">
-            Tu ID de Acceso
+            {locale === 'en' ? 'Your Access ID' : 'Tu ID de Acceso'}
           </p>
           <p className="text-4xl font-mono font-bold text-[#373737] tracking-widest">
             {successData.id}
@@ -215,18 +212,20 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
             <div className="flex items-center justify-center gap-2 mb-6">
               <Loader2 className="h-5 w-5 animate-spin text-[#DBF227]" />
               <p className="text-sm text-gray-600 font-medium">
-                Iniciando sesión automáticamente...
+                {locale === 'en' ? 'Logging in automatically...' : 'Iniciando sesión automáticamente...'}
               </p>
             </div>
             <p className="text-xs text-gray-400">
-              Serás redirigido a tu perfil en un momento
+              {locale === 'en' ? 'You will be redirected to your profile in a moment' : 'Serás redirigido a tu perfil en un momento'}
             </p>
           </>
         ) : (
           <>
             <p className="text-sm text-gray-400 mb-6">
-              Guarda este ID. Lo necesitarás para ingresar al evento y registrar tu
-              asistencia.
+              {locale === 'en' 
+                ? 'Save this ID. You will need it to enter the event and register your attendance.' 
+                : 'Guarda este ID. Lo necesitarás para ingresar al evento y registrar tu asistencia.'
+              }
             </p>
 
             <Button
@@ -241,7 +240,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
               className="w-full font-bold"
               size="lg"
             >
-              {isEmbedded ? 'Ir a la plataforma' : 'Entendido'}
+              {isEmbedded ? (locale === 'en' ? 'Go to platform' : 'Ir a la plataforma') : (locale === 'en' ? 'Got it' : 'Entendido')}
             </Button>
           </>
         )}
@@ -266,19 +265,18 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
           return orderToUse.map((fieldId) => {
             // Render fixed fields
             if (fieldId === 'nombre' || fieldId === 'apellidos') {
-              // Special case: Name and Last Name are in a grid
-              if (fieldId === 'apellidos') return null; // Skip if we hit apellidos, handled in nombre case
+              if (fieldId === 'apellidos') return null; 
 
               return (
                 <div key="name-grid" className="grid grid-cols-1 xs:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-sm font-bold text-[#373737] ml-1">
-                      Nombre <span className="text-red-500">*</span>
+                      {locale === 'en' ? 'First Name' : 'Nombre'} <span className="text-red-500">*</span>
                     </label>
                     <Input
                       {...firstNameReg}
                       onBlur={(e) => handleBlur(e, "firstName", firstNameReg.onBlur)}
-                      placeholder="Ej. Juan"
+                      placeholder={locale === 'en' ? "Ex. John" : "Ej. Juan"}
                       className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
                         errors.firstName ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"
                       }`}
@@ -287,12 +285,12 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-sm font-bold text-[#373737] ml-1">
-                      Apellidos <span className="text-red-500">*</span>
+                      {locale === 'en' ? 'Last Names' : 'Apellidos'} <span className="text-red-500">*</span>
                     </label>
                     <Input
                       {...lastNameReg}
                       onBlur={(e) => handleBlur(e, "lastName", lastNameReg.onBlur)}
-                      placeholder="Ej. Pérez López"
+                      placeholder={locale === 'en' ? "Ex. Smith Jones" : "Ej. Pérez López"}
                       className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
                         errors.lastName ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"
                       }`}
@@ -307,7 +305,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
               return (
                 <div key="grado" className="space-y-1.5">
                   <label className="text-sm font-bold text-[#373737] ml-1">
-                    Grado Académico <span className="text-red-500">*</span>
+                    {locale === 'en' ? 'Academic Degree' : 'Grado Académico'} <span className="text-red-500">*</span>
                   </label>
                   <select
                     {...register("degree")}
@@ -315,13 +313,13 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                         errors.degree ? "border-red-500 bg-red-50" : "border-gray-200"
                     }`}
                   >
-                    <option value="">Seleccione un grado</option>
-                    <option value="Licenciatura">Licenciatura</option>
-                    <option value="Maestría">Maestría</option>
-                    <option value="Doctorado">Doctorado</option>
-                    <option value="Especialidad">Especialidad</option>
-                    <option value="Estudiante">Estudiante</option>
-                    <option value="Profesor">Profesor</option>
+                    <option value="">{locale === 'en' ? 'Select a degree' : 'Seleccione un grado'}</option>
+                    <option value="Licenciatura">{locale === 'en' ? 'Bachelor\'s' : 'Licenciatura'}</option>
+                    <option value="Maestría">{locale === 'en' ? 'Master\'s' : 'Maestría'}</option>
+                    <option value="Doctorado">{locale === 'en' ? 'Doctorate' : 'Doctorado'}</option>
+                    <option value="Especialidad">{locale === 'en' ? 'Specialty' : 'Especialidad'}</option>
+                    <option value="Estudiante">{locale === 'en' ? 'Student' : 'Estudiante'}</option>
+                    <option value="Profesor">{locale === 'en' ? 'Professor' : 'Profesor'}</option>
                   </select>
                   {errors.degree && <p className="text-red-500 text-xs ml-1">{errors.degree.message}</p>}
                 </div>
@@ -332,7 +330,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
               return (
                 <div key="genero" className="space-y-1.5">
                   <label className="text-sm font-bold text-[#373737] ml-1">
-                    Género <span className="text-red-500">*</span>
+                    {locale === 'en' ? 'Gender' : 'Género'} <span className="text-red-500">*</span>
                   </label>
                   <select
                     {...register("gender")}
@@ -340,10 +338,10 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                         errors.gender ? "border-red-500 bg-red-50" : "border-gray-200"
                     }`}
                   >
-                    <option value="">Seleccione un género</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Femenino">Femenino</option>
-                    <option value="Neutro">Neutro</option>
+                    <option value="">{locale === 'en' ? 'Select a gender' : 'Seleccione un género'}</option>
+                    <option value="Masculino">{locale === 'en' ? 'Male' : 'Masculino'}</option>
+                    <option value="Femenino">{locale === 'en' ? 'Female' : 'Femenino'}</option>
+                    <option value="Neutro">{locale === 'en' ? 'Neutral' : 'Neutro'}</option>
                   </select>
                   {errors.gender && <p className="text-red-500 text-xs ml-1">{errors.gender.message}</p>}
                 </div>
@@ -371,7 +369,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
               return (
                 <div key="confirmEmail" className="space-y-1.5">
                   <label className="text-sm font-bold text-[#373737] ml-1">
-                    Confirmar Email <span className="text-red-500">*</span>
+                    {locale === 'en' ? 'Confirm Email' : 'Confirmar Email'} <span className="text-red-500">*</span>
                   </label>
                   <Input
                     {...register("confirmEmail")}
@@ -388,12 +386,12 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
               return (
                 <div key="telefono" className="space-y-1.5">
                   <label className="text-sm font-bold text-[#373737] ml-1">
-                    Teléfono <span className="text-red-500">*</span>
+                    {locale === 'en' ? 'Phone' : 'Teléfono'} <span className="text-red-500">*</span>
                   </label>
                   <Input
                     {...register("phone")}
                     type="tel"
-                    placeholder="Minimo 10 digitos. Sin lada."
+                    placeholder={locale === 'en' ? "Minimum 10 digits" : "Minimo 10 digitos. Sin lada."}
                     className={`rounded-xl border h-12 text-black ${errors.phone ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"}`}
                   />
                   {errors.phone && <p className="text-red-500 text-xs ml-1">{errors.phone.message}</p>}
@@ -408,7 +406,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                 <div key={input.id} className="space-y-1.5 animate-in fade-in slide-in-from-bottom-1 duration-300">
                   {input.type !== "checkbox" && (
                     <label className="text-sm font-bold text-[#373737] ml-1">
-                      {input.label} {input.required && <span className="text-red-500">*</span>}
+                      {locale === 'en' && input.label_en ? input.label_en : input.label} {input.required && <span className="text-red-500">*</span>}
                     </label>
                   )}
                   {input.type === "text" && (
@@ -455,7 +453,9 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                           }
                         }}
                       />
-                      <p className="url-error hidden text-red-500 text-xs ml-1 font-bold animate-in fade-in slide-in-from-top-1 duration-200">Esta no es una URL válida</p>
+                      <p className="url-error hidden text-red-500 text-xs ml-1 font-bold animate-in fade-in slide-in-from-top-1 duration-200">
+                        {locale === 'en' ? 'This is not a valid URL' : 'Esta no es una URL válida'}
+                      </p>
                     </div>
                   )}
                   {input.type === "dropdown" && (
@@ -464,7 +464,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                       className="h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-black focus:ring-0 transition-all text-black outline-none" 
                       required={input.required}
                     >
-                      <option value="">Seleccionar...</option>
+                      <option value="">{locale === 'en' ? 'Select...' : 'Seleccionar...'}</option>
                       {input.placeholder?.split(",").map((opt: string, i: number) => (
                         <option key={i} value={opt.trim()}>{opt.trim()}</option>
                       ))}
@@ -475,7 +475,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                       <div className="flex items-center gap-2 ml-1">
                         <input type="checkbox" name={input.id} className="h-5 w-5 rounded border-gray-300 text-black accent-black" required={input.required} />
                         <label className="text-sm font-bold text-[#373737]">
-                           {input.label} {input.required && <span className="text-red-500">*</span>}
+                           {locale === 'en' && input.label_en ? input.label_en : input.label} {input.required && <span className="text-red-500">*</span>}
                         </label>
                       </div>
                       {input.placeholder && (
@@ -518,10 +518,10 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
       >
         {isLoading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Registrando...
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {locale === 'en' ? 'Registering...' : 'Registrando...'}
           </>
         ) : (
-          "Generar ID Digital"
+          locale === 'en' ? 'Generate Digital ID' : 'Generar ID Digital'
         )}
       </Button>
     </form>

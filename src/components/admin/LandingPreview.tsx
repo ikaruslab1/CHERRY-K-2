@@ -9,6 +9,7 @@ interface LandingPreviewProps {
   conference: Conference;
   view: 'desktop' | 'tablet' | 'mobile';
   zoom?: number;
+  locale?: 'en' | 'es';
 }
 
 const VIEWPORT_DATA = {
@@ -17,7 +18,7 @@ const VIEWPORT_DATA = {
   mobile: { width: 375, height: 812, baseScale: 0.75, icon: Smartphone }
 };
 
-export function LandingPreview({ config, conference, view, zoom = 1 }: LandingPreviewProps) {
+export function LandingPreview({ config, conference, view, zoom = 1, locale }: LandingPreviewProps) {
   const { width, height, baseScale, icon: Icon } = VIEWPORT_DATA[view];
   const scale = baseScale * zoom;
 
@@ -46,7 +47,7 @@ export function LandingPreview({ config, conference, view, zoom = 1 }: LandingPr
       >
         {/* Content Area with LandingRenderer */}
         <div className="relative w-full">
-           <LandingRenderer config={config} conference={conference} />
+           <LandingRenderer config={config} conference={conference} forcedLocale={locale} />
 
            {/* THE FOLD INDICATOR (Límite de pantalla inicial) */}
            <div 

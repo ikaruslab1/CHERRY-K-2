@@ -1,28 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { loginWithId } from '@/actions/auth'; // Ensure this matches the export
+import { loginWithId } from '@/actions/auth'; 
 import { Loader2, ArrowRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { RecoverIdModal } from './RecoverIdModal';
 
-const formSchema = z.object({
-  shortId: z.string().min(1, 'El ID es obligatorio'),
+const createFormSchema = (locale: string) => z.object({
+  shortId: z.string().min(1, locale === 'en' ? 'ID is required' : 'El ID es obligatorio'),
 });
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = {
+  shortId: string;
+};
 
 interface LoginFormProps {
   conferenceId?: string;
   isEmbedded?: boolean;
+  locale?: string;
 }
 
-export function LoginForm({ conferenceId, isEmbedded }: LoginFormProps) {
+export function LoginForm({ conferenceId, isEmbedded, locale = 'es' }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRecoverModalOpen, setIsRecoverModalOpen] = useState(false);
@@ -34,8 +37,25 @@ export function LoginForm({ conferenceId, isEmbedded }: LoginFormProps) {
     setValue,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(createFormSchema(locale)),
   });
+
+  const searchParams = useSearchParams();
+
+  // Auto-fill and auto-submit if code is present in URL
+  useEffect(() => {
+    const code = searchParams.get('code');
+    if (code) {
+      console.log('[LoginForm] Auto-filling ID from URL:', code);
+      setValue('shortId', code.toUpperCase());
+      
+      // We wait a tiny bit to ensure the form is ready and value is set
+      const timer = setTimeout(() => {
+          handleSubmit(onSubmit)();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, setValue]);
 
   const onSubmit = async (data: FormData) => {
     setIsLoading(true);
@@ -59,10 +79,10 @@ export function LoginForm({ conferenceId, isEmbedded }: LoginFormProps) {
             window.location.href = '/profile'; 
         }
       } else {
-        setError(result.error || 'Error al iniciar sesión');
+        setError(result.error || (locale === 'en' ? 'Login failed' : 'Error al iniciar sesión'));
       }
     } catch (err) {
-      setError('Error de conexión');
+      setError(locale === 'en' ? 'Connection error' : 'Error de conexión');
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +100,7 @@ export function LoginForm({ conferenceId, isEmbedded }: LoginFormProps) {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 w-full text-left">
         <div className="space-y-2">
           <label className="text-sm font-bold text-[#373737] ml-1">
-            ID de Acceso
+            {locale === 'en' ? 'Access ID' : 'ID de Acceso'}
           </label>
           <Input
             {...register('shortId', {
@@ -112,11 +132,11 @@ export function LoginForm({ conferenceId, isEmbedded }: LoginFormProps) {
         >
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verificando...
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {locale === 'en' ? 'Verifying...' : 'Verificando...'}
             </>
           ) : (
             <>
-              Ingresar <ArrowRight className="ml-2 h-4 w-4" />
+              {locale === 'en' ? 'Login' : 'Ingresar'} <ArrowRight className="ml-2 h-4 w-4" />
             </>
           )}
         </Button>
@@ -127,7 +147,7 @@ export function LoginForm({ conferenceId, isEmbedded }: LoginFormProps) {
                 onClick={() => setIsRecoverModalOpen(true)}
                 className="text-sm text-gray-500 hover:text-blue-600 underline underline-offset-4 transition-colors"
             >
-                ¿Olvidaste tu ID? Recupéralo aquí
+                {locale === 'en' ? 'Forgot your ID? Recover it here' : '¿Olvidaste tu ID? Recupéralo aquí'}
             </button>
         </div>
       </form>
@@ -138,6 +158,7 @@ export function LoginForm({ conferenceId, isEmbedded }: LoginFormProps) {
             isOpen={isRecoverModalOpen}
             onClose={() => setIsRecoverModalOpen(false)}
             onLoginRaw={(id) => handleRecoverLogin(id)}
+            locale={locale}
         />
       )}
     </>

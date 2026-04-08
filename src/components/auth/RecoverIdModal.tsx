@@ -12,15 +12,10 @@ interface RecoverIdModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLoginRaw: (id: string, e?: React.FormEvent) => void; 
-  // onLoginRaw is a way to trigger the login logic from the parent without a form event if needed, 
-  // or we can just populate the parent state and submit. 
-  // Actually, easiest is to just pass a "onRecovered" which sets the ID in the parent form.
-  // But the prompt says "un boton extra para iniciar sesión de una vez".
-  // So I'll probably just emit the ID back or handle login here if I can import login logic.
-  // Since login logic is inside LoginForm, I should probably expose a function from LoginForm or just pass a callback.
+  locale?: string;
 }
 
-export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalProps) {
+export function RecoverIdModal({ isOpen, onClose, onLoginRaw, locale = 'es' }: RecoverIdModalProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -43,7 +38,7 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
     if (res.success) {
       setStep(2);
     } else {
-      setError(res.error || 'Error al validar correo');
+      setError(res.error || (locale === 'en' ? 'Error validating email' : 'Error al validar correo'));
     }
   };
 
@@ -54,7 +49,7 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
 
     // Basic length validation
     if (phone.length !== 10) {
-        setError('El número debe tener 10 dígitos');
+        setError(locale === 'en' ? 'The number must have 10 digits' : 'El número debe tener 10 dígitos');
         setIsLoading(false);
         return;
     }
@@ -66,7 +61,7 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
       setRecoveredId(res.short_id);
       setStep(3);
     } else {
-      setError(res.error || 'Error al validar datos');
+      setError(res.error || (locale === 'en' ? 'Error validating data' : 'Error al validar datos'));
     }
   };
 
@@ -77,24 +72,22 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
   };
 
   const handlePrint = () => {
-    // Open a simple window to print or just print the current view.
-    // Creating a printable window is cleaner.
     const printWindow = window.open('', '_blank', 'width=400,height=400');
     if (printWindow) {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Tu ID de Acceso</title>
+            <title>${locale === 'en' ? 'Your Access ID' : 'Tu ID de Acceso'}</title>
             <style>
               body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
               .id { font-size: 40px; font-weight: bold; margin: 20px 0; border: 2px dashed #000; padding: 10px 20px; }
             </style>
           </head>
           <body>
-            <h2>Recuperación de ID</h2>
-            <p>Tu código de acceso es:</p>
+            <h2>${locale === 'en' ? 'ID Recovery' : 'Recuperación de ID'}</h2>
+            <p>${locale === 'en' ? 'Your access code is:' : 'Tu código de acceso es:'}</p>
             <div class="id">${recoveredId}</div>
-            <p>Guárdalo en un lugar seguro.</p>
+            <p>${locale === 'en' ? 'Keep it in a safe place.' : 'Guárdalo en un lugar seguro.'}</p>
             <script>window.print();</script>
           </body>
         </html>
@@ -124,7 +117,9 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
                         <ArrowLeft size={20} />
                     </button>
                 )}
-                <h3 className="font-bold text-xl text-black">Recuperar ID</h3>
+                <h3 className="font-bold text-xl text-black">
+                  {locale === 'en' ? 'Recover ID' : 'Recuperar ID'}
+                </h3>
             </div>
             <button onClick={handleReset} className="text-gray-400 hover:text-black transition-colors">
                 <X size={20} />
@@ -136,10 +131,15 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
             {step === 1 && (
                 <form onSubmit={handleStep1} className="space-y-5">
                     <p className="text-gray-800 text-base font-medium leading-relaxed">
-                        Ingresa tu correo electrónico registrado para comenzar el proceso de recuperación.
+                        {locale === 'en' 
+                          ? 'Enter your registered email to start the recovery process.' 
+                          : 'Ingresa tu correo electrónico registrado para comenzar el proceso de recuperación.'
+                        }
                     </p>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-900 uppercase tracking-wide ml-1">Correo Electrónico</label>
+                        <label className="text-sm font-bold text-gray-900 uppercase tracking-wide ml-1">
+                          {locale === 'en' ? 'Email Address' : 'Correo Electrónico'}
+                        </label>
                         <Input 
                             type="email" 
                             value={email} 
@@ -152,7 +152,7 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
                     {error && <p className="text-red-600 text-sm font-bold animate-pulse">{error}</p>}
                     <Button type="submit" className="w-full mt-2 h-12 text-base font-bold bg-[#373737] hover:bg-black text-white rounded-xl" disabled={isLoading}>
                         {isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2"/> : null}
-                        Continuar <ChevronRight className="w-5 h-5 ml-1" />
+                        {locale === 'en' ? 'Continue' : 'Continuar'} <ChevronRight className="w-5 h-5 ml-1" />
                     </Button>
                 </form>
             )}
@@ -160,10 +160,15 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
             {step === 2 && (
                 <form onSubmit={handleStep2} className="space-y-5">
                     <p className="text-gray-800 text-base font-medium leading-relaxed">
-                        ¡Correo encontrado! Ahora, confirma tu identidad ingresando tu número de celular (10 dígitos).
+                        {locale === 'en'
+                          ? 'Email found! Now, confirm your identity by entering your cell phone number (10 digits).'
+                          : '¡Correo encontrado! Ahora, confirma tu identidad ingresando tu número de celular (10 dígitos).'
+                        }
                     </p>
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-900 uppercase tracking-wide ml-1">Celular</label>
+                        <label className="text-sm font-bold text-gray-900 uppercase tracking-wide ml-1">
+                          {locale === 'en' ? 'Phone Number' : 'Celular'}
+                        </label>
                         <Input 
                             type="tel" 
                             value={phone} 
@@ -171,7 +176,7 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
                                 const val = e.target.value.replace(/\D/g, '').slice(0, 10);
                                 setPhone(val);
                             }}
-                            placeholder="Ej. 5512345678"
+                            placeholder={locale === 'en' ? 'Ex. 5512345678' : 'Ej. 5512345678'}
                             className="bg-white border-gray-200 focus:border-black focus:ring-1 focus:ring-black transition-all text-center tracking-widest font-mono text-xl font-bold text-black h-12 rounded-xl placeholder:text-gray-500"
                             required
                         />
@@ -180,7 +185,7 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
                     {error && <p className="text-red-600 text-sm font-bold animate-pulse">{error}</p>}
                     <Button type="submit" className="w-full mt-2 h-12 text-base font-bold bg-[#373737] hover:bg-black text-white rounded-xl" disabled={isLoading || phone.length < 10}>
                          {isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2"/> : null}
-                        Validar Identidad
+                        {locale === 'en' ? 'Validate Identity' : 'Validar Identidad'}
                     </Button>
                 </form>
             )}
@@ -191,8 +196,12 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
                         <Check size={40} strokeWidth={3} />
                     </div>
                     <div className="space-y-2">
-                        <h4 className="text-2xl font-black text-black">¡Validación Exitosa!</h4>
-                        <p className="text-gray-700 font-medium">Hemos recuperado tu código de acceso.</p>
+                        <h4 className="text-2xl font-black text-black">
+                          {locale === 'en' ? 'Validation Successful!' : '¡Validación Exitosa!'}
+                        </h4>
+                        <p className="text-gray-700 font-medium">
+                          {locale === 'en' ? 'We have recovered your access code.' : 'Hemos recuperado tu código de acceso.'}
+                        </p>
                     </div>
 
                     <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 relative group">
@@ -204,11 +213,11 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
                     <div className="grid grid-cols-2 gap-3">
                         <Button variant="outline" type="button" onClick={copyToClipboard} className="w-full relative overflow-hidden h-11 border-gray-300 text-gray-700 font-bold hover:bg-gray-50 hover:text-black">
                             {copied ? <Check className="w-4 h-4 mr-2 text-green-600" /> : <Copy className="w-4 h-4 mr-2" />}
-                            {copied ? "Copiado" : "Copiar"}
+                            {copied ? (locale === 'en' ? "Copied" : "Copiado") : (locale === 'en' ? "Copy" : "Copiar")}
                         </Button>
                         <Button variant="outline" type="button" onClick={handlePrint} className="w-full h-11 border-gray-300 text-gray-700 font-bold hover:bg-gray-50 hover:text-black">
                             <Printer className="w-4 h-4 mr-2" />
-                            Imprimir
+                            {locale === 'en' ? 'Print' : 'Imprimir'}
                         </Button>
                     </div>
 
@@ -219,7 +228,7 @@ export function RecoverIdModal({ isOpen, onClose, onLoginRaw }: RecoverIdModalPr
                             onClick={() => onLoginRaw(recoveredId)}
                         >
                             <LogIn className="w-5 h-5 mr-2" />
-                            Iniciar Sesión Ahora
+                            {locale === 'en' ? 'Log In Now' : 'Iniciar Sesión Ahora'}
                         </Button>
                     </div>
                 </div>

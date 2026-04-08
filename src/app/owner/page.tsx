@@ -46,18 +46,26 @@ export default function OwnerDashboard() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newConf, setNewConf] = useState<{
     title: string;
+    title_en?: string;
     description: string;
     event_type: string;
     institution_name: string;
+    institution_name_en?: string;
     department_name: string;
+    department_name_en?: string;
+    enable_translation: boolean;
     accent_color: { type: 'solid' | 'gradient'; value: string };
     badge_icon: { type: 'preset' | 'custom' | 'default'; value: string };
   }>({ 
     title: '', 
+    title_en: '',
     description: '',
     event_type: 'Congreso',
     institution_name: '',
+    institution_name_en: '',
     department_name: '',
+    department_name_en: '',
+    enable_translation: false,
     accent_color: { type: 'solid', value: '#DBF227' },
     badge_icon: { type: 'default', value: '' }
   });
@@ -91,10 +99,14 @@ export default function OwnerDashboard() {
 
      const payload = {
          title: newConf.title,
+         title_en: newConf.title_en,
          description: newConf.description,
          event_type: newConf.event_type,
          institution_name: newConf.institution_name,
+         institution_name_en: newConf.institution_name_en,
          department_name: newConf.department_name,
+         department_name_en: newConf.department_name_en,
+         enable_translation: newConf.enable_translation,
          accent_color: newConf.accent_color,
          badge_icon: newConf.badge_icon
      };
@@ -144,10 +156,14 @@ export default function OwnerDashboard() {
      setEditingId(null);
      setNewConf({ 
         title: '', 
+        title_en: '',
         description: '',
         event_type: 'Congreso',
         institution_name: '',
+        institution_name_en: '',
         department_name: '',
+        department_name_en: '',
+        enable_translation: false,
         accent_color: { type: 'solid', value: '#DBF227' },
         badge_icon: { type: 'default', value: '' }
      });
@@ -156,10 +172,14 @@ export default function OwnerDashboard() {
   const startEdit = (conf: Conference) => {
      setNewConf({ 
         title: conf.title, 
+        title_en: conf.title_en || '',
         description: conf.description,
         event_type: conf.event_type || 'Congreso',
         institution_name: conf.institution_name || '',
+        institution_name_en: conf.institution_name_en || '',
         department_name: conf.department_name || '',
+        department_name_en: conf.department_name_en || '',
+        enable_translation: conf.enable_translation || false,
         accent_color: conf.accent_color || { type: 'solid', value: '#DBF227' },
         badge_icon: conf.badge_icon || { type: 'default', value: '' }
      });
@@ -314,9 +334,22 @@ export default function OwnerDashboard() {
                       </select>
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                        <span className="w-1 h-1 bg-[var(--color-acid)]" /> TITULAR_PROYECTO
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <span className="w-1 h-1 bg-[var(--color-acid)]" /> TITULAR_PROYECTO
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setNewConf({...newConf, enable_translation: !newConf.enable_translation})}
+                          className={`text-[9px] font-black uppercase tracking-[0.2em] px-2 py-1 rounded transition-colors ${
+                            newConf.enable_translation 
+                            ? 'bg-[var(--color-acid)] text-black' 
+                            : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
+                          }`}
+                        >
+                          {newConf.enable_translation ? 'IDIOMA INGLÉS ACTIVO' : 'ACTIVAR IDIOMA INGLÉS'}
+                        </button>
+                      </div>
                       <input 
                           type="text" 
                           placeholder="ASIGNAR NOMBRE..." 
@@ -324,6 +357,15 @@ export default function OwnerDashboard() {
                           value={newConf.title}
                           onChange={e => setNewConf({...newConf, title: e.target.value})}
                       />
+                      {newConf.enable_translation && (
+                        <input 
+                            type="text" 
+                            placeholder="ASIGNAR NOMBRE (INGLÉS)..." 
+                            className="w-full bg-[var(--color-acid)]/10 border-b-2 border-[var(--color-acid)]/50 p-3 text-black font-medium outline-none focus:border-[var(--color-acid)] placeholder:text-gray-400 transition-all text-lg mt-2"
+                            value={newConf.title_en || ''}
+                            onChange={e => setNewConf({...newConf, title_en: e.target.value})}
+                        />
+                      )}
                     </div>
                   </div>
 
@@ -339,6 +381,15 @@ export default function OwnerDashboard() {
                           value={newConf.institution_name}
                           onChange={e => setNewConf({...newConf, institution_name: e.target.value})}
                       />
+                      {newConf.enable_translation && (
+                        <input 
+                            type="text" 
+                            placeholder="INSTITUCIÓN / ORGANISMO (INGLÉS)..." 
+                            className="w-full bg-[var(--color-acid)]/10 border-b-2 border-[var(--color-acid)]/50 p-3 text-black font-medium outline-none focus:border-[var(--color-acid)] placeholder:text-gray-400 transition-all text-lg mt-2"
+                            value={newConf.institution_name_en || ''}
+                            onChange={e => setNewConf({...newConf, institution_name_en: e.target.value})}
+                        />
+                      )}
                     </div>
                     <div className="space-y-3">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
@@ -351,6 +402,15 @@ export default function OwnerDashboard() {
                           value={newConf.department_name}
                           onChange={e => setNewConf({...newConf, department_name: e.target.value})}
                       />
+                      {newConf.enable_translation && (
+                        <input 
+                            type="text" 
+                            placeholder="DIVISIÓN ACADÉMICA (INGLÉS)..." 
+                            className="w-full bg-[var(--color-acid)]/10 border-b-2 border-[var(--color-acid)]/50 p-3 text-black font-medium outline-none focus:border-[var(--color-acid)] placeholder:text-gray-400 transition-all text-lg mt-2"
+                            value={newConf.department_name_en || ''}
+                            onChange={e => setNewConf({...newConf, department_name_en: e.target.value})}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>

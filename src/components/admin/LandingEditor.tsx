@@ -18,6 +18,7 @@ export function LandingEditor() {
   const [saving, setSaving] = useState(false);
   const [activeView, setActiveView] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [zoom, setZoom] = useState(1);
+  const [previewLocale, setPreviewLocale] = useState<'es' | 'en'>('es');
 
   useEffect(() => {
     if (currentConference) {
@@ -143,15 +144,33 @@ export function LandingEditor() {
         onCopyLink={handleCopyLink}
         conferenceId={currentConference?.id}
         certificateConfig={currentConference?.certificate_config}
+        enableTranslation={currentConference?.enable_translation}
       />
 
       {/* Main Preview Area */}
       <div className="flex-1 flex flex-col min-w-0 bg-gray-100">
         {/* Preview Toolbar */}
         <div className="h-14 bg-white border-b border-gray-200 px-6 flex items-center justify-between shadow-sm z-10">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Palette className="w-5 h-5 text-gray-400" />
             <h3 className="font-bold text-sm text-gray-700">Vista Previa en Tiempo Real</h3>
+            
+            {currentConference?.enable_translation && (
+              <div className="ml-4 flex items-center bg-gray-100 p-0.5 rounded-lg border border-gray-200">
+                <button
+                  onClick={() => setPreviewLocale('es')}
+                  className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${previewLocale === 'es' ? 'bg-white text-gray-950 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  Español
+                </button>
+                <button
+                  onClick={() => setPreviewLocale('en')}
+                  className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${previewLocale === 'en' ? 'bg-white text-gray-950 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                  English
+                </button>
+              </div>
+            )}
           </div>
           
           <div className="flex items-center gap-4">
@@ -209,6 +228,7 @@ export function LandingEditor() {
             conference={currentConference!} 
             view={activeView} 
             zoom={zoom}
+            locale={previewLocale}
           />
         </div>
       </div>
