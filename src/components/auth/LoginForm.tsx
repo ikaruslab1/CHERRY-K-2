@@ -6,7 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { loginWithId } from '@/actions/auth'; 
+import { loginWithId, resolveEmailByShortId } from '@/actions/auth'; 
+import { supabase } from '@/lib/supabase';
 import { Loader2, ArrowRight } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { RecoverIdModal } from './RecoverIdModal';
@@ -62,24 +63,51 @@ export function LoginForm({ conferenceId, isEmbedded, locale = 'es' }: LoginForm
     setError(null);
 
     try {
-      const result = await loginWithId(data.shortId);
-      
-      if (result.success) {
-        // Si hay una conferencia específica en el contexto (ej. landing personalizada), 
-        // nos aseguramos de que sea la seleccionada al entrar al perfil.
-        if (conferenceId && typeof window !== 'undefined') {
-            localStorage.setItem('conference_id', conferenceId);
-            document.cookie = `conference_id=${conferenceId}; path=/; max-age=31536000; SameSite=Lax`;
+      if (isEmbedded) {
+        // --- FLUJO IFRAME: Login directo en el browser para persistir sesión correctamente ---
+        // 1. Resolver email por short_id via Server Action (sin crear sesión en servidor)
+        const resolved = await resolveEmailByShortId(data.shortId);
+        if (!resolved.success || !resolved.email) {
+          setError(resolved.error || (locale === 'en' ? 'ID not found' : 'ID no encontrado'));
+          return;
         }
 
-        // Redirigir usando window.top.location.href si es un iframe, o window.location.href normal.
-        if (isEmbedded && window.top) {
-            window.top.location.href = window.location.origin + '/profile';
+        // 2. Autenticar directamente desde el browser client (persiste sesión en cookies/localStorage)
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: resolved.email,
+          password: data.shortId,
+        });
+
+        if (signInError) {
+          setError(locale === 'en' ? 'Invalid credentials' : 'Credenciales inválidas');
+          return;
+        }
+
+        // 3. Guardar conferenceId si aplica
+        if (conferenceId) {
+          localStorage.setItem('conference_id', conferenceId);
+          document.cookie = `conference_id=${conferenceId}; path=/; max-age=31536000; SameSite=Lax`;
+        }
+
+        // 4. Navegar al perfil desde la ventana padre (sesión ya activa en el browser)
+        if (window.top) {
+          window.top.location.href = window.location.origin + '/profile';
         } else {
-            window.location.href = '/profile'; 
+          window.location.href = '/profile';
         }
       } else {
-        setError(result.error || (locale === 'en' ? 'Login failed' : 'Error al iniciar sesión'));
+        // --- FLUJO NORMAL: Server Action establece sesión vía cookies HTTP ---
+        const result = await loginWithId(data.shortId);
+        
+        if (result.success) {
+          if (conferenceId && typeof window !== 'undefined') {
+            localStorage.setItem('conference_id', conferenceId);
+            document.cookie = `conference_id=${conferenceId}; path=/; max-age=31536000; SameSite=Lax`;
+          }
+          window.location.href = '/profile';
+        } else {
+          setError(result.error || (locale === 'en' ? 'Login failed' : 'Error al iniciar sesión'));
+        }
       }
     } catch (err) {
       setError(locale === 'en' ? 'Connection error' : 'Error de conexión');

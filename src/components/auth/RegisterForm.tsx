@@ -7,6 +7,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { registerUser, loginWithId } from "@/actions/auth";
+import { supabase } from "@/lib/supabase";
 import { Loader2, CheckCircle } from "lucide-react";
 import * as Icons from 'lucide-react';
 import { useRouter } from "next/navigation";
@@ -75,6 +76,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
   const [successData, setSuccessData] = useState<{
     id: string;
     name: string;
+    email: string;
   } | null>(null);
 
   const {
@@ -146,23 +148,47 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
         setSuccessData({
           id: shortId,
           name: fullName,
+          email: formattedData.email,
         });
         
         // Auto-login after a short delay
         setIsAutoLoggingIn(true);
         setTimeout(async () => {
-          const loginResult = await loginWithId(shortId);
-          
-          if (loginResult.success) {
-            if (isEmbedded) {
-                // If embedded, stop spinning and show the button to continue manually
-                setIsAutoLoggingIn(false);
-            } else {
+          if (isEmbedded) {
+            // --- FLUJO IFRAME: Autenticar directamente desde el browser para persistir sesión ---
+            // El Server Action no puede establecer cookies en el contexto del iframe.
+            // Usamos el browser client que sí guarda los tokens en localStorage/cookies del browser.
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+              email: formattedData.email,
+              password: shortId,
+            });
+
+            if (!signInError) {
+              // Guardar conferenceId si aplica
+              if (conferenceId) {
+                localStorage.setItem('conference_id', conferenceId);
+                document.cookie = `conference_id=${conferenceId}; path=/; max-age=31536000; SameSite=Lax`;
+              }
+              // Navegar al perfil desde la ventana padre (sesión ya activa en el browser)
+              if (window.top) {
+                window.top.location.href = window.location.origin + '/profile';
+              } else {
                 window.location.href = '/profile';
+              }
+            } else {
+              setIsAutoLoggingIn(false);
+              console.error("Auto-login failed (embedded):", signInError);
             }
           } else {
-            setIsAutoLoggingIn(false);
-            console.error("Auto-login failed:", loginResult.error);
+            // --- FLUJO NORMAL: Server Action ---
+            const loginResult = await loginWithId(shortId);
+            
+            if (loginResult.success) {
+              window.location.href = '/profile';
+            } else {
+              setIsAutoLoggingIn(false);
+              console.error("Auto-login failed:", loginResult.error);
+            }
           }
         }, 2000); // 2 second delay to show success message
         
@@ -229,9 +255,18 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
             </p>
 
             <Button
-              onClick={() => {
-                  if (isEmbedded && window.top) {
-                      window.top.location.href = window.location.origin + '/profile';
+              onClick={async () => {
+                  if (isEmbedded) {
+                      // Intentar autenticar en el browser antes de navegar (por si el auto-login falló)
+                      await supabase.auth.signInWithPassword({
+                        email: successData?.email || '',
+                        password: successData?.id || '',
+                      }).catch(() => {}); // Ignorar error; redirigir de todos modos
+                      if (window.top) {
+                        window.top.location.href = window.location.origin + '/profile';
+                      } else {
+                        window.location.href = '/profile';
+                      }
                   } else {
                       window.location.reload();
                   }

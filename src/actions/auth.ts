@@ -136,6 +136,30 @@ export async function registerUser(data: {
   }
 }
 
+/**
+ * Resolves the email address associated with a short_id.
+ * Used by the client-side iframe auth flow to perform signInWithPassword
+ * directly from the browser (which correctly persists the session).
+ */
+export async function resolveEmailByShortId(shortId: string): Promise<{ success: boolean; email?: string; error?: string }> {
+  try {
+    const { data: profile, error } = await supabaseAdmin
+      .from('profiles')
+      .select('email')
+      .eq('short_id', shortId)
+      .single();
+
+    if (error || !profile) {
+      return { success: false, error: 'ID no encontrado' };
+    }
+
+    return { success: true, email: profile.email };
+  } catch (err: any) {
+    console.error('resolveEmailByShortId Exception:', err);
+    return { success: false, error: 'Error al procesar solicitud' };
+  }
+}
+
 export async function loginWithId(shortId: string) {
   try {
     // 1. Find email by short_id (using admin client since we don't have user session yet)
