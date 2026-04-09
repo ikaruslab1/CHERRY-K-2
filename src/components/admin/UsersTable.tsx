@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Loader2, Search, Edit2, X, UserCog, Check, QrCode, Download } from 'lucide-react';
+import { Loader2, Search, Edit2, X, UserCog, Check, QrCode, Download, Trash2, User, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { deleteUser, updateUserProfile } from '@/actions/users';
 import { QRCodeSVG } from 'qrcode.react';
 
 import { useDebounce } from '@/hooks/useDebounce';
@@ -29,6 +30,24 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const { currentConference } = useConference();
 
+  // Modal tabs
+  type ModalTab = 'data' | 'role' | 'delete';
+  const [activeTab, setActiveTab] = useState<ModalTab>('data');
+
+  // Edit data form state
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
+  const [editDegree, setEditDegree] = useState('');
+  const [editGender, setEditGender] = useState('');
+  const [savingData, setSavingData] = useState(false);
+  const [dataError, setDataError] = useState('');
+  const [dataSuccess, setDataSuccess] = useState(false);
+
+  // Delete confirmation state
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
@@ -36,11 +55,24 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
   const openModal = (user: UserProfile) => {
       setSelectedUser(user);
       setSelectedRole(user.role);
+      setActiveTab('data');
+      setEditFirstName(user.first_name);
+      setEditLastName(user.last_name);
+      setEditDegree(user.degree || '');
+      setEditGender(user.gender || '');
+      setDataError('');
+      setDataSuccess(false);
+      setDeleteConfirmName('');
+      setDeleteError('');
   };
 
   const closeModal = () => {
       setSelectedUser(null);
       setSelectedRole('');
+      setDataError('');
+      setDataSuccess(false);
+      setDeleteConfirmName('');
+      setDeleteError('');
   };
 
   const closeQrModal = () => {
@@ -94,6 +126,47 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
         console.error(error);
     }
     setUpdating(false);
+  };
+
+  const saveProfileData = async () => {
+    if (!selectedUser) return;
+    setSavingData(true);
+    setDataError('');
+    setDataSuccess(false);
+    const result = await updateUserProfile(selectedUser.id, {
+      first_name: editFirstName.trim(),
+      last_name: editLastName.trim(),
+      degree: editDegree.trim(),
+      gender: editGender,
+    });
+    if (result.success) {
+      setDataSuccess(true);
+      mutateUsers();
+      mutatePlatformUsers();
+    } else {
+      setDataError(result.error || 'Error al guardar');
+    }
+    setSavingData(false);
+  };
+
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
+    const fullName = `${selectedUser.first_name} ${selectedUser.last_name}`;
+    if (deleteConfirmName.trim().toLowerCase() !== fullName.trim().toLowerCase()) {
+      setDeleteError('El nombre no coincide. Por favor escríbelo exactamente.');
+      return;
+    }
+    setDeleting(true);
+    setDeleteError('');
+    const result = await deleteUser(selectedUser.id);
+    if (result.success) {
+      mutateUsers();
+      mutatePlatformUsers();
+      closeModal();
+    } else {
+      setDeleteError(result.error || 'Error al eliminar usuario');
+    }
+    setDeleting(false);
   };
 
   const getRoleBadgeClasses = (role: string) => {
@@ -328,88 +401,237 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
         )}
       </div>
 
-      {/* Role Edit Modal */}
+      {/* User Management Modal */}
       {selectedUser && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-                  <div className="p-6 border-b border-gray-100 flex justify-between items-start">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+                  {/* Header */}
+                  <div className="p-5 border-b border-gray-100 flex justify-between items-start">
                       <div>
                           <h3 className="text-lg font-bold text-[#373737] flex items-center gap-2">
                              <UserCog className="h-5 w-5 text-[#DBF227]" />
                              Gestionar Usuario
                           </h3>
-                          <p className="text-sm text-gray-500 mt-1">Modificar permisos y rol de acceso.</p>
+                          <p className="text-sm text-gray-500 mt-0.5">{selectedUser.first_name} {selectedUser.last_name}</p>
                       </div>
-                      <button onClick={closeModal} className="text-gray-400 hover:text-red-500 transition-colors">
+                      <button onClick={closeModal} className="text-gray-400 hover:text-red-500 transition-colors rounded-lg p-1 hover:bg-red-50">
                           <X className="h-5 w-5" />
                       </button>
                   </div>
-                  
-                  <div className="p-6 space-y-6">
-                      {/* User Summary Card */}
-                      <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex gap-4 items-center">
-                          <div className="h-12 w-12 rounded-full bg-[#DBF227]/20 flex items-center justify-center text-[#373737] font-bold text-lg">
-                              {selectedUser.first_name.charAt(0)}{selectedUser.last_name.charAt(0)}
-                          </div>
-                          <div>
-                              <h4 className="font-bold text-[#373737]">{selectedUser.first_name} {selectedUser.last_name}</h4>
-                              <div className="flex gap-2 text-xs text-gray-500 font-mono mt-0.5">
-                                  <span>{selectedUser.short_id}</span>
-                                  <span>•</span>
-                                  <span>{selectedUser.degree}</span>
+
+                  {/* Tab Nav */}
+                  <div className="flex border-b border-gray-100 bg-gray-50/60">
+                      <button
+                          onClick={() => setActiveTab('data')}
+                          className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold transition-all ${
+                              activeTab === 'data'
+                                  ? 'text-[#373737] border-b-2 border-[#DBF227] bg-white'
+                                  : 'text-gray-400 hover:text-gray-600 hover:bg-white/60'
+                          }`}
+                      >
+                          <User className="h-4 w-4" />
+                          Datos
+                      </button>
+                      <button
+                          onClick={() => setActiveTab('role')}
+                          className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold transition-all ${
+                              activeTab === 'role'
+                                  ? 'text-[#373737] border-b-2 border-[#DBF227] bg-white'
+                                  : 'text-gray-400 hover:text-gray-600 hover:bg-white/60'
+                          }`}
+                      >
+                          <ShieldCheck className="h-4 w-4" />
+                          Rol
+                      </button>
+                      {currentUserRole === 'owner' && (
+                          <button
+                              onClick={() => setActiveTab('delete')}
+                              className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold transition-all ${
+                                  activeTab === 'delete'
+                                      ? 'text-red-600 border-b-2 border-red-400 bg-white'
+                                      : 'text-gray-400 hover:text-red-500 hover:bg-white/60'
+                              }`}
+                          >
+                              <Trash2 className="h-4 w-4" />
+                              Eliminar
+                          </button>
+                      )}
+                  </div>
+
+                  {/* === TAB: DATOS === */}
+                  {activeTab === 'data' && (
+                      <div className="p-5 space-y-4">
+                          {/* User avatar summary */}
+                          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                              <div className="h-10 w-10 rounded-full bg-[#DBF227]/20 flex items-center justify-center text-[#373737] font-bold shrink-0">
+                                  {selectedUser.first_name.charAt(0)}{selectedUser.last_name.charAt(0)}
                               </div>
-                              {selectedUser.email && (
-                                  <div className="text-xs text-gray-400 mt-1">
-                                      {selectedUser.email}
-                                  </div>
-                              )}
+                              <div className="text-xs text-gray-500">
+                                  <span className="font-mono font-bold text-[#373737]">{selectedUser.short_id}</span>
+                                  {selectedUser.email && <span className="ml-2 text-gray-400">{selectedUser.email}</span>}
+                              </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Nombre</label>
+                                  <Input
+                                      value={editFirstName}
+                                      onChange={e => setEditFirstName(e.target.value)}
+                                      className="bg-white border-gray-200 text-[#373737]"
+                                      placeholder="Nombre"
+                                  />
+                              </div>
+                              <div className="space-y-1">
+                                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Apellido</label>
+                                  <Input
+                                      value={editLastName}
+                                      onChange={e => setEditLastName(e.target.value)}
+                                      className="bg-white border-gray-200 text-[#373737]"
+                                      placeholder="Apellido"
+                                  />
+                              </div>
+                          </div>
+
+                          <div className="space-y-1">
+                              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Grado / Cargo</label>
+                              <Input
+                                  value={editDegree}
+                                  onChange={e => setEditDegree(e.target.value)}
+                                  className="bg-white border-gray-200 text-[#373737]"
+                                  placeholder="Ej. Dr., Mtro., Lic."
+                              />
+                          </div>
+
+                          <div className="space-y-1">
+                              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Género</label>
+                              <div className="flex gap-2">
+                                  {['masculino', 'femenino', 'otro'].map(g => (
+                                      <button
+                                          key={g}
+                                          onClick={() => setEditGender(g)}
+                                          className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-all capitalize ${
+                                              editGender === g
+                                                  ? 'border-[#DBF227] bg-[#DBF227]/10 text-[#373737] ring-1 ring-[#DBF227]'
+                                                  : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                                          }`}
+                                      >
+                                          {g}
+                                      </button>
+                                  ))}
+                              </div>
+                          </div>
+
+                          {dataError && (
+                              <p className="text-sm text-red-500 bg-red-50 border border-red-100 p-2.5 rounded-lg">{dataError}</p>
+                          )}
+                          {dataSuccess && (
+                              <p className="text-sm text-green-600 bg-green-50 border border-green-100 p-2.5 rounded-lg flex items-center gap-2">
+                                  <Check className="h-4 w-4" /> Datos actualizados correctamente.
+                              </p>
+                          )}
+
+                          <div className="flex gap-3 pt-1">
+                              <Button variant="ghost" onClick={closeModal} className="flex-1 text-gray-500">Cancelar</Button>
+                              <Button onClick={saveProfileData} disabled={savingData} className="flex-1 bg-[#373737] text-white hover:bg-black">
+                                  {savingData ? <Loader2 className="animate-spin h-4 w-4" /> : 'Guardar Cambios'}
+                              </Button>
                           </div>
                       </div>
+                  )}
 
-                      {/* Role Selector */}
-                      <div className="space-y-3">
-                          <label className="text-sm font-bold text-[#373737]">Seleccionar nuevo rol:</label>
-                          <div className="grid grid-cols-1 gap-2">
-                                {rolesList.map((role) => (
-                                  <button
-                                      key={role}
-                                      onClick={() => setSelectedRole(role)}
-                                      className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
-                                          selectedRole === role 
-                                          ? 'border-[#DBF227] bg-[#DBF227]/10 ring-1 ring-[#DBF227]' 
-                                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                      }`}
-                                  >
-                                      <div className="flex flex-col items-start">
-                                          <span className="font-semibold text-sm capitalize text-[#373737]">
-                                              {role === 'user' ? 'Usuario' : (role === 'owner' ? 'Desarrollador' : (role === 'vip' ? 'VIP' : role))}
-                                          </span>
-                                          <span className="text-xs text-gray-400">
-                                              {role === 'user' && 'Acceso estándar a perfil y agenda.'}
-                                              {role === 'vip' && 'Igual a usuario, gafete distintivo.'}
-                                              {role === 'ponente' && 'Mismos permisos que usuario. Rol distintivo.'}
-                                              {role === 'staff' && 'Puede escanear QRs y ver agenda.'}
-                                              {role === 'admin' && 'Control total del sistema.'}
-                                              {role === 'owner' && 'Acceso absoluto + Gestión de conferencias.'}
-                                          </span>
-                                      </div>
-                                      {selectedRole === role && (
-                                          <div className="h-5 w-5 rounded-full bg-[#DBF227] flex items-center justify-center">
-                                              <Check className="h-3 w-3 text-[#373737]" />
+                  {/* === TAB: ROL === */}
+                  {activeTab === 'role' && (
+                      <div className="p-5 space-y-4">
+                          <div className="space-y-2">
+                              <label className="text-sm font-bold text-[#373737]">Seleccionar nuevo rol:</label>
+                              <div className="grid grid-cols-1 gap-2">
+                                  {rolesList.map((role) => (
+                                      <button
+                                          key={role}
+                                          onClick={() => setSelectedRole(role)}
+                                          className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                                              selectedRole === role
+                                                  ? 'border-[#DBF227] bg-[#DBF227]/10 ring-1 ring-[#DBF227]'
+                                                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                          }`}
+                                      >
+                                          <div className="flex flex-col items-start">
+                                              <span className="font-semibold text-sm capitalize text-[#373737]">
+                                                  {role === 'user' ? 'Usuario' : (role === 'owner' ? 'Desarrollador' : (role === 'vip' ? 'VIP' : role))}
+                                              </span>
+                                              <span className="text-xs text-gray-400">
+                                                  {role === 'user' && 'Acceso estándar a perfil y agenda.'}
+                                                  {role === 'vip' && 'Igual a usuario, gafete distintivo.'}
+                                                  {role === 'ponente' && 'Mismos permisos que usuario. Rol distintivo.'}
+                                                  {role === 'staff' && 'Puede escanear QRs y ver agenda.'}
+                                                  {role === 'admin' && 'Control total del sistema.'}
+                                                  {role === 'owner' && 'Acceso absoluto + Gestión de conferencias.'}
+                                              </span>
                                           </div>
-                                      )}
-                                  </button>
-                              ))}
+                                          {selectedRole === role && (
+                                              <div className="h-5 w-5 rounded-full bg-[#DBF227] flex items-center justify-center shrink-0">
+                                                  <Check className="h-3 w-3 text-[#373737]" />
+                                              </div>
+                                          )}
+                                      </button>
+                                  ))}
+                              </div>
+                          </div>
+
+                          <div className="flex gap-3 pt-1">
+                              <Button variant="ghost" onClick={closeModal} className="flex-1 text-gray-500">Cancelar</Button>
+                              <Button onClick={saveRole} disabled={updating} className="flex-1 bg-[#373737] text-white hover:bg-black">
+                                  {updating ? <Loader2 className="animate-spin h-4 w-4" /> : 'Confirmar Rol'}
+                              </Button>
                           </div>
                       </div>
-                  </div>
+                  )}
 
-                  <div className="p-6 pt-2 bg-gray-50/50 flex gap-3">
-                      <Button variant="ghost" onClick={closeModal} className="flex-1 text-gray-500">Cancelar</Button>
-                      <Button onClick={saveRole} disabled={updating} className="flex-1 bg-[#373737] text-white hover:bg-black">
-                          {updating ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : 'Confirmar Cambio'}
-                      </Button>
-                  </div>
+                  {/* === TAB: ELIMINAR === */}
+                  {activeTab === 'delete' && (
+                      <div className="p-5 space-y-4">
+                          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-xl">
+                              <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                              <div className="space-y-1">
+                                  <p className="text-sm font-bold text-red-600">Acción irreversible</p>
+                                  <p className="text-xs text-red-500">
+                                      Eliminar a <strong>{selectedUser.first_name} {selectedUser.last_name}</strong> borrará por completo su cuenta, perfil y acceso a la plataforma. Esta acción no se puede deshacer.
+                                  </p>
+                              </div>
+                          </div>
+
+                          <div className="space-y-2">
+                              <label className="text-sm font-bold text-[#373737]">
+                                  Escribe el nombre completo para confirmar:
+                              </label>
+                              <p className="text-xs text-gray-400 font-mono bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg">
+                                  {selectedUser.first_name} {selectedUser.last_name}
+                              </p>
+                              <Input
+                                  value={deleteConfirmName}
+                                  onChange={e => { setDeleteConfirmName(e.target.value); setDeleteError(''); }}
+                                  placeholder="Escribe el nombre exacto..."
+                                  className="bg-white border-gray-200 text-[#373737]"
+                              />
+                          </div>
+
+                          {deleteError && (
+                              <p className="text-sm text-red-500 bg-red-50 border border-red-100 p-2.5 rounded-lg">{deleteError}</p>
+                          )}
+
+                          <div className="flex gap-3 pt-1">
+                              <Button variant="ghost" onClick={closeModal} className="flex-1 text-gray-500">Cancelar</Button>
+                              <Button
+                                  onClick={handleDeleteUser}
+                                  disabled={deleting || deleteConfirmName.trim().toLowerCase() !== `${selectedUser.first_name} ${selectedUser.last_name}`.trim().toLowerCase()}
+                                  className="flex-1 bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                  {deleting ? <Loader2 className="animate-spin h-4 w-4" /> : <><Trash2 className="h-4 w-4 mr-2" />Eliminar Usuario</>}
+                              </Button>
+                          </div>
+                      </div>
+                  )}
               </div>
           </div>
       )}
