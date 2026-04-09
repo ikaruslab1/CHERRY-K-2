@@ -7,7 +7,6 @@ import * as z from "zod";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { registerUser, loginWithId } from "@/actions/auth";
-import { supabase } from "@/lib/supabase";
 import { Loader2, CheckCircle } from "lucide-react";
 import * as Icons from 'lucide-react';
 import { useRouter } from "next/navigation";
@@ -155,29 +154,14 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
         setIsAutoLoggingIn(true);
         setTimeout(async () => {
           if (isEmbedded) {
-            // --- FLUJO IFRAME: Autenticar directamente desde el browser para persistir sesión ---
-            // El Server Action no puede establecer cookies en el contexto del iframe.
-            // Usamos el browser client que sí guarda los tokens en localStorage/cookies del browser.
-            const { error: signInError } = await supabase.auth.signInWithPassword({
-              email: formattedData.email,
-              password: shortId,
-            });
-
-            if (!signInError) {
-              // Guardar conferenceId si aplica
-              if (conferenceId) {
-                localStorage.setItem('conference_id', conferenceId);
-                document.cookie = `conference_id=${conferenceId}; path=/; max-age=31536000; SameSite=Lax`;
-              }
-              // Navegar al perfil desde la ventana padre (sesión ya activa en el browser)
-              if (window.top) {
-                window.top.location.href = window.location.origin + '/profile';
-              } else {
-                window.location.href = '/profile';
-              }
+            // --- FLUJO IFRAME: Redirigir a /login?code=ID en la ventana padre ---
+            // La página de login ya tiene lógica para auto-rellenar y auto-submitear el código,
+            // estableciendo la sesión correctamente en el contexto del browser principal.
+            const loginUrl = `${window.location.origin}/login?code=${encodeURIComponent(shortId)}`;
+            if (window.top) {
+              window.top.location.href = loginUrl;
             } else {
-              setIsAutoLoggingIn(false);
-              console.error("Auto-login failed (embedded):", signInError);
+              window.location.href = loginUrl;
             }
           } else {
             // --- FLUJO NORMAL: Server Action ---
@@ -257,15 +241,12 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
             <Button
               onClick={async () => {
                   if (isEmbedded) {
-                      // Intentar autenticar en el browser antes de navegar (por si el auto-login falló)
-                      await supabase.auth.signInWithPassword({
-                        email: successData?.email || '',
-                        password: successData?.id || '',
-                      }).catch(() => {}); // Ignorar error; redirigir de todos modos
+                      // Redirigir a /login?code=ID en la ventana padre (mismo mecanismo que el auto-login)
+                      const loginUrl = `${window.location.origin}/login?code=${encodeURIComponent(successData?.id || '')}`;
                       if (window.top) {
-                        window.top.location.href = window.location.origin + '/profile';
+                        window.top.location.href = loginUrl;
                       } else {
-                        window.location.href = '/profile';
+                        window.location.href = loginUrl;
                       }
                   } else {
                       window.location.reload();

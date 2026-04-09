@@ -57,8 +57,9 @@ export default function LoginPage() {
   }, [searchParams]);
 
   useEffect(() => {
-    // Si el usuario viene específicamente a seleccionar un evento, no lo redirigimos
+    // Si el usuario viene a seleccionar un evento o a auto-hacer login con un código, no redirigimos
     if (searchParams.get('action') === 'select_event') return;
+    if (searchParams.get('code')) return;
 
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();

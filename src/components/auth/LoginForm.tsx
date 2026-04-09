@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { loginWithId, resolveEmailByShortId } from '@/actions/auth'; 
-import { supabase } from '@/lib/supabase';
+import { resolveEmailByShortId, loginWithId } from '@/actions/auth';
 import { Loader2, ArrowRight } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { RecoverIdModal } from './RecoverIdModal';
 
 const createFormSchema = (locale: string) => z.object({
@@ -30,7 +29,6 @@ export function LoginForm({ conferenceId, isEmbedded, locale = 'es' }: LoginForm
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRecoverModalOpen, setIsRecoverModalOpen] = useState(false);
-  const router = useRouter();
 
   const {
     register,
@@ -43,66 +41,64 @@ export function LoginForm({ conferenceId, isEmbedded, locale = 'es' }: LoginForm
 
   const searchParams = useSearchParams();
 
-  // Auto-fill and auto-submit if code is present in URL
-  useEffect(() => {
-    const code = searchParams.get('code');
-    if (code) {
-      console.log('[LoginForm] Auto-filling ID from URL:', code);
-      setValue('shortId', code.toUpperCase());
-      
-      // We wait a tiny bit to ensure the form is ready and value is set
-      const timer = setTimeout(() => {
-          handleSubmit(onSubmit)();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [searchParams, setValue]);
-
-  const onSubmit = async (data: FormData) => {
+  /**
+   * Handler principal del formulario.
+   *
+   * - MODO EMBEDDED (iframe): Valida que el ID exista, luego redirige la
+   *   ventana padre a /login?code=ID. La página de login (corriendo en el
+   *   contexto principal del browser) detecta el parámetro `code`, lo
+   *   auto-rellena y auto-submitea, estableciendo la sesión correctamente
+   *   mediante el Server Action con cookies HTTP.
+   *
+   * - MODO NORMAL: Llama directamente al Server Action loginWithId que
+   *   establece la sesión con cookies en el contexto actual.
+   */
+  const onSubmit = useCallback(async (data: FormData) => {
     setIsLoading(true);
     setError(null);
 
     try {
       if (isEmbedded) {
-        // --- FLUJO IFRAME: Login directo en el browser para persistir sesión correctamente ---
-        // 1. Resolver email por short_id via Server Action (sin crear sesión en servidor)
+        // 1. Verificar que el ID existe (sin crear sesión en el servidor)
         const resolved = await resolveEmailByShortId(data.shortId);
         if (!resolved.success || !resolved.email) {
           setError(resolved.error || (locale === 'en' ? 'ID not found' : 'ID no encontrado'));
+          setIsLoading(false);
           return;
         }
 
-        // 2. Autenticar directamente desde el browser client (persiste sesión en cookies/localStorage)
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: resolved.email,
-          password: data.shortId,
-        });
-
-        if (signInError) {
-          setError(locale === 'en' ? 'Invalid credentials' : 'Credenciales inválidas');
-          return;
-        }
-
-        // 3. Guardar conferenceId si aplica
+        // 2. Guardar conferenceId si aplica
         if (conferenceId) {
-          localStorage.setItem('conference_id', conferenceId);
-          document.cookie = `conference_id=${conferenceId}; path=/; max-age=31536000; SameSite=Lax`;
-        }
-
-        // 4. Navegar al perfil desde la ventana padre (sesión ya activa en el browser)
-        if (window.top) {
-          window.top.location.href = window.location.origin + '/profile';
-        } else {
-          window.location.href = '/profile';
-        }
-      } else {
-        // --- FLUJO NORMAL: Server Action establece sesión vía cookies HTTP ---
-        const result = await loginWithId(data.shortId);
-        
-        if (result.success) {
-          if (conferenceId && typeof window !== 'undefined') {
+          try {
             localStorage.setItem('conference_id', conferenceId);
             document.cookie = `conference_id=${conferenceId}; path=/; max-age=31536000; SameSite=Lax`;
+          } catch (_) {}
+        }
+
+        // 3. Redirigir la ventana padre a /login?code=ID
+        // La página de login detecta el código, lo auto-rellena y auto-submitea,
+        // estableciendo la sesión en el contexto correcto del browser principal.
+        const loginUrl = `${window.location.origin}/login?code=${encodeURIComponent(data.shortId)}`;
+        try {
+          if (window.top && window.top !== window) {
+            window.top.location.href = loginUrl;
+          } else {
+            window.location.href = loginUrl;
+          }
+        } catch (_) {
+          // Fallback si window.top es cross-origin y lo bloquea el browser
+          window.open(loginUrl, '_blank');
+        }
+      } else {
+        // Flujo normal: Server Action establece sesión con cookies HTTP
+        const result = await loginWithId(data.shortId);
+
+        if (result.success) {
+          if (conferenceId && typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('conference_id', conferenceId);
+              document.cookie = `conference_id=${conferenceId}; path=/; max-age=31536000; SameSite=Lax`;
+            } catch (_) {}
           }
           window.location.href = '/profile';
         } else {
@@ -114,14 +110,29 @@ export function LoginForm({ conferenceId, isEmbedded, locale = 'es' }: LoginForm
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isEmbedded, conferenceId, locale]);
 
-  const handleRecoverLogin = (id: string) => {
+  // Auto-fill y auto-submit cuando llega el parámetro ?code= en la URL
+  // (esto ocurre en la página /login normal, NO en el iframe)
+  useEffect(() => {
+    const code = searchParams.get('code');
+    if (code) {
+      console.log('[LoginForm] Auto-rellenando ID desde URL:', code);
+      setValue('shortId', code.toUpperCase());
+
+      // Pequeño delay para que el form registre el valor antes de submitear
+      const timer = setTimeout(() => {
+        handleSubmit(onSubmit)();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, setValue, handleSubmit, onSubmit]);
+
+  const handleRecoverLogin = useCallback((id: string) => {
     setValue('shortId', id);
     setIsRecoverModalOpen(false);
-    // Auto submit
     handleSubmit(onSubmit)();
-  };
+  }, [setValue, handleSubmit, onSubmit]);
 
   return (
     <>
@@ -170,7 +181,7 @@ export function LoginForm({ conferenceId, isEmbedded, locale = 'es' }: LoginForm
         </Button>
 
         <div className="text-center">
-            <button 
+            <button
                 type="button"
                 onClick={() => setIsRecoverModalOpen(true)}
                 className="text-sm text-gray-500 hover:text-blue-600 underline underline-offset-4 transition-colors"
@@ -182,7 +193,7 @@ export function LoginForm({ conferenceId, isEmbedded, locale = 'es' }: LoginForm
 
       {/* Recover Modal */}
       {isRecoverModalOpen && (
-        <RecoverIdModal 
+        <RecoverIdModal
             isOpen={isRecoverModalOpen}
             onClose={() => setIsRecoverModalOpen(false)}
             onLoginRaw={(id) => handleRecoverLogin(id)}
