@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
-import { Trash, Edit, Plus, Eye, Printer, X, Users, GraduationCap, ChevronDown, Save, Info } from 'lucide-react';
+import { Trash, Edit, Plus, Eye, Printer, X, Users, GraduationCap, ChevronDown, Save, Info, Copy } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { CertificateContent, Certificate } from '@/components/profile/CertificateContent';
 import { CertificatePreview } from '@/components/profile/CertificatePreview';
@@ -18,7 +18,8 @@ export function EventsManager() {
   const [events, setEvents] = useState<Event[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState<Event | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
   const [speakerSelection, setSpeakerSelection] = useState<{event: Event, speakers: any[]} | null>(null);
@@ -142,13 +143,12 @@ export function EventsManager() {
   };
 
   const onSubmit = async (data: any) => {
-    if (!currentConference) {
+     if (!currentConference) {
         alert("Error de sesión: No hay congreso seleccionado.");
         return;
     }
     try {
         console.log('EventsManager onSubmit data:', data);
-        console.log('Speaker IDs to save:', data.speakerIds);
         
         const eventData = {
             title: data.title,
@@ -173,10 +173,10 @@ export function EventsManager() {
 
         let eventId: string;
 
-        if (isEditing) {
-            const { error } = await supabase.from('events').update(eventData).eq('id', isEditing.id);
+        if (isEditMode && selectedEvent) {
+            const { error } = await supabase.from('events').update(eventData).eq('id', selectedEvent.id);
             if (error) throw error;
-            eventId = isEditing.id;
+            eventId = selectedEvent.id;
             
             // Delete old speakers
             const { error: deleteError } = await supabase.from('event_speakers').delete().eq('event_id', eventId);
@@ -204,7 +204,8 @@ export function EventsManager() {
             if (speakersError) throw speakersError;
         }
 
-        setIsEditing(null);
+        setSelectedEvent(null);
+        setIsEditMode(false);
         setIsCreating(false);
         fetchEvents();
     } catch (error: any) {
@@ -221,7 +222,14 @@ export function EventsManager() {
   };
 
   const startEdit = (event: Event) => {
-      setIsEditing(event);
+      setSelectedEvent(event);
+      setIsEditMode(true);
+      setIsCreating(true);
+  };
+
+  const startDuplicate = (event: Event) => {
+      setSelectedEvent(event);
+      setIsEditMode(false);
       setIsCreating(true);
   };
 
@@ -308,7 +316,7 @@ export function EventsManager() {
         </div>
         
         <div className="flex justify-between items-center">
-            <Button onClick={() => { setIsCreating(true); setIsEditing(null); }} className="bg-[#373737] text-white hover:bg-black">
+            <Button onClick={() => { setIsCreating(true); setSelectedEvent(null); setIsEditMode(false); }} className="bg-[#373737] text-white hover:bg-black">
                 <Plus className="mr-2 h-4 w-4" /> Nuevo Evento
             </Button>
         </div>
@@ -481,7 +489,7 @@ export function EventsManager() {
                 <div className="p-5 xs:p-6 md:p-8 pt-6 xs:pt-8 md:pt-10">
                     <div className="mb-6 xs:mb-8">
                         <h2 className="text-2xl xs:text-3xl font-bold text-[#373737] mt-1 xs:mt-2 leading-tight">
-                            {isEditing ? 'Editar Evento' : 'Crear Nuevo Evento'}
+                            {isEditMode ? 'Editar Evento' : selectedEvent ? 'Duplicar Evento' : 'Crear Nuevo Evento'}
                         </h2>
                         <p className="text-gray-500 mt-1 xs:mt-2 text-xs xs:text-sm">
                             Llena los detalles para agregar una actividad a la agenda oficial.
@@ -489,8 +497,8 @@ export function EventsManager() {
                     </div>
 
                     <EventForm
-                        initialData={isEditing}
-                        isEditing={!!isEditing}
+                        initialData={selectedEvent}
+                        isEditing={isEditMode}
                         users={users}
                         onSubmit={onSubmit}
                         onCancel={() => setIsCreating(false)}
@@ -541,7 +549,10 @@ export function EventsManager() {
                               <Eye className="h-4 w-4" />
                           </Button>
                       )}
-                      <Button size="sm" variant="ghost" onClick={() => startEdit(event)} className="text-gray-400 hover:text-[#373737] hover:bg-gray-100 rounded-xl">
+                      <Button size="sm" variant="ghost" onClick={() => startDuplicate(event)} className="text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl" title="Duplicar Evento">
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => startEdit(event)} className="text-gray-400 hover:text-[#373737] hover:bg-gray-100 rounded-xl" title="Editar Evento">
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button size="sm" variant="ghost" className="text-red-300 hover:text-red-500 hover:bg-red-50 rounded-xl" onClick={() => deleteEvent(event.id)}>
