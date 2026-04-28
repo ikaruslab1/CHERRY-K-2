@@ -11,6 +11,8 @@ function PreviewContent() {
   const { t } = useLanguage();
   const url = searchParams.get('url');
   const height = searchParams.get('height') || '800px';
+  const width = searchParams.get('width') || '100%';
+  const margin = searchParams.get('margin') || '0';
   const [showSpecialMsg, setShowSpecialMsg] = useState(false);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ function PreviewContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white p-4 md:p-8 flex items-center justify-center relative">
+    <div className="min-h-screen bg-white p-4 md:p-8 flex flex-col items-center justify-center relative">
       <AnimatePresence>
         {showSpecialMsg && (
           <motion.div 
@@ -56,7 +58,10 @@ function PreviewContent() {
         )}
       </AnimatePresence>
 
-      <div className="w-full max-w-6xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+      <div 
+        className="w-full max-w-6xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200 transition-all duration-300 mx-auto"
+        style={{ width: width === '100%' ? '100%' : width }}
+      >
         <div className="bg-gray-50 border-b border-gray-200 p-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
                 <div className="flex gap-1.5">
@@ -69,16 +74,18 @@ function PreviewContent() {
                 </span>
             </div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                Vista Previa del Iframe
+                Vista Previa del Iframe (Espaciado Interno)
             </span>
         </div>
-        <iframe 
-          src={url} 
-          width="100%" 
-          style={{ height, border: 'none' }}
-          allow="autoplay; fullscreen"
-          loading="lazy"
-        />
+        <div className="bg-gray-50">
+          <iframe 
+            src={url} 
+            width="100%" 
+            style={{ height, border: 'none', background: 'white' }}
+            allow="autoplay; fullscreen"
+            loading="lazy"
+          />
+        </div>
       </div>
     </div>
   );

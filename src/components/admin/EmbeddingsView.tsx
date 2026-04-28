@@ -8,6 +8,8 @@ export function EmbeddingsView() {
     const { currentConference } = useConference();
     const [copied, setCopied] = useState<string | null>(null);
     const [defaultAuthView, setDefaultAuthView] = useState<'login' | 'register'>('login');
+    const [loginIframeWidth, setLoginIframeWidth] = useState('100%');
+    const [loginIframeHeight, setLoginIframeHeight] = useState('');
 
     if (!currentConference) {
         return (
@@ -37,6 +39,8 @@ export function EmbeddingsView() {
             description: 'Muestra la agenda completa y horarios en otra página web sin requerir inicio de sesión.',
             url: `${baseUrl}/event/${currentConference.id}/agenda?hideHeader=true`, 
             height: '800px',
+            width: '100%',
+            margin: '0',
         },
         {
             id: 'login',
@@ -45,7 +49,9 @@ export function EmbeddingsView() {
                 ? 'Este formulario incluye los campos personalizados configurados en tu landing page activa.'
                 : 'Muestra únicamente los formularios de ingreso o registro para este evento. Al ingresar, redirigirá directamente a la plataforma.',
             url: authUrl.toString(),
-            height: isSpecialAuthCase ? '850px' : '650px',
+            height: loginIframeHeight || (isSpecialAuthCase ? '850px' : '650px'),
+            width: loginIframeWidth,
+            margin: '0',
         },
         {
             id: 'index',
@@ -53,11 +59,13 @@ export function EmbeddingsView() {
             description: 'Incrusta toda la landing page personalizada del evento.',
             url: `${baseUrl}/event/${currentConference.id}`,
             height: '800px',
+            width: '100%',
+            margin: '0',
         }
     ];
 
-    const generateIframe = (url: string, height: string) => {
-        return `<iframe \n  src="${url}" \n  width="100%" \n  height="${height}" \n  frameborder="0" \n  style="border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" \n  allow="autoplay; fullscreen" \n  loading="lazy"\n></iframe>`;
+    const generateIframe = (url: string, height: string, width: string = '100%', margin: string = '0') => {
+        return `<iframe \n  src="${url}" \n  width="${width}" \n  height="${height}" \n  frameborder="0" \n  style="border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" \n  allow="autoplay; fullscreen" \n  loading="lazy"\n></iframe>`;
     };
 
     const copyToClipboard = async (text: string, id: string) => {
@@ -104,9 +112,9 @@ export function EmbeddingsView() {
 
                     const urlEs = getUrlWithLang(embed.url, 'es');
                     const urlEn = getUrlWithLang(embed.url, 'en');
-                    const iframeCode = generateIframe(embed.url, embed.height);
-                    const iframeCodeEs = generateIframe(urlEs, embed.height);
-                    const iframeCodeEn = generateIframe(urlEn, embed.height);
+                    const iframeCode = generateIframe(embed.url, embed.height, embed.width, embed.margin);
+                    const iframeCodeEs = generateIframe(urlEs, embed.height, embed.width, embed.margin);
+                    const iframeCodeEn = generateIframe(urlEn, embed.height, embed.width, embed.margin);
                     const isCopied = copied === embed.id;
                     const isCopiedEs = copied === `${embed.id}_es`;
                     const isCopiedEn = copied === `${embed.id}_en`;
@@ -141,7 +149,7 @@ export function EmbeddingsView() {
                                         variant="outline" 
                                         size="sm" 
                                         className="gap-2 text-xs h-8 bg-white text-black border-gray-200 hover:bg-gray-100"
-                                        onClick={() => window.open(`${baseUrl}/admin/preview?url=${encodeURIComponent(embed.url)}&height=${embed.height}`, '_blank')}
+                                        onClick={() => window.open(`${baseUrl}/admin/preview?url=${encodeURIComponent(embed.url)}&height=${embed.height}&width=${embed.width}&margin=${encodeURIComponent(embed.margin)}`, '_blank')}
                                     >
                                         <ExternalLink className="w-3 h-3" />
                                         <span className="hidden sm:inline">Vista Previa</span>
@@ -150,24 +158,57 @@ export function EmbeddingsView() {
                             </div>
                             <div className="p-5 space-y-3">
                                 {isAuth && (
-                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 mb-2">
-                                        <div className="flex items-center gap-2 text-xs font-bold text-gray-600 uppercase tracking-tight">
-                                            <Icons.Settings2 className="w-4 h-4 text-gray-400" />
-                                            Vista por defecto:
+                                    <div className="flex flex-col space-y-4 p-4 bg-gray-50 rounded-xl border border-gray-100 mb-2">
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-gray-600 uppercase tracking-tight">
+                                                <Icons.Settings2 className="w-4 h-4 text-gray-400" />
+                                                Vista por defecto:
+                                            </div>
+                                            <div className="flex bg-white p-1 rounded-lg border border-gray-200 shadow-sm w-full sm:w-auto">
+                                                <button 
+                                                    onClick={() => setDefaultAuthView('login')}
+                                                    className={`flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold rounded-md transition-all ${defaultAuthView === 'login' ? 'bg-[#373737] text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
+                                                >
+                                                    Iniciar Sesión
+                                                </button>
+                                                <button 
+                                                    onClick={() => setDefaultAuthView('register')}
+                                                    className={`flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold rounded-md transition-all ${defaultAuthView === 'register' ? 'bg-[#373737] text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
+                                                >
+                                                    Registro
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div className="flex bg-white p-1 rounded-lg border border-gray-200 shadow-sm w-full sm:w-auto">
-                                            <button 
-                                                onClick={() => setDefaultAuthView('login')}
-                                                className={`flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold rounded-md transition-all ${defaultAuthView === 'login' ? 'bg-[#373737] text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
-                                            >
-                                                Iniciar Sesión
-                                            </button>
-                                            <button 
-                                                onClick={() => setDefaultAuthView('register')}
-                                                className={`flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold rounded-md transition-all ${defaultAuthView === 'register' ? 'bg-[#373737] text-white shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
-                                            >
-                                                Registro
-                                            </button>
+                                        
+                                        <div className="h-px bg-gray-200 w-full" />
+                                        
+                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-gray-600 uppercase tracking-tight">
+                                                <Icons.Maximize className="w-4 h-4 text-gray-400" />
+                                                Dimensiones del Iframe:
+                                            </div>
+                                            <div className="flex gap-2 w-full sm:w-auto">
+                                                <div className="flex items-center bg-white border border-gray-200 rounded-lg px-2 overflow-hidden shadow-sm flex-1 sm:flex-none">
+                                                    <span className="text-xs text-gray-400 px-2">Ancho:</span>
+                                                    <input 
+                                                        type="text" 
+                                                        value={loginIframeWidth}
+                                                        onChange={(e) => setLoginIframeWidth(e.target.value)}
+                                                        className="w-20 px-2 py-1.5 text-xs font-bold text-[#373737] focus:outline-none"
+                                                        placeholder="100%"
+                                                    />
+                                                </div>
+                                                <div className="flex items-center bg-white border border-gray-200 rounded-lg px-2 overflow-hidden shadow-sm flex-1 sm:flex-none">
+                                                    <span className="text-xs text-gray-400 px-2">Alto:</span>
+                                                    <input 
+                                                        type="text" 
+                                                        value={loginIframeHeight}
+                                                        onChange={(e) => setLoginIframeHeight(e.target.value)}
+                                                        className="w-20 px-2 py-1.5 text-xs font-bold text-[#373737] focus:outline-none"
+                                                        placeholder={isSpecialAuthCase ? '850px' : '650px'}
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -197,7 +238,7 @@ export function EmbeddingsView() {
                                                         variant="ghost" 
                                                         size="sm" 
                                                         className="text-[10px] h-6 px-2 gap-1 text-gray-500 hover:text-black hover:bg-gray-200"
-                                                        onClick={() => window.open(`${baseUrl}/admin/preview?url=${encodeURIComponent(urlEs)}&height=${embed.height}`, '_blank')}
+                                                        onClick={() => window.open(`${baseUrl}/admin/preview?url=${encodeURIComponent(urlEs)}&height=${embed.height}&width=${embed.width}&margin=${encodeURIComponent(embed.margin)}`, '_blank')}
                                                     >
                                                         <ExternalLink className="w-3 h-3" />
                                                         Vista Previa
@@ -237,7 +278,7 @@ export function EmbeddingsView() {
                                                         variant="ghost" 
                                                         size="sm" 
                                                         className="text-[10px] h-6 px-2 gap-1 text-gray-500 hover:text-black hover:bg-gray-200"
-                                                        onClick={() => window.open(`${baseUrl}/admin/preview?url=${encodeURIComponent(urlEn)}&height=${embed.height}`, '_blank')}
+                                                        onClick={() => window.open(`${baseUrl}/admin/preview?url=${encodeURIComponent(urlEn)}&height=${embed.height}&width=${embed.width}&margin=${encodeURIComponent(embed.margin)}`, '_blank')}
                                                     >
                                                         <ExternalLink className="w-3 h-3" />
                                                         Vista Previa

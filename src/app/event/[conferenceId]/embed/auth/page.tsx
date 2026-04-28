@@ -14,11 +14,17 @@ export default function EmbedAuthPage({ params }: { params: Promise<{ conference
   const [view, setView] = useState<'login' | 'register'>('login');
   const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [extraPadding, setExtraPadding] = useState('0px');
 
   useEffect(() => {
     // Definir vista por defecto si viene en la URL
     const searchParams = new URLSearchParams(window.location.search);
     const viewParam = searchParams.get('view');
+    const marginParam = searchParams.get('margin');
+    
+    // Comportamiento por defecto: margen amplio abajo para forzar scroll en modales
+    setExtraPadding(marginParam ? marginParam.split(' ')[0] : '200px');
+
     if (viewParam === 'register' || viewParam === 'login') {
       setView(viewParam as 'login' | 'register');
     }
@@ -51,7 +57,13 @@ export default function EmbedAuthPage({ params }: { params: Promise<{ conference
   }, [conferenceId]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div 
+      className={`min-h-screen bg-white flex flex-col items-center p-4 relative overflow-x-hidden overflow-y-auto justify-start`}
+      style={{ 
+        paddingTop: extraPadding !== '0px' ? '40px' : '0px', 
+        paddingBottom: extraPadding 
+      }}
+    >
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-20" />
       
