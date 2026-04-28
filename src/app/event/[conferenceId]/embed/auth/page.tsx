@@ -72,6 +72,17 @@ export default function EmbedAuthPage({ params }: { params: Promise<{ conference
       <div className="w-full max-w-[420px] space-y-6 relative z-10">
         {/* Toggle Header */}
         <div className="flex flex-col space-y-1.5 text-center">
+            {view === 'register' && (
+                <p className="text-sm text-gray-500 mb-2">
+                    {t('auth.already_have_id')}{' '}
+                    <button 
+                        onClick={() => setView('login')}
+                        className="font-bold text-blue-600 hover:underline transition-all"
+                    >
+                        {t('auth.log_in')}
+                    </button>
+                </p>
+            )}
             <h2 className="text-2xl font-bold tracking-tight text-gray-900">
                 {view === 'login' ? t('auth.welcome_back') : t('auth.create_account')}
             </h2>
