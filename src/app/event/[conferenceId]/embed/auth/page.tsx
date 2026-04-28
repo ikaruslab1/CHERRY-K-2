@@ -23,7 +23,7 @@ export default function EmbedAuthPage({ params }: { params: Promise<{ conference
     const marginParam = searchParams.get('margin');
     
     // Comportamiento por defecto: margen amplio abajo para forzar scroll en modales
-    setExtraPadding(marginParam ? marginParam.split(' ')[0] : '200px');
+    setExtraPadding(marginParam ? marginParam.split(' ')[0] : '400px');
 
     if (viewParam === 'register' || viewParam === 'login') {
       setView(viewParam as 'login' | 'register');
