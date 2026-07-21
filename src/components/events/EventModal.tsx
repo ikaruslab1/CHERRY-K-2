@@ -22,6 +22,8 @@ import { cn } from '@/lib/utils';
 import { formatMexicoTime, formatMexicoDate } from '@/lib/dateUtils';
 import { useLanguage } from '@/context/LanguageContext';
 import { getTranslatedField } from '@/utils/i18nHelpers';
+import { supabase } from '@/lib/supabase';
+import { submitRating } from '@/actions/ratings';
 
 interface EventModalProps {
   event: Event | null;
@@ -135,6 +137,52 @@ export function EventModal({
   const locale = language === 'es' ? 'es-MX' : 'en-US';
   const [zoomedImageSrc, setZoomedImageSrc] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
+
+  // Rating and Feedback States
+  const [userRating, setUserRating] = useState<number>(0);
+  const [userComment, setUserComment] = useState<string>('');
+  const [ratingLoaded, setRatingLoaded] = useState<boolean>(false);
+  const [submittingRating, setSubmittingRating] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadRating() {
+      if (!event || !isOpen || !isAttended) {
+        setRatingLoaded(false);
+        setUserRating(0);
+        setUserComment('');
+        return;
+      }
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('event_ratings')
+        .select('rating, comment')
+        .eq('event_id', event.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (data) {
+        setUserRating(data.rating);
+        setUserComment(data.comment || '');
+      }
+      setRatingLoaded(true);
+    }
+    loadRating();
+  }, [event?.id, isOpen, isAttended]);
+
+  const handleSaveRating = async () => {
+    if (userRating < 1 || !event) return;
+    setSubmittingRating(true);
+    setSubmitError(null);
+    const res = await submitRating(event.id, userRating, userComment);
+    setSubmittingRating(false);
+    if (!res.success) {
+      setSubmitError(res.error || 'Ocurrió un error al guardar la calificación');
+    }
+  };
 
   useEffect(() => {
     const handleDescriptionClick = (e: MouseEvent) => {
@@ -299,6 +347,74 @@ export function EventModal({
                     dangerouslySetInnerHTML={{ __html: getTranslatedField(event, 'description', language) }}
                 />
             </div>
+          )}
+
+          {/* Calificación / Retroalimentación */}
+          {isAttended && ratingLoaded && (
+             <div className="p-6 bg-gray-50 border border-gray-100 rounded-2xl space-y-4 animate-in fade-in duration-300">
+                 <div className="flex items-center justify-between">
+                     <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                         <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                         Califica esta actividad
+                     </h4>
+                     {userRating > 0 && (
+                         <span className="text-[10px] bg-green-50 text-green-700 px-2.5 py-0.5 rounded-full uppercase tracking-wider font-bold">
+                             Guardado
+                         </span>
+                     )}
+                 </div>
+                 
+                 <p className="text-xs text-gray-500">
+                     Tu opinión nos ayuda a mejorar los próximos eventos. La calificación es anónima.
+                 </p>
+
+                 {/* Stars Selector */}
+                 <div className="flex gap-2 justify-center py-2">
+                     {[1, 2, 3, 4, 5].map((star) => (
+                         <button
+                             key={star}
+                             type="button"
+                             onClick={() => setUserRating(star)}
+                             className="transition-transform active:scale-90 hover:scale-110 focus:outline-none cursor-pointer"
+                         >
+                             <Star 
+                                 className={cn(
+                                     "w-8 h-8",
+                                     star <= userRating 
+                                         ? "text-amber-400 fill-amber-400" 
+                                         : "text-gray-300"
+                                 )} 
+                             />
+                         </button>
+                     ))}
+                 </div>
+
+                 {/* Comment Box */}
+                 {userRating > 0 && (
+                     <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                         <textarea
+                             value={userComment}
+                             onChange={(e) => setUserComment(e.target.value)}
+                             placeholder="Escribe un comentario breve sobre la ponencia (opcional)..."
+                             rows={2}
+                             className="w-full text-sm p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#DBF227] transition-all resize-none text-black"
+                             maxLength={500}
+                         />
+                         
+                         {submitError && (
+                             <p className="text-xs text-red-500 font-medium">{submitError}</p>
+                         )}
+
+                         <Button
+                             onClick={handleSaveRating}
+                             disabled={submittingRating}
+                             className="w-full bg-black text-white hover:bg-[var(--color-acid)] hover:text-black font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider cursor-pointer"
+                         >
+                             {submittingRating ? 'Guardando...' : 'Enviar Retroalimentación'}
+                         </Button>
+                     </div>
+                 )}
+             </div>
           )}
 
           {/* Custom Links */}

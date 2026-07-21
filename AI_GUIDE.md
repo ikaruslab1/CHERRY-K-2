@@ -22,7 +22,8 @@ El proyecto está construido con **Next.js 16 (App Router)**, **React 19**, **Ta
 - **[src/app/](file:///d:/Proyectos/cherry-k-2/src/app/)**: Enrutamiento de Next.js.
   - `/` -> Redirecciona dinámicamente según sesión y cookies.
   - `/login` -> Portal bilingüe de acceso y registro.
-  - `/profile` -> Panel principal adaptativo (usuario, ponente, staff y admin).
+  - `/profile` -> Panel principal del Asistente (gafete, agenda, constancias y FAQ - estilo "Acid Editorial" en modo oscuro y BottomNav para móvil).
+  - `/admin` -> Portal de Control Administrativo (Dashboard de métricas, Gestor de eventos, Control de usuarios, Diseñador de constancias, Editor de landing, Embeddings y Lector QR). Administrado mediante subrutas `/admin/events`, `/admin/users`, `/admin/certificates`, `/admin/landing`, `/admin/embeddings` y `/admin/scanner`.
   - `/event/[conferenceId]` -> Landing page personalizada e indexable de cada evento.
 - **[src/components/](file:///d:/Proyectos/cherry-k-2/src/components/)**: Componentes UI y controladores modulares.
 - **[src/context/](file:///d:/Proyectos/cherry-k-2/src/context/)**: Contextos globales de React:
@@ -92,3 +93,5 @@ El diseño sigue una estrategia editorial neo-grotesca inspirada en el brutalism
 2. **Evitar Placeholders:** Todos los componentes visuales deben presentar datos estructurados o mockups con buen aspecto estético. No usar textos temporales de relleno.
 3. **Lazy-Loading:** Componentes administrativos de control pesados (ej: `UsersTable`, `EventsManager`, `MetricsView`) consumidos solo por Staff/Admin deben cargarse dinámicamente (`next/dynamic` con `ssr: false`) en vistas compartidas como `/profile`.
 4. **Modificaciones de DB:** Cualquier alteración del esquema SQL debe ser creada en un nuevo script dentro de [supabase/migrations/](file:///d:/Proyectos/cherry-k-2/supabase/migrations/) respetando el orden cronológico del prefijo numérico.
+5. **Compilación / Servidor de Desarrollo:** En entornos locales, si Turbopack genera errores de detección de la raíz del proyecto (`Turbopack Error: Next.js package not found`), ejecutar el servidor de desarrollo forzando el empaquetador Webpack mediante `next dev --webpack` (o corriendo `pnpm dev` que ya tiene el flag configurado por defecto).
+

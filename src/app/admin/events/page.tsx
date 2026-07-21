@@ -9,16 +9,16 @@ const LoadingSpinner = () => (
     </div>
 );
 
-const MetricsView = dynamic(() => import('@/components/admin/metrics/MetricsView').then(mod => mod.MetricsView), {
+const EventsManager = dynamic(() => import('@/components/admin/EventsManager').then(mod => mod.EventsManager), {
     loading: () => <LoadingSpinner />,
     ssr: false
 });
 
-export default function MetricsPage() {
+export default function EventsPage() {
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-black text-black uppercase tracking-tight">Métricas del Congreso</h1>
-            <MetricsView />
+            <h1 className="text-3xl font-black text-black uppercase tracking-tight">Gestión de Eventos</h1>
+            <EventsManager />
         </div>
     );
 }

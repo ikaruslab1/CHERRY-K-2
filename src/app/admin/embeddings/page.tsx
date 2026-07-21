@@ -9,16 +9,15 @@ const LoadingSpinner = () => (
     </div>
 );
 
-const MetricsView = dynamic(() => import('@/components/admin/metrics/MetricsView').then(mod => mod.MetricsView), {
+const EmbeddingsView = dynamic(() => import('@/components/admin/EmbeddingsView').then(mod => mod.EmbeddingsView), {
     loading: () => <LoadingSpinner />,
     ssr: false
 });
 
-export default function MetricsPage() {
+export default function EmbeddingsPage() {
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-black text-black uppercase tracking-tight">Métricas del Congreso</h1>
-            <MetricsView />
+            <EmbeddingsView />
         </div>
     );
 }

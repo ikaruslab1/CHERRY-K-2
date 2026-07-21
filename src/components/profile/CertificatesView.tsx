@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useConference } from '@/context/ConferenceContext';
 import { CertificateList } from './certificates/CertificateList';
 import { CertificateModal } from './certificates/CertificateModal';
 import { useCertificates } from '@/hooks/useCertificates';
 import { Certificate } from '@/types/certificates';
-import { Loader2, Award, CheckCircle2, Mail, Info } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { Loader2, Award, CheckCircle2, Mail, Info, CalendarCheck } from 'lucide-react';
 
 export function CertificatesView() {
   const { currentConference } = useConference();
@@ -21,9 +22,44 @@ export function CertificatesView() {
   } = useCertificates(currentConference?.id);
   
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
+  const [attendanceLogs, setAttendanceLogs] = useState<{ id: string; scanned_at: string; event_title: string }[]>([]);
+  const [showLogs, setShowLogs] = useState(false);
 
   // Check if the admin wants to deliver the cert directly or via email
   const deliverGlobalCert = currentConference?.deliver_global_certificate ?? false;
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      if (!currentConference) return;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from('attendance')
+        .select(`
+          id,
+          scanned_at,
+          events!inner (
+            id,
+            title,
+            conference_id
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('events.conference_id', currentConference.id)
+        .not('scanned_at', 'is', null);
+      
+      if (data) {
+        setAttendanceLogs(data.map((d: any) => ({
+          id: d.id,
+          scanned_at: d.scanned_at,
+          event_title: d.events.title
+        })));
+      }
+    };
+    fetchLogs();
+  }, [currentConference]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-MX', {
@@ -89,6 +125,34 @@ export function CertificatesView() {
                  }}
                />
              </div>
+           </div>
+
+           {/* Detailed logs checklist */}
+           <div className="pt-2 border-t border-gray-100/10">
+             <button 
+               onClick={() => setShowLogs(!showLogs)}
+               className="text-xs font-bold text-[var(--color-acid)] hover:underline flex items-center gap-1.5 focus:outline-none"
+             >
+               <CalendarCheck className="w-3.5 h-3.5" />
+               {showLogs ? 'Ocultar desglose de asistencias' : 'Ver desglose de asistencias'}
+             </button>
+             
+             {showLogs && (
+               <div className="mt-3 space-y-2 max-h-48 overflow-y-auto pr-1 animate-in slide-in-from-top-1 duration-200">
+                 {attendanceLogs.length > 0 ? (
+                   attendanceLogs.map((log) => (
+                     <div key={log.id} className="flex justify-between items-center text-xs py-2 px-3 bg-white/5 rounded-xl border border-white/5">
+                       <span className="text-gray-200 font-medium truncate max-w-[200px] sm:max-w-xs">{log.event_title}</span>
+                       <span className="text-gray-400 font-mono text-[10px] shrink-0">
+                         {new Date(log.scanned_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+                       </span>
+                     </div>
+                   ))
+                 ) : (
+                   <p className="text-[11px] text-gray-400 italic px-2">No se han registrado asistencias aún.</p>
+                 )}
+               </div>
+             )}
            </div>
 
            {/* Earned Certificate or Email Banner */}

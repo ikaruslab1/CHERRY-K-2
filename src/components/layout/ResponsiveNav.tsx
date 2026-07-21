@@ -27,9 +27,11 @@ interface ResponsiveNavProps {
     handleSignOut: () => void;
     onFAQClick?: () => void;
     isFAQActive?: boolean;
+    dark?: boolean;
+    hideMobileToggle?: boolean;
 }
 
-export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, onFAQClick, isFAQActive }: ResponsiveNavProps) {
+export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, onFAQClick, isFAQActive, dark = false, hideMobileToggle = false }: ResponsiveNavProps) {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const { isDesktopCollapsed, setIsDesktopCollapsed } = useSidebar();
     const { currentConference } = useConference();
@@ -39,14 +41,18 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
     // Filter visible items
     const visibleItems = items.filter(item => item.show !== false);
 
-    // Styles - Swiss minimalist (White, Gray, Acid Green Accent)
-    const sidebarBg = "bg-white border-r border-gray-100";
+    // Styles - Swiss minimalist (White, Gray, Acid Green Accent) vs Acid Editorial Dark
+    const sidebarBg = dark 
+        ? "bg-[#0a0a0a] border-r border-white/5" 
+        : "bg-white border-r border-gray-100";
     
     // Active Item: Acid Green Background, Black Text (Brand Identity) - Flat, no shadow
     const itemActive = "bg-[var(--color-acid)] text-black font-bold";
     
     // Inactive Item: Gray Text, Hover to Light Gray with Black Text
-    const itemInactive = "text-gray-500 hover:bg-gray-50 hover:text-black transition-colors duration-200";
+    const itemInactive = dark
+        ? "text-gray-400 hover:bg-white/5 hover:text-white transition-colors duration-200"
+        : "text-gray-500 hover:bg-gray-50 hover:text-black transition-colors duration-200";
 
     const [isVisible, setIsVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
@@ -72,20 +78,25 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
     return (
         <>
             {/* MOBILE: Toggle Button */}
-            <motion.div 
-                className="md:hidden fixed top-4 left-4 z-[100]"
-                initial={{ y: 0 }}
-                animate={{ y: isVisible ? 0 : -100 }}
-                transition={{ duration: 0.3 }}
-            >
-               <button 
-                  onClick={() => setIsMobileOpen(true)}
-                  className="bg-white p-2.5 shadow-sm border border-gray-200 text-black flex items-center justify-center active:scale-95 transition-transform rounded-xl"
-                  title="Abrir Menú"
-               >
-                  <Menu className="w-5 h-5" />
-               </button>
-            </motion.div>
+            {!hideMobileToggle && (
+                <motion.div 
+                    className="md:hidden fixed top-4 left-4 z-[100]"
+                    initial={{ y: 0 }}
+                    animate={{ y: isVisible ? 0 : -100 }}
+                    transition={{ duration: 0.3 }}
+                >
+                   <button 
+                      onClick={() => setIsMobileOpen(true)}
+                      className={cn(
+                         "p-2.5 shadow-sm border flex items-center justify-center active:scale-95 transition-transform rounded-xl",
+                         dark ? "bg-[#0a0a0a] border-white/5 text-white" : "bg-white border-gray-200 text-black"
+                      )}
+                      title="Abrir Menú"
+                   >
+                      <Menu className="w-5 h-5" />
+                   </button>
+                </motion.div>
+            )}
 
             {/* MOBILE: Backdrop & Menu */}
             <AnimatePresence>
@@ -104,24 +115,30 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                             animate={{ x: 0 }}
                             exit={{ x: '-100%' }}
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className="md:hidden fixed top-0 left-0 bottom-0 w-[80%] max-w-[300px] bg-white border-r border-gray-200 z-50 flex flex-col p-6"
+                            className={cn(
+                                "md:hidden fixed top-0 left-0 bottom-0 w-[80%] max-w-[300px] z-50 flex flex-col p-6",
+                                dark ? "bg-[#0a0a0a] border-r border-white/5 text-white" : "bg-white border-r border-gray-200"
+                            )}
                         >
                             {/* Header Mobile */}
-                            <div className="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
+                            <div className={cn("flex justify-between items-center mb-8 pb-4 border-b", dark ? "border-white/5" : "border-gray-100")}>
                                 <div className="flex items-center gap-3 overflow-hidden flex-1 min-w-0">
                                     <div className="w-8 h-8 bg-[var(--color-acid)] flex items-center justify-center rounded-lg shrink-0 shadow-sm border border-black/5">
                                         <LayoutGrid className="w-4 h-4" style={{ color: 'var(--color-acid-text)' }} />
                                     </div>
                                     <div className="flex flex-col overflow-hidden min-w-0">
                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">{t('nav.menu')}</span>
-                                       <h2 className="text-sm font-bold text-black uppercase tracking-wider leading-tight opacity-90 break-words">
+                                       <h2 className={cn("text-sm font-bold uppercase tracking-wider leading-tight opacity-90 break-words", dark ? "text-white" : "text-black")}>
                                           {currentConference?.title || 'Cherry-K'}
                                        </h2>
                                     </div>
                                 </div>
                                 <button 
                                     onClick={() => setIsMobileOpen(false)}
-                                    className="p-2 hover:bg-gray-100 text-gray-500 transition-colors rounded-lg shrink-0"
+                                    className={cn(
+                                        "p-2 transition-colors rounded-lg shrink-0",
+                                        dark ? "hover:bg-white/5 text-gray-400 hover:text-white" : "hover:bg-gray-100 text-gray-500"
+                                    )}
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
