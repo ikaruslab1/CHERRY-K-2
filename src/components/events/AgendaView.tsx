@@ -224,7 +224,10 @@ export function AgendaView() {
       >
         <div className="flex flex-col gap-4 xs:flex-row xs:items-center xs:justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[var(--color-acid)] rounded-lg">
+            <div 
+              className="p-2.5 rounded-lg shadow-sm transition-all duration-500"
+              style={{ background: 'var(--color-acid-gradient)' }}
+            >
               <Calendar className="h-6 w-6 xs:h-7 xs:w-7" style={{ color: 'var(--color-acid-text)' }} />
             </div>
             <div>
@@ -260,20 +263,26 @@ export function AgendaView() {
             transition={{ delay: 0.2 }}
             className="grid grid-cols-2 gap-3"
           >
-            <div className="bg-white border border-gray-200 rounded-lg p-3.5">
+            <div className="bg-white border border-gray-200 rounded-lg p-3.5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)]">
               <div className="flex items-center gap-2 mb-1">
-                < Star className="h-3.5 w-3.5 text-gray-500" />
+                <Star className="h-3.5 w-3.5 text-gray-500" />
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('agenda.interest')}</span>
               </div>
               <p className="text-xl font-bold text-[#373737]">{interests.size}</p>
             </div>
             
-            <div className="bg-[var(--color-acid)]/50 border border-[var(--color-acid)] rounded-lg p-3.5">
+            <div 
+              className="rounded-lg p-3.5 border transition-all duration-500 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]"
+              style={{ 
+                background: 'var(--color-acid-gradient)',
+                borderColor: 'var(--color-acid)'
+              }}
+            >
               <div className="flex items-center gap-2 mb-1">
                 <CheckCircle2 className="h-3.5 w-3.5" style={{ color: 'var(--color-acid-text)' }} />
                 <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--color-acid-text)' }}>{t('agenda.attended')}</span>
               </div>
-              <p className="text-xl font-bold" style={{ color: 'var(--color-acid-text)' }}>
+              <p className="text-xl font-bold animate-pulse-subtle" style={{ color: 'var(--color-acid-text)' }}>
                 {filteredEvents.filter(e => (attendance[e.id] || 0) >= (e.duration_days || 1)).length}
               </p>
             </div>

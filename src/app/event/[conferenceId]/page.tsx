@@ -1,10 +1,13 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 import { Metadata } from 'next';
 import { LandingRenderer } from '@/components/landing/LandingRenderer';
 import { ConferenceLandingConfig } from '@/types';
 
 export const revalidate = 60; // Revalidate every minute
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface Props {
   params: Promise<{
@@ -14,16 +17,6 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { conferenceId } = await params;
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-      },
-    }
-  );
   const { data: conference } = await supabase
     .from('conferences')
     .select('title, description, custom_landing_enabled')
@@ -46,16 +39,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function EventLandingPage({ params }: Props) {
   const { conferenceId } = await params;
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-      },
-    }
-  );
 
   // Fetch conference config from Supabase
   const { data: conference, error } = await supabase
@@ -73,3 +56,4 @@ export default async function EventLandingPage({ params }: Props) {
 
   return <LandingRenderer config={config} conference={conference} />;
 }
+

@@ -4,18 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { UserProfileView } from '@/components/profile/UserProfileView';
-import { AgendaView } from '@/components/events/AgendaView';
-import { UsersTable } from '@/components/admin/UsersTable';
-import { EventsManager } from '@/components/admin/EventsManager';
-import AttendanceView from '@/views/admin/AttendanceView';
-import { ParticipationView } from '@/components/profile/ParticipationView';
-import { MetricsView } from '@/components/admin/metrics/MetricsView';
-import { CertificateDesignView } from '@/components/admin/CertificateDesignView';
-import { EmbeddingsView } from '@/components/admin/EmbeddingsView';
 import { User, Calendar, FileText, Mic, QrCode, Users, Settings, LayoutDashboard, Award, Crown, Palette, Code } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { FAQView } from '@/components/faq/FAQView';
-import { CertificatesView } from '@/components/profile/CertificatesView';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
@@ -24,8 +14,64 @@ import { useConference } from '@/context/ConferenceContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useRoleAuth } from '@/hooks/useRoleAuth';
 
+const LoadingSpinner = () => (
+    <div className="flex items-center justify-center p-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+);
+
+const AgendaView = dynamic(() => import('@/components/events/AgendaView').then(mod => mod.AgendaView), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
+
+const UsersTable = dynamic(() => import('@/components/admin/UsersTable').then(mod => mod.UsersTable), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
+
+const EventsManager = dynamic(() => import('@/components/admin/EventsManager').then(mod => mod.EventsManager), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
+
+const AttendanceView = dynamic(() => import('@/views/admin/AttendanceView'), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
+
+const ParticipationView = dynamic(() => import('@/components/profile/ParticipationView').then(mod => mod.ParticipationView), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
+
+const MetricsView = dynamic(() => import('@/components/admin/metrics/MetricsView').then(mod => mod.MetricsView), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
+
+const CertificateDesignView = dynamic(() => import('@/components/admin/CertificateDesignView').then(mod => mod.CertificateDesignView), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
+
+const EmbeddingsView = dynamic(() => import('@/components/admin/EmbeddingsView').then(mod => mod.EmbeddingsView), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
+
+const FAQView = dynamic(() => import('@/components/faq/FAQView').then(mod => mod.FAQView), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
+
+const CertificatesView = dynamic(() => import('@/components/profile/CertificatesView').then(mod => mod.CertificatesView), {
+    loading: () => <LoadingSpinner />,
+    ssr: false
+});
+
 const LandingEditor = dynamic(() => import('@/components/admin/LandingEditor').then(mod => mod.LandingEditor), {
-    loading: () => <div className="p-8 flex justify-center"><Calendar className="animate-spin text-red-500" /></div>,
+    loading: () => <LoadingSpinner />,
     ssr: false
 });
 

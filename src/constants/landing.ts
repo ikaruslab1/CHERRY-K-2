@@ -99,14 +99,14 @@ export const BLOCK_DEFAULTS: Record<string, any> = {
   hero: {
     variant: 'centered',
     content: {
-      title: "Título del Hero",
+      title: "Conecta, Innova y Certifica tu Conocimiento",
       title_font: 'sans',
-      subtitle: "Subtítulo informativo",
+      subtitle: "La plataforma académica definitiva para congresos, simposios y talleres internacionales de alto impacto.",
       subtitle_font: 'sans',
       background_type: 'color',
       background_value: '#F3F4F6',
       buttons: [
-        { label: "Botón Principal", url: "#", color: "#000000" }
+        { label: "Explorar Evento", url: "#agenda", color: "#000000" }
       ],
       title_color: "#000000",
       subtitle_color: "#000000",
@@ -120,21 +120,22 @@ export const BLOCK_DEFAULTS: Record<string, any> = {
     variant: 'grid',
     content: {
       items: [
-        { title: "Nueva Característica", description: "Descripción breve...", icon_color: "#FFFFFF" }
+        { title: "Acceso Inteligente", description: "Pase de lista y acreditación express mediante escaneo de gafete QR dinámico.", icon_color: "#FFFFFF" },
+        { title: "Constancias Autónomas", description: "Emisión y descarga instantánea de certificados digitales validados al cumplir la asistencia mínima.", icon_color: "#FFFFFF" }
       ]
     }
   },
   cta: {
     variant: 'standard',
     content: {
-      title: "Únete al Futuro de la Legislación",
-      subtitle: "Asegura tu lugar en uno de los eventos más importantes de la zona",
+      title: "Comienza la Experiencia Académica",
+      subtitle: "Asegura tu lugar en las ponencias, foros y talleres clave de este periodo.",
       background_color: "#000000",
       text_color: "#FFFFFF",
       text_align: "center",
       button_align: "center",
       buttons: [
-        { label: "Obtener Entrada", url: "#register", color: "#FFFFFF", text_color: "#000000" },
+        { label: "Obtener Gafete", url: "#register", color: "#FFFFFF", text_color: "#000000" },
         { label: "Acceder a mi Portal", url: "#login", color: "#373737", text_color: "#FFFFFF" }
       ],
       login_label: "Iniciar sesión",
