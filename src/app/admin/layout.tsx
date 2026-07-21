@@ -119,9 +119,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500 font-medium">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)] text-[var(--foreground)] font-medium">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#373737]"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[var(--foreground)]"></div>
           <span>Cargando panel de control...</span>
         </div>
       </div>
@@ -137,7 +137,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isFullWidthPage) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-[var(--background)]">
         <ResponsiveNav 
           items={navItems}
           activeTab={activeTab}
@@ -152,7 +152,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-[#373737]">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <ResponsiveNav 
         items={navItems}
         activeTab={activeTab}

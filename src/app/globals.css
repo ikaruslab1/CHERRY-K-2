@@ -22,30 +22,63 @@
 }
 
 :root {
-  /* Default Theme: Void (Dark) */
-  --background: var(--color-void);
-  --foreground: var(--color-chalk);
-
+  /* Default Theme: Light Mode (Swiss Clean) */
+  --background: #ffffff;
+  --foreground: #121212;
+  
+  --card: #ffffff;
+  --card-foreground: #121212;
+  
   --primary: var(--color-acid);
   --primary-foreground: var(--color-acid-fg);
 
-  --secondary: var(--color-electric);
-  --secondary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
 
-  --muted: var(--color-surface);
-  --muted-foreground: #888888;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
 
-  --accent: var(--color-surface);
-  --accent-foreground: var(--color-chalk);
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
 
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
 
-  --border: var(--color-subtle);
-  --input: var(--color-surface);
+  --border: #e4e4e7;
+  --input: #ffffff;
   --ring: var(--color-acid);
 
   --radius: 0rem;
+  
+  /* Texture color */
+  --grid-dot: #e4e4e7;
+}
+
+.dark {
+  /* Dark Theme: Void (Brutalist dark) */
+  --background: var(--color-void);
+  --foreground: var(--color-chalk);
+
+  --card: #111111;
+  --card-foreground: var(--color-chalk);
+
+  --primary: var(--color-acid);
+  --primary-foreground: var(--color-acid-fg);
+
+  --secondary: var(--color-surface);
+  --secondary-foreground: var(--color-chalk);
+
+  --muted: var(--color-surface);
+  --muted-foreground: #a1a1aa;
+
+  --accent: var(--color-surface);
+  --accent-foreground: var(--color-chalk);
+
+  --border: var(--color-subtle);
+  --input: var(--color-surface);
+  --ring: var(--color-acid);
+  
+  --grid-dot: var(--color-surface);
 }
 
 /* Base Styles */
@@ -59,7 +92,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 
   /* Acid Grid Texture */
-  background-image: radial-gradient(var(--color-surface) 1px, transparent 1px);
+  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
   background-size: 32px 32px;
   background-attachment: fixed;
 

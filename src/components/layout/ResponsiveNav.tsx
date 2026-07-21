@@ -8,6 +8,7 @@ import { useConference } from '@/context/ConferenceContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { InstallPWAButton } from '../ui/InstallPWAButton';
 import { LanguageToggle } from '../ui/LanguageToggle';
+import { ThemeToggle } from '../ThemeToggle';
 
 import { cn } from '@/lib/utils';
 
@@ -41,18 +42,14 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
     // Filter visible items
     const visibleItems = items.filter(item => item.show !== false);
 
-    // Styles - Swiss minimalist (White, Gray, Acid Green Accent) vs Acid Editorial Dark
-    const sidebarBg = dark 
-        ? "bg-[#0a0a0a] border-r border-white/5" 
-        : "bg-white border-r border-gray-100";
+    // Styles - Adaptive colors using CSS variables
+    const sidebarBg = "bg-[var(--card)] border-r border-[var(--border)] text-[var(--foreground)]";
     
     // Active Item: Acid Green Background, Black Text (Brand Identity) - Flat, no shadow
     const itemActive = "bg-[var(--color-acid)] text-black font-bold";
     
-    // Inactive Item: Gray Text, Hover to Light Gray with Black Text
-    const itemInactive = dark
-        ? "text-gray-400 hover:bg-white/5 hover:text-white transition-colors duration-200"
-        : "text-gray-500 hover:bg-gray-50 hover:text-black transition-colors duration-200";
+    // Inactive Item: Gray Text, Hover to Light Gray with Black/White Text
+    const itemInactive = "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-black dark:hover:text-white transition-colors duration-200";
 
     const [isVisible, setIsVisible] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
@@ -88,8 +85,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                    <button 
                       onClick={() => setIsMobileOpen(true)}
                       className={cn(
-                         "p-2.5 shadow-sm border flex items-center justify-center active:scale-95 transition-transform rounded-xl",
-                         dark ? "bg-[#0a0a0a] border-white/5 text-white" : "bg-white border-gray-200 text-black"
+                         "p-2.5 shadow-sm border flex items-center justify-center active:scale-95 transition-transform rounded-xl bg-[var(--card)] border-[var(--border)] text-[var(--foreground)]"
                       )}
                       title="Abrir Menú"
                    >
@@ -115,31 +111,25 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                             animate={{ x: 0 }}
                             exit={{ x: '-100%' }}
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                            className={cn(
-                                "md:hidden fixed top-0 left-0 bottom-0 w-[80%] max-w-[300px] z-50 flex flex-col p-6",
-                                dark ? "bg-[#0a0a0a] border-r border-white/5 text-white" : "bg-white border-r border-gray-200"
-                            )}
+                            className="md:hidden fixed top-0 left-0 bottom-0 w-[80%] max-w-[300px] z-50 flex flex-col p-6 bg-[var(--card)] border-r border-[var(--border)] text-[var(--foreground)]"
                         >
                             {/* Header Mobile */}
-                            <div className={cn("flex justify-between items-center mb-8 pb-4 border-b", dark ? "border-white/5" : "border-gray-100")}>
+                            <div className="flex justify-between items-center mb-8 pb-4 border-b border-[var(--border)]">
                                 <div className="flex items-center gap-3 overflow-hidden flex-1 min-w-0">
                                     <div className="w-8 h-8 bg-[var(--color-acid)] flex items-center justify-center rounded-lg shrink-0 shadow-sm border border-black/5">
                                         <LayoutGrid className="w-4 h-4" style={{ color: 'var(--color-acid-text)' }} />
                                     </div>
                                     <div className="flex flex-col overflow-hidden min-w-0">
                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">{t('nav.menu')}</span>
-                                       <h2 className={cn("text-sm font-bold uppercase tracking-wider leading-tight opacity-90 break-words", dark ? "text-white" : "text-black")}>
+                                       <h2 className="text-sm font-bold uppercase tracking-wider leading-tight opacity-90 break-words text-[var(--foreground)]">
                                           {currentConference?.title || 'Cherry-K'}
                                        </h2>
                                     </div>
                                 </div>
-                                <button 
-                                    onClick={() => setIsMobileOpen(false)}
-                                    className={cn(
-                                        "p-2 transition-colors rounded-lg shrink-0",
-                                        dark ? "hover:bg-white/5 text-gray-400 hover:text-white" : "hover:bg-gray-100 text-gray-500"
-                                    )}
-                                >
+                                 <button 
+                                     onClick={() => setIsMobileOpen(false)}
+                                     className="p-2 transition-colors rounded-lg shrink-0 hover:bg-gray-100 dark:hover:bg-zinc-800 text-[var(--foreground)] opacity-70 hover:opacity-100"
+                                 >
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
@@ -181,8 +171,9 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                             </nav>
 
                             {/* Footer Mobile */}
-                            <div className="pt-6 border-t border-gray-100 mt-auto space-y-3">
+                            <div className="pt-6 border-t border-gray-100 dark:border-zinc-800 mt-auto space-y-3">
                                 {currentConference?.enable_translation && <LanguageToggle mobile />}
+                                <ThemeToggle />
                                 <InstallPWAButton />
                                 {onFAQClick && (
                                     <button
@@ -225,7 +216,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                 {/* Header Desktop */}
                 <motion.div 
                     layout
-                    className="flex items-center justify-between p-5 border-b border-gray-100 min-h-[80px]"
+                    className="flex items-center justify-between p-5 border-b border-[var(--border)] min-h-[80px]"
                 >
                     <div className="flex items-center gap-3 overflow-hidden flex-1 min-w-0">
                          {/* Icon always visible */}
@@ -242,13 +233,13 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                                     exit={{ opacity: 0, width: 0 }}
                                     transition={{ duration: 0.2 }}
                                     className="flex flex-col overflow-hidden min-w-0"
-                                >
-                                    <div className="min-w-[160px]">
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1 ml-1 whitespace-nowrap">{t('nav.menu')}</span>
-                                        <h2 className="text-xs font-bold text-black uppercase tracking-wider leading-tight ml-1 break-words" title={currentConference?.title || 'Cherry-K'}>
-                                            {currentConference?.title || 'Cherry-K'}
-                                        </h2>
-                                    </div>
+                                  >
+                                      <div className="min-w-[160px]">
+                                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1 ml-1 whitespace-nowrap">{t('nav.menu')}</span>
+                                          <h2 className="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider leading-tight ml-1 break-words" title={currentConference?.title || 'Cherry-K'}>
+                                              {currentConference?.title || 'Cherry-K'}
+                                          </h2>
+                                      </div>
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -334,9 +325,10 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                 {/* Footer Desktop */}
                 <motion.div 
                     layout
-                    className="p-3 border-t border-gray-100 space-y-2"
+                    className="p-3 border-t border-gray-100 dark:border-zinc-800 space-y-2"
                 >
                     {currentConference?.enable_translation && <LanguageToggle collapsed={isDesktopCollapsed} />}
+                    <ThemeToggle collapsed={isDesktopCollapsed} />
                     <InstallPWAButton collapsed={isDesktopCollapsed} />
 
                     {onFAQClick && (

@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useConference } from '@/context/ConferenceContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useRoleAuth } from '@/hooks/useRoleAuth';
@@ -141,12 +142,12 @@ export default function ProfilePage() {
   const handleFAQClick = () => setActiveTab('faq');
 
   return (
-    <SidebarAwareContainer className="min-h-screen bg-[#050505] text-[#f2f2f2] pb-24 md:pb-8 profile-dark-mode-override">
+    <SidebarAwareContainer className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24 md:pb-8">
       {/* Mobile Top Header */}
       <div className="md:hidden flex justify-between items-center mb-4 pt-4 px-6 relative z-10">
           <div className="flex flex-col">
               <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest leading-none mb-1">Cherry K-2</span>
-              <h2 className="text-sm font-black text-white uppercase tracking-wider leading-tight max-w-[200px] truncate" title={currentConference?.title || 'Cherry-K'}>
+              <h2 className="text-sm font-black uppercase tracking-wider leading-tight max-w-[200px] truncate text-[var(--foreground)]" title={currentConference?.title || 'Cherry-K'}>
                   {currentConference?.title || 'Cherry-K'}
               </h2>
           </div>
@@ -154,14 +155,15 @@ export default function ProfilePage() {
               {isAdmin || isStaff ? (
                   <button 
                       onClick={() => router.push('/admin')}
-                      className="bg-[var(--color-acid)] text-black border border-black/10 px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all active:scale-95 shadow-sm"
+                      className="bg-[var(--color-acid)] text-black border border-black/10 px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all active:scale-95 shadow-sm cursor-pointer"
                   >
                       Admin
                   </button>
               ) : null}
+              <ThemeToggle className="!w-auto !p-2 shrink-0 bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 border-transparent hover:border-[var(--border)]" />
               <button 
                   onClick={handleSignOut}
-                  className="p-2 bg-white/5 hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors rounded-xl border border-white/5"
+                  className="p-2 bg-gray-50 dark:bg-white/5 hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors rounded-xl border border-gray-200 dark:border-white/5 cursor-pointer"
                   title={t('nav.logout')}
               >
                   <LogOut className="w-4 h-4" />
@@ -177,7 +179,6 @@ export default function ProfilePage() {
           handleSignOut={handleSignOut}
           onFAQClick={handleFAQClick}
           isFAQActive={isFAQActive}
-          dark={true}
           hideMobileToggle={true}
         />
         
@@ -209,62 +210,6 @@ export default function ProfilePage() {
         setActiveTab={setActiveTab}
       />
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        /* Overrides for Profile dark theme */
-        .profile-dark-mode-override .bg-white {
-          background-color: rgba(14, 14, 14, 0.7) !important;
-          backdrop-filter: blur(12px) !important;
-          -webkit-backdrop-filter: blur(12px) !important;
-          border-color: rgba(255, 255, 255, 0.05) !important;
-          color: #f2f2f2 !important;
-        }
-        .profile-dark-mode-override .text-black, 
-        .profile-dark-mode-override .text-gray-900, 
-        .profile-dark-mode-override .text-gray-800, 
-        .profile-dark-mode-override .text-gray-700 {
-          color: #ffffff !important;
-        }
-        .profile-dark-mode-override .text-gray-500, 
-        .profile-dark-mode-override .text-gray-600,
-        .profile-dark-mode-override .text-muted-foreground {
-          color: #a3a3a3 !important;
-        }
-        .profile-dark-mode-override .border-gray-100, 
-        .profile-dark-mode-override .border-gray-200,
-        .profile-dark-mode-override .border-border {
-          border-color: rgba(255, 255, 255, 0.05) !important;
-        }
-        .profile-dark-mode-override .bg-gray-50,
-        .profile-dark-mode-override .bg-gray-100 {
-          background-color: rgba(255, 255, 255, 0.02) !important;
-          color: #f2f2f2 !important;
-        }
-        .profile-dark-mode-override .hover\\:bg-gray-50:hover {
-          background-color: rgba(255, 255, 255, 0.05) !important;
-        }
-        .profile-dark-mode-override input, 
-        .profile-dark-mode-override select, 
-        .profile-dark-mode-override textarea {
-          background-color: rgba(0, 0, 0, 0.3) !important;
-          border-color: rgba(255, 255, 255, 0.08) !important;
-          color: #ffffff !important;
-        }
-        .profile-dark-mode-override button.bg-white {
-          background-color: rgba(255, 255, 255, 0.05) !important;
-          color: #ffffff !important;
-          border-color: rgba(255, 255, 255, 0.1) !important;
-        }
-        .profile-dark-mode-override button.bg-white:hover {
-          background-color: rgba(255, 255, 255, 0.1) !important;
-        }
-        /* Fix FAQ borders */
-        .profile-dark-mode-override .border-\\[\\#DBF227\\] {
-          border-color: var(--color-acid) !important;
-        }
-        .profile-dark-mode-override .ring-\\[\\#DBF227\\]\\/50 {
-          --tw-ring-color: rgba(var(--color-acid-rgb), 0.3) !important;
-        }
-      `}} />
     </SidebarAwareContainer>
   );
 }

@@ -5,6 +5,7 @@ import "./globals.css";
 
 import { ConferenceProvider } from "@/context/ConferenceContext";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { SyncWrapper } from "@/components/SyncWrapper";
 import { DevServiceWorkerUnregister } from "@/components/DevServiceWorkerUnregister";
@@ -84,17 +85,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} ${playfairDisplay.variable} ${syne.variable} ${manrope.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <Suspense fallback={null}>
-          <LanguageProvider>
-            <ConferenceProvider>
-              <SyncWrapper>
-                <DynamicTheme />
-                <SidebarProvider>
-                  {children}
-                </SidebarProvider>
-                {process.env.NODE_ENV === 'development' && <DevServiceWorkerUnregister />}
-              </SyncWrapper>
-            </ConferenceProvider>
-          </LanguageProvider>
+          <ThemeProvider>
+            <LanguageProvider>
+              <ConferenceProvider>
+                <SyncWrapper>
+                  <DynamicTheme />
+                  <SidebarProvider>
+                    {children}
+                  </SidebarProvider>
+                  {process.env.NODE_ENV === 'development' && <DevServiceWorkerUnregister />}
+                </SyncWrapper>
+              </ConferenceProvider>
+            </LanguageProvider>
+          </ThemeProvider>
         </Suspense>
       </body>
     </html>

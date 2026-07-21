@@ -34,7 +34,7 @@ export function SidebarAwareContainer({ children, className = '' }: SidebarAware
             }}
             initial={false}
         >
-            <div className="absolute inset-y-0 left-0 w-px bg-black/5 z-30 md:block hidden shadow-[4px_0_24px_rgba(0,0,0,0.02)]" />
+            <div className="absolute inset-y-0 left-0 w-px bg-[var(--border)] z-30 md:block hidden" />
             <AnimatePresence mode="wait">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
