@@ -206,7 +206,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
     <div className={`flex flex-col h-full w-full bg-white select-none ${isPrint ? 'print-badge-content' : ''}`}>
       {/* Header - Accent Color - Safe Zone Top */}
       <div 
-        className={`relative shrink-0 flex flex-col items-center justify-center overflow-hidden transition-colors duration-300 ${isPrint ? 'pt-12 pb-8 px-8' : 'pt-4 xs:pt-5 pb-2.5 xs:pb-3 px-4'}`}
+        className={`relative shrink-0 flex flex-col items-center justify-center overflow-hidden transition-colors duration-300 ${isPrint ? 'pt-12 pb-8 px-8' : 'pt-3.5 xs:pt-4.5 pb-2 xs:pb-2.5 px-3'}`}
         style={{ 
           background: themeColor,
           ...(animationType === 'gradient' && {
@@ -285,42 +285,42 @@ export function ProfileCard({ profile }: ProfileCardProps) {
       </div>
 
       {/* Main Content Body - Flexible Space */}
-      <div className={`flex-1 flex flex-col items-center justify-evenly w-full min-h-0 ${isPrint ? 'px-12 py-12 gap-8' : 'px-4 py-2 xs:py-3 gap-1 xs:gap-2'}`}>
+      <div className={`flex-1 flex flex-col items-center justify-between w-full min-h-0 ${isPrint ? 'px-12 py-12 gap-8' : 'px-3 py-1.5 xs:py-2.5 gap-1'}`}>
           
           {/* Title Section */}
-          <div className={`flex flex-col items-center justify-center text-center ${isPrint ? 'space-y-4' : 'space-y-0.5 xs:space-y-1'}`}>
+          <div className={`flex flex-col items-center justify-center text-center shrink-0 ${isPrint ? 'space-y-4' : 'space-y-0.5'}`}>
               <h3 className={`${isPrint ? 'text-sm' : 'text-[9px] xs:text-[10px]'} text-gray-400 font-bold uppercase tracking-[0.2em] line-clamp-1`}>{eventTitle}</h3>
               <h1 className="text-[#373737] leading-tight">
-                  <span className={`block font-bold text-gray-700 ${isPrint ? 'text-4xl' : 'text-lg xs:text-xl sm:text-2xl'}`}>
+                  <span className={`block font-bold text-gray-700 ${isPrint ? 'text-4xl' : 'text-base xs:text-lg sm:text-xl'}`}>
                     {degreeAbbr} {profile.first_name}
                   </span>
-                  <span className={`block font-medium text-gray-500 mt-0.5 ${isPrint ? 'text-3xl mt-2' : 'text-base xs:text-lg sm:text-xl'}`}>
+                  <span className={`block font-medium text-gray-500 mt-0.5 ${isPrint ? 'text-3xl mt-2' : 'text-sm xs:text-base sm:text-lg'}`}>
                     {profile.last_name}
                   </span>
               </h1>
           </div>
 
           {/* QR Section - Maximized & Elegant */}
-          <div className={`relative flex items-center justify-center w-full shrink-0 ${isPrint ? 'flex-1 py-10' : 'py-1'}`}>
-              <div className={`relative bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 ${isPrint ? 'p-6 shadow-none border-gray-200' : 'p-2.5'}`}>
+          <div className={`relative flex items-center justify-center w-full flex-1 min-h-0 ${isPrint ? 'py-10' : 'py-0.5'}`}>
+              <div className={`relative bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 flex items-center justify-center ${isPrint ? 'p-6 shadow-none border-gray-200' : 'p-2'}`}>
                   <div className="absolute inset-0 rounded-2xl border border-black/5" />
                   <QRCodeSVG 
                       value={qrData} 
-                      size={isPrint ? 320 : 140}
+                      size={isPrint ? 320 : 180}
                       level="H"
                       includeMargin={true}
-                      className="object-contain w-full max-w-[130px] xs:max-w-[145px] sm:max-w-[170px]"
+                      className="object-contain w-full h-auto max-w-[170px] xs:max-w-[190px] sm:max-w-[220px] aspect-square"
                   />
                   {/* Decorative corners */}
-                  <div className={`absolute border-black/10 rounded-tl-lg ${isPrint ? 'top-6 left-6 w-8 h-8 border-t-4 border-l-4' : 'top-2.5 left-2.5 w-3.5 h-3.5 border-t-2 border-l-2'}`} />
-                  <div className={`absolute border-black/10 rounded-tr-lg ${isPrint ? 'top-6 right-6 w-8 h-8 border-t-4 border-r-4' : 'top-2.5 right-2.5 w-3.5 h-3.5 border-t-2 border-r-2'}`} />
-                  <div className={`absolute border-black/10 rounded-bl-lg ${isPrint ? 'bottom-6 left-6 w-8 h-8 border-b-4 border-l-4' : 'bottom-2.5 left-2.5 w-3.5 h-3.5 border-b-2 border-l-2'}`} />
-                  <div className={`absolute border-black/10 rounded-br-lg ${isPrint ? 'bottom-6 right-6 w-8 h-8 border-b-4 border-r-4' : 'bottom-2.5 right-2.5 w-3.5 h-3.5 border-b-2 border-r-2'}`} />
+                  <div className={`absolute border-black/10 rounded-tl-lg ${isPrint ? 'top-6 left-6 w-8 h-8 border-t-4 border-l-4' : 'top-2 left-2 w-3.5 h-3.5 border-t-2 border-l-2'}`} />
+                  <div className={`absolute border-black/10 rounded-tr-lg ${isPrint ? 'top-6 right-6 w-8 h-8 border-t-4 border-r-4' : 'top-2 right-2 w-3.5 h-3.5 border-t-2 border-r-2'}`} />
+                  <div className={`absolute border-black/10 rounded-bl-lg ${isPrint ? 'bottom-6 left-6 w-8 h-8 border-b-4 border-l-4' : 'bottom-2 left-2 w-3.5 h-3.5 border-b-2 border-l-2'}`} />
+                  <div className={`absolute border-black/10 rounded-br-lg ${isPrint ? 'bottom-6 right-6 w-8 h-8 border-b-4 border-r-4' : 'bottom-2 right-2 w-3.5 h-3.5 border-b-2 border-r-2'}`} />
               </div>
           </div>
 
           {/* Role Badge - Subtle & Clean */}
-          <div className={`flex flex-col items-center shrink-0 ${isPrint ? 'mb-10' : 'mb-0.5'}`}>
+          <div className={`flex flex-col items-center shrink-0 ${isPrint ? 'mb-10' : 'mb-0'}`}>
               {profile.role !== 'owner' && (
                   <span className={`${isPrint ? 'text-sm mb-4' : 'text-[8px] mb-0.5'} text-gray-400 font-bold uppercase tracking-widest opacity-60`}>
                       {t('profile.role_in_event')}
@@ -339,12 +339,12 @@ export function ProfileCard({ profile }: ProfileCardProps) {
       </div>
 
       {/* Footer - Safe Zone Bottom */}
-      <div className={`shrink-0 text-center ${isPrint ? 'pb-16 pt-4 px-12' : 'pb-4 pt-1 px-4'}`}>
+      <div className={`shrink-0 text-center ${isPrint ? 'pb-16 pt-4 px-12' : 'pb-3.5 pt-1 px-3'}`}>
           <div className="opacity-60 grayscale transition-all duration-500 hover:grayscale-0 hover:opacity-100 flex flex-col items-center justify-center">
             <p className={`text-[#373737] font-bold uppercase tracking-widest leading-tight mb-0.5 ${isPrint ? 'text-sm' : 'text-[9px] xs:text-[10px]'}`}>
                 {institution}
             </p>
-            <div className={`bg-gray-200 mx-auto ${isPrint ? 'w-24 h-px my-6' : 'w-8 h-px my-1.5'}`} />
+            <div className={`bg-gray-200 mx-auto ${isPrint ? 'w-24 h-px my-6' : 'w-6 h-px my-1'}`} />
             <p className={`text-gray-400 font-medium tracking-[0.2em] uppercase leading-tight ${isPrint ? 'text-xs' : 'text-[8px] xs:text-[9px]'}`}>
                 {department}
             </p>

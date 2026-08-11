@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { UserProfileView } from '@/components/profile/UserProfileView';
-import { User, Calendar, FileText, Mic, Crown, HelpCircle, LogOut, LayoutDashboard, Settings } from 'lucide-react';
+import { User, Calendar, FileText, Mic, Crown, HelpCircle, LogOut, LayoutDashboard, Settings, QrCode } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
@@ -15,6 +15,7 @@ import { useConference } from '@/context/ConferenceContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useRoleAuth } from '@/hooks/useRoleAuth';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { cn } from '@/lib/utils';
 
 const LoadingSpinner = () => (
     <div className="flex items-center justify-center p-12">
@@ -49,6 +50,7 @@ export default function ProfilePage() {
   const { loading: authLoading, userRole } = useRoleAuth();
   const [sessionLoading, setSessionLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'participation' | 'constancias' | 'faq'>('profile');
+  const [isGearMenuOpen, setIsGearMenuOpen] = useState(false);
 
   const isAdmin = userRole === 'admin' || userRole === 'owner';
   const isStaff = userRole === 'staff';
@@ -74,6 +76,16 @@ export default function ProfilePage() {
       router.push('/');
   };
 
+  const handleGearClick = () => {
+      if (isOwner) {
+          setIsGearMenuOpen(prev => !prev);
+      } else if (userRole === 'staff') {
+          router.push('/staff');
+      } else if (userRole === 'admin' || isAdmin) {
+          router.push('/admin');
+      }
+  };
+
   const navItems = [
     { id: 'profile', label: t('nav.profile'), icon: <User className="w-5 h-5" />, show: true },
     { id: 'agenda', label: t('nav.agenda'), icon: <Calendar className="w-5 h-5" />, show: true },
@@ -83,10 +95,10 @@ export default function ProfilePage() {
     { id: 'divider-admin', label: 'Administración', show: isAdmin || isStaff, isDivider: true },
     { 
         id: 'admin_portal_link', 
-        label: 'Panel Admin', 
+        label: isStaff && !isAdmin ? 'Panel Staff' : 'Panel Admin', 
         icon: <LayoutDashboard className="w-5 h-5" />, 
         show: isAdmin || isStaff,
-        onClick: () => router.push('/admin') 
+        onClick: () => router.push(isStaff && !isAdmin ? '/staff' : '/admin') 
     },
     { id: 'divider-owner', label: t('nav.tools_owner'), show: isOwner, isDivider: true },
     { 
@@ -153,16 +165,62 @@ export default function ProfilePage() {
           </div>
           <div className="flex items-center gap-2 shrink-0">
               {isOwner || isAdmin || isStaff ? (
-                  <button 
-                      onClick={() => {
-                          if (isOwner) router.push('/owner');
-                          else router.push('/admin');
-                      }}
-                      className="p-2 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-800 rounded-xl shrink-0 transition-all active:scale-95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer flex items-center justify-center"
-                      title={isOwner ? 'Panel Owner' : (isAdmin ? 'Panel Admin' : 'Panel Staff')}
-                  >
-                      <Settings className="w-4 h-4 transition-transform duration-300 hover:rotate-45" style={{ color: 'var(--color-acid)' }} />
-                  </button>
+                  <div className="relative shrink-0">
+                      <button 
+                          onClick={handleGearClick}
+                          className="p-2 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-800 rounded-xl shrink-0 transition-all active:scale-95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer flex items-center justify-center relative z-20"
+                          title={isOwner ? 'Seleccionar Panel' : (isStaff && !isAdmin ? 'Panel Staff' : 'Panel Admin')}
+                      >
+                          <Settings className={cn("w-4 h-4 transition-transform duration-300", isGearMenuOpen && "rotate-90")} style={{ color: 'var(--color-acid)' }} />
+                      </button>
+
+                      <AnimatePresence>
+                          {isOwner && isGearMenuOpen && (
+                              <>
+                                  {/* Invisible backdrop to dismiss dropdown */}
+                                  <div 
+                                      className="fixed inset-0 z-30 bg-transparent"
+                                      onClick={() => setIsGearMenuOpen(false)}
+                                  />
+                                  
+                                  {/* Role selection dropdown for Owner */}
+                                  <motion.div
+                                      initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                                      exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                                      transition={{ duration: 0.15 }}
+                                      className="absolute right-0 mt-2 w-44 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-xl z-40 overflow-hidden p-1.5 space-y-1"
+                                  >
+                                      <div className="px-3 py-1.5 text-[9px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-zinc-800 mb-1">
+                                          Seleccionar Panel
+                                      </div>
+                                      
+                                      <button
+                                          onClick={() => {
+                                              setIsGearMenuOpen(false);
+                                              router.push('/admin');
+                                          }}
+                                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-xl transition-colors text-left cursor-pointer"
+                                      >
+                                          <LayoutDashboard className="w-4 h-4 shrink-0" style={{ color: 'var(--color-acid)' }} />
+                                          <span>Panel Admin</span>
+                                      </button>
+
+                                      <button
+                                          onClick={() => {
+                                              setIsGearMenuOpen(false);
+                                              router.push('/staff');
+                                          }}
+                                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-xl transition-colors text-left cursor-pointer"
+                                      >
+                                          <QrCode className="w-4 h-4 text-blue-500 shrink-0" />
+                                          <span>Panel Staff</span>
+                                      </button>
+                                  </motion.div>
+                              </>
+                          )}
+                      </AnimatePresence>
+                  </div>
               ) : null}
               <ThemeToggle className="!w-auto !p-2 shrink-0 bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 border-transparent hover:border-[var(--border)]" />
               <button 
