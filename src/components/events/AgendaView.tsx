@@ -243,11 +243,11 @@ export function AgendaView() {
           {/* Search Bar - Clean */}
           <div className="relative w-full xs:w-72 sm:w-96">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
+              <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </div>
             <input
               type="text"
-              className="block w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-acid)] focus:border-transparent text-sm transition-all"
+              className="block w-full pl-11 pr-4 py-2.5 border border-gray-300 dark:border-zinc-800 rounded-lg leading-5 bg-white dark:bg-[#111111] text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--color-acid)] focus:border-transparent text-sm transition-all"
               placeholder={t('agenda.search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -263,12 +263,12 @@ export function AgendaView() {
             transition={{ delay: 0.2 }}
             className="grid grid-cols-2 gap-3"
           >
-            <div className="bg-white border border-gray-200 rounded-lg p-3.5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)]">
+            <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-zinc-800 rounded-lg p-3.5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)]">
               <div className="flex items-center gap-2 mb-1">
-                <Star className="h-3.5 w-3.5 text-gray-500" />
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('agenda.interest')}</span>
+                <Star className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t('agenda.interest')}</span>
               </div>
-              <p className="text-xl font-bold text-[#373737]">{interests.size}</p>
+              <p className="text-xl font-bold text-[#373737] dark:text-white">{interests.size}</p>
             </div>
             
             <div 
@@ -294,23 +294,23 @@ export function AgendaView() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center py-16 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50"
+          className="text-center py-16 rounded-xl border-2 border-dashed border-gray-300 dark:border-zinc-850 bg-gray-50 dark:bg-zinc-900/40"
         >
           {events.length === 0 ? (
              <div className="flex flex-col items-center gap-3">
-               <div className="p-4 bg-white rounded-full border border-gray-200">
-                 <Calendar className="h-8 w-8 text-gray-400" />
+               <div className="p-4 bg-white dark:bg-[#1a1a1a] rounded-full border border-gray-200 dark:border-zinc-800">
+                 <Calendar className="h-8 w-8 text-gray-400 dark:text-gray-550" />
                </div>
-               <p className="text-gray-600 font-semibold">{t('agenda.no_events')}</p>
-               <p className="text-gray-500 text-sm">{t('agenda.no_events_desc')}</p>
+               <p className="text-gray-600 dark:text-gray-300 font-semibold">{t('agenda.no_events')}</p>
+               <p className="text-gray-500 dark:text-gray-400 text-sm">{t('agenda.no_events_desc')}</p>
              </div>
           ) : (
              <div className="flex flex-col items-center gap-3">
-                <div className="p-4 bg-white rounded-full border border-gray-200">
-                  <Search className="h-8 w-8 text-gray-400" />
+                <div className="p-4 bg-white dark:bg-[#1a1a1a] rounded-full border border-gray-200 dark:border-zinc-800">
+                  <Search className="h-8 w-8 text-gray-400 dark:text-gray-550" />
                 </div>
-                <p className="text-gray-600 font-semibold">{t('agenda.no_results')}</p>
-                <p className="text-sm text-gray-500">{t('agenda.no_results_desc')}</p>
+                <p className="text-gray-600 dark:text-gray-300 font-semibold">{t('agenda.no_results')}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('agenda.no_results_desc')}</p>
              </div>
           )}
         </motion.div>
