@@ -273,7 +273,7 @@ export default function OwnerDashboard() {
           }}
       />
       
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-12 md:py-20 text-black">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-4 md:py-16 text-black">
         <motion.header 
           initial={{ opacity: 0, y: -40 }}
           animate={{ opacity: 1, y: 0 }}

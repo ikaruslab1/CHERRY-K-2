@@ -84,7 +84,7 @@ export default function StaffPage() {
 
   return (
     <SidebarAwareContainer className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24 md:pb-8">
-      <div className="p-4 md:p-8 min-h-screen flex flex-col">
+      <div className="px-4 py-3 md:p-8 min-h-screen flex flex-col">
         <ResponsiveNav 
           items={navItems}
           activeTab={activeTab}
@@ -100,8 +100,8 @@ export default function StaffPage() {
           hideMobileToggle={true}
         />
         
-        <div className="max-w-4xl mx-auto space-y-8 mt-4 md:mt-0 flex-1 w-full relative z-10">
-          <div className="p-0 min-h-[500px]">
+        <div className="max-w-4xl mx-auto space-y-6 mt-0 md:mt-0 flex-1 w-full relative z-10">
+          <div className="p-0 min-h-0">
                <AnimatePresence mode="wait">
                   <motion.div
                       key={activeTab}

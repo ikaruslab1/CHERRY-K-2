@@ -149,7 +149,7 @@ export function ParticipationView() {
               >
                 <button 
                   onClick={() => toggleExpand(event.id)}
-                  className="group relative w-full text-left pl-7 pr-6 py-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-6"
+                  className="group relative w-full text-left pl-5 pr-4 py-4 xs:pl-7 xs:pr-6 xs:py-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-6"
                 >
                   {/* Accent Line */}
                   <div className="absolute bottom-0 left-0 top-0 w-1.5 bg-[#DBF227] transition-colors" />

@@ -49,10 +49,10 @@ export function UserProfileView() {
   );
 
   return (
-    <div className="flex relative justify-center items-center min-h-[calc(100vh-6rem)] w-full py-8 animate-in fade-in duration-700">
+    <div className="flex relative justify-center items-center w-full py-2 xs:py-4 md:py-8 min-h-0 md:min-h-[calc(100vh-12rem)] animate-in fade-in duration-700">
         {/* Glow backdrop using the conference accent gradient */}
         <div 
-          className="absolute w-[300px] h-[300px] xs:w-[350px] xs:h-[350px] rounded-full blur-[80px] xs:blur-[100px] opacity-15 pointer-events-none -z-10 transition-all duration-500"
+          className="absolute w-[280px] h-[280px] xs:w-[350px] xs:h-[350px] rounded-full blur-[80px] xs:blur-[100px] opacity-15 pointer-events-none -z-10 transition-all duration-500"
           style={{ background: 'var(--color-acid-gradient)' }}
         />
         {profile ? (

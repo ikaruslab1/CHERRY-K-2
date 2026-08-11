@@ -189,8 +189,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         handleSignOut={handleSignOut}
         hideMobileToggle={true}
       />
-      <SidebarAwareContainer className="p-4 md:p-8 min-h-screen">
-        <div className="max-w-7xl mx-auto space-y-8 mt-12 md:mt-0">
+      <SidebarAwareContainer className="px-4 py-3 md:p-8 min-h-screen">
+        <div className="max-w-7xl mx-auto space-y-6 mt-0 md:mt-0">
           {children}
         </div>
       </SidebarAwareContainer>
