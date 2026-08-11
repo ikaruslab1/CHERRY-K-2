@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { UserProfileView } from '@/components/profile/UserProfileView';
-import { User, Calendar, FileText, Mic, Crown, HelpCircle, LogOut, LayoutDashboard, Settings, QrCode } from 'lucide-react';
+import { User, Calendar, FileText, Mic, Crown, HelpCircle, LogOut, LayoutDashboard, Settings, QrCode, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
@@ -50,7 +50,7 @@ export default function ProfilePage() {
   const { loading: authLoading, userRole } = useRoleAuth();
   const [sessionLoading, setSessionLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'participation' | 'constancias' | 'faq'>('profile');
-  const [isGearMenuOpen, setIsGearMenuOpen] = useState(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
 
   const isAdmin = userRole === 'admin' || userRole === 'owner';
   const isStaff = userRole === 'staff';
@@ -78,7 +78,7 @@ export default function ProfilePage() {
 
   const handleGearClick = () => {
       if (isOwner) {
-          setIsGearMenuOpen(prev => !prev);
+          setIsRoleModalOpen(true);
       } else if (userRole === 'staff') {
           router.push('/staff');
       } else if (userRole === 'admin' || isAdmin) {
@@ -165,62 +165,13 @@ export default function ProfilePage() {
           </div>
           <div className="flex items-center gap-2 shrink-0">
               {isOwner || isAdmin || isStaff ? (
-                  <div className="relative shrink-0">
-                      <button 
-                          onClick={handleGearClick}
-                          className="p-2 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-800 rounded-xl shrink-0 transition-all active:scale-95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer flex items-center justify-center relative z-20"
-                          title={isOwner ? 'Seleccionar Panel' : (isStaff && !isAdmin ? 'Panel Staff' : 'Panel Admin')}
-                      >
-                          <Settings className={cn("w-4 h-4 transition-transform duration-300", isGearMenuOpen && "rotate-90")} style={{ color: 'var(--color-acid)' }} />
-                      </button>
-
-                      <AnimatePresence>
-                          {isOwner && isGearMenuOpen && (
-                              <>
-                                  {/* Invisible backdrop to dismiss dropdown */}
-                                  <div 
-                                      className="fixed inset-0 z-30 bg-transparent"
-                                      onClick={() => setIsGearMenuOpen(false)}
-                                  />
-                                  
-                                  {/* Role selection dropdown for Owner */}
-                                  <motion.div
-                                      initial={{ opacity: 0, scale: 0.95, y: -5 }}
-                                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                                      exit={{ opacity: 0, scale: 0.95, y: -5 }}
-                                      transition={{ duration: 0.15 }}
-                                      className="absolute right-0 mt-2 w-44 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl shadow-xl z-40 overflow-hidden p-1.5 space-y-1"
-                                  >
-                                      <div className="px-3 py-1.5 text-[9px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-zinc-800 mb-1">
-                                          Seleccionar Panel
-                                      </div>
-                                      
-                                      <button
-                                          onClick={() => {
-                                              setIsGearMenuOpen(false);
-                                              router.push('/admin');
-                                          }}
-                                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-xl transition-colors text-left cursor-pointer"
-                                      >
-                                          <LayoutDashboard className="w-4 h-4 shrink-0" style={{ color: 'var(--color-acid)' }} />
-                                          <span>Panel Admin</span>
-                                      </button>
-
-                                      <button
-                                          onClick={() => {
-                                              setIsGearMenuOpen(false);
-                                              router.push('/staff');
-                                          }}
-                                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-xl transition-colors text-left cursor-pointer"
-                                      >
-                                          <QrCode className="w-4 h-4 text-blue-500 shrink-0" />
-                                          <span>Panel Staff</span>
-                                      </button>
-                                  </motion.div>
-                              </>
-                          )}
-                      </AnimatePresence>
-                  </div>
+                  <button 
+                      onClick={handleGearClick}
+                      className="p-2 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-800 rounded-xl shrink-0 transition-all active:scale-95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer flex items-center justify-center"
+                      title={isOwner ? 'Seleccionar Panel' : (isStaff && !isAdmin ? 'Panel Staff' : 'Panel Admin')}
+                  >
+                      <Settings className="w-4 h-4 transition-transform duration-300 hover:rotate-45" style={{ color: 'var(--color-acid)' }} />
+                  </button>
               ) : null}
               <ThemeToggle className="!w-auto !p-2 shrink-0 bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 border-transparent hover:border-[var(--border)]" />
               <button 
@@ -271,6 +222,120 @@ export default function ProfilePage() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
+
+      {/* Role Selection Modal for Owner */}
+      <AnimatePresence>
+        {isOwner && isRoleModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+            onClick={() => setIsRoleModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 p-6 space-y-5"
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center border border-amber-500/20">
+                    <Crown className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-gray-900 dark:text-white uppercase tracking-wider">
+                      Seleccionar Panel
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Elige el portal al que deseas ingresar
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsRoleModalOpen(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-gray-400 hover:text-gray-700 dark:hover:text-white cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Role Action Cards */}
+              <div className="space-y-3">
+                {/* Admin Panel Card */}
+                <button
+                  onClick={() => {
+                    setIsRoleModalOpen(false);
+                    router.push('/admin');
+                  }}
+                  className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl bg-gray-50 dark:bg-zinc-800/60 hover:bg-lime-500/10 dark:hover:bg-lime-500/15 border border-gray-200/80 dark:border-zinc-700/60 hover:border-lime-500/40 transition-all text-left group cursor-pointer active:scale-[0.98]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-lime-500/15 dark:bg-lime-500/20 flex items-center justify-center shrink-0 border border-lime-500/30 group-hover:scale-110 transition-transform">
+                    <LayoutDashboard className="w-5 h-5" style={{ color: 'var(--color-acid)' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">Panel Admin</span>
+                      <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-lime-500/10 text-lime-600 dark:text-lime-400 font-bold border border-lime-500/20">Admin</span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                      Gestión de eventos, agenda y métricas
+                    </p>
+                  </div>
+                </button>
+
+                {/* Staff Panel Card */}
+                <button
+                  onClick={() => {
+                    setIsRoleModalOpen(false);
+                    router.push('/staff');
+                  }}
+                  className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl bg-gray-50 dark:bg-zinc-800/60 hover:bg-blue-500/10 dark:hover:bg-blue-500/15 border border-gray-200/80 dark:border-zinc-700/60 hover:border-blue-500/40 transition-all text-left group cursor-pointer active:scale-[0.98]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/15 dark:bg-blue-500/20 flex items-center justify-center shrink-0 border border-blue-500/30 group-hover:scale-110 transition-transform">
+                    <QrCode className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">Panel Staff</span>
+                      <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">Staff</span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                      Escáner de asistencia QR y accesos
+                    </p>
+                  </div>
+                </button>
+
+                {/* Owner Panel Card */}
+                <button
+                  onClick={() => {
+                    setIsRoleModalOpen(false);
+                    router.push('/owner');
+                  }}
+                  className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl bg-gray-50 dark:bg-zinc-800/60 hover:bg-amber-500/10 dark:hover:bg-amber-500/15 border border-gray-200/80 dark:border-zinc-700/60 hover:border-amber-500/40 transition-all text-left group cursor-pointer active:scale-[0.98]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 dark:bg-amber-500/20 flex items-center justify-center shrink-0 border border-amber-500/30 group-hover:scale-110 transition-transform">
+                    <Crown className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">Panel Owner</span>
+                      <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/20">Owner</span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                      Administración global y plataforma
+                    </p>
+                  </div>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </SidebarAwareContainer>
   );
