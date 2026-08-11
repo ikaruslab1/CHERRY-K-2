@@ -122,25 +122,25 @@ export function EmbeddingsView() {
                     return (
                         <div 
                             key={embed.id} 
-                            className={`bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm transition-all duration-300 ${
+                            className={`bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden shadow-sm transition-all duration-300 ${
                                 isLandingDisabled ? 'opacity-50 grayscale pointer-events-none' : 'hover:shadow-md'
-                            } ${isSpecialAuth ? 'ring-2 ring-blue-100 border-blue-200' : ''}`}
+                            } ${isSpecialAuth ? 'ring-2 ring-blue-500/20 border-blue-500/40' : ''}`}
                         >
-                            <div className="p-5 border-b border-gray-50 flex justify-between items-start bg-gray-50/50">
+                            <div className="p-4 xs:p-5 border-b border-gray-100 dark:border-zinc-800 flex flex-col sm:flex-row justify-between items-start gap-3 bg-gray-50/50 dark:bg-zinc-900/40">
                                 <div>
-                                    <h3 className="font-bold text-[#373737] flex items-center gap-2">
-                                        <Globe className={`w-4 h-4 ${isLandingDisabled ? 'text-gray-300' : 'text-gray-400'}`} />
-                                        {embed.title}
+                                    <h3 className="font-bold text-[#373737] dark:text-white flex items-center gap-2 text-sm xs:text-base">
+                                        <Globe className={`w-4 h-4 shrink-0 ${isLandingDisabled ? 'text-gray-300' : 'text-gray-400'}`} />
+                                        <span>{embed.title}</span>
                                         {isLandingDisabled && (
-                                            <span className="text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full uppercase tracking-wider">Desactivado</span>
+                                            <span className="text-[10px] bg-gray-200 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">Desactivado</span>
                                         )}
                                         {isSpecialAuth && (
-                                            <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">Personalizado</span>
+                                            <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0">Personalizado</span>
                                         )}
                                     </h3>
-                                    <p className="text-sm text-gray-500 mt-1">
+                                    <p className="text-xs xs:text-sm text-gray-500 dark:text-gray-400 mt-1">
                                         {isLandingDisabled 
-                                            ? 'Debes activar la opcion "Landing Activa" en Diseño para usar este embedding.' 
+                                            ? 'Debes activar la opción "Landing Activa" en Diseño para usar este embedding.' 
                                             : embed.description}
                                     </p>
                                 </div>
@@ -148,15 +148,15 @@ export function EmbeddingsView() {
                                     <Button 
                                         variant="outline" 
                                         size="sm" 
-                                        className="gap-2 text-xs h-8 bg-white text-black border-gray-200 hover:bg-gray-100"
+                                        className="gap-2 text-xs h-8 bg-white dark:bg-zinc-800 text-black dark:text-white border-gray-200 dark:border-zinc-700 hover:bg-gray-100 shrink-0"
                                         onClick={() => window.open(`${baseUrl}/admin/preview?url=${encodeURIComponent(embed.url)}&height=${embed.height}&width=${embed.width}&margin=${encodeURIComponent(embed.margin)}`, '_blank')}
                                     >
                                         <ExternalLink className="w-3 h-3" />
-                                        <span className="hidden sm:inline">Vista Previa</span>
+                                        <span>Vista Previa</span>
                                     </Button>
                                 )}
                             </div>
-                            <div className="p-5 space-y-3">
+                            <div className="p-4 xs:p-5 space-y-3">
                                 {isAuth && (
                                     <div className="flex flex-col space-y-4 p-4 bg-gray-50 rounded-xl border border-gray-100 mb-2">
                                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

@@ -318,7 +318,7 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                             </div>
 
                             {/* Mobile Card View */}
-                            <div className="grid grid-cols-1 gap-4 md:hidden">
+                            <div className="grid grid-cols-1 gap-3.5 md:hidden">
                                 {userList.map(user => {
                                     const isTargetOwner = user.role === 'owner';
                                     const isTargetAdmin = user.role === 'admin';
@@ -330,36 +330,36 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                                     if (isTargetAdmin && (!isCurrentOwner && !isCurrentAdmin)) canViewDetails = false;
 
                                     return (
-                                    <div key={user.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-3">
+                                    <div key={user.id} className="bg-white dark:bg-[#111111] p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm flex flex-col gap-3">
                                         <div className="flex justify-between items-start">
-                                            <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-gray-700 dark:text-gray-200 font-bold shrink-0 text-sm">
                                                     {user.first_name.charAt(0)}{user.last_name.charAt(0)}
                                                 </div>
-                                                <div>
-                                                    <h4 className="font-bold text-[#373737]">{user.first_name} {user.last_name}</h4>
-                                                    <p className="text-xs text-gray-500 font-mono">
+                                                <div className="min-w-0">
+                                                    <h4 className="font-bold text-[#373737] dark:text-white text-sm truncate">{user.first_name} {user.last_name}</h4>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                                                         {canViewDetails ? user.short_id : '••••••'}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getRoleBadgeClasses(user.role)} capitalize`}>
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border shrink-0 ${getRoleBadgeClasses(user.role)} capitalize`}>
                                                 {user.role === 'owner' ? 'Dev' : (user.role === 'vip' ? 'VIP' : user.role)}
                                             </span>
                                         </div>
                                         
-                                        <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-                                            <span className="text-xs text-gray-400">{user.degree || 'Sin grado'}</span>
-                                            <div className="flex gap-2">
+                                        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-zinc-800/80">
+                                            <span className="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[150px]">{user.degree || 'Sin grado'}</span>
+                                            <div className="flex gap-2 shrink-0">
                                                 {canViewDetails ? (
                                                     <button
                                                         onClick={() => setSelectedQrUser(user)}
-                                                        className="p-2 bg-gray-50 hover:bg-[#DBF227]/20 text-gray-400 hover:text-[#373737] rounded-lg transition-colors border border-gray-200"
+                                                        className="p-2 bg-gray-50 dark:bg-zinc-900 hover:bg-[#DBF227]/20 text-gray-400 dark:text-gray-400 hover:text-[#373737] dark:hover:text-white rounded-lg transition-colors border border-gray-200 dark:border-zinc-800 cursor-pointer"
                                                     >
                                                         <QrCode className="h-4 w-4" />
                                                     </button>
                                                 ) : (
-                                                    <div className="p-2 text-gray-200 cursor-not-allowed border border-transparent">
+                                                    <div className="p-2 text-gray-200 dark:text-zinc-700 cursor-not-allowed border border-transparent">
                                                         <QrCode className="h-4 w-4" />
                                                     </div>
                                                 )}
