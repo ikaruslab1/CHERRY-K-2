@@ -62,40 +62,40 @@ export function EventMetricsDashboard({ onSelectEvent }: EventMetricsDashboardPr
           return (
             <div 
                 key={event.event_id} 
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all p-5 flex flex-col justify-between"
+                className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-md transition-all p-5 flex flex-col justify-between"
             >
               <div>
                 <div className="flex justify-between items-start gap-4 mb-3">
-                    <h3 className="font-bold text-lg text-[#373737] leading-tight line-clamp-2">
+                    <h3 className="font-bold text-lg text-[#373737] dark:text-white leading-tight line-clamp-2">
                         {event.title}
                     </h3>
                     {isMultiDay && (
-                        <span className="shrink-0 bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">
+                        <span className="shrink-0 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">
                             {event.duration_days} Días
                         </span>
                     )}
                 </div>
 
-                <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
                     <Calendar className="h-4 w-4" />
                     {formatMexicoDate(event.date, { weekday: 'short', day: 'numeric', month: 'short' })}
                 </div>
 
                 {/* Metrics Visualization */}
-                <div className="space-y-3 bg-gray-50 rounded-xl p-3 mb-4">
+                <div className="space-y-3 bg-gray-50 dark:bg-zinc-900/60 rounded-xl p-3 mb-4 border border-transparent dark:border-zinc-800">
                     <div className="flex flex-col gap-1 text-sm">
                         <div className="flex justify-between items-end">
-                             <span className="text-gray-500 font-medium">Asistencia</span>
-                             <span className="font-bold text-[#373737] text-lg">{event.unique_attendees}</span>
+                             <span className="text-gray-500 dark:text-gray-400 font-medium">Asistencia</span>
+                             <span className="font-bold text-[#373737] dark:text-white text-lg">{event.unique_attendees}</span>
                         </div>
                         <div className="flex justify-between items-end">
-                             <span className="text-gray-500 font-medium">Interesados</span>
-                             <span className="text-gray-600 font-semibold">{event.total_interested}</span>
+                             <span className="text-gray-500 dark:text-gray-400 font-medium">Interesados</span>
+                             <span className="text-gray-600 dark:text-gray-300 font-semibold">{event.total_interested}</span>
                         </div>
                     </div>
                     
                     {/* Progress Bar */}
-                    <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-gray-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                         <div 
                             className={`h-full rounded-full transition-all duration-1000 ${
                                 attendanceRate > 80 ? 'bg-green-500' : 
@@ -105,7 +105,7 @@ export function EventMetricsDashboard({ onSelectEvent }: EventMetricsDashboardPr
                         />
                     </div>
                     
-                    <div className="text-right text-xs font-bold text-gray-400">
+                    <div className="text-right text-xs font-bold text-gray-400 dark:text-gray-500">
                         {attendanceRate}% Asistencia efectiva
                     </div>
                 </div>
@@ -113,7 +113,7 @@ export function EventMetricsDashboard({ onSelectEvent }: EventMetricsDashboardPr
 
               <Button 
                 onClick={() => onSelectEvent(event.event_id)} 
-                className="w-full bg-white border border-gray-200 text-[#373737] hover:bg-gray-50 hover:border-gray-300 justify-between group"
+                className="w-full bg-white dark:bg-[#111111] border border-gray-200 dark:border-zinc-800 text-[#373737] dark:text-white hover:bg-gray-50 dark:hover:bg-zinc-800 hover:border-gray-300 justify-between group"
               >
                  Ver Detalles
                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

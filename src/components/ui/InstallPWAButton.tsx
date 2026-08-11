@@ -60,15 +60,15 @@ export function InstallPWAButton({ collapsed = false }: InstallPWAButtonProps) {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white rounded-t-2xl md:rounded-2xl p-6 z-[10000] shadow-2xl w-full md:w-[400px] border border-gray-100"
+              className="fixed bottom-0 left-0 right-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 bg-white dark:bg-[#111111] rounded-t-2xl md:rounded-2xl p-6 z-[10000] shadow-2xl w-full md:w-[400px] border border-gray-100 dark:border-zinc-800"
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-[#373737] font-playfair">Instalar en iPhone/iPad</h3>
+                <h3 className="text-lg font-bold text-[#373737] dark:text-white font-playfair">Instalar en iPhone/iPad</h3>
                 <button 
                   onClick={() => setShowIOSInstructions(false)} 
-                  className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
                 >
-                  <X className="w-5 h-5 text-gray-400 hover:text-[#373737]" />
+                  <X className="w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-[#373737] dark:hover:text-white" />
                 </button>
               </div>
               

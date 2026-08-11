@@ -51,27 +51,27 @@ export default function AttendanceView() { // Default export for import ease
         <div className="w-full max-w-sm xs:max-w-md md:max-w-lg xl:max-w-xl mx-auto p-0 xs:p-4 space-y-6 md:space-y-8">
             
             {/* Header / Selector Section */}
-            <div className="bg-white p-5 xs:p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-3 xs:space-y-4 md:space-y-5">
+            <div className="bg-white dark:bg-[#111111] p-5 xs:p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-zinc-800 space-y-3 xs:space-y-4 md:space-y-5">
                 <div>
-                    <h2 className="text-lg xs:text-xl md:text-2xl font-black text-[#373737]">Control de Asistencia</h2>
-                    <p className="text-xs xs:text-sm md:text-base text-gray-500">Escanea el código QR de los asistentes.</p>
+                    <h2 className="text-lg xs:text-xl md:text-2xl font-black text-[#373737] dark:text-white">Control de Asistencia</h2>
+                    <p className="text-xs xs:text-sm md:text-base text-gray-500 dark:text-gray-400">Escanea el código QR de los asistentes.</p>
                 </div>
 
                 <div className="space-y-1.5 xs:space-y-2">
-                    <label className="text-[10px] xs:text-xs font-bold uppercase text-gray-400 tracking-wider">Actividad Actual</label>
+                    <label className="text-[10px] xs:text-xs font-bold uppercase text-gray-400 dark:text-gray-500 tracking-wider">Actividad Actual</label>
                     {loadingActivities ? null : (
                         <div className="relative">
                             <select
                                 value={selectedActivity}
                                 onChange={(e) => setSelectedActivity(e.target.value)}
-                                className="w-full appearance-none bg-gray-50 border border-gray-200 text-[#373737] font-semibold rounded-xl py-3 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-[#DBF227]"
+                                className="w-full appearance-none bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-[#373737] dark:text-white font-semibold rounded-xl py-3 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-[#DBF227]"
                             >
                                 <option value="" disabled>Seleccionar Actividad...</option>
                                 {activities.map(evt => (
-                                    <option key={evt.id} value={evt.id}>{evt.title}</option>
+                                    <option key={evt.id} value={evt.id} className="bg-white dark:bg-[#111111] text-black dark:text-white">{evt.title}</option>
                                 ))}
                             </select>
-                            <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                            <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
                         </div>
                     )}
                 </div>

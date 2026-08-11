@@ -139,17 +139,17 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
       const result = await registerUser(formattedData);
       if (result.success && result.data) {
         localStorage.removeItem("register_form_data"); // Clear saved data
-        
+
         const shortId = result.data.short_id;
         const fullName = `${formattedData.firstName} ${formattedData.lastName}`;
-        
+
         // Show success message briefly
         setSuccessData({
           id: shortId,
           name: fullName,
           email: formattedData.email,
         });
-        
+
         // Auto-login after a short delay
         setIsAutoLoggingIn(true);
         setTimeout(async () => {
@@ -166,7 +166,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
           } else {
             // --- FLUJO NORMAL: Server Action ---
             const loginResult = await loginWithId(shortId);
-            
+
             if (loginResult.success) {
               window.location.href = '/profile';
             } else {
@@ -175,7 +175,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
             }
           }
         }, 2000); // 2 second delay to show success message
-        
+
       } else {
         alert((locale === 'en' ? "Error registering: " : "Error al registrar: ") + result.error);
       }
@@ -232,25 +232,25 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
         ) : (
           <>
             <p className="text-sm text-gray-400 mb-6">
-              {locale === 'en' 
-                ? 'Save this ID. You will need it to enter the event and register your attendance.' 
+              {locale === 'en'
+                ? 'Save this ID. You will need it to enter the event and register your attendance.'
                 : 'Guarda este ID. Lo necesitarás para ingresar al evento y registrar tu asistencia.'
               }
             </p>
 
             <Button
               onClick={async () => {
-                  if (isEmbedded) {
-                      // Redirigir a /login?code=ID en la ventana padre (mismo mecanismo que el auto-login)
-                      const loginUrl = `${window.location.origin}/login?code=${encodeURIComponent(successData?.id || '')}`;
-                      if (window.top) {
-                        window.top.location.href = loginUrl;
-                      } else {
-                        window.location.href = loginUrl;
-                      }
+                if (isEmbedded) {
+                  // Redirigir a /login?code=ID en la ventana padre (mismo mecanismo que el auto-login)
+                  const loginUrl = `${window.location.origin}/login?code=${encodeURIComponent(successData?.id || '')}`;
+                  if (window.top) {
+                    window.top.location.href = loginUrl;
                   } else {
-                      window.location.reload();
+                    window.location.href = loginUrl;
                   }
+                } else {
+                  window.location.reload();
+                }
               }}
               variant="primary"
               className="w-full font-bold"
@@ -281,7 +281,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
           return orderToUse.map((fieldId) => {
             // Render fixed fields
             if (fieldId === 'nombre' || fieldId === 'apellidos') {
-              if (fieldId === 'apellidos') return null; 
+              if (fieldId === 'apellidos') return null;
 
               return (
                 <div key="name-grid" className="grid grid-cols-1 xs:grid-cols-2 gap-4">
@@ -293,9 +293,8 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                       {...firstNameReg}
                       onBlur={(e) => handleBlur(e, "firstName", firstNameReg.onBlur)}
                       placeholder={locale === 'en' ? "Ex. John" : "Ej. Juan"}
-                      className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
-                        errors.firstName ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"
-                      }`}
+                      className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${errors.firstName ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"
+                        }`}
                     />
                     {errors.firstName && <p className="text-red-500 text-xs ml-1">{errors.firstName.message}</p>}
                   </div>
@@ -307,9 +306,8 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                       {...lastNameReg}
                       onBlur={(e) => handleBlur(e, "lastName", lastNameReg.onBlur)}
                       placeholder={locale === 'en' ? "Ex. Smith Jones" : "Ej. Pérez López"}
-                      className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${
-                        errors.lastName ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"
-                      }`}
+                      className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${errors.lastName ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"
+                        }`}
                     />
                     {errors.lastName && <p className="text-red-500 text-xs ml-1">{errors.lastName.message}</p>}
                   </div>
@@ -325,9 +323,8 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                   </label>
                   <select
                     {...register("degree")}
-                    className={`w-full h-12 rounded-xl border transition-all px-3 text-black bg-white focus:border-black outline-none ${
-                        errors.degree ? "border-red-500 bg-red-50" : "border-gray-200"
-                    }`}
+                    className={`w-full h-12 rounded-xl border transition-all px-3 text-black bg-white focus:border-black outline-none ${errors.degree ? "border-red-500 bg-red-50" : "border-gray-200"
+                      }`}
                   >
                     <option value="">{locale === 'en' ? 'Select a degree' : 'Seleccione un grado'}</option>
                     <option value="Licenciatura">{locale === 'en' ? 'Bachelor\'s' : 'Licenciatura'}</option>
@@ -350,9 +347,8 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                   </label>
                   <select
                     {...register("gender")}
-                    className={`w-full h-12 rounded-xl border transition-all px-3 text-black bg-white focus:border-black outline-none ${
-                        errors.gender ? "border-red-500 bg-red-50" : "border-gray-200"
-                    }`}
+                    className={`w-full h-12 rounded-xl border transition-all px-3 text-black bg-white focus:border-black outline-none ${errors.gender ? "border-red-500 bg-red-50" : "border-gray-200"
+                      }`}
                   >
                     <option value="">{locale === 'en' ? 'Select a gender' : 'Seleccione un género'}</option>
                     <option value="Masculino">{locale === 'en' ? 'Male' : 'Masculino'}</option>
@@ -426,20 +422,20 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                     </label>
                   )}
                   {input.type === "text" && (
-                    <Input 
-                      name={input.id} 
-                      placeholder={input.placeholder} 
-                      className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all" 
+                    <Input
+                      name={input.id}
+                      placeholder={input.placeholder}
+                      className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all"
                       required={input.required}
                       maxLength={50}
                     />
                   )}
                   {input.type === "number" && (
-                    <Input 
-                      name={input.id} 
-                      type="text" 
-                      placeholder={input.placeholder} 
-                      className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all" 
+                    <Input
+                      name={input.id}
+                      type="text"
+                      placeholder={input.placeholder}
+                      className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all"
                       required={input.required}
                       onKeyDown={(e) => {
                         const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', '-', '(', ')', '+', '{', '}', ' '];
@@ -451,11 +447,11 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                   )}
                   {input.type === "url" && (
                     <div className="space-y-1.5">
-                      <Input 
-                        name={input.id} 
-                        type="url" 
-                        placeholder={input.placeholder} 
-                        className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all" 
+                      <Input
+                        name={input.id}
+                        type="url"
+                        placeholder={input.placeholder}
+                        className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all"
                         required={input.required}
                         onBlur={(e) => {
                           const val = e.target.value;
@@ -475,9 +471,9 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                     </div>
                   )}
                   {input.type === "dropdown" && (
-                    <select 
-                      name={input.id} 
-                      className="h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-black focus:ring-0 transition-all text-black outline-none" 
+                    <select
+                      name={input.id}
+                      className="h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-black focus:ring-0 transition-all text-black outline-none"
                       required={input.required}
                     >
                       <option value="">{locale === 'en' ? 'Select...' : 'Seleccionar...'}</option>
@@ -491,7 +487,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                       <div className="flex items-center gap-2 ml-1">
                         <input type="checkbox" name={input.id} className="h-5 w-5 rounded border-gray-300 text-black accent-black" required={input.required} />
                         <label className="text-sm font-bold text-[#373737]">
-                           {locale === 'en' && input.label_en ? input.label_en : input.label} {input.required && <span className="text-red-500">*</span>}
+                          {locale === 'en' && input.label_en ? input.label_en : input.label} {input.required && <span className="text-red-500">*</span>}
                         </label>
                       </div>
                       {input.placeholder && (
@@ -500,19 +496,17 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
                     </div>
                   )}
                   {input.banner_active && input.banner_text && (
-                    <div className={`mt-2 p-3 rounded-xl text-xs font-semibold border flex flex-col sm:flex-row items-center sm:items-start gap-3 whitespace-normal break-words leading-relaxed ${
-                      input.banner_color === "red" ? "bg-red-50 text-red-700 border-red-100" :
-                      input.banner_color === "green" ? "bg-green-50 text-green-700 border-green-100" :
-                      input.banner_color === "yellow" ? "bg-yellow-50 text-yellow-800 border-yellow-100" :
-                      "bg-blue-50 text-blue-700 border-blue-100"
-                    }`}>
+                    <div className={`mt-2 p-3 rounded-xl text-xs font-semibold border flex flex-col sm:flex-row items-center sm:items-start gap-3 whitespace-normal break-words leading-relaxed ${input.banner_color === "red" ? "bg-red-50 text-red-700 border-red-100" :
+                        input.banner_color === "green" ? "bg-green-50 text-green-700 border-green-100" :
+                          input.banner_color === "yellow" ? "bg-yellow-50 text-yellow-800 border-yellow-100" :
+                            "bg-blue-50 text-blue-700 border-blue-100"
+                      }`}>
                       <div className="shrink-0 pt-0.5">
-                        <CheckCircle className={`w-4 h-4 ${
-                          input.banner_color === "red" ? "text-red-400" :
-                          input.banner_color === "green" ? "text-green-400" :
-                          input.banner_color === "yellow" ? "text-yellow-500" :
-                          "text-blue-400"
-                        }`} />
+                        <CheckCircle className={`w-4 h-4 ${input.banner_color === "red" ? "text-red-400" :
+                            input.banner_color === "green" ? "text-green-400" :
+                              input.banner_color === "yellow" ? "text-yellow-500" :
+                                "text-blue-400"
+                          }`} />
                       </div>
                       <span className="flex-1 text-center sm:text-left">{input.banner_text}</span>
                     </div>

@@ -19,6 +19,11 @@
   --color-surface: #111111;
   --color-electric: #5e17eb;
   --color-subtle: #333333;
+
+  /* Theme tokens */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
 }
 
 :root {

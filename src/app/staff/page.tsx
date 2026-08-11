@@ -33,11 +33,11 @@ export default function StaffPage() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="relative flex flex-col md:flex-row justify-center items-center bg-white shadow-sm border border-gray-100 p-2 md:p-2 rounded-2xl sticky top-4 z-50 gap-2 md:gap-0 font-medium"
+          className="relative flex flex-col md:flex-row justify-center items-center bg-white dark:bg-[#111111] shadow-sm border border-gray-100 dark:border-zinc-800 p-2 md:p-2 rounded-2xl sticky top-4 z-50 gap-2 md:gap-0 font-medium"
         >
             
             {/* Tabs & Pills */}
-            <div className="flex flex-col md:flex-row items-stretch md:items-center w-full md:w-auto gap-2 md:gap-1 bg-gray-100 p-2 md:p-1 rounded-xl transition-all duration-300">
+            <div className="flex flex-col md:flex-row items-stretch md:items-center w-full md:w-auto gap-2 md:gap-1 bg-gray-100 dark:bg-zinc-900 p-2 md:p-1 rounded-xl transition-all duration-300">
                 
                 {/* Mobile Header: Profile + Toggle */}
                 <div className="flex flex-row gap-1 w-full md:w-auto">
@@ -45,8 +45,8 @@ export default function StaffPage() {
                         onClick={() => { setActiveTab('profile'); setIsMobileMenuOpen(false); }}
                         className={`flex-1 md:flex-none px-4 py-2 md:py-2 rounded-lg text-xs md:text-sm font-semibold transition-all whitespace-nowrap md:w-auto flex justify-center md:inline-block items-center gap-2 ${
                             activeTab === 'profile' 
-                            ? 'bg-white text-[#373737] shadow-sm' 
-                            : 'text-gray-500 hover:text-[#373737] bg-transparent hover:bg-gray-200'
+                            ? 'bg-white dark:bg-[#111111] text-[#373737] dark:text-white shadow-sm' 
+                            : 'text-gray-500 dark:text-gray-400 hover:text-[#373737] dark:hover:text-white bg-transparent hover:bg-gray-200 dark:hover:bg-zinc-800'
                         }`}
                     >
                         Mi Perfil
@@ -54,7 +54,7 @@ export default function StaffPage() {
                     
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="md:hidden px-3 py-2 rounded-lg text-xs font-semibold bg-white shadow-sm text-[#373737] border border-gray-100 flex items-center justify-center transition-all hover:bg-gray-50 active:scale-95"
+                        className="md:hidden px-3 py-2 rounded-lg text-xs font-semibold bg-white dark:bg-[#111111] shadow-sm text-[#373737] dark:text-white border border-gray-100 dark:border-zinc-800 flex items-center justify-center transition-all hover:bg-gray-50 dark:hover:bg-zinc-800 active:scale-95"
                     >
                         <span className="sr-only">Ver más</span>
                         {isMobileMenuOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -67,8 +67,8 @@ export default function StaffPage() {
                         onClick={() => { setActiveTab('agenda'); setIsMobileMenuOpen(false); }}
                         className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto flex justify-center items-center ${
                             activeTab === 'agenda' 
-                            ? 'bg-white text-[#373737] shadow-sm' 
-                            : 'text-gray-500 hover:text-[#373737]'
+                            ? 'bg-white dark:bg-[#111111] text-[#373737] dark:text-white shadow-sm' 
+                            : 'text-gray-500 dark:text-gray-400 hover:text-[#373737] dark:hover:text-white'
                         }`}
                     >
                         Agenda
@@ -77,8 +77,8 @@ export default function StaffPage() {
                         onClick={() => { setActiveTab('constancias'); setIsMobileMenuOpen(false); }}
                         className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap w-full md:w-auto flex justify-center items-center ${
                             activeTab === 'constancias' 
-                            ? 'bg-white text-[#373737] shadow-sm' 
-                            : 'text-gray-500 hover:text-[#373737]'
+                            ? 'bg-white dark:bg-[#111111] text-[#373737] dark:text-white shadow-sm' 
+                            : 'text-gray-500 dark:text-gray-400 hover:text-[#373737] dark:hover:text-white'
                         }`}
                     >
                         Constancias
@@ -87,8 +87,8 @@ export default function StaffPage() {
                         onClick={() => { setActiveTab('scanner'); setIsMobileMenuOpen(false); }}
                         className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap flex items-center justify-center gap-2 w-full md:w-auto ${
                             activeTab === 'scanner' 
-                            ? 'bg-white text-[#373737] shadow-sm' 
-                            : 'text-gray-500 hover:text-[#373737]'
+                            ? 'bg-white dark:bg-[#111111] text-[#373737] dark:text-white shadow-sm' 
+                            : 'text-gray-500 dark:text-gray-400 hover:text-[#373737] dark:hover:text-white'
                         }`}
                     >
                         <QrCode className="h-4 w-4" />
@@ -98,8 +98,8 @@ export default function StaffPage() {
                         onClick={() => { setActiveTab('users'); setIsMobileMenuOpen(false); }}
                         className={`px-6 py-3 md:py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap flex items-center justify-center gap-2 w-full md:w-auto ${
                             activeTab === 'users' 
-                            ? 'bg-white text-[#373737] shadow-sm' 
-                            : 'text-gray-500 hover:text-[#373737]'
+                            ? 'bg-white dark:bg-[#111111] text-[#373737] dark:text-white shadow-sm' 
+                            : 'text-gray-500 dark:text-gray-400 hover:text-[#373737] dark:hover:text-white'
                         }`}
                     >
                         <Users className="h-4 w-4" />

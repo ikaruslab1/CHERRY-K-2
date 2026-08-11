@@ -164,23 +164,23 @@ export function ShareEventModal({ conference, isOpen, onClose }: ShareEventModal
             exit={{ scale: 0.9, opacity: 0, y: 16 }}
             transition={{ type: 'spring', damping: 26, stiffness: 380 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden"
+            className="bg-white dark:bg-[#111111] w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-zinc-800"
           >
             {/* Header */}
-            <div className="relative px-6 pt-6 pb-4 border-b border-gray-100">
+            <div className="relative px-6 pt-6 pb-4 border-b border-gray-100 dark:border-zinc-800">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-[#DBF227] flex items-center justify-center">
                   <QrCode className="w-5 h-5 text-[#111]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-gray-900 font-syne tracking-tight">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white font-syne tracking-tight">
                     Compartir Evento
                   </h3>
-                  <p className="text-xs text-gray-500 truncate">{conference.title}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{conference.title}</p>
                 </div>
                 <button
                   onClick={onClose}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-700"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -192,14 +192,14 @@ export function ShareEventModal({ conference, isOpen, onClose }: ShareEventModal
               {/* Shareable card preview */}
               <div
                 ref={cardRef}
-                className="relative rounded-2xl border border-gray-200 bg-white overflow-hidden shadow-sm"
+                className="relative rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm"
               >
                 {/* Accent top stripe */}
                 <div className="h-2 bg-[#DBF227]" />
 
                 {/* QR Code centered */}
                 <div id="share-qr-canvas" className="flex flex-col items-center gap-4 px-6 py-8">
-                  <div className="p-3 border border-gray-100 rounded-2xl bg-white shadow-sm">
+                  <div className="p-3 border border-gray-100 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-950 shadow-sm">
                     <QRCodeCanvas
                       value={eventUrl}
                       size={200}
@@ -212,10 +212,10 @@ export function ShareEventModal({ conference, isOpen, onClose }: ShareEventModal
 
                   {/* Event name */}
                   <div className="text-center space-y-1 max-w-[260px]">
-                    <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-gray-400">
+                    <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
                       Escanea para acceder
                     </p>
-                    <h4 className="text-base font-bold text-gray-900 font-syne leading-tight text-balance">
+                    <h4 className="text-base font-bold text-gray-900 dark:text-white font-syne leading-tight text-balance">
                       {conference.title}
                     </h4>
                   </div>
@@ -230,9 +230,9 @@ export function ShareEventModal({ conference, isOpen, onClose }: ShareEventModal
               </div>
 
               {/* URL Preview */}
-              <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5">
-                <Link2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                <span className="text-xs text-gray-500 font-mono truncate flex-1">{eventUrl}</span>
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-900/60 border border-gray-200 dark:border-zinc-800 rounded-xl px-4 py-2.5">
+                <Link2 className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 shrink-0" />
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate flex-1">{eventUrl}</span>
               </div>
 
               {/* Action buttons */}
@@ -242,12 +242,12 @@ export function ShareEventModal({ conference, isOpen, onClose }: ShareEventModal
                   whileTap={{ scale: 0.96 }}
                   onClick={handleDownloadCard}
                   disabled={downloadingCard}
-                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-[#DBF227] transition-all group disabled:opacity-60"
+                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:border-[#DBF227] transition-all group disabled:opacity-60"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-[#DBF227] flex items-center justify-center transition-colors">
-                    <ImageDown className="w-4 h-4 text-gray-600 group-hover:text-black" />
+                  <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-zinc-800 group-hover:bg-[#DBF227] flex items-center justify-center transition-colors">
+                    <ImageDown className="w-4 h-4 text-gray-600 dark:text-gray-300 group-hover:text-black" />
                   </div>
-                  <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wide leading-tight text-center">
+                  <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide leading-tight text-center">
                     {downloadingCard ? 'Guardando…' : 'Guardar tarjeta'}
                   </span>
                 </motion.button>
@@ -256,12 +256,12 @@ export function ShareEventModal({ conference, isOpen, onClose }: ShareEventModal
                 <motion.button
                   whileTap={{ scale: 0.96 }}
                   onClick={handleDownloadQR}
-                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-[#DBF227] transition-all group"
+                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:border-[#DBF227] transition-all group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-gray-100 group-hover:bg-[#DBF227] flex items-center justify-center transition-colors">
-                    <QrCode className="w-4 h-4 text-gray-600 group-hover:text-black" />
+                  <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-zinc-800 group-hover:bg-[#DBF227] flex items-center justify-center transition-colors">
+                    <QrCode className="w-4 h-4 text-gray-600 dark:text-gray-300 group-hover:text-black" />
                   </div>
-                  <span className="text-[10px] font-bold text-gray-600 uppercase tracking-wide leading-tight text-center">
+                  <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide leading-tight text-center">
                     Guardar QR
                   </span>
                 </motion.button>
@@ -270,9 +270,9 @@ export function ShareEventModal({ conference, isOpen, onClose }: ShareEventModal
                 <motion.button
                   whileTap={{ scale: 0.96 }}
                   onClick={handleCopyLink}
-                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-[#DBF227] transition-all group"
+                  className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:border-[#DBF227] transition-all group"
                 >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${copied ? 'bg-green-100' : 'bg-gray-100 group-hover:bg-[#DBF227]'}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${copied ? 'bg-green-100 dark:bg-green-950/40' : 'bg-gray-100 dark:bg-zinc-800 group-hover:bg-[#DBF227]'}`}>
                     {copied
                       ? <Check className="w-4 h-4 text-green-600" />
                       : <Copy className="w-4 h-4 text-gray-600 group-hover:text-black" />
