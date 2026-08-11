@@ -144,18 +144,18 @@ export default function ProfilePage() {
   return (
     <SidebarAwareContainer className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24 md:pb-8">
       {/* Mobile Top Header */}
-      <div className="md:hidden flex justify-between items-center mb-4 pt-4 px-6 relative z-10">
-          <div className="flex flex-col">
+      <div className="md:hidden flex justify-between items-center mb-4 pt-4 px-4 relative z-10 w-full overflow-hidden">
+          <div className="flex flex-col min-w-0">
               <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest leading-none mb-1">Cherry K-2</span>
-              <h2 className="text-sm font-black uppercase tracking-wider leading-tight max-w-[200px] truncate text-[var(--foreground)]" title={currentConference?.title || 'Cherry-K'}>
+              <h2 className="text-sm font-black uppercase tracking-wider leading-tight max-w-[120px] xs:max-w-[180px] truncate text-[var(--foreground)]" title={currentConference?.title || 'Cherry-K'}>
                   {currentConference?.title || 'Cherry-K'}
               </h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 shrink-0">
               {isAdmin || isStaff ? (
                   <button 
                       onClick={() => router.push('/admin')}
-                      className="bg-[var(--color-acid)] text-black border border-black/10 px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all active:scale-95 shadow-sm cursor-pointer"
+                      className="bg-[var(--color-acid)] text-black border border-black/10 px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-sm cursor-pointer"
                   >
                       Admin
                   </button>
@@ -171,7 +171,7 @@ export default function ProfilePage() {
           </div>
       </div>
 
-      <div className="p-4 md:p-8 min-h-screen flex flex-col">
+      <div className="p-3 xs:p-4 md:p-8 min-h-screen flex flex-col">
         <ResponsiveNav 
           items={navItems}
           activeTab={activeTab}

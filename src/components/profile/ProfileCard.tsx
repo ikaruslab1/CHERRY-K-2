@@ -362,7 +362,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
         stiffness: 260, 
         damping: 20 
       }}
-      className="flex flex-col items-center gap-8 w-full max-w-[20rem] xs:max-w-xs sm:max-w-sm mx-auto"
+      className="flex flex-col items-center gap-8 w-full max-w-[18.5rem] xs:max-w-[20rem] sm:max-w-sm mx-auto"
     >
       <motion.div 
         className="relative w-full aspect-[9/16] [perspective:1000px] cursor-pointer group print:hidden select-none"

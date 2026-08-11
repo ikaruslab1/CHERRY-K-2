@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
+import { BottomNav } from '@/components/layout/BottomNav';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -117,6 +118,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   ];
 
+  const bottomNavItems = [
+    { id: 'profile_link', label: 'Mi Perfil', icon: <ArrowLeft className="w-5 h-5" />, show: true },
+    { id: 'attendance', label: 'Asistencia', icon: <QrCode className="w-5 h-5" />, show: true },
+    { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: true },
+    { id: 'metrics', label: 'Métricas', icon: <LayoutDashboard className="w-5 h-5" />, show: isAdmin }
+  ];
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)] text-[var(--foreground)] font-medium">
@@ -135,35 +143,54 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Check if we are on a full-width visual editor page
   const isFullWidthPage = pathname.startsWith('/admin/certificates') || pathname.startsWith('/admin/landing');
 
+  const handleBottomNavAction = (id: string) => {
+    if (id === 'profile_link') router.push('/profile');
+    else if (id === 'attendance') router.push('/admin/scanner');
+    else if (id === 'users') router.push('/admin/users');
+    else if (id === 'metrics') router.push('/admin');
+  };
+
   if (isFullWidthPage) {
     return (
-      <div className="min-h-screen bg-[var(--background)]">
+      <div className="min-h-screen bg-[var(--background)] pb-24 md:pb-0">
         <ResponsiveNav 
           items={navItems}
           activeTab={activeTab}
           setActiveTab={() => {}}
           handleSignOut={handleSignOut}
+          hideMobileToggle={true}
         />
         <div className="mt-12 md:mt-0 h-[calc(100vh-48px)] md:h-screen">
           {children}
         </div>
+        <BottomNav 
+          items={bottomNavItems}
+          activeTab={activeTab}
+          setActiveTab={handleBottomNavAction}
+        />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pb-24 md:pb-0">
       <ResponsiveNav 
         items={navItems}
         activeTab={activeTab}
         setActiveTab={() => {}}
         handleSignOut={handleSignOut}
+        hideMobileToggle={true}
       />
       <SidebarAwareContainer className="p-4 md:p-8 min-h-screen">
         <div className="max-w-7xl mx-auto space-y-8 mt-12 md:mt-0">
           {children}
         </div>
       </SidebarAwareContainer>
+      <BottomNav 
+        items={bottomNavItems}
+        activeTab={activeTab}
+        setActiveTab={handleBottomNavAction}
+      />
     </div>
   );
 }
