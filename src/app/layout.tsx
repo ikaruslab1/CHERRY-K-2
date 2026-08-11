@@ -81,6 +81,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <h1>version 1</h1>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} ${playfairDisplay.variable} ${syne.variable} ${manrope.variable} ${jetbrainsMono.variable} antialiased`}
       >
