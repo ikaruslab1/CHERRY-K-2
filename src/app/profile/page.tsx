@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { UserProfileView } from '@/components/profile/UserProfileView';
-import { User, Calendar, FileText, Mic, Crown, HelpCircle, LogOut, LayoutDashboard } from 'lucide-react';
+import { User, Calendar, FileText, Mic, Crown, HelpCircle, LogOut, LayoutDashboard, Settings } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
@@ -152,12 +152,16 @@ export default function ProfilePage() {
               </h2>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-              {isAdmin || isStaff ? (
+              {isOwner || isAdmin || isStaff ? (
                   <button 
-                      onClick={() => router.push('/admin')}
-                      className="bg-[var(--color-acid)] text-black border border-black/10 px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all active:scale-95 shadow-sm cursor-pointer"
+                      onClick={() => {
+                          if (isOwner) router.push('/owner');
+                          else router.push('/admin');
+                      }}
+                      className="p-2 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-800 rounded-xl shrink-0 transition-all active:scale-95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer flex items-center justify-center"
+                      title={isOwner ? 'Panel Owner' : (isAdmin ? 'Panel Admin' : 'Panel Staff')}
                   >
-                      Admin
+                      <Settings className="w-4 h-4 transition-transform duration-300 hover:rotate-45" style={{ color: 'var(--color-acid)' }} />
                   </button>
               ) : null}
               <ThemeToggle className="!w-auto !p-2 shrink-0 bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 border-transparent hover:border-[var(--border)]" />

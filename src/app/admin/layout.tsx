@@ -122,7 +122,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { id: 'profile_link', label: 'Mi Perfil', icon: <ArrowLeft className="w-5 h-5" />, show: true },
     { id: 'attendance', label: 'Asistencia', icon: <QrCode className="w-5 h-5" />, show: true },
     { id: 'users', label: 'Usuarios', icon: <Users className="w-5 h-5" />, show: true },
-    { id: 'metrics', label: 'Métricas', icon: <LayoutDashboard className="w-5 h-5" />, show: isAdmin }
+    { id: 'events', label: 'Eventos', icon: <Settings className="w-5 h-5" />, show: isAdmin },
+    { id: 'metrics', label: 'Métricas', icon: <LayoutDashboard className="w-5 h-5" />, show: isAdmin },
+    { id: 'embeddings', label: 'Embeddings', icon: <Code className="w-5 h-5" />, show: isAdmin },
+    { id: 'design-certificates', label: 'Constancias', icon: <Award className="w-5 h-5" />, show: isAdmin },
+    { id: 'landing-editor', label: 'Landing', icon: <Palette className="w-5 h-5" />, show: isAdmin }
   ];
 
   if (loading) {
@@ -147,7 +151,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (id === 'profile_link') router.push('/profile');
     else if (id === 'attendance') router.push('/admin/scanner');
     else if (id === 'users') router.push('/admin/users');
+    else if (id === 'events') router.push('/admin/events');
     else if (id === 'metrics') router.push('/admin');
+    else if (id === 'embeddings') router.push('/admin/embeddings');
+    else if (id === 'design-certificates') router.push('/admin/certificates');
+    else if (id === 'landing-editor') router.push('/admin/landing');
   };
 
   if (isFullWidthPage) {
