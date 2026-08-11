@@ -87,7 +87,7 @@ export default function StaffPage() {
       <div className="p-4 md:p-8 min-h-screen flex flex-col">
         <ResponsiveNav 
           items={navItems}
-          activeTab={activeTab === 'profile_link' ? '' : activeTab}
+          activeTab={activeTab}
           setActiveTab={(id) => {
             const item = navItems.find(i => i.id === id);
             if (item && item.onClick) {
