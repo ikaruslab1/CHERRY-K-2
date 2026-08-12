@@ -31,7 +31,7 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
                 .from('profiles')
                 .select('is_owner')
                 .eq('id', userId)
-                .single();
+                .maybeSingle();
              
              if (profile && profile.is_owner) {
                  return 'owner';
@@ -43,7 +43,7 @@ export function useRoleAuth(allowedRoles: AllowedRole[] = [], redirectTo: string
                 .select('role')
                 .eq('user_id', userId)
                 .eq('conference_id', conferenceId)
-                .single();
+                .maybeSingle();
              
              if (localRole && localRole.role) {
                  return localRole.role as AllowedRole;

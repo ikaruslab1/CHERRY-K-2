@@ -50,7 +50,7 @@ export default function ProfilePage() {
   const { t } = useLanguage();
   const { loading: authLoading, userRole } = useRoleAuth();
   const [sessionLoading, setSessionLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'gafete' | 'agenda' | 'participation' | 'constancias' | 'faq'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'gafete' | 'agenda' | 'participation' | 'constancias' | 'faq'>('gafete');
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
 
   const isAdmin = userRole === 'admin' || userRole === 'owner';

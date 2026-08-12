@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { getCurrentUserProfile } from '@/actions/auth';
 import { 
   User, 
@@ -49,13 +50,37 @@ export function ProfileDetailsView() {
   useEffect(() => {
     async function fetchProfile() {
       setLoading(true);
-      const res = await getCurrentUserProfile();
-      if (res.success && res.profile) {
-        setProfile(res.profile as UserProfileData);
-      } else {
-        setError(res.error || 'No se pudo cargar la información del perfil.');
+      setError(null);
+      try {
+        // 1. Try client browser session first
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: pData } = await supabase
+            .from('profiles')
+            .select('id, short_id, username, first_name, last_name, degree, gender, email, phone, role, user_password, created_at')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          if (pData) {
+            setProfile(pData as UserProfileData);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // 2. Fallback to Server Action
+        const res = await getCurrentUserProfile();
+        if (res.success && res.profile) {
+          setProfile(res.profile as UserProfileData);
+        } else {
+          setError(res.error || 'No se pudo cargar la información del perfil.');
+        }
+      } catch (err: any) {
+        console.error('Error fetching profile in component:', err);
+        setError('Error al conectar con la base de datos.');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchProfile();
   }, []);
