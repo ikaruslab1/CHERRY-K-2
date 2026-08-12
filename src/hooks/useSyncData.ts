@@ -29,7 +29,7 @@ export function useSyncData() {
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
         
         if (profile) {
           console.log(`[useSyncData] Processing profile for ${profile.first_name}, global is_owner: ${profile.is_owner}`);

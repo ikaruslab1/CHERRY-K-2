@@ -34,7 +34,6 @@ interface UserProfileData {
   gender: string;
   email: string;
   phone: string;
-  role: string;
   user_password?: string;
   created_at?: string;
 }
@@ -57,7 +56,7 @@ export function ProfileDetailsView() {
         if (session?.user) {
           const { data: pData } = await supabase
             .from('profiles')
-            .select('id, short_id, username, first_name, last_name, degree, gender, email, phone, role, user_password, created_at')
+            .select('id, short_id, username, first_name, last_name, degree, gender, email, phone, user_password, created_at')
             .eq('id', session.user.id)
             .maybeSingle();
 

@@ -255,9 +255,9 @@ export async function getCurrentUserProfile() {
 
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('id, short_id, username, first_name, last_name, degree, gender, email, phone, role, user_password, created_at')
+      .select('id, short_id, username, first_name, last_name, degree, gender, email, phone, user_password, created_at')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError || !profile) {
       return { success: false, error: 'Perfil no encontrado' };
