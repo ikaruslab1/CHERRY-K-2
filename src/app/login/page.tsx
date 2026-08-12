@@ -190,8 +190,8 @@ export default function LoginPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground font-manrope text-gray-700 pb-4">
                     {view === 'login' 
-                        ? 'Ingresa tu ID de acceso para continuar' 
-                        : 'Completa tus datos para generar tu ID digital'}
+                        ? 'Ingresa tu usuario y contraseña para continuar' 
+                        : 'Completa tus datos para crear tu cuenta'}
                 </p>
                 {/* Show active event in form header too if valid */}
                 {currentConference && (
@@ -241,7 +241,7 @@ export default function LoginPage() {
                     </p>
                 ) : (
                     <p className="text-gray-500">
-                        ¿Ya tienes tu ID?{' '}
+                        ¿Ya tienes cuenta?{' '}
                         <button 
                             onClick={() => setView('login')}
                             className="font-bold text-blue-600 hover:text-blue-500 hover:underline transition-all"

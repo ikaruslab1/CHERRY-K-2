@@ -83,12 +83,12 @@
   "auth": {
     "welcome_back": "Bienvenido de nuevo",
     "create_account": "Crear nueva cuenta",
-    "enter_id": "Ingresa tu ID de acceso para continuar",
+    "enter_id": "Ingresa tu usuario y contraseña para continuar",
     "complete_extended": "Completa el formulario extendido con tus datos.",
-    "complete_details": "Completa tus datos para generar tu ID digital",
+    "complete_details": "Completa tus datos para crear tu cuenta",
     "no_account_yet": "¿Aún no tienes cuenta?",
     "register_here": "Regístrate aquí",
-    "already_have_id": "¿Ya tienes tu ID?",
+    "already_have_id": "¿Ya tienes cuenta?",
     "log_in": "Inicia sesión",
     "custom_fields_active": "Campos Personalizados Activos",
     "custom_fields_msg": "Se han agregado nuevos campos obligatorios al formulario de registro para este evento."

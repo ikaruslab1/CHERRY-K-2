@@ -68,6 +68,7 @@ export interface UserProfile {
   first_name: string;
   last_name: string;
   short_id: string;
+  username?: string;
   degree: string;
   role: 'user' | 'staff' | 'admin' | 'ponente' | 'owner' | 'vip';
   is_owner: boolean;

@@ -21,6 +21,12 @@
       "sourceType": "github",
       "computedHash": "4764bacd34af8e5c27a85ca01a90197afcf1f1ed1785975ba91d9b80dff60e2d"
     },
+    "email-and-password-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/emailAndPassword/SKILL.md",
+      "computedHash": "7786d722fa682b3d6a99793e73a9d51b59becefa595676134a993020633e068f"
+    },
     "i18n-expert": {
       "source": "daymade/claude-code-skills",
       "sourceType": "github",

@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   short_id TEXT UNIQUE,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
+  username TEXT UNIQUE,
   email TEXT UNIQUE NOT NULL,
   phone TEXT,
   degree TEXT CHECK (degree IN ('Licenciatura', 'Maestría', 'Doctorado', 'Especialidad', 'Estudiante', 'Profesor')),
