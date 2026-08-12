@@ -38,7 +38,11 @@ interface UserProfileData {
   created_at?: string;
 }
 
-export function ProfileDetailsView() {
+interface ProfileDetailsViewProps {
+  role?: string;
+}
+
+export function ProfileDetailsView({ role = 'user' }: ProfileDetailsViewProps) {
   const { language, t } = useLanguage();
   const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -146,7 +150,7 @@ export function ProfileDetailsView() {
                 {fullName}
               </h2>
               <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-zinc-700">
-                {profile.role}
+                {role}
               </span>
             </div>
             <p className="text-xs text-gray-400 font-mono">

@@ -208,7 +208,7 @@ export default function ProfilePage() {
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.3 }}
                   >
-                      {activeTab === 'profile' && <ProfileDetailsView />}
+                      {activeTab === 'profile' && <ProfileDetailsView role={userRole || undefined} />}
                       {activeTab === 'gafete' && <UserProfileView />}
                       {activeTab === 'agenda' && <AgendaView />}
                       {activeTab === 'constancias' && <CertificatesView />}
