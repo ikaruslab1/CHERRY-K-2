@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LogOut, X, Menu, ChevronLeft, ChevronRight, LayoutGrid, Bell, BellOff, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSidebar } from '@/context/SidebarContext';
@@ -52,25 +52,25 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
     const itemInactive = "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-black dark:hover:text-white transition-colors duration-200";
 
     const [isVisible, setIsVisible] = useState(true);
-    const [lastScrollY, setLastScrollY] = useState(0);
+    const lastScrollYRef = useRef(0);
 
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
             
-            if (currentScrollY > lastScrollY && currentScrollY > 10) {
+            if (currentScrollY > lastScrollYRef.current && currentScrollY > 10) {
                 // Scrolling down
                 setIsVisible(false);
             } else {
                 // Scrolling up
                 setIsVisible(true);
             }
-            setLastScrollY(currentScrollY);
+            lastScrollYRef.current = currentScrollY;
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [lastScrollY]);
+    }, []);
 
     return (
         <>

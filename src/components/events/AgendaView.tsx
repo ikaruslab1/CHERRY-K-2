@@ -247,7 +247,7 @@ export function AgendaView() {
             </div>
             <input
               type="text"
-              className="block w-full pl-11 pr-4 py-2.5 border border-gray-300 dark:border-zinc-800 rounded-lg leading-5 bg-white dark:bg-[#111111] text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--color-acid)] focus:border-transparent text-sm transition-all"
+              className="block w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-acid)] focus:border-transparent text-sm transition-all shadow-sm"
               placeholder={t('agenda.search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -263,12 +263,12 @@ export function AgendaView() {
             transition={{ delay: 0.2 }}
             className="grid grid-cols-2 gap-3"
           >
-            <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-zinc-800 rounded-lg p-3.5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)]">
+            <div className="bg-white border border-gray-200 rounded-xl p-3.5 shadow-sm">
               <div className="flex items-center gap-2 mb-1">
-                <Star className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
-                <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t('agenda.interest')}</span>
+                <Star className="h-3.5 w-3.5" style={{ color: 'var(--color-acid)' }} />
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('agenda.interest')}</span>
               </div>
-              <p className="text-xl font-bold text-[#373737] dark:text-white">{interests.size}</p>
+              <p className="text-xl font-bold text-[#373737]">{interests.size}</p>
             </div>
             
             <div 
@@ -461,7 +461,7 @@ export function AgendaView() {
                             return (
                               <div key={date} className="relative">
                                 {/* Minimalist Urban Header Design */}
-                                <div className="sticky top-0 z-30 py-4 bg-[#fafafa]/95 backdrop-blur-md border-b border-gray-200">
+                                <div className="sticky top-0 z-30 py-4 bg-white/95 backdrop-blur-md border-b border-gray-200">
                                   <div className="flex items-center justify-between px-1">
                                     <div className="flex items-baseline gap-3">
                                       <h4 className="text-3xl font-extrabold text-black uppercase tracking-tight">

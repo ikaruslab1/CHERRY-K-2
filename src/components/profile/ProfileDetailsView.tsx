@@ -140,16 +140,29 @@ export function ProfileDetailsView({ role = 'user' }: ProfileDetailsViewProps) {
       <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xl shadow-gray-200/40 dark:shadow-none space-y-6">
         
         {/* Profile Header */}
-        <div className="flex flex-col sm:flex-row items-center gap-5 border-b border-gray-100 dark:border-zinc-800 pb-6 text-center sm:text-left">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-gray-900 to-gray-700 text-white flex items-center justify-center text-2xl font-black shadow-md shrink-0">
+        <div className="flex flex-col sm:flex-row items-center gap-5 border-b border-gray-100 pb-6 text-center sm:text-left">
+          <div
+            className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black shadow-md shrink-0"
+            style={{
+              background: 'var(--color-acid-gradient)',
+              color: 'var(--color-acid-text, #121212)'
+            }}
+          >
             {profile.first_name?.[0]?.toUpperCase()}{profile.last_name?.[0]?.toUpperCase()}
           </div>
           <div className="flex-1 space-y-1">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-syne">
+              <h2 className="text-2xl font-bold text-gray-900 font-syne">
                 {fullName}
               </h2>
-              <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-zinc-700">
+              <span
+                className="text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full border"
+                style={{
+                  backgroundColor: 'rgb(var(--color-acid-rgb) / 0.15)',
+                  borderColor: 'rgb(var(--color-acid-rgb) / 0.3)',
+                  color: 'var(--color-acid-text, #121212)'
+                }}
+              >
                 {role}
               </span>
             </div>
@@ -162,7 +175,7 @@ export function ProfileDetailsView({ role = 'user' }: ProfileDetailsViewProps) {
         {/* Section 1: Access Credentials (ID, Username, Password) */}
         <div className="space-y-4">
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
-            <Lock className="w-4 h-4 text-blue-500" />
+            <Lock className="w-4 h-4" style={{ color: 'var(--color-acid)' }} />
             Credenciales de Acceso
           </h3>
 

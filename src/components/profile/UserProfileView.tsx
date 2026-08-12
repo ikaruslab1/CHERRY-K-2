@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { ProfileCard } from '@/components/profile/ProfileCard';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
+import { Loader2 } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -49,7 +50,7 @@ export function UserProfileView() {
   );
 
   return (
-    <div className="flex relative justify-center items-center w-full py-2 xs:py-4 md:py-8 min-h-0 md:min-h-[calc(100vh-12rem)] animate-in fade-in duration-700">
+    <div className="flex relative justify-center items-center w-full py-2 xs:py-4 md:py-8 min-h-[70vh] md:min-h-[calc(100vh-12rem)] animate-in fade-in duration-700">
         {/* Glow backdrop using the conference accent gradient */}
         <div 
           className="absolute w-[280px] h-[280px] xs:w-[350px] xs:h-[350px] rounded-full blur-[80px] xs:blur-[100px] opacity-15 pointer-events-none -z-10 transition-all duration-500"
@@ -57,7 +58,12 @@ export function UserProfileView() {
         />
         {profile ? (
             <ProfileCard profile={profile} />
-        ) : null}
+        ) : (
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-[var(--color-acid)]" />
+              <p className="text-xs text-gray-400 font-medium">Cargando gafete...</p>
+            </div>
+        )}
     </div>
   );
 }

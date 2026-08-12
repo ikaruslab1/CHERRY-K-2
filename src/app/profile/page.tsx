@@ -199,7 +199,7 @@ export default function ProfilePage() {
         />
         
         <div className="max-w-4xl mx-auto space-y-6 mt-0 md:mt-0 flex-1 w-full relative z-10">
-          <div className="p-0 min-h-0">
+          <div className="p-0">
                <AnimatePresence mode="wait">
                   <motion.div
                       key={activeTab}

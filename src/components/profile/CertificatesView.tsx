@@ -137,12 +137,12 @@ export function CertificatesView() {
                {showLogs ? 'Ocultar desglose de asistencias' : 'Ver desglose de asistencias'}
              </button>
              
-             {showLogs && (
+              {showLogs && (
                <div className="mt-3 space-y-2 max-h-48 overflow-y-auto pr-1 animate-in slide-in-from-top-1 duration-200">
                  {attendanceLogs.length > 0 ? (
                    attendanceLogs.map((log) => (
-                     <div key={log.id} className="flex justify-between items-center text-xs py-2 px-3 bg-white/5 rounded-xl border border-white/5">
-                       <span className="text-gray-200 font-medium truncate max-w-[200px] sm:max-w-xs">{log.event_title}</span>
+                     <div key={log.id} className="flex justify-between items-center text-xs py-2 px-3 bg-gray-50 rounded-xl border border-gray-100">
+                       <span className="text-gray-700 font-medium truncate max-w-[200px] sm:max-w-xs">{log.event_title}</span>
                        <span className="text-gray-400 font-mono text-[10px] shrink-0">
                          {new Date(log.scanned_at).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
                        </span>

@@ -53,7 +53,11 @@ export function CertificateCard({ cert, onView, formatDate }: CertificateCardPro
                 
                 <Button 
                     onClick={() => onView(cert)}
-                    className="w-full mt-2 bg-[#373737] dark:bg-zinc-850 hover:bg-[#2a2a2a] dark:hover:bg-zinc-700 text-white flex items-center justify-center gap-2 text-xs md:text-sm h-9 md:h-10"
+                    className="w-full mt-2 flex items-center justify-center gap-2 text-xs md:text-sm h-9 md:h-10 rounded-lg font-bold uppercase tracking-wide transition-all"
+                    style={{
+                      backgroundColor: 'var(--color-acid)',
+                      color: 'var(--color-acid-text, #121212)'
+                    }}
                 >
                     <Eye className="h-3.5 w-3.5" />
                     Visualizar

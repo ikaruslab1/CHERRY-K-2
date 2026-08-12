@@ -153,20 +153,20 @@ export function AgendaItem({
   };
 
   // Dynamic styles based on state
-  const isDark = isInterested && !isAttended;
+  const isDark = false; // Always light theme - no dark card mode
   
   const containerBase = "group relative flex w-full flex-col sm:flex-row overflow-hidden rounded-2xl border transition-all duration-300";
   const containerStyles = isAttended 
-    ? "bg-white dark:bg-[#111111] border-transparent" // Detached state handles visuals
-    : isDark 
-      ? "bg-[#121212] dark:bg-[#111111] border-[#121212] dark:border-zinc-800 text-white shadow-lg" 
-      : "bg-white dark:bg-[#111111] border-gray-300 dark:border-zinc-800 text-[#121212] dark:text-white shadow-sm hover:border-gray-400 dark:hover:border-zinc-700 hover:shadow-md";
+    ? "bg-white border-[var(--color-acid)] shadow-sm" 
+    : isInterested 
+      ? "bg-white border-[var(--color-acid)]/40 shadow-sm hover:border-[var(--color-acid)] hover:shadow-md" 
+      : "bg-white border-gray-200 shadow-sm hover:border-gray-300 hover:shadow-md";
 
   const stubStyles = isAttended
     ? "bg-[var(--color-acid)] text-[#121212]"
-    : isDark
-      ? "bg-[#1f1f1f] text-gray-400"
-      : "bg-gray-50 dark:bg-zinc-900 text-gray-500 dark:text-gray-400 border-l border-gray-200 dark:border-zinc-800 border-dashed"; // Added dashed border for visual separation in default
+    : isInterested
+      ? "bg-[var(--color-acid)]/10 text-gray-600 border-l border-[var(--color-acid)]/30"
+      : "bg-gray-50 text-gray-500 border-l border-gray-200 border-dashed";
 
   return (
     <div className="relative w-full"> 
@@ -183,16 +183,12 @@ export function AgendaItem({
         <div className="flex-1 p-5 sm:p-6 flex flex-col gap-4 relative z-10">
           <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex flex-wrap items-center gap-2">
-                  <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border ${
-                    isDark ? "bg-white text-black border-white" : "bg-black dark:bg-zinc-800 text-white border-black dark:border-zinc-750"
-                  }`}>
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border bg-gray-900 text-white border-gray-900`}>
                       {getTranslatedField(event, 'type', language)}
                   </span>
 
                   {event.gives_certificate && (
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
-                        isDark ? "border-gray-700 bg-[#1f1f1f] text-gray-300" : "border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/60 text-gray-600 dark:text-gray-400"
-                      }`}>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider border-gray-200 bg-gray-50 text-gray-600`}>
                           <Medal className="h-3 w-3" /> {t('agenda.certificate')}
                       </span>
                   )}
@@ -215,11 +211,7 @@ export function AgendaItem({
 
               {/* Progress for Multi-day Events */}
               {(event.duration_days || 1) > 1 && (
-                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border ${
-                      isDark 
-                        ? "bg-amber-950/30 border-amber-900/50 text-amber-200" 
-                        : "bg-amber-50 border-amber-100 text-amber-700" 
-                  }`}>
+                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border bg-amber-50 border-amber-100 text-amber-700`}>
                       {attendanceCount >= (event.duration_days || 1) ? (
                          <CheckCircle2 className="h-3.5 w-3.5" />
                       ) : (
@@ -240,15 +232,15 @@ export function AgendaItem({
           </div>
 
           <div className="space-y-1">
-              <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest font-geist-sans">{formatMexicoTime(eventDate, locale)}</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-geist-sans">{formatMexicoTime(eventDate, locale)}</span>
               
-              <h3 className={`pb-4 text-xl sm:text-2xl font-bold leading-tight tracking-tight ${isDark ? "text-white" : "text-[#121212] dark:text-white"}`}>
+              <h3 className={`pb-4 text-xl sm:text-2xl font-bold leading-tight tracking-tight text-[#121212]`}>
                   {getTranslatedField(event, 'title', language)}
               </h3>
               
               <div className="flex flex-col gap-1.5">
                   {event.location && (
-                  <div className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide mt-1 ${isDark ? "text-gray-500" : "text-gray-400 dark:text-gray-500"}`}>
+                  <div className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide mt-1 text-gray-400`}>
                       <MapPin className="h-3.5 w-3.5" />
                       {getTranslatedField(event, 'location', language)}
                   </div>
@@ -262,11 +254,7 @@ export function AgendaItem({
                   {event.custom_links.map((link, idx) => {
                       const IconComp = ICON_MAP[link.icon] || LinkIcon;
                       return (
-                          <div key={idx} className={`p-1.5 rounded-lg border transition-colors ${
-                            isDark 
-                              ? "border-gray-800 bg-[#1f1f1f] text-gray-400 hover:text-white hover:border-gray-600" 
-                              : "border-gray-100 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-black"
-                          }`} title={link.label}>
+                          <div key={idx} className={`p-1.5 rounded-lg border transition-colors border-gray-100 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-black`} title={link.label}>
                               <IconComp size={14} />
                           </div>
                       );
@@ -277,16 +265,16 @@ export function AgendaItem({
 
         {/* Perforation / Connector - Animated only if attended */}
         <div className={`hidden sm:flex flex-col items-center justify-between py-3 relative w-6 z-20`}>
-           <div className={`absolute top-[-50%] bottom-[-50%] left-1/2 w-0 border-r-2 border-dashed ${isDark ? "border-[#333] dark:border-zinc-800" : "border-gray-300 dark:border-zinc-800"}`} />
-           <div className={`absolute top-[-6px] left-[50%] translate-x-[-50%] h-3 w-3 rounded-full bg-white dark:bg-[#050505] z-30`} />
-           <div className={`absolute bottom-[-6px] left-[50%] translate-x-[-50%] h-3 w-3 rounded-full bg-white dark:bg-[#050505] z-30`} />
+           <div className={`absolute top-[-50%] bottom-[-50%] left-1/2 w-0 border-r-2 border-dashed border-gray-200`} />
+           <div className={`absolute top-[-6px] left-[50%] translate-x-[-50%] h-3 w-3 rounded-full bg-[var(--background)] z-30`} />
+           <div className={`absolute bottom-[-6px] left-[50%] translate-x-[-50%] h-3 w-3 rounded-full bg-[var(--background)] z-30`} />
         </div>
 
          {/* Mobile Perforation */}
         <div className="flex sm:hidden flex-row items-center justify-between px-3 relative h-6 w-full z-20">
-           <div className={`absolute left-[-50%] right-[-50%] top-1/2 h-0 border-b-2 border-dashed ${isDark ? "border-[#333] dark:border-zinc-800" : "border-gray-300 dark:border-zinc-800"}`} />
-           <div className={`absolute left-[-6px] top-[50%] translate-y-[-50%] h-3 w-3 rounded-full bg-white dark:bg-[#050505] z-30`} />
-           <div className={`absolute right-[-6px] top-[50%] translate-y-[-50%] h-3 w-3 rounded-full bg-white dark:bg-[#050505] z-30`} />
+           <div className={`absolute left-[-50%] right-[-50%] top-1/2 h-0 border-b-2 border-dashed border-gray-200`} />
+           <div className={`absolute left-[-6px] top-[50%] translate-y-[-50%] h-3 w-3 rounded-full bg-[var(--background)] z-30`} />
+           <div className={`absolute right-[-6px] top-[50%] translate-y-[-50%] h-3 w-3 rounded-full bg-[var(--background)] z-30`} />
         </div>
 
         {/* Right Section - Stub */}
