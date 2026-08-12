@@ -224,30 +224,20 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
       const result = await registerUser(formattedData);
       if (result.success && result.data) {
         localStorage.removeItem("register_form_data"); // Clear saved data
-
+        
         const shortId = result.data.short_id;
         const assignedUsername = result.data.username;
         const fullName = `${formattedData.firstName} ${formattedData.lastName}`;
-<<<<<<< HEAD
         
         // Show success screen
-=======
-
-        // Show success message briefly
->>>>>>> 04f5753faa187366369ad5317a4143825cd305ad
         setSuccessData({
           id: shortId,
           username: assignedUsername,
           name: fullName,
           email: formattedData.email,
         });
-<<<<<<< HEAD
         
         // Auto-login after brief delay using credentials
-=======
-
-        // Auto-login after a short delay
->>>>>>> 04f5753faa187366369ad5317a4143825cd305ad
         setIsAutoLoggingIn(true);
         setTimeout(async () => {
           if (isEmbedded) {
@@ -258,13 +248,7 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
               window.location.href = loginUrl;
             }
           } else {
-<<<<<<< HEAD
             const loginResult = await loginWithCredentials(assignedUsername, formattedData.password);
-=======
-            // --- FLUJO NORMAL: Server Action ---
-            const loginResult = await loginWithId(shortId);
-
->>>>>>> 04f5753faa187366369ad5317a4143825cd305ad
             if (loginResult.success) {
               window.location.href = '/profile';
             } else {
@@ -272,13 +256,8 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
               console.error("Auto-login failed:", loginResult.error);
             }
           }
-<<<<<<< HEAD
         }, 2000);
         
-=======
-        }, 2000); // 2 second delay to show success message
-
->>>>>>> 04f5753faa187366369ad5317a4143825cd305ad
       } else {
         alert((locale === 'en' ? "Error registering: " : "Error al registrar: ") + result.error);
         if (result.error?.toLowerCase().includes("usuario")) {
@@ -350,38 +329,23 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
         ) : (
           <>
             <p className="text-sm text-gray-400 mb-6">
-<<<<<<< HEAD
               {locale === 'en' 
                 ? 'Save your username and password to log in in the future.' 
                 : 'Guarda tu usuario y contraseña para futuros inicios de sesión.'
-=======
-              {locale === 'en'
-                ? 'Save this ID. You will need it to enter the event and register your attendance.'
-                : 'Guarda este ID. Lo necesitarás para ingresar al evento y registrar tu asistencia.'
->>>>>>> 04f5753faa187366369ad5317a4143825cd305ad
               }
             </p>
 
             <Button
               onClick={async () => {
                 if (isEmbedded) {
-<<<<<<< HEAD
                   const loginUrl = `${window.location.origin}/login?user=${encodeURIComponent(successData?.username || '')}`;
-=======
-                  // Redirigir a /login?code=ID en la ventana padre (mismo mecanismo que el auto-login)
-                  const loginUrl = `${window.location.origin}/login?code=${encodeURIComponent(successData?.id || '')}`;
->>>>>>> 04f5753faa187366369ad5317a4143825cd305ad
                   if (window.top) {
                     window.top.location.href = loginUrl;
                   } else {
                     window.location.href = loginUrl;
                   }
                 } else {
-<<<<<<< HEAD
                   window.location.href = '/login';
-=======
-                  window.location.reload();
->>>>>>> 04f5753faa187366369ad5317a4143825cd305ad
                 }
               }}
               variant="primary"
@@ -401,7 +365,6 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
   const lastNameReg = register("lastName");
 
   return (
-<<<<<<< HEAD
     <div className="w-full overflow-hidden relative">
       {/* Progress Step Indicator */}
       <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
@@ -426,257 +389,6 @@ export function RegisterForm({ conferenceId, isEmbedded, customInputs = [], fiel
             {locale === 'en' ? 'Access Credentials' : 'Credenciales'}
           </span>
         </div>
-=======
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-5 w-full text-left"
-    >
-      <div className="space-y-5">
-        {(() => {
-          const defaultOrder = ['nombre', 'apellidos', 'grado', 'genero', 'email', 'confirmEmail', 'telefono'];
-          const orderToUse = fieldsOrder && fieldsOrder.length > 0 ? fieldsOrder : [...defaultOrder, ...customInputs.map(ci => ci.id)];
-
-          return orderToUse.map((fieldId) => {
-            // Render fixed fields
-            if (fieldId === 'nombre' || fieldId === 'apellidos') {
-              if (fieldId === 'apellidos') return null;
-
-              return (
-                <div key="name-grid" className="grid grid-cols-1 xs:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-bold text-[#373737] ml-1">
-                      {locale === 'en' ? 'First Name' : 'Nombre'} <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      {...firstNameReg}
-                      onBlur={(e) => handleBlur(e, "firstName", firstNameReg.onBlur)}
-                      placeholder={locale === 'en' ? "Ex. John" : "Ej. Juan"}
-                      className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${errors.firstName ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"
-                        }`}
-                    />
-                    {errors.firstName && <p className="text-red-500 text-xs ml-1">{errors.firstName.message}</p>}
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-sm font-bold text-[#373737] ml-1">
-                      {locale === 'en' ? 'Last Names' : 'Apellidos'} <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      {...lastNameReg}
-                      onBlur={(e) => handleBlur(e, "lastName", lastNameReg.onBlur)}
-                      placeholder={locale === 'en' ? "Ex. Smith Jones" : "Ej. Pérez López"}
-                      className={`rounded-xl border transition-all h-12 text-black placeholder:text-gray-500 ${errors.lastName ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"
-                        }`}
-                    />
-                    {errors.lastName && <p className="text-red-500 text-xs ml-1">{errors.lastName.message}</p>}
-                  </div>
-                </div>
-              );
-            }
-
-            if (fieldId === 'grado') {
-              return (
-                <div key="grado" className="space-y-1.5">
-                  <label className="text-sm font-bold text-[#373737] ml-1">
-                    {locale === 'en' ? 'Academic Degree' : 'Grado Académico'} <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    {...register("degree")}
-                    className={`w-full h-12 rounded-xl border transition-all px-3 text-black bg-white focus:border-black outline-none ${errors.degree ? "border-red-500 bg-red-50" : "border-gray-200"
-                      }`}
-                  >
-                    <option value="">{locale === 'en' ? 'Select a degree' : 'Seleccione un grado'}</option>
-                    <option value="Licenciatura">{locale === 'en' ? 'Bachelor\'s' : 'Licenciatura'}</option>
-                    <option value="Maestría">{locale === 'en' ? 'Master\'s' : 'Maestría'}</option>
-                    <option value="Doctorado">{locale === 'en' ? 'Doctorate' : 'Doctorado'}</option>
-                    <option value="Especialidad">{locale === 'en' ? 'Specialty' : 'Especialidad'}</option>
-                    <option value="Estudiante">{locale === 'en' ? 'Student' : 'Estudiante'}</option>
-                    <option value="Profesor">{locale === 'en' ? 'Professor' : 'Profesor'}</option>
-                  </select>
-                  {errors.degree && <p className="text-red-500 text-xs ml-1">{errors.degree.message}</p>}
-                </div>
-              );
-            }
-
-            if (fieldId === 'genero') {
-              return (
-                <div key="genero" className="space-y-1.5">
-                  <label className="text-sm font-bold text-[#373737] ml-1">
-                    {locale === 'en' ? 'Gender' : 'Género'} <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    {...register("gender")}
-                    className={`w-full h-12 rounded-xl border transition-all px-3 text-black bg-white focus:border-black outline-none ${errors.gender ? "border-red-500 bg-red-50" : "border-gray-200"
-                      }`}
-                  >
-                    <option value="">{locale === 'en' ? 'Select a gender' : 'Seleccione un género'}</option>
-                    <option value="Masculino">{locale === 'en' ? 'Male' : 'Masculino'}</option>
-                    <option value="Femenino">{locale === 'en' ? 'Female' : 'Femenino'}</option>
-                    <option value="Neutro">{locale === 'en' ? 'Neutral' : 'Neutro'}</option>
-                  </select>
-                  {errors.gender && <p className="text-red-500 text-xs ml-1">{errors.gender.message}</p>}
-                </div>
-              );
-            }
-            if (fieldId === 'email') {
-
-              return (
-                <div key="email" className="space-y-1.5">
-                  <label className="text-sm font-bold text-[#373737] ml-1">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    {...register("email")}
-                    type="email"
-                    placeholder="juan@example.com"
-                    className={`rounded-xl border h-12 text-black ${errors.email ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"}`}
-                  />
-                  {errors.email && <p className="text-red-500 text-xs ml-1">{errors.email.message}</p>}
-                </div>
-              );
-            }
-
-            if (fieldId === 'confirmEmail') {
-              return (
-                <div key="confirmEmail" className="space-y-1.5">
-                  <label className="text-sm font-bold text-[#373737] ml-1">
-                    {locale === 'en' ? 'Confirm Email' : 'Confirmar Email'} <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    {...register("confirmEmail")}
-                    type="email"
-                    placeholder="juan@example.com"
-                    className={`rounded-xl border h-12 text-black ${errors.confirmEmail ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"}`}
-                  />
-                  {errors.confirmEmail && <p className="text-red-500 text-xs ml-1">{errors.confirmEmail.message}</p>}
-                </div>
-              );
-            }
-
-            if (fieldId === 'telefono') {
-              return (
-                <div key="telefono" className="space-y-1.5">
-                  <label className="text-sm font-bold text-[#373737] ml-1">
-                    {locale === 'en' ? 'Phone' : 'Teléfono'} <span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    {...register("phone")}
-                    type="tel"
-                    placeholder={locale === 'en' ? "Minimum 10 digits" : "Minimo 10 digitos. Sin lada."}
-                    className={`rounded-xl border h-12 text-black ${errors.phone ? "border-red-500 bg-red-50" : "border-gray-200 bg-white"}`}
-                  />
-                  {errors.phone && <p className="text-red-500 text-xs ml-1">{errors.phone.message}</p>}
-                </div>
-              );
-            }
-
-            // Render custom fields
-            const input = customInputs.find(ci => ci.id === fieldId);
-            if (input) {
-              return (
-                <div key={input.id} className="space-y-1.5 animate-in fade-in slide-in-from-bottom-1 duration-300">
-                  {input.type !== "checkbox" && (
-                    <label className="text-sm font-bold text-[#373737] ml-1">
-                      {locale === 'en' && input.label_en ? input.label_en : input.label} {input.required && <span className="text-red-500">*</span>}
-                    </label>
-                  )}
-                  {input.type === "text" && (
-                    <Input
-                      name={input.id}
-                      placeholder={input.placeholder}
-                      className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all"
-                      required={input.required}
-                      maxLength={50}
-                    />
-                  )}
-                  {input.type === "number" && (
-                    <Input
-                      name={input.id}
-                      type="text"
-                      placeholder={input.placeholder}
-                      className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all"
-                      required={input.required}
-                      onKeyDown={(e) => {
-                        const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', '-', '(', ')', '+', '{', '}', ' '];
-                        if (!/^\d$/.test(e.key) && !allowedKeys.includes(e.key)) {
-                          e.preventDefault();
-                        }
-                      }}
-                    />
-                  )}
-                  {input.type === "url" && (
-                    <div className="space-y-1.5">
-                      <Input
-                        name={input.id}
-                        type="url"
-                        placeholder={input.placeholder}
-                        className="h-12 border border-gray-200 rounded-xl bg-white focus:border-black text-black transition-all"
-                        required={input.required}
-                        onBlur={(e) => {
-                          const val = e.target.value;
-                          const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
-                          if (val && !urlPattern.test(val)) {
-                            const p = e.target.parentElement?.querySelector('.url-error');
-                            if (p) p.classList.remove('hidden');
-                          } else {
-                            const p = e.target.parentElement?.querySelector('.url-error');
-                            if (p) p.classList.add('hidden');
-                          }
-                        }}
-                      />
-                      <p className="url-error hidden text-red-500 text-xs ml-1 font-bold animate-in fade-in slide-in-from-top-1 duration-200">
-                        {locale === 'en' ? 'This is not a valid URL' : 'Esta no es una URL válida'}
-                      </p>
-                    </div>
-                  )}
-                  {input.type === "dropdown" && (
-                    <select
-                      name={input.id}
-                      className="h-12 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm focus:border-black focus:ring-0 transition-all text-black outline-none"
-                      required={input.required}
-                    >
-                      <option value="">{locale === 'en' ? 'Select...' : 'Seleccionar...'}</option>
-                      {input.placeholder?.split(",").map((opt: string, i: number) => (
-                        <option key={i} value={opt.trim()}>{opt.trim()}</option>
-                      ))}
-                    </select>
-                  )}
-                  {input.type === "checkbox" && (
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 ml-1">
-                        <input type="checkbox" name={input.id} className="h-5 w-5 rounded border-gray-300 text-black accent-black" required={input.required} />
-                        <label className="text-sm font-bold text-[#373737]">
-                          {locale === 'en' && input.label_en ? input.label_en : input.label} {input.required && <span className="text-red-500">*</span>}
-                        </label>
-                      </div>
-                      {input.placeholder && (
-                        <p className="text-[11px] text-gray-500 ml-8 leading-tight font-medium opacity-70">{input.placeholder}</p>
-                      )}
-                    </div>
-                  )}
-                  {input.banner_active && input.banner_text && (
-                    <div className={`mt-2 p-3 rounded-xl text-xs font-semibold border flex flex-col sm:flex-row items-center sm:items-start gap-3 whitespace-normal break-words leading-relaxed ${input.banner_color === "red" ? "bg-red-50 text-red-700 border-red-100" :
-                        input.banner_color === "green" ? "bg-green-50 text-green-700 border-green-100" :
-                          input.banner_color === "yellow" ? "bg-yellow-50 text-yellow-800 border-yellow-100" :
-                            "bg-blue-50 text-blue-700 border-blue-100"
-                      }`}>
-                      <div className="shrink-0 pt-0.5">
-                        <CheckCircle className={`w-4 h-4 ${input.banner_color === "red" ? "text-red-400" :
-                            input.banner_color === "green" ? "text-green-400" :
-                              input.banner_color === "yellow" ? "text-yellow-500" :
-                                "text-blue-400"
-                          }`} />
-                      </div>
-                      <span className="flex-1 text-center sm:text-left">{input.banner_text}</span>
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
-            return null;
-          });
-        })()}
->>>>>>> 04f5753faa187366369ad5317a4143825cd305ad
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="w-full text-left">
