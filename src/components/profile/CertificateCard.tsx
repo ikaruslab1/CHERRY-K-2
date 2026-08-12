@@ -29,23 +29,23 @@ interface CertificateCardProps {
 
 export function CertificateCard({ cert, onView, formatDate }: CertificateCardProps) {
     return (
-        <div className="bg-white border boundary-gray-200 rounded-xl p-4 md:p-5 hover:shadow-md transition-all group relative overflow-hidden flex flex-col h-full">
+        <div className="bg-white dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-800 rounded-xl p-4 md:p-5 hover:shadow-md transition-all group relative overflow-hidden flex flex-col h-full">
             <div className="absolute top-0 right-0 w-24 h-24 bg-[var(--color-acid)]/10 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110" />
             
             <div className="relative z-10 flex flex-col h-full justify-between gap-3">
                 <div className="space-y-2">
                     <div className="flex justify-between items-start">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-[var(--color-acid)]/20 text-yellow-800">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-[var(--color-acid)]/20 text-yellow-800 dark:bg-[var(--color-acid)]/10 dark:text-[var(--color-acid)]">
                             {cert.events.type || 'Evento'}
                         </span>
-                        <span className="text-[10px] text-gray-400 font-mono pt-0.5">
+                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono pt-0.5">
                             {formatDate(cert.events.date)}
                         </span>
                     </div>
-                    <h3 className="text-base md:text-lg font-bold text-[#373737] leading-tight line-clamp-2 min-h-[2.5rem]" title={cert.events.title}>
+                    <h3 className="text-base md:text-lg font-bold text-[#373737] dark:text-white leading-tight line-clamp-2 min-h-[2.5rem]" title={cert.events.title}>
                         {cert.events.title}
                     </h3>
-                    <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                    <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                             <MapPin className="h-3 w-3 shrink-0" />
                             <span className="truncate">{cert.events.location || 'FES Acatlán'}</span>
                     </div>
@@ -53,7 +53,7 @@ export function CertificateCard({ cert, onView, formatDate }: CertificateCardPro
                 
                 <Button 
                     onClick={() => onView(cert)}
-                    className="w-full mt-2 bg-[#373737] hover:bg-[#2a2a2a] text-white flex items-center justify-center gap-2 text-xs md:text-sm h-9 md:h-10"
+                    className="w-full mt-2 bg-[#373737] dark:bg-zinc-850 hover:bg-[#2a2a2a] dark:hover:bg-zinc-700 text-white flex items-center justify-center gap-2 text-xs md:text-sm h-9 md:h-10"
                 >
                     <Eye className="h-3.5 w-3.5" />
                     Visualizar

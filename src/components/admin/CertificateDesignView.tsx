@@ -1,6 +1,7 @@
 'use client';
 
 import { CertificateDesigner } from '@/components/admin/CertificateDesigner';
+import { DesktopRequiredWarning } from '@/components/ui/DesktopRequiredWarning';
 import { useConference } from '@/context/ConferenceContext';
 import { supabase } from '@/lib/supabase';
 import { Loader2 } from 'lucide-react';
@@ -64,10 +65,17 @@ export function CertificateDesignView() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-60px)]">
-            <div className="flex items-center gap-4 mb-2 pb-2 border-b border-gray-100 px-4 lg:px-6">
-                <h2 className="font-bold text-lg truncate">
-                    Diseño Global del Evento: <span className="text-[#373737]">{currentConference.title}</span>
+        <div className="flex flex-col h-[calc(100vh-60px)] relative">
+            {/* Desktop View Recommended Warning Overlay for Mobile */}
+            <DesktopRequiredWarning
+                title="Editor de Constancias"
+                description="El diseñador de constancias requiere un espacio de trabajo más amplio para ajustar tipografías, logotipos, márgenes y vistas previas del certificado."
+                recommendedResolution="1280px+ (Escritorio)"
+            />
+
+            <div className="flex items-center gap-4 mb-2 pb-2 border-b border-gray-100 dark:border-zinc-800 px-4 lg:px-6">
+                <h2 className="font-bold text-lg truncate text-gray-900 dark:text-white">
+                    Diseño Global del Evento: <span className="text-[#373737] dark:text-gray-300">{currentConference.title}</span>
                 </h2>
             </div>
             <div className="flex-1 overflow-hidden">

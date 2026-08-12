@@ -199,22 +199,22 @@ function SortableRegistrationField({
       <div 
         ref={setNodeRef} 
         style={style}
-        className={`flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 opacity-60 ${isDragging ? 'ring-2 ring-black bg-white opacity-100 z-50' : ''}`}
+        className={`flex items-center gap-3 p-3 bg-gray-50 dark:bg-zinc-900/60 rounded-xl border border-gray-100 dark:border-zinc-800 opacity-60 ${isDragging ? 'ring-2 ring-black bg-white dark:bg-[#111111] opacity-100 z-50' : ''}`}
       >
-        <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-black p-1">
+        <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white p-1">
           <Icons.GripVertical className="w-4 h-4" />
         </div>
-        <div className="p-1.5 bg-white rounded-lg border border-gray-100">
-          {id === 'nombre' && <Icons.User className="w-3 h-3 text-gray-400" />}
-          {id === 'apellidos' && <Icons.User className="w-3 h-3 text-gray-400" />}
-          {id === 'grado' && <Icons.BookOpen className="w-3 h-3 text-gray-400" />}
-          {id === 'genero' && <Icons.Users className="w-3 h-3 text-gray-400" />}
-          {id === 'email' && <Icons.Mail className="w-3 h-3 text-gray-400" />}
-          {id === 'confirmEmail' && <Icons.Mail className="w-3 h-3 text-gray-400" />}
-          {id === 'telefono' && <Icons.Phone className="w-3 h-3 text-gray-400" />}
+        <div className="p-1.5 bg-white dark:bg-[#111111] rounded-lg border border-gray-100 dark:border-zinc-800">
+          {id === 'nombre' && <Icons.User className="w-3 h-3 text-gray-400 dark:text-gray-500" />}
+          {id === 'apellidos' && <Icons.User className="w-3 h-3 text-gray-400 dark:text-gray-500" />}
+          {id === 'grado' && <Icons.BookOpen className="w-3 h-3 text-gray-400 dark:text-gray-500" />}
+          {id === 'genero' && <Icons.Users className="w-3 h-3 text-gray-400 dark:text-gray-500" />}
+          {id === 'email' && <Icons.Mail className="w-3 h-3 text-gray-400 dark:text-gray-500" />}
+          {id === 'confirmEmail' && <Icons.Mail className="w-3 h-3 text-gray-400 dark:text-gray-500" />}
+          {id === 'telefono' && <Icons.Phone className="w-3 h-3 text-gray-400 dark:text-gray-500" />}
         </div>
-        <span className="text-[11px] font-bold text-gray-500 uppercase tracking-tight flex-1">{item.label}</span>
-        <Icons.Lock className="w-3 h-3 text-gray-300 mr-1" />
+        <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight flex-1">{item.label}</span>
+        <Icons.Lock className="w-3 h-3 text-gray-300 dark:text-zinc-700 mr-1" />
       </div>
     );
   }
@@ -223,14 +223,14 @@ function SortableRegistrationField({
     <div 
       ref={setNodeRef} 
       style={style}
-      className={`p-3 bg-white rounded-xl border border-gray-200 shadow-sm relative space-y-3 ${isDragging ? 'ring-2 ring-black border-transparent z-50' : ''}`}
+      className={`p-3 bg-white dark:bg-[#111111] rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm relative space-y-3 ${isDragging ? 'ring-2 ring-black border-transparent z-50' : ''}`}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-2">
+      <div className="flex items-center justify-between gap-2 border-b border-gray-100 dark:border-zinc-800 pb-2">
         <div className="flex items-center gap-2">
-          <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-black p-1">
+          <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-black dark:hover:text-white p-1">
             <Icons.GripVertical className="w-4 h-4" />
           </div>
-          <div className="p-1 px-2 bg-gray-50 rounded text-[9px] font-bold text-gray-400 flex items-center gap-1.5 border border-gray-100 uppercase tracking-tight">
+          <div className="p-1 px-2 bg-gray-50 dark:bg-zinc-900 rounded text-[9px] font-bold text-gray-400 dark:text-gray-500 flex items-center gap-1.5 border border-gray-100 dark:border-zinc-800 uppercase tracking-tight">
             {item.type === 'text' && <Icons.Type className="w-2.5 h-2.5" />}
             {item.type === 'number' && <Icons.Hash className="w-2.5 h-2.5" />}
             {item.type === 'url' && <Icons.Link className="w-2.5 h-2.5" />}
@@ -241,7 +241,7 @@ function SortableRegistrationField({
         </div>
         <button 
           onClick={onRemove}
-          className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"
+          className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-all"
         >
           <Icons.Trash2 className="w-3 h-3" />
         </button>
@@ -249,11 +249,11 @@ function SortableRegistrationField({
 
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1.5">
-          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Tipo</label>
+          <label className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Tipo</label>
           <select 
             value={item.type || 'text'}
             onChange={(e) => onUpdate?.({ type: e.target.value })}
-            className="w-full text-[10px] p-1.5 rounded-lg border border-gray-200 bg-white text-black outline-none h-8 font-medium"
+            className="w-full text-[10px] p-1.5 rounded-lg border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-black dark:text-white outline-none h-8 font-medium"
           >
             <option value="text">Texto simple</option>
             <option value="number">Número</option>

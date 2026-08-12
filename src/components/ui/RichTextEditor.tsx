@@ -374,9 +374,9 @@ export function RichTextEditor({
       {showImageDialog && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeImageDialog} />
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative z-10 flex flex-col p-6 space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl relative z-10 flex flex-col p-6 space-y-5 animate-in zoom-in-95 duration-200">
                 <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-bold text-[#373737]">
+                    <h3 className="text-lg font-bold text-[#373737] dark:text-white">
                         {editingImageNode ? 'Editar Imagen' : 'Insertar Imagen'}
                     </h3>
                     <button onClick={closeImageDialog} className="text-gray-400 hover:text-red-500 transition-colors">
@@ -387,14 +387,14 @@ export function RichTextEditor({
                 <div className="space-y-4">
                     {/* Upload / Image Preview */}
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-[#373737]">Imagen:</label>
+                        <label className="text-sm font-bold text-[#373737] dark:text-white">Imagen:</label>
                         {imgUrl ? (
-                            <div className="relative group rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
+                            <div className="relative group rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 flex items-center justify-center">
                                 <img src={imgUrl} alt="Preview" className="max-h-40 object-contain p-2" />
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                                     <button 
                                       onClick={(e) => { e.preventDefault(); fileInputRef.current?.click(); }} 
-                                      className="bg-white text-black p-2 rounded-lg font-bold text-xs shadow-lg hover:bg-[#DBF227]"
+                                      className="bg-white dark:bg-zinc-800 text-black dark:text-white p-2 rounded-lg font-bold text-xs shadow-lg hover:bg-[#DBF227] dark:hover:bg-[#DBF227] dark:hover:text-black"
                                     >
                                         Reemplazar
                                     </button>
@@ -404,7 +404,7 @@ export function RichTextEditor({
                             <button 
                                 onClick={(e) => { e.preventDefault(); fileInputRef.current?.click(); }}
                                 disabled={uploadingImage}
-                                className="w-full h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:border-[#DBF227] hover:bg-[#DBF227]/5 transition-colors disabled:opacity-50"
+                                className="w-full h-32 border-2 border-dashed border-gray-300 dark:border-zinc-800 rounded-xl flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 hover:border-[#DBF227] hover:bg-[#DBF227]/5 transition-colors disabled:opacity-50"
                             >
                                 {uploadingImage ? (
                                     <Loader2 className="w-6 h-6 animate-spin text-[#DBF227]" />
@@ -429,7 +429,7 @@ export function RichTextEditor({
                         <>
                             {/* Width Selection */}
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-[#373737]">Tamaño:</label>
+                                <label className="text-sm font-bold text-[#373737] dark:text-white">Tamaño:</label>
                                 <div className="flex gap-2">
                                     {['50%', '100%', '300px', '500px'].map((w) => (
                                         <button
@@ -437,7 +437,7 @@ export function RichTextEditor({
                                             onClick={(e) => { e.preventDefault(); setImgWidth(w); }}
                                             className={clsx(
                                                 "flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all",
-                                                imgWidth === w ? "bg-[#DBF227] border-[#DBF227] text-black" : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
+                                                imgWidth === w ? "bg-[#DBF227] border-[#DBF227] text-black" : "bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800"
                                             )}
                                         >
                                             {w}
@@ -449,7 +449,7 @@ export function RichTextEditor({
                                     value={imgWidth}
                                     onChange={(e) => setImgWidth(e.target.value)}
                                     placeholder="Ej. 600px, 80%, etc." 
-                                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#DBF227]"
+                                    className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-black dark:text-white rounded-lg outline-none focus:border-[#DBF227]"
                                 />
                             </div>
 

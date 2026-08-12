@@ -99,40 +99,40 @@ export function StaffScannerView() {
          )}
 
          {/* Header / Selector Section */}
-         <div className="bg-white p-5 xs:p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-3 xs:space-y-4 md:space-y-5">
+         <div className="bg-white dark:bg-[#111111] p-5 xs:p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-zinc-800 space-y-3 xs:space-y-4 md:space-y-5">
                 <div>
-                    <h2 className="text-xl xs:text-2xl md:text-3xl font-bold text-center text-[#373737]">Scanner de Asistencia</h2>
-                    <p className="text-xs xs:text-sm md:text-base text-gray-500 text-center">Escanea el código QR de los asistentes.</p>
+                    <h2 className="text-xl xs:text-2xl md:text-3xl font-bold text-center text-[#373737] dark:text-white">Scanner de Asistencia</h2>
+                    <p className="text-xs xs:text-sm md:text-base text-gray-500 dark:text-gray-400 text-center">Escanea el código QR de los asistentes.</p>
                 </div>
 
                 <div className="space-y-1.5 xs:space-y-2">
-                    <label className="text-[10px] xs:text-xs font-bold uppercase text-gray-400 tracking-wider">Actividad Actual</label>
+                    <label className="text-[10px] xs:text-xs font-bold uppercase text-gray-400 dark:text-gray-500 tracking-wider">Actividad Actual</label>
                     {loadingActivities ? (
-                        <div className="h-10 xs:h-12 w-full bg-gray-50 rounded-xl animate-pulse" />
+                        <div className="h-10 xs:h-12 w-full bg-gray-50 dark:bg-zinc-900 rounded-xl animate-pulse" />
                     ) : (
                         <div className="relative">
                             <select
                                 value={selectedEventId}
                                 onChange={(e) => setSelectedEventId(e.target.value)}
-                                className="w-full appearance-none bg-gray-50 border border-gray-200 text-[#373737] font-semibold rounded-xl py-3 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-[#DBF227]"
+                                className="w-full appearance-none bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-[#373737] dark:text-white font-semibold rounded-xl py-3 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-[#DBF227]"
                             >
                                 {events.length === 0 && <option value="" disabled>No hay eventos activos</option>}
                                 {events.map(event => (
-                                    <option key={event.id} value={event.id}>
+                                    <option key={event.id} value={event.id} className="bg-white dark:bg-[#111111] text-black dark:text-white">
                                         {event.title}
                                     </option>
                                 ))}
                             </select>
-                            <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                            <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
                         </div>
                     )}
                 </div>
          </div>
 
         {/* Scanner Section */}
-        <div className="relative rounded-3xl overflow-hidden shadow-xl ring-4 ring-black/5">
+        <div className="relative rounded-3xl overflow-hidden shadow-xl ring-4 ring-black/5 dark:ring-white/10">
             {!selectedEventId ? (
-                <div className="aspect-square bg-gray-100 flex flex-col items-center justify-center text-center p-8 space-y-4">
+                <div className="aspect-square bg-gray-100 dark:bg-zinc-900 flex flex-col items-center justify-center text-center p-8 space-y-4">
                     <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
                         <AlertTriangle className="h-8 w-8 text-gray-400" />
                     </div>

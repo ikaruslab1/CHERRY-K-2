@@ -7,6 +7,7 @@ import { ConferenceLandingConfig } from '@/types';
 import { DEFAULT_LANDING_CONFIG } from '@/constants/landing';
 import { LandingEditorSidebar } from './LandingEditorSidebar';
 import { LandingPreview } from './LandingPreview';
+import { DesktopRequiredWarning } from '@/components/ui/DesktopRequiredWarning';
 import { Palette, Loader2, Save, AlertTriangle, ZoomIn, ZoomOut, Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -120,18 +121,11 @@ export function LandingEditor() {
   return (
     <div className="flex flex-col lg:flex-row h-full bg-gray-50 overflow-hidden relative">
       {/* Mobile/Tablet Warning Overlay */}
-      <div className="lg:hidden fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300">
-        <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-6">
-          <AlertTriangle className="w-8 h-8 text-amber-500" />
-        </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Editor no optimizado para móviles</h2>
-        <p className="text-sm text-gray-500 max-w-xs leading-relaxed">
-          El editor de landing requiere una pantalla más amplia para gestionar el diseño y la vista previa en tiempo real.
-        </p>
-        <div className="mt-8 p-4 bg-gray-50 rounded-xl border border-gray-100 text-[10px] text-gray-400 font-mono uppercase tracking-widest">
-          Resolución recomendada: 1280px+
-        </div>
-      </div>
+      <DesktopRequiredWarning
+        title="Editor de Landing Page"
+        description="El editor de la landing page requiere una pantalla más amplia para gestionar bloques modulares, estilos tipográficos y vista previa en tiempo real."
+        recommendedResolution="1280px+ (Escritorio)"
+      />
 
       {/* Sidebar Controls */}
       <LandingEditorSidebar 

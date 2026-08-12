@@ -28,16 +28,16 @@ export function LandingPreview({ config, conference, view, zoom = 1, locale }: L
       style={{ width: `${width * scale}px` }}
     >
       {/* Device Frame Info */}
-      <div className="mb-6 flex items-center gap-3 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
-         <Icon className="w-4 h-4 text-gray-400" />
-         <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest">
+      <div className="mb-6 flex items-center gap-3 bg-white dark:bg-[#111111] px-4 py-2 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800">
+         <Icon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+         <span className="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-widest">
            {view} — {width} × {height} px
          </span>
       </div>
 
       {/* Simulated Device Container */}
       <div 
-        className="relative shadow-[0_30px_100px_rgba(0,0,0,0.15)] border-[12px] border-gray-950 rounded-[3rem] overflow-hidden bg-white transition-all duration-500 origin-top"
+        className="relative shadow-[0_30px_100px_rgba(0,0,0,0.15)] border-[12px] border-gray-950 rounded-[3rem] overflow-hidden bg-white dark:bg-[#050505] transition-all duration-500 origin-top"
         style={{
           width: `${width}px`,
           transform: `scale(${scale})`,

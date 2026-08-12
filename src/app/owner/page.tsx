@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
-import { User, LogOut, LayoutDashboard, Upload, X } from 'lucide-react';
+import { BottomNav } from '@/components/layout/BottomNav';
+import { User, LogOut, LayoutDashboard, Upload, X, ArrowLeft } from 'lucide-react';
 import { Conference } from '@/types';
 import { useConference } from '@/context/ConferenceContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -245,8 +246,13 @@ export default function OwnerDashboard() {
   if (loading) return <div className="p-8 text-center">Cargando...</div>;
   if (!isAuthorized) return <div className="p-8 text-center">Acceso denegado. Se requiere rol Owner.</div>;
 
+  const bottomNavItems = [
+    { id: 'profile', label: 'Volver a Perfil', icon: <ArrowLeft className="w-5 h-5" />, show: true },
+    { id: 'owner', label: 'Panel Owner', icon: <LayoutDashboard className="w-5 h-5" />, show: true }
+  ];
+
   return (
-    <SidebarAwareContainer className="min-h-screen bg-white relative">
+    <SidebarAwareContainer className="min-h-screen bg-white relative pb-24 md:pb-0">
       {/* Background Grid Pattern - Subtle dark dots */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
            style={{ backgroundImage: 'radial-gradient(circle, #000000 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
@@ -256,9 +262,18 @@ export default function OwnerDashboard() {
           activeTab="owner"
           setActiveTab={() => {}}
           handleSignOut={handleSignOut}
+          hideMobileToggle={true}
       />
       
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-12 md:py-20 text-black">
+      <BottomNav 
+          items={bottomNavItems}
+          activeTab="owner"
+          setActiveTab={(id) => {
+              if (id === 'profile') router.push('/profile');
+          }}
+      />
+      
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-4 md:py-16 text-black">
         <motion.header 
           initial={{ opacity: 0, y: -40 }}
           animate={{ opacity: 1, y: 0 }}
