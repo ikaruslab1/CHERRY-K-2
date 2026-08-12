@@ -3,6 +3,7 @@
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { sendWelcomeEmail } from '@/lib/resend';
 
 // TODO: SEGURIDAD CRÍTICA - MEJORA REALIZADA
 // Aunque hemos movido la autenticación al lado del servidor (evitando exponer credenciales),
@@ -129,6 +130,18 @@ export async function registerUser(data: {
       if (accessError) {
         console.error("Error linking user to conference on registration:", accessError);
       }
+    }
+
+    // 4. Send welcome email using Resend
+    try {
+      await sendWelcomeEmail({
+        email: cleanEmail,
+        firstName: data.firstName,
+        username: cleanUsername,
+        shortId,
+      });
+    } catch (emailErr) {
+      console.error("Error trigger sending welcome email:", emailErr);
     }
 
     return { success: true, data: { short_id: shortId, username: cleanUsername } };

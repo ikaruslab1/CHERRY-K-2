@@ -27,6 +27,12 @@
       "skillPath": "better-auth/emailAndPassword/SKILL.md",
       "computedHash": "7786d722fa682b3d6a99793e73a9d51b59becefa595676134a993020633e068f"
     },
+    "email-best-practices": {
+      "source": "resend/email-best-practices",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "652506fcb66611db5d9b1fcdad46e856bd9a4c18e9f05688771b96b1d00f3317"
+    },
     "i18n-expert": {
       "source": "daymade/claude-code-skills",
       "sourceType": "github",
@@ -36,6 +42,12 @@
       "source": "yunshu0909/yunshu_skillshub",
       "sourceType": "github",
       "computedHash": "86a965ce9280bc4c794eeeae694da6f226ff3bdc2fbb53e18784281cae06af06"
+    },
+    "resend": {
+      "source": "resend/resend-skills",
+      "sourceType": "github",
+      "skillPath": "skills/resend/SKILL.md",
+      "computedHash": "b6d29c14be496cc4e29fcd9950da977ea598606a068cccd621a51e8fce499d87"
     }
   }
 }

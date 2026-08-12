@@ -27,6 +27,7 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
   const [currentConference, setCurrentConference] = useState<Conference | null>(null);
   const [availableConferences, setAvailableConferences] = useState<Conference[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initialFetched, setInitialFetched] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -34,17 +35,20 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
   // 1. Load available conferences (Run once)
   useEffect(() => {
     const fetchConferences = async () => {
-      const { data: conferences, error } = await supabase
-        .from('conferences')
-        .select('*')
-        .eq('is_active', true)
-        .order('start_date', { ascending: false });
+      try {
+        const { data: conferences, error } = await supabase
+          .from('conferences')
+          .select('*')
+          .eq('is_active', true)
+          .order('start_date', { ascending: false });
 
-      if (error) console.error('Error fetching conferences:', error);
-      setAvailableConferences(conferences || []);
-      // Set loading to false only after initial conference check? 
-      // Actually we need to wait for the second effect to run at least once or checking localStorage here.
-      // But we can keep loading=true until selection logic runs.
+        if (error) console.error('Error fetching conferences:', error);
+        setAvailableConferences(conferences || []);
+      } catch (err) {
+        console.error('Failed to fetch conferences:', err);
+      } finally {
+        setInitialFetched(true);
+      }
     };
     
     fetchConferences();
@@ -52,16 +56,7 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
 
   // 2. Handle Selection Logic based on URL or LocalStorage
   useEffect(() => {
-    // Wait until conferences are loaded
-    if (availableConferences.length === 0 && loading) {
-       // If truly no conferences, we might want to stop loading to avoid stuck state
-       // But fetchConferences sets empty array if error/empty.
-       // We can check if fetch is done by seeing if availableConferences is set? 
-       // Initial state is [].
-       // This is a bit tricky. Let's assume if [] and it's been a while? 
-       // Better: add a separate loaded flag for conferences.
-       return; 
-    }
+    if (!initialFetched) return;
 
     const paramId = searchParams.get('event');
     const savedId = typeof window !== 'undefined' ? localStorage.getItem('conference_id') : null;
@@ -92,10 +87,10 @@ export const ConferenceProvider = ({ children }: { children: React.ReactNode }) 
         }
     }
     
-    // Always stop loading after this check, even if nothing found
+    // Always stop loading after this check
     setLoading(false);
     
-  }, [availableConferences, searchParams, currentConference?.id]);
+  }, [availableConferences, searchParams, currentConference?.id, initialFetched]);
 
   // 3. Register Access when conference updates
   useEffect(() => {
