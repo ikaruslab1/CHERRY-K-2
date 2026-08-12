@@ -134,14 +134,20 @@ export async function registerUser(data: {
 
     // 4. Send welcome email using Resend
     try {
-      await sendWelcomeEmail({
+      const emailResult = await sendWelcomeEmail({
         email: cleanEmail,
         firstName: data.firstName,
         username: cleanUsername,
         shortId,
       });
+
+      if (!emailResult.success) {
+        console.warn("[Register] Welcome email warning:", emailResult.error);
+      } else {
+        console.log(`[Register] Welcome email sent successfully (ID: ${emailResult.data?.id})`);
+      }
     } catch (emailErr) {
-      console.error("Error trigger sending welcome email:", emailErr);
+      console.error("[Register] Unexpected exception while triggering welcome email:", emailErr);
     }
 
     return { success: true, data: { short_id: shortId, username: cleanUsername } };

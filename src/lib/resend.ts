@@ -1,13 +1,21 @@
 import { Resend } from 'resend';
 
-const apiKey = process.env.RESEND_API_KEY;
-const fromEmail = process.env.RESEND_FROM_EMAIL || 'contacto@scherry.click';
-
-if (!apiKey) {
-  console.warn('WARNING: RESEND_API_KEY is not defined in the environment variables.');
+/**
+ * Returns an instance of the Resend SDK initialized dynamically with runtime environment variables.
+ */
+export function getResendClient(): Resend | null {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('[Resend] WARNING: RESEND_API_KEY is missing in environment variables.');
+    return null;
+  }
+  return new Resend(apiKey);
 }
 
-export const resend = apiKey ? new Resend(apiKey) : null;
+/**
+ * Legacy export for backward compatibility.
+ */
+export const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 /**
  * Sends a premium transactional welcome email to the newly registered user.
@@ -23,11 +31,13 @@ export async function sendWelcomeEmail({
   username: string;
   shortId: string;
 }) {
-  if (!resend) {
-    console.error('Cannot send email: Resend client is not initialized (missing API key).');
-    return { success: false, error: 'Resend client not initialized' };
+  const resendClient = getResendClient();
+  if (!resendClient) {
+    console.error('[Resend] Cannot send email: RESEND_API_KEY is not defined.');
+    return { success: false, error: 'RESEND_API_KEY not configured' };
   }
 
+  const configuredFrom = process.env.RESEND_FROM_EMAIL || 'contacto@send.scherry.click';
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -183,9 +193,9 @@ export async function sendWelcomeEmail({
   `;
 
   // According to Resend SDK guidelines: SDK returns { data, error }, does not throw.
-  const { data, error } = await resend.emails.send(
+  const { data, error } = await resendClient.emails.send(
     {
-      from: `Cherry <${fromEmail}>`,
+      from: `Cherry <${configuredFrom}>`,
       to: [email],
       subject: '¡Te damos la bienvenida a Cherry! 🍒',
       html: htmlContent,
@@ -193,11 +203,38 @@ export async function sendWelcomeEmail({
     { idempotencyKey: `welcome-email/${username}-${shortId}` }
   );
 
-  if (error) {
-    console.error('Failed to send welcome email via Resend:', error.message);
-    return { success: false, error: error.message };
+  if (!error) {
+    console.log(`[Resend] Welcome email sent successfully to ${email} (ID: ${data?.id})`);
+    return { success: true, data };
   }
 
-  console.log('Welcome email sent successfully:', data?.id);
-  return { success: true, data };
+  console.error(`[Resend] Failed to send email via "${configuredFrom}":`, error.message);
+
+  // Fallback check: If the error is due to an unverified domain (403 validation_error)
+  const isDomainError = error.message?.toLowerCase().includes('not verified') || error.name === 'validation_error';
+  if (isDomainError) {
+    console.warn(`[Resend] Domain "${configuredFrom}" is not verified in Resend Dashboard yet.`);
+    console.warn(`[Resend] Please verify your domain at https://resend.com/domains.`);
+    console.warn(`[Resend] Attempting sandbox fallback via "onboarding@resend.dev"...`);
+
+    const fallbackSend = await resendClient.emails.send(
+      {
+        from: 'Cherry <onboarding@resend.dev>',
+        to: [email],
+        subject: '¡Te damos la bienvenida a Cherry! 🍒 (Sandbox)',
+        html: htmlContent,
+      },
+      { idempotencyKey: `welcome-email-sandbox/${username}-${shortId}` }
+    );
+
+    if (!fallbackSend.error) {
+      console.log(`[Resend] Sandbox fallback email sent successfully to ${email} (ID: ${fallbackSend.data?.id})`);
+      return { success: true, data: fallbackSend.data, usedFallback: true };
+    }
+
+    console.error('[Resend] Sandbox fallback also failed:', fallbackSend.error.message);
+  }
+
+  return { success: false, error: error.message };
 }
+

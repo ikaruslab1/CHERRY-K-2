@@ -222,7 +222,7 @@ export function EventModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: "100%", opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="relative w-full max-w-2xl bg-white dark:bg-[#111111] shadow-2xl flex flex-col h-[95vh] sm:h-[90vh] overflow-hidden rounded-t-3xl sm:rounded-2xl transition-colors duration-300"
+        className="relative w-full max-w-2xl bg-white shadow-2xl flex flex-col h-[95vh] sm:h-[90vh] overflow-hidden rounded-t-3xl sm:rounded-2xl"
       >
         
         {/* Header Image Area - Full Clarity */}
@@ -257,7 +257,7 @@ export function EventModal({
 
           {/* Type Badge (Top Right) */}
           <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-2">
-            <div className="bg-white dark:bg-zinc-800 text-black dark:text-white border border-gray-200 dark:border-zinc-700 text-xs font-bold uppercase tracking-widest px-4 py-2 shadow-sm">
+            <div className="bg-white text-black border border-gray-200 text-xs font-bold uppercase tracking-widest px-4 py-2 shadow-sm">
               {getTranslatedField(event, 'type', language)}
             </div>
             
@@ -275,23 +275,23 @@ export function EventModal({
             whileHover={{ scale: 1.1, rotate: 90 }}
             whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="absolute top-4 left-4 p-2 bg-white dark:bg-zinc-900 text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black transition-colors z-20 rounded-full shadow-lg border border-transparent dark:border-zinc-800"
+            className="absolute top-4 left-4 p-2 bg-white text-black hover:bg-gray-100 transition-colors z-20 rounded-full shadow-lg border border-gray-100"
           >
             <X className="h-5 w-5" />
           </motion.button>
           
            {/* Date & Time Block - Unified & Polished */}
-           <div className="absolute bottom-0 left-6 z-20 transform translate-y-1/4 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex bg-white dark:bg-[#1f1f1f]">
+               <div className="absolute bottom-0 left-6 z-20 transform translate-y-1/4 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex bg-white">
               {/* Accent Strip */}
               <div className="w-1.5 bg-[var(--color-acid)]"></div>
               
-              <div className="flex divide-x divide-gray-100 dark:divide-zinc-800">
+              <div className="flex divide-x divide-gray-100">
                   {/* Date Part */}
-                  <div className="p-3 px-5 flex flex-col items-center justify-center bg-white dark:bg-[#1f1f1f]">
-                       <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">
+                  <div className="p-3 px-5 flex flex-col items-center justify-center bg-white">
+                       <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-0.5">
                           {formatMexicoDate(eventDate, { month: 'short' }, locale).replace('.', '')}
                        </span>
-                       <span className="text-3xl font-black text-[#373737] dark:text-white tracking-tight leading-none font-geist-sans">
+                       <span className="text-3xl font-black text-[#373737] tracking-tight leading-none font-geist-sans">
                           {(() => {
                               const duration = event.duration_days || 1;
                               if (duration > 1) {
@@ -305,11 +305,11 @@ export function EventModal({
                   </div>
 
                   {/* Time Part */}
-                  <div className="p-3 px-5 flex flex-col justify-center items-start min-w-[110px] bg-white dark:bg-[#1f1f1f]">
-                       <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                  <div className="p-3 px-5 flex flex-col justify-center items-start min-w-[110px] bg-white">
+                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
                           <Clock className="h-3 w-3" /> {t('event.time')}
                        </span>
-                       <span className="text-xl font-bold text-[#373737] dark:text-white tracking-tight leading-none font-geist-sans">
+                       <span className="text-xl font-bold text-[#373737] tracking-tight leading-none font-geist-sans">
                           {formatMexicoTime(eventDate, locale)}
                        </span>
                   </div>
@@ -318,7 +318,7 @@ export function EventModal({
         </div>
 
         {/* Content Body - White Background, Black Text */}
-        <div className="flex-1 overflow-y-scroll p-8 pt-12 space-y-8 custom-scrollbar bg-white dark:bg-[#111111]">
+        <div className="flex-1 overflow-y-scroll p-8 pt-12 space-y-8 custom-scrollbar bg-white">
           
           {/* Title & Tags */}
           <div className="space-y-4">
@@ -329,7 +329,7 @@ export function EventModal({
             {event.tags && event.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                 {event.tags.map(tag => (
-                    <span key={tag} className="text-[10px] font-bold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-zinc-900/60 px-3 py-1 uppercase tracking-widest border border-gray-200 dark:border-zinc-800 hover:bg-[var(--color-acid)] hover:text-[var(--color-acid-text)] hover:border-transparent transition-colors">
+                    <span key={tag} className="text-[10px] font-bold text-gray-500 bg-gray-100 px-3 py-1 uppercase tracking-widest border border-gray-200 hover:bg-[var(--color-acid)] hover:text-[var(--color-acid-text)] hover:border-transparent transition-colors">
                       #{tag}
                     </span>
                 ))}
@@ -343,7 +343,7 @@ export function EventModal({
                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('event.about')}</h4>
                 <div 
                     id="event-description-container"
-                    className="text-gray-600 dark:text-gray-300 text-base leading-relaxed prose prose-neutral dark:prose-invert max-w-none font-geist-sans"
+                    className="text-gray-600 text-base leading-relaxed prose prose-neutral max-w-none font-geist-sans"
                     dangerouslySetInnerHTML={{ __html: getTranslatedField(event, 'description', language) }}
                 />
             </div>
@@ -351,20 +351,20 @@ export function EventModal({
 
           {/* Calificación / Retroalimentación */}
           {isAttended && ratingLoaded && (
-             <div className="p-6 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-zinc-800 rounded-2xl space-y-4 animate-in fade-in duration-300">
+             <div className="p-6 bg-gray-50 border border-gray-100 rounded-2xl space-y-4 animate-in fade-in duration-300">
                  <div className="flex items-center justify-between">
                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
                          <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                          Califica esta actividad
                      </h4>
                      {userRating > 0 && (
-                         <span className="text-[10px] bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 px-2.5 py-0.5 rounded-full uppercase tracking-wider font-bold">
+                         <span className="text-[10px] bg-green-50 text-green-700 px-2.5 py-0.5 rounded-full uppercase tracking-wider font-bold">
                              Guardado
                          </span>
                      )}
                  </div>
                  
-                 <p className="text-xs text-gray-500 dark:text-gray-400">
+                 <p className="text-xs text-gray-500">
                      Tu opinión nos ayuda a mejorar los próximos eventos. La calificación es anónima.
                  </p>
 
@@ -382,7 +382,7 @@ export function EventModal({
                                      "w-8 h-8",
                                      star <= userRating 
                                          ? "text-amber-400 fill-amber-400" 
-                                         : "text-gray-300 dark:text-zinc-700"
+                                         : "text-gray-300"
                                  )} 
                              />
                          </button>
@@ -397,7 +397,7 @@ export function EventModal({
                              onChange={(e) => setUserComment(e.target.value)}
                              placeholder="Escribe un comentario breve sobre la ponencia (opcional)..."
                              rows={2}
-                             className="w-full text-sm p-3 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#DBF227] transition-all resize-none text-black dark:text-white"
+                             className="w-full text-sm p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#DBF227] transition-all resize-none text-black"
                              maxLength={500}
                          />
                          
@@ -408,7 +408,11 @@ export function EventModal({
                          <Button
                              onClick={handleSaveRating}
                              disabled={submittingRating}
-                             className="w-full bg-black dark:bg-zinc-800 text-white dark:text-white hover:bg-[var(--color-acid)] hover:text-black dark:hover:text-black font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider cursor-pointer"
+                             className="w-full font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider cursor-pointer"
+                             style={{
+                                backgroundColor: 'var(--color-acid)',
+                                color: 'var(--color-acid-text, #121212)'
+                             }}
                          >
                              {submittingRating ? 'Guardando...' : 'Enviar Retroalimentación'}
                          </Button>
@@ -430,14 +434,14 @@ export function EventModal({
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-zinc-800 hover:border-[var(--color-acid)] hover:bg-white dark:hover:bg-zinc-900 transition-all group"
+                      className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-100 hover:border-[var(--color-acid)] hover:bg-white transition-all group"
                     >
-                      <div className="p-2 bg-white dark:bg-[#111111] border border-gray-100 dark:border-zinc-800 group-hover:bg-[var(--color-acid)] group-hover:text-[var(--color-acid-text)] transition-colors">
+                      <div className="p-2 bg-white border border-gray-100 group-hover:bg-[var(--color-acid)] group-hover:text-[var(--color-acid-text)] transition-colors">
                         <IconComp size={18} />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-bold text-black dark:text-white uppercase tracking-wider">{link.label}</p>
-                        <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[250px] font-mono">{link.url}</p>
+                        <p className="text-sm font-bold text-black uppercase tracking-wider">{link.label}</p>
+                        <p className="text-[10px] text-gray-400 truncate max-w-[250px] font-mono">{link.url}</p>
                       </div>
                       <ExternalLink size={14} className="text-gray-300 group-hover:text-[var(--color-acid-text)] transition-colors" />
                     </a>
@@ -447,18 +451,18 @@ export function EventModal({
             </div>
           )}
 
-          <div className="h-px w-full bg-gray-100 dark:bg-zinc-800" />
+          <div className="h-px w-full bg-gray-100" />
 
           {/* Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                {/* Location */}
                 <div className="flex gap-4 group">
-                     <div className="p-3 bg-gray-50 dark:bg-white/5 text-black dark:text-white border border-gray-100 dark:border-zinc-800 h-fit">
+                     <div className="p-3 bg-gray-50 text-black border border-gray-100 h-fit">
                          <MapPin className="h-5 w-5" />
                      </div>
                      <div>
                          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{t('event.location')}</h4>
-                         <p className="text-base text-black dark:text-white font-medium group-hover:underline decoration-[var(--color-acid)] decoration-2 underline-offset-4 transition-all">
+                         <p className="text-base text-black font-medium group-hover:underline decoration-[var(--color-acid)] decoration-2 underline-offset-4 transition-all">
                              {getTranslatedField(event, 'location', language)}
                          </p>
                      </div>
@@ -468,7 +472,7 @@ export function EventModal({
                {/* Speakers */}
                {(event.speakers && event.speakers.length > 0) ? (
                    <div className="flex gap-4 md:col-span-2">
-                        <div className="p-3 bg-gray-50 dark:bg-white/5 text-black dark:text-white border border-gray-100 dark:border-zinc-800 h-fit shrink-0">
+                        <div className="p-3 bg-gray-50 text-black border border-gray-100 h-fit shrink-0">
                             <Users className="h-5 w-5" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -487,12 +491,12 @@ export function EventModal({
                             </h4>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {event.speakers.map((speaker, idx) => (
-                                    <div key={idx} className="flex items-center gap-3 p-2 border border-transparent hover:bg-gray-50 dark:hover:bg-zinc-900 hover:border-gray-100 dark:hover:border-zinc-800 rounded-lg transition-colors group">
-                                         <div className="h-8 w-8 bg-gray-100 dark:bg-zinc-850 rounded-full flex items-center justify-center text-[10px] font-bold text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-zinc-800 group-hover:bg-[#DBF227] group-hover:text-black group-hover:border-transparent transition-colors">
+                                    <div key={idx} className="flex items-center gap-3 p-2 border border-transparent hover:bg-gray-50 hover:border-gray-100 rounded-lg transition-colors group">
+                                         <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center text-[10px] font-bold text-gray-500 border border-gray-200 group-hover:bg-[#DBF227] group-hover:text-black group-hover:border-transparent transition-colors">
                                             {speaker.first_name?.[0]}{speaker.last_name?.[0]}
                                          </div>
                                          <div className="min-w-0">
-                                            <p className="text-sm font-bold text-black dark:text-white leading-tight text-balance">
+                                            <p className="text-sm font-bold text-black leading-tight text-balance">
                                                 {getDegreeAbbr(speaker?.degree, speaker?.gender)} {speaker.first_name} {speaker.last_name}
                                             </p>
                                          </div>
@@ -503,7 +507,7 @@ export function EventModal({
                    </div>
                ) : event.speaker && (
                    <div className="flex gap-4">
-                        <div className="p-3 bg-gray-50 dark:bg-white/5 text-black dark:text-white border border-gray-100 dark:border-zinc-800 h-fit">
+                        <div className="p-3 bg-gray-50 text-black border border-gray-100 h-fit">
                             <User className="h-5 w-5" />
                         </div>
                         <div>
@@ -517,7 +521,7 @@ export function EventModal({
                                   return 'Speaker';
                               })()}
                             </h4>
-                            <p className="text-base text-black dark:text-white font-medium">
+                            <p className="text-base text-black font-medium">
                                  {getDegreeAbbr(event.speaker.degree, event.speaker.gender)} {event.speaker.first_name} {event.speaker.last_name}
                              </p>
                         </div>
@@ -531,9 +535,9 @@ export function EventModal({
 
          {/* Fixed Footer - White */}
          {!hideActionButtons && (
-          <div className="p-6 border-t border-gray-100 dark:border-zinc-800 bg-white dark:bg-[#111111] sticky bottom-0 z-10">
+          <div className="p-6 border-t border-gray-100 bg-white sticky bottom-0 z-10">
             {isAttended ? (
-              <div className="w-full py-4 text-sm font-bold text-black dark:text-white bg-gray-100 dark:bg-zinc-900/60 border border-gray-200 dark:border-zinc-800 flex items-center justify-center gap-3 uppercase tracking-widest cursor-default">
+              <div className="w-full py-4 text-sm font-bold text-black bg-gray-100 border border-gray-200 flex items-center justify-center gap-3 uppercase tracking-widest cursor-default">
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
                 {t('event.attendance_confirmed')}
               </div>
@@ -542,9 +546,13 @@ export function EventModal({
                   onClick={() => onToggleInterest(event.id)}
                   className={`w-full h-14 text-sm tracking-[0.15em] uppercase font-bold transition-all ${
                     isInterested 
-                      ? "bg-white dark:bg-[#111111] text-red-500 border-2 border-red-100 dark:border-red-950/40 hover:bg-red-50 dark:hover:bg-red-950/20"
-                      : "bg-black dark:bg-zinc-800 text-white dark:text-white hover:bg-[var(--color-acid)] hover:text-[var(--color-acid-text)] dark:hover:text-black hover:shadow-xl border border-transparent hover:border-black/10"
+                      ? "bg-white text-red-500 border-2 border-red-100 hover:bg-red-50"
+                      : ""
                   }`}
+                  style={!isInterested ? {
+                    backgroundColor: 'var(--color-acid)',
+                    color: 'var(--color-acid-text, #121212)'
+                  } : undefined}
               >
                   {isInterested ? t('event.remove_interested_btn') : t('event.interested_btn')}
               </Button>

@@ -95,3 +95,27 @@ El diseño sigue una estrategia editorial neo-grotesca inspirada en el brutalism
 4. **Modificaciones de DB:** Cualquier alteración del esquema SQL debe ser creada en un nuevo script dentro de [supabase/migrations/](file:///d:/Proyectos/cherry-k-2/supabase/migrations/) respetando el orden cronológico del prefijo numérico.
 5. **Compilación / Servidor de Desarrollo:** En entornos locales, si Turbopack genera errores de detección de la raíz del proyecto (`Turbopack Error: Next.js package not found`), ejecutar el servidor de desarrollo forzando el empaquetador Webpack mediante `next dev --webpack` (o corriendo `pnpm dev` que ya tiene el flag configurado por defecto).
 
+---
+
+## 📧 7. Integración de Correos Transaccionales (Resend)
+
+La plataforma utiliza **Resend** para el envío de correos electrónicos transaccionales (confirmaciones de registro, credenciales y avisos del evento).
+
+### Archivos Clave
+- **[src/lib/resend.ts](file:///d:/Proyectos/cherry-k-2/src/lib/resend.ts)**: Inicialización del cliente Resend (`getResendClient()`), definición de plantillas HTML y la función `sendWelcomeEmail`.
+- **[src/actions/auth.ts](file:///d:/Proyectos/cherry-k-2/src/actions/auth.ts)**: Invoca el envío de correos tras completar con éxito el registro en Supabase Auth y la inserción del perfil.
+
+### Variables de Entorno Requeridas
+En `.env.local` y en las **Environment Variables de Vercel (Production y Preview)**:
+```env
+RESEND_API_KEY="re_eRWVfm7T_..."
+RESEND_FROM_EMAIL="contacto@send.scherry.click"
+```
+
+### Reglas Técnicas y Gotchas Críticos
+1. **El SDK no lanza excepciones:** El SDK oficial de Resend para Node.js devuelve una tupla `{ data, error }` y **NO** lanza errores mediante `throw`. Siempre se debe verificar `if (error)` explícitamente en las funciones helpers e inspeccionar `result.success` en las Server Actions.
+2. **Verificación de Dominio DNS (Error HTTP 403):** Para enviar desde un dominio propio (ej: `@send.scherry.click` o `@scherry.click`), el dominio **debe estar verificado** en el Dashboard de Resend ([https://resend.com/domains](https://resend.com/domains)). Si no está verificado, la API de Resend rechaza la solicitud con un error `403 Forbidden` (`validation_error: domain is not verified`).
+3. **Mecanismo de Fallback a Sandbox:** En `src/lib/resend.ts`, si un envío falla debido a un error 403 por dominio no verificado, el sistema automáticamente intenta un reenvío utilizando el remitente sandbox `onboarding@resend.dev` y emite advertencias detalladas en la consola del servidor.
+4. **Idempotencia:** Todos los envíos transaccionales deben incluir una clave de idempotencia (`idempotencyKey`) con el formato `<tipo-evento>/<id-entidad>` (ej: `welcome-email/${username}-${shortId}`). Esto evita envíos duplicados en caso de reintentos o fallas de red en los 24 horas posteriores.
+
+
