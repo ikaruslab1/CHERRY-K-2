@@ -23,7 +23,7 @@ export function BottomNav({ items, activeTab, setActiveTab }: BottomNavProps) {
   return (
     <div className="md:hidden fixed bottom-6 left-4 right-4 z-50">
       <nav className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border border-gray-200/80 dark:border-zinc-800 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] relative max-h-36 overflow-y-auto overflow-x-hidden p-2">
-        <div className="grid grid-cols-4 gap-y-2 gap-x-1 items-center justify-items-center w-full">
+        <div className="flex items-center justify-around w-full gap-1">
           {visibleItems.map((item) => {
             const isActive = activeTab === item.id;
             

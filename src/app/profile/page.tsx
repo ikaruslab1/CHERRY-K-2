@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { UserProfileView } from '@/components/profile/UserProfileView';
-import { User, Calendar, FileText, Mic, Crown, HelpCircle, LogOut, LayoutDashboard, Settings, QrCode, X } from 'lucide-react';
+import { ProfileDetailsView } from '@/components/profile/ProfileDetailsView';
+import { User, Calendar, FileText, Mic, Crown, HelpCircle, LogOut, LayoutDashboard, Settings, QrCode, X, IdCard } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
@@ -49,7 +50,7 @@ export default function ProfilePage() {
   const { t } = useLanguage();
   const { loading: authLoading, userRole } = useRoleAuth();
   const [sessionLoading, setSessionLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'profile' | 'agenda' | 'participation' | 'constancias' | 'faq'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'gafete' | 'agenda' | 'participation' | 'constancias' | 'faq'>('profile');
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
 
   const isAdmin = userRole === 'admin' || userRole === 'owner';
@@ -87,7 +88,8 @@ export default function ProfilePage() {
   };
 
   const navItems = [
-    { id: 'profile', label: t('nav.profile'), icon: <User className="w-5 h-5" />, show: true },
+    { id: 'profile', label: 'Perfil', icon: <User className="w-5 h-5" />, show: true },
+    { id: 'gafete', label: 'Gafete Digital', icon: <IdCard className="w-5 h-5" />, show: true },
     { id: 'agenda', label: t('nav.agenda'), icon: <Calendar className="w-5 h-5" />, show: true },
     { id: 'constancias', label: t('nav.certificates'), icon: <FileText className="w-5 h-5" />, show: true },
     { id: 'divider-ponente', label: t('nav.tools_speaker'), show: isPonente, isDivider: true },
@@ -111,7 +113,8 @@ export default function ProfilePage() {
   ];
 
   const bottomNavItems = [
-    { id: 'profile', label: t('nav.profile'), icon: <User className="w-5 h-5" />, show: true },
+    { id: 'profile', label: 'Perfil', icon: <User className="w-5 h-5" />, show: true },
+    { id: 'gafete', label: 'Gafete', icon: <IdCard className="w-5 h-5" />, show: true },
     { id: 'agenda', label: t('nav.agenda'), icon: <Calendar className="w-5 h-5" />, show: true },
     { id: 'constancias', label: t('nav.certificates'), icon: <FileText className="w-5 h-5" />, show: true },
     { id: 'participation', label: t('nav.participation'), icon: <Mic className="w-5 h-5" />, show: isPonente },
@@ -205,7 +208,8 @@ export default function ProfilePage() {
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.3 }}
                   >
-                      {activeTab === 'profile' && <UserProfileView />}
+                      {activeTab === 'profile' && <ProfileDetailsView />}
+                      {activeTab === 'gafete' && <UserProfileView />}
                       {activeTab === 'agenda' && <AgendaView />}
                       {activeTab === 'constancias' && <CertificatesView />}
                       {isPonente && activeTab === 'participation' && <ParticipationView />}
