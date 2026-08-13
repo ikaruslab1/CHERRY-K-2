@@ -123,29 +123,29 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <SidebarAwareContainer className="min-h-screen p-8 bg-[#050505] text-[#f2f2f2]">
+      <SidebarAwareContainer className="min-h-screen p-8 bg-[var(--background)] text-[var(--foreground)]">
         <div className="md:hidden flex justify-between items-center mb-8">
-            <Skeleton className="h-10 w-10 rounded-full bg-white/5" />
-            <Skeleton className="h-8 w-32 bg-white/5" />
+            <Skeleton className="h-10 w-10 rounded-full bg-gray-200" />
+            <Skeleton className="h-8 w-32 bg-gray-200" />
         </div>
         <div className="max-w-4xl mx-auto space-y-8 mt-12 md:mt-0">
             <div className="flex gap-4 overflow-x-auto pb-4 md:pb-0">
                 {[1, 2, 3, 4].map((i) => (
-                    <Skeleton key={i} className="h-10 w-32 flex-shrink-0 rounded-full bg-white/5" />
+                    <Skeleton key={i} className="h-10 w-32 flex-shrink-0 rounded-full bg-gray-200" />
                 ))}
             </div>
             <div className="space-y-6">
-                <div className="flex flex-col md:flex-row gap-6 items-center md:items-start p-6 bg-white/5 rounded-2xl border border-white/10 shadow-sm">
-                     <Skeleton className="h-24 w-24 rounded-full bg-white/5" />
+                <div className="flex flex-col md:flex-row gap-6 items-center md:items-start p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                     <Skeleton className="h-24 w-24 rounded-full bg-gray-200" />
                      <div className="space-y-3 w-full max-w-sm text-center md:text-left">
-                        <Skeleton className="h-8 w-3/4 mx-auto md:mx-0 bg-white/5" />
-                        <Skeleton className="h-4 w-1/2 mx-auto md:mx-0 bg-white/5" />
-                        <Skeleton className="h-4 w-full mx-auto md:mx-0 bg-white/5" />
+                        <Skeleton className="h-8 w-3/4 mx-auto md:mx-0 bg-gray-200" />
+                        <Skeleton className="h-4 w-1/2 mx-auto md:mx-0 bg-gray-200" />
+                        <Skeleton className="h-4 w-full mx-auto md:mx-0 bg-gray-200" />
                      </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <Skeleton className="h-48 w-full rounded-2xl bg-white/5" />
-                     <Skeleton className="h-48 w-full rounded-2xl bg-white/5" />
+                     <Skeleton className="h-48 w-full rounded-2xl bg-gray-200" />
+                     <Skeleton className="h-48 w-full rounded-2xl bg-gray-200" />
                 </div>
             </div>
         </div>
@@ -170,16 +170,16 @@ export default function ProfilePage() {
               {isOwner || isAdmin || isStaff ? (
                   <button 
                       onClick={handleGearClick}
-                      className="p-2 bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-800 rounded-xl shrink-0 transition-all active:scale-95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer flex items-center justify-center"
+                      className="p-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl shrink-0 transition-all active:scale-95 shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer flex items-center justify-center"
                       title={isOwner ? 'Seleccionar Panel' : (isStaff && !isAdmin ? 'Panel Staff' : 'Panel Admin')}
                   >
                       <Settings className="w-4 h-4 transition-transform duration-300 hover:rotate-45" style={{ color: 'var(--color-acid)' }} />
                   </button>
               ) : null}
-              <ThemeToggle className="!w-auto !p-2 shrink-0 bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 border-transparent hover:border-[var(--border)]" />
+              <ThemeToggle className="!w-auto !p-2 shrink-0 bg-transparent hover:bg-gray-100 border-transparent hover:border-[var(--border)]" />
               <button 
                   onClick={handleSignOut}
-                  className="p-2 bg-gray-50 dark:bg-white/5 hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors rounded-xl border border-gray-200 dark:border-white/5 cursor-pointer"
+                  className="p-2 bg-gray-50 hover:bg-red-50 text-red-500 transition-colors rounded-xl border border-gray-200 cursor-pointer"
                   title={t('nav.logout')}
               >
                   <LogOut className="w-4 h-4" />
@@ -243,26 +243,26 @@ export default function ProfilePage() {
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-zinc-900 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 p-6 space-y-5"
+              className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-gray-200 p-6 space-y-5"
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-zinc-800">
+              <div className="flex items-center justify-between pb-3 border-b border-gray-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center border border-amber-500/20">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
                     <Crown className="w-5 h-5 text-amber-500" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black text-gray-900 dark:text-white uppercase tracking-wider">
+                    <h3 className="text-base font-black text-gray-900 uppercase tracking-wider">
                       Seleccionar Panel
                     </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-gray-500">
                       Elige el portal al que deseas ingresar
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsRoleModalOpen(false)}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-gray-400 hover:text-gray-700 dark:hover:text-white cursor-pointer"
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-700 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -276,17 +276,17 @@ export default function ProfilePage() {
                     setIsRoleModalOpen(false);
                     router.push('/admin');
                   }}
-                  className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl bg-gray-50 dark:bg-zinc-800/60 hover:bg-lime-500/10 dark:hover:bg-lime-500/15 border border-gray-200/80 dark:border-zinc-700/60 hover:border-lime-500/40 transition-all text-left group cursor-pointer active:scale-[0.98]"
+                  className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl bg-gray-50 hover:bg-lime-50 border border-gray-200 hover:border-lime-500/40 transition-all text-left group cursor-pointer active:scale-[0.98]"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-lime-500/15 dark:bg-lime-500/20 flex items-center justify-center shrink-0 border border-lime-500/30 group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 rounded-xl bg-lime-500/15 flex items-center justify-center shrink-0 border border-lime-500/30 group-hover:scale-110 transition-transform">
                     <LayoutDashboard className="w-5 h-5" style={{ color: 'var(--color-acid)' }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">Panel Admin</span>
-                      <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-lime-500/10 text-lime-600 dark:text-lime-400 font-bold border border-lime-500/20">Admin</span>
+                      <span className="text-sm font-bold text-gray-900">Panel Admin</span>
+                      <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-lime-500/10 text-lime-600 font-bold border border-lime-500/20">Admin</span>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                    <p className="text-xs text-gray-500 truncate mt-0.5">
                       Gestión de eventos, agenda y métricas
                     </p>
                   </div>
@@ -298,17 +298,17 @@ export default function ProfilePage() {
                     setIsRoleModalOpen(false);
                     router.push('/staff');
                   }}
-                  className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl bg-gray-50 dark:bg-zinc-800/60 hover:bg-blue-500/10 dark:hover:bg-blue-500/15 border border-gray-200/80 dark:border-zinc-700/60 hover:border-blue-500/40 transition-all text-left group cursor-pointer active:scale-[0.98]"
+                  className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-500/40 transition-all text-left group cursor-pointer active:scale-[0.98]"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/15 dark:bg-blue-500/20 flex items-center justify-center shrink-0 border border-blue-500/30 group-hover:scale-110 transition-transform">
-                    <QrCode className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center shrink-0 border border-blue-500/30 group-hover:scale-110 transition-transform">
+                    <QrCode className="w-5 h-5 text-blue-500" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">Panel Staff</span>
-                      <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">Staff</span>
+                      <span className="text-sm font-bold text-gray-900">Panel Staff</span>
+                      <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 font-bold border border-blue-500/20">Staff</span>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                    <p className="text-xs text-gray-500 truncate mt-0.5">
                       Escáner de asistencia QR y accesos
                     </p>
                   </div>
@@ -320,17 +320,17 @@ export default function ProfilePage() {
                     setIsRoleModalOpen(false);
                     router.push('/owner');
                   }}
-                  className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl bg-gray-50 dark:bg-zinc-800/60 hover:bg-amber-500/10 dark:hover:bg-amber-500/15 border border-gray-200/80 dark:border-zinc-700/60 hover:border-amber-500/40 transition-all text-left group cursor-pointer active:scale-[0.98]"
+                  className="w-full flex items-center gap-3.5 p-3.5 rounded-2xl bg-gray-50 hover:bg-amber-50 border border-gray-200 hover:border-amber-500/40 transition-all text-left group cursor-pointer active:scale-[0.98]"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 dark:bg-amber-500/20 flex items-center justify-center shrink-0 border border-amber-500/30 group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0 border border-amber-500/30 group-hover:scale-110 transition-transform">
                     <Crown className="w-5 h-5 text-amber-500" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">Panel Owner</span>
-                      <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/20">Owner</span>
+                      <span className="text-sm font-bold text-gray-900">Panel Owner</span>
+                      <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-bold border border-amber-500/20">Owner</span>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                    <p className="text-xs text-gray-500 truncate mt-0.5">
                       Administración global y plataforma
                     </p>
                   </div>

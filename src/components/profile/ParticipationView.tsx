@@ -145,20 +145,20 @@ export function ParticipationView() {
             return (
               <div 
                 key={event.id}
-                className="overflow-hidden rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-[#111111] shadow-sm transition-all duration-300"
+                className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300"
               >
                 <button 
                   onClick={() => toggleExpand(event.id)}
                   className="group relative w-full text-left pl-5 pr-4 py-4 xs:pl-7 xs:pr-6 xs:py-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-6"
                 >
                   {/* Accent Line */}
-                  <div className="absolute bottom-0 left-0 top-0 w-1.5 bg-[#DBF227] transition-colors" />
+                  <div className="absolute bottom-0 left-0 top-0 w-1.5 bg-[var(--color-acid)] transition-colors" />
                   
                   {/* Main Info */}
                   <div className="flex flex-1 flex-col items-start gap-2">
                     {/* Tags */}
                     <div className="flex flex-wrap items-center gap-2">
-                       <span className="inline-flex items-center rounded-md border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                       <span className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-500">
                         {event.type}
                       </span>
                       
@@ -171,21 +171,21 @@ export function ParticipationView() {
                     </div>
 
                     {/* Title */}
-                    <h3 className="text-lg xs:text-xl font-bold leading-snug text-[#373737] dark:text-white group-hover:text-black dark:group-hover:text-[var(--color-acid)] transition-colors">
+                    <h3 className="text-lg xs:text-xl font-bold leading-snug text-gray-900 group-hover:text-black transition-colors">
                       {event.title}
                     </h3>
                     
                     {/* Location */}
-                    <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
-                        <MapPin className="h-4 w-4 text-[#DBF227]" />
+                    <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                        <MapPin className="h-4 w-4 text-[var(--color-acid)]" />
                         {event.location}
                     </div>
                   </div>
 
                   {/* Date & Time Box */}
                   <div className="flex shrink-0 items-center justify-between md:justify-end gap-6 w-full md:w-auto">
-                    <div className="flex flex-row md:flex-col items-start md:items-end gap-1 font-medium text-sm text-gray-500 dark:text-gray-400">
-                      <span className="capitalize font-bold text-[#373737] dark:text-white">
+                    <div className="flex flex-row md:flex-col items-start md:items-end gap-1 font-medium text-sm text-gray-500">
+                      <span className="capitalize font-bold text-gray-900">
                         {eventDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
                       </span>
                       <span>
@@ -193,7 +193,7 @@ export function ParticipationView() {
                       </span>
                     </div>
                     
-                    <div className="p-2 bg-gray-50 dark:bg-zinc-900 rounded-full text-gray-400 dark:text-gray-500 group-hover:text-black dark:group-hover:text-white transition-colors">
+                    <div className="p-2 bg-gray-50 rounded-full text-gray-400 group-hover:text-black transition-colors">
                       {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                     </div>
                   </div>
@@ -207,28 +207,28 @@ export function ParticipationView() {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
-                      className="border-t border-gray-100 dark:border-zinc-800 bg-gray-50/30 dark:bg-zinc-900/10 overflow-hidden"
+                      className="border-t border-gray-100 bg-gray-50/30 overflow-hidden"
                     >
                       <div className="p-6 space-y-6">
                         {/* Stats Dashboard Row */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="bg-white dark:bg-[#1a1a1a] p-4 rounded-xl border border-gray-100 dark:border-zinc-800 flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                          <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                               <Users className="w-5 h-5" />
                             </div>
                             <div>
-                              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-widest">Asistencia</p>
-                              <p className="text-xl font-black text-black dark:text-white">{event.attendees_scanned} escaneados</p>
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Asistencia</p>
+                              <p className="text-xl font-black text-black">{event.attendees_scanned} escaneados</p>
                             </div>
                           </div>
 
-                          <div className="bg-white dark:bg-[#1a1a1a] p-4 rounded-xl border border-gray-100 dark:border-zinc-800 flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                          <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                               <Star className="w-5 h-5 fill-amber-500 text-amber-500" />
                             </div>
                             <div>
-                              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-widest">Calificación Promedio</p>
-                              <p className="text-xl font-black text-black dark:text-white">
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Calificación Promedio</p>
+                              <p className="text-xl font-black text-black">
                                 {event.ratingCount && event.ratingCount > 0 
                                   ? `${event.ratingAvg} / 5 (${event.ratingCount} opiniones)`
                                   : 'Sin calificaciones aún'}
@@ -247,12 +247,12 @@ export function ParticipationView() {
                           <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                             {event.comments && event.comments.length > 0 ? (
                               event.comments.map((comment, idx) => (
-                                <div key={idx} className="bg-white dark:bg-[#1a1a1a] p-4 rounded-xl border border-gray-100 dark:border-zinc-800 text-sm text-gray-700 dark:text-gray-300 leading-relaxed shadow-sm">
+                                <div key={idx} className="bg-white p-4 rounded-xl border border-gray-200 text-sm text-gray-700 leading-relaxed shadow-sm">
                                   "{comment}"
                                 </div>
                               ))
                             ) : (
-                              <p className="text-xs text-gray-400 italic py-4 text-center bg-white dark:bg-[#1a1a1a] rounded-xl border border-gray-100 dark:border-zinc-800">
+                              <p className="text-xs text-gray-400 italic py-4 text-center bg-white rounded-xl border border-gray-200">
                                 No se han recibido comentarios escritos para este evento.
                               </p>
                             )}

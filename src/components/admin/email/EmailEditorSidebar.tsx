@@ -126,15 +126,15 @@ export function EmailEditorSidebar({
   };
 
   return (
-    <div className="w-full lg:w-[460px] bg-white dark:bg-zinc-950 border-r border-gray-200 dark:border-zinc-800 flex flex-col h-full overflow-hidden">
+    <div className="w-full lg:w-[460px] bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
       {/* Sidebar Navigation Tabs */}
-      <div className="flex items-center gap-1 p-2 bg-gray-50 dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-1 p-2 bg-gray-50 border-b border-gray-200 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setActiveTab('content')}
           className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'content'
-              ? 'bg-white dark:bg-zinc-800 text-gray-900 dark:text-white shadow-sm'
-              : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-900'
           }`}
           style={activeTab === 'content' ? { borderLeft: `3px solid ${accentColor}` } : {}}
         >
@@ -146,8 +146,8 @@ export function EmailEditorSidebar({
           onClick={() => setActiveTab('logos')}
           className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'logos'
-              ? 'bg-white dark:bg-zinc-800 text-gray-900 dark:text-white shadow-sm'
-              : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-900'
           }`}
           style={activeTab === 'logos' ? { borderLeft: `3px solid ${accentColor}` } : {}}
         >
@@ -159,8 +159,8 @@ export function EmailEditorSidebar({
           onClick={() => setActiveTab('agenda')}
           className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'agenda'
-              ? 'bg-white dark:bg-zinc-800 text-gray-900 dark:text-white shadow-sm'
-              : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-900'
           }`}
           style={activeTab === 'agenda' ? { borderLeft: `3px solid ${accentColor}` } : {}}
         >
@@ -172,8 +172,8 @@ export function EmailEditorSidebar({
           onClick={() => setActiveTab('typography')}
           className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'typography'
-              ? 'bg-white dark:bg-zinc-800 text-gray-900 dark:text-white shadow-sm'
-              : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-900'
           }`}
           style={activeTab === 'typography' ? { borderLeft: `3px solid ${accentColor}` } : {}}
         >
@@ -185,8 +185,8 @@ export function EmailEditorSidebar({
           onClick={() => setActiveTab('extra')}
           className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer ${
             activeTab === 'extra'
-              ? 'bg-white dark:bg-zinc-800 text-gray-900 dark:text-white shadow-sm'
-              : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-900'
           }`}
           style={activeTab === 'extra' ? { borderLeft: `3px solid ${accentColor}` } : {}}
         >
@@ -201,15 +201,15 @@ export function EmailEditorSidebar({
         {activeTab === 'content' && (
           <div className="space-y-6 animate-in fade-in duration-200">
             {/* Subject & Preheader Header */}
-            <div className="space-y-4 bg-gray-50 dark:bg-zinc-900/60 p-4 rounded-xl border border-gray-200 dark:border-zinc-800">
-              <h4 className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
+            <div className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
                 <Tag className="w-3.5 h-3.5" style={{ color: accentColor }} />
                 <span>Asunto y Preencabezado</span>
               </h4>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                     Asunto del Correo
                   </label>
                   <input
@@ -217,12 +217,12 @@ export function EmailEditorSidebar({
                     value={config.subject || ''}
                     onChange={(e) => updateConfig({ subject: e.target.value })}
                     placeholder="Ej: ¡Bienvenido a {{evento}}, {{nombre}}!"
-                    className="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                    className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                     Preencabezado (Snippet de Vista Previa)
                   </label>
                   <input
@@ -230,7 +230,7 @@ export function EmailEditorSidebar({
                     value={config.preheader || ''}
                     onChange={(e) => updateConfig({ preheader: e.target.value })}
                     placeholder="Ej: Revisa tus credenciales de acceso..."
-                    className="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                    className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
               </div>
@@ -239,7 +239,7 @@ export function EmailEditorSidebar({
             {/* Quick Placeholders Toolbar */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+                <label className="text-xs font-bold text-gray-800 uppercase tracking-wider">
                   Insertar Placeholders Dinámicos
                 </label>
                 <span className="text-[10px] text-gray-400 font-medium">Haz clic para agregar al texto</span>
@@ -250,7 +250,7 @@ export function EmailEditorSidebar({
                     key={ph.key}
                     type="button"
                     onClick={() => insertPlaceholderIntoBody(ph.key)}
-                    className="px-2.5 py-1 text-[11px] font-mono font-semibold bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-800 dark:text-gray-200 rounded-lg transition-all border border-gray-200 dark:border-zinc-700 cursor-pointer active:scale-95 flex items-center gap-1"
+                    className="px-2.5 py-1 text-[11px] font-mono font-semibold bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-all border border-gray-200 cursor-pointer active:scale-95 flex items-center gap-1"
                     title={ph.description}
                   >
                     <span>{ph.key}</span>
@@ -262,7 +262,7 @@ export function EmailEditorSidebar({
 
             {/* Rich Text Editor */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-gray-800 uppercase tracking-wider">
                 Cuerpo del Correo (HTML / Mensaje de Bienvenida)
               </label>
               <textarea
@@ -270,10 +270,10 @@ export function EmailEditorSidebar({
                 onChange={(e) => updateConfig({ body_html: e.target.value })}
                 rows={10}
                 placeholder="Escribe el mensaje de bienvenida aquí. Puedes usar etiquetas HTML como <p>, <strong>, <a>, <ul>, etc."
-                className="w-full p-3 text-xs font-mono bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white leading-relaxed"
+                className="w-full p-3 text-xs font-mono bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black leading-relaxed"
               />
               <p className="text-[11px] text-gray-500">
-                Soporta formato HTML completo y placeholders dinámicos como <code className="bg-gray-100 dark:bg-zinc-800 px-1 rounded text-black dark:text-white">{"{{nombre}}"}</code>.
+                Soporta formato HTML completo y placeholders dinámicos como <code className="bg-gray-100 px-1 rounded text-black">{"{{nombre}}"}</code>.
               </p>
             </div>
           </div>
@@ -283,7 +283,7 @@ export function EmailEditorSidebar({
         {activeTab === 'logos' && (
           <div className="space-y-6 animate-in fade-in duration-200">
             <div className="space-y-2">
-              <h4 className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
+              <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
                 <ImageIcon className="w-3.5 h-3.5" style={{ color: accentColor }} />
                 <span>Selector de Logotipos Institucionales</span>
               </h4>
@@ -293,7 +293,7 @@ export function EmailEditorSidebar({
             </div>
 
             {/* Logo Type Switcher */}
-            <div className="grid grid-cols-4 gap-1.5 p-1 bg-gray-100 dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800">
+            <div className="grid grid-cols-4 gap-1.5 p-1 bg-gray-100 rounded-xl border border-gray-200">
               {(['preset', 'custom', 'text', 'none'] as const).map((type) => (
                 <button
                   key={type}
@@ -308,8 +308,8 @@ export function EmailEditorSidebar({
                   }
                   className={`py-1.5 text-xs font-bold uppercase rounded-lg transition-all capitalize ${
                     config.logo?.type === type
-                      ? 'bg-white dark:bg-zinc-800 text-gray-900 dark:text-white shadow-sm'
-                      : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   {type === 'preset' ? 'Precargados' : type === 'custom' ? 'URL' : type === 'text' ? 'Texto' : 'Sin logo'}
@@ -320,7 +320,7 @@ export function EmailEditorSidebar({
             {/* Preset Logos Grid */}
             {config.logo?.type === 'preset' && (
               <div className="space-y-3">
-                <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase">
+                <label className="block text-[11px] font-bold text-gray-600 uppercase">
                   Logos Precargados del Sistema
                 </label>
                 <div className="grid grid-cols-3 gap-2.5">
@@ -340,14 +340,14 @@ export function EmailEditorSidebar({
                             },
                           })
                         }
-                        className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer bg-white dark:bg-zinc-900 ${
+                        className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer bg-white ${
                           isSelected
-                            ? 'border-black dark:border-white shadow-md scale-[1.02]'
-                            : 'border-gray-200 dark:border-zinc-800 hover:border-gray-400'
+                            ? 'border-black shadow-md scale-[1.02]'
+                            : 'border-gray-200 hover:border-gray-400'
                         }`}
                       >
                         <img src={logoUrl} alt={preset} className="h-8 max-w-full object-contain" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-gray-600">
                           {preset}
                         </span>
                       </button>
@@ -360,7 +360,7 @@ export function EmailEditorSidebar({
             {/* Custom URL Option */}
             {config.logo?.type === 'custom' && (
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                <label className="block text-xs font-bold text-gray-700">
                   URL de Imagen del Logo
                 </label>
                 <input
@@ -376,7 +376,7 @@ export function EmailEditorSidebar({
                     })
                   }
                   placeholder="https://ejemplo.com/logo.png"
-                  className="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none"
+                  className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-xl focus:outline-none"
                 />
               </div>
             )}
@@ -384,7 +384,7 @@ export function EmailEditorSidebar({
             {/* Text Logo Option */}
             {config.logo?.type === 'text' && (
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                <label className="block text-xs font-bold text-gray-700">
                   Texto del Encabezado / Marca
                 </label>
                 <input
@@ -400,16 +400,16 @@ export function EmailEditorSidebar({
                     })
                   }
                   placeholder="Ej: 🍒 Cherry Eventos"
-                  className="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none"
+                  className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-xl focus:outline-none"
                 />
               </div>
             )}
 
             {/* Logo Sizing & Alignment */}
             {config.logo?.type !== 'none' && (
-              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-zinc-900/60 rounded-xl border border-gray-200 dark:border-zinc-800">
+              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                     Alto del Logo (px)
                   </label>
                   <input
@@ -425,12 +425,12 @@ export function EmailEditorSidebar({
                         },
                       })
                     }
-                    className="w-full px-3 py-1.5 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg"
+                    className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                     Alineación
                   </label>
                   <select
@@ -443,7 +443,7 @@ export function EmailEditorSidebar({
                         },
                       })
                     }
-                    className="w-full px-3 py-1.5 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg"
+                    className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg"
                   >
                     <option value="left">Izquierda</option>
                     <option value="center">Centro</option>
@@ -460,7 +460,7 @@ export function EmailEditorSidebar({
           <div className="space-y-6 animate-in fade-in duration-200">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
                   <Calendar className="w-3.5 h-3.5" style={{ color: accentColor }} />
                   <span>Selector de Eventos de la Agenda</span>
                 </h4>
@@ -472,7 +472,7 @@ export function EmailEditorSidebar({
                     onChange={(e) => updateAgendaSection({ show: e.target.checked })}
                     className="sr-only peer"
                   />
-                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black dark:peer-checked:bg-white"></div>
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                 </label>
               </div>
               <p className="text-xs text-gray-500">
@@ -483,7 +483,7 @@ export function EmailEditorSidebar({
             {config.agenda_section?.show && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                     Título de la Sección de Agenda
                   </label>
                   <input
@@ -491,17 +491,17 @@ export function EmailEditorSidebar({
                     value={config.agenda_section?.title || ''}
                     onChange={(e) => updateAgendaSection({ title: e.target.value })}
                     placeholder="Ej: Eventos Destacados de la Agenda"
-                    className="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg"
+                    className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase">
+                  <label className="block text-[11px] font-bold text-gray-600 uppercase">
                     Eventos Disponibles en el Evento Global ({agendaEvents.length})
                   </label>
 
                   {agendaEvents.length === 0 ? (
-                    <div className="p-4 bg-gray-50 dark:bg-zinc-900 text-center rounded-xl border border-dashed border-gray-300 dark:border-zinc-800 text-xs text-gray-500">
+                    <div className="p-4 bg-gray-50 text-center rounded-xl border border-dashed border-gray-300 text-xs text-gray-500">
                       No hay eventos creados en la agenda del evento aún.
                     </div>
                   ) : (
@@ -514,8 +514,8 @@ export function EmailEditorSidebar({
                             onClick={() => toggleEventInAgenda(evt.id)}
                             className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-3 ${
                               isChecked
-                                ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800 shadow-sm'
-                                : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 hover:border-gray-300'
+                                ? 'bg-amber-50/50 border-amber-300 shadow-sm'
+                                : 'bg-white border-gray-200 hover:border-gray-300'
                             }`}
                           >
                             <div className="mt-0.5">
@@ -528,7 +528,7 @@ export function EmailEditorSidebar({
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2 mb-1">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">
                                   {evt.type || 'Actividad'}
                                 </span>
                                 {evt.date && (
@@ -537,7 +537,7 @@ export function EmailEditorSidebar({
                                   </span>
                                 )}
                               </div>
-                              <h5 className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                              <h5 className="text-xs font-bold text-gray-900 truncate">
                                 {evt.title}
                               </h5>
                               {evt.location && (
@@ -560,20 +560,20 @@ export function EmailEditorSidebar({
         {/* TAB 4: ESTILOS & TIPOGRAFÍA */}
         {activeTab === 'typography' && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            <h4 className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
+            <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
               <Palette className="w-3.5 h-3.5" style={{ color: accentColor }} />
               <span>Personalización Visual y Tipográfica</span>
             </h4>
 
             {/* Typography Family */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+              <label className="block text-xs font-bold text-gray-700">
                 Familia de Tipografía
               </label>
               <select
                 value={config.styles?.font_family || 'sans-serif'}
                 onChange={(e) => updateStyles({ font_family: e.target.value })}
-                className="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none"
+                className="w-full px-3 py-2 text-xs bg-white border border-gray-300 rounded-xl focus:outline-none"
               >
                 {FONT_FAMILY_OPTIONS.map((font) => (
                   <option key={font.value} value={font.value}>
@@ -585,7 +585,7 @@ export function EmailEditorSidebar({
 
             {/* Font Size */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+              <label className="block text-xs font-bold text-gray-700">
                 Tamaño del Texto Base
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -596,8 +596,8 @@ export function EmailEditorSidebar({
                     onClick={() => updateStyles({ font_size_body: size.value })}
                     className={`py-2 text-xs font-bold rounded-lg border transition-all ${
                       config.styles?.font_size_body === size.value
-                        ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white shadow-sm'
-                        : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300'
+                        ? 'bg-black text-white border-black shadow-sm'
+                        : 'bg-white border-gray-200 text-gray-700'
                     }`}
                   >
                     {size.value}
@@ -607,15 +607,15 @@ export function EmailEditorSidebar({
             </div>
 
             {/* Color Scheme Inputs */}
-            <div className="space-y-4 p-4 bg-gray-50 dark:bg-zinc-900/60 rounded-xl border border-gray-200 dark:border-zinc-800">
-              <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase">
+            <div className="space-y-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <label className="block text-[11px] font-bold text-gray-600 uppercase">
                 Paleta de Colores
               </label>
 
               <div className="grid grid-cols-2 gap-4">
                 {/* Accent Color */}
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">
                     Color de Acento
                   </label>
                   <div className="flex items-center gap-2">
@@ -629,14 +629,14 @@ export function EmailEditorSidebar({
                       type="text"
                       value={config.styles?.accent_color || accentColor}
                       onChange={(e) => updateStyles({ accent_color: e.target.value })}
-                      className="w-full px-2.5 py-1 text-xs font-mono bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg uppercase"
+                      className="w-full px-2.5 py-1 text-xs font-mono bg-white border border-gray-300 rounded-lg uppercase"
                     />
                   </div>
                 </div>
 
                 {/* Text Color */}
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">
                     Color de Texto
                   </label>
                   <div className="flex items-center gap-2">
@@ -650,14 +650,14 @@ export function EmailEditorSidebar({
                       type="text"
                       value={config.styles?.text_color || '#1a1a1a'}
                       onChange={(e) => updateStyles({ text_color: e.target.value })}
-                      className="w-full px-2.5 py-1 text-xs font-mono bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg uppercase"
+                      className="w-full px-2.5 py-1 text-xs font-mono bg-white border border-gray-300 rounded-lg uppercase"
                     />
                   </div>
                 </div>
 
                 {/* Outer Background Color */}
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">
                     Fondo Exterior
                   </label>
                   <div className="flex items-center gap-2">
@@ -671,14 +671,14 @@ export function EmailEditorSidebar({
                       type="text"
                       value={config.styles?.background_color || '#f8fafc'}
                       onChange={(e) => updateStyles({ background_color: e.target.value })}
-                      className="w-full px-2.5 py-1 text-xs font-mono bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg uppercase"
+                      className="w-full px-2.5 py-1 text-xs font-mono bg-white border border-gray-300 rounded-lg uppercase"
                     />
                   </div>
                 </div>
 
                 {/* Card Background Color */}
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                  <label className="block text-[11px] font-semibold text-gray-600 mb-1">
                     Fondo de Tarjeta
                   </label>
                   <div className="flex items-center gap-2">
@@ -692,7 +692,7 @@ export function EmailEditorSidebar({
                       type="text"
                       value={config.styles?.card_background || '#ffffff'}
                       onChange={(e) => updateStyles({ card_background: e.target.value })}
-                      className="w-full px-2.5 py-1 text-xs font-mono bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg uppercase"
+                      className="w-full px-2.5 py-1 text-xs font-mono bg-white border border-gray-300 rounded-lg uppercase"
                     />
                   </div>
                 </div>
@@ -701,7 +701,7 @@ export function EmailEditorSidebar({
 
             {/* Border Radius Options */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+              <label className="block text-xs font-bold text-gray-700">
                 Redondeo de Bordes de Tarjeta
               </label>
               <div className="grid grid-cols-4 gap-2">
@@ -717,8 +717,8 @@ export function EmailEditorSidebar({
                     onClick={() => updateStyles({ border_radius: radius.value })}
                     className={`py-2 text-[11px] font-bold rounded-lg border transition-all ${
                       config.styles?.border_radius === radius.value
-                        ? 'bg-black text-white dark:bg-white dark:text-black border-black dark:border-white shadow-sm'
-                        : 'bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300'
+                        ? 'bg-black text-white border-black shadow-sm'
+                        : 'bg-white border-gray-200 text-gray-700'
                     }`}
                   >
                     {radius.label}
@@ -732,15 +732,15 @@ export function EmailEditorSidebar({
         {/* TAB 5: BLOQUES EXTRA & ELEMENTOS PROFUNDOS */}
         {activeTab === 'extra' && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            <h4 className="text-xs font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider flex items-center gap-2">
+            <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
               <Sliders className="w-3.5 h-3.5" style={{ color: accentColor }} />
               <span>Elementos Estructurales Personalizables</span>
             </h4>
 
             {/* HEADER BANNER */}
-            <div className="p-4 bg-gray-50 dark:bg-zinc-900/60 rounded-xl border border-gray-200 dark:border-zinc-800 space-y-3">
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-800 flex items-center gap-2">
                   <Layout className="w-3.5 h-3.5 text-gray-500" /> Banner de Encabezado
                 </span>
                 <input
@@ -754,25 +754,25 @@ export function EmailEditorSidebar({
               {config.header_banner?.show && (
                 <div className="space-y-3 pt-2">
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                    <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                       Título del Banner
                     </label>
                     <input
                       type="text"
                       value={config.header_banner?.title || ''}
                       onChange={(e) => updateHeaderBanner({ title: e.target.value })}
-                      className="w-full px-3 py-1.5 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg"
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                    <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                       Subtítulo del Banner
                     </label>
                     <input
                       type="text"
                       value={config.header_banner?.subtitle || ''}
                       onChange={(e) => updateHeaderBanner({ subtitle: e.target.value })}
-                      className="w-full px-3 py-1.5 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg"
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg"
                     />
                   </div>
                 </div>
@@ -780,9 +780,9 @@ export function EmailEditorSidebar({
             </div>
 
             {/* CREDENTIALS BOX */}
-            <div className="p-4 bg-gray-50 dark:bg-zinc-900/60 rounded-xl border border-gray-200 dark:border-zinc-800 space-y-3">
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-800 flex items-center gap-2">
                   <ShieldCheck className="w-3.5 h-3.5 text-gray-500" /> Caja de Credenciales
                 </span>
                 <input
@@ -796,14 +796,14 @@ export function EmailEditorSidebar({
               {config.credentials_box?.show && (
                 <div className="space-y-3 pt-2">
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                    <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                       Título de la Caja
                     </label>
                     <input
                       type="text"
                       value={config.credentials_box?.title || ''}
                       onChange={(e) => updateCredentialsBox({ title: e.target.value })}
-                      className="w-full px-3 py-1.5 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg"
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
@@ -845,9 +845,9 @@ export function EmailEditorSidebar({
             </div>
 
             {/* CTA BUTTON */}
-            <div className="p-4 bg-gray-50 dark:bg-zinc-900/60 rounded-xl border border-gray-200 dark:border-zinc-800 space-y-3">
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-800 flex items-center gap-2">
                   <MousePointerClick className="w-3.5 h-3.5 text-gray-500" /> Botón de Acción Principal (CTA)
                 </span>
                 <input
@@ -861,18 +861,18 @@ export function EmailEditorSidebar({
               {config.cta_button?.show && (
                 <div className="space-y-3 pt-2">
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                    <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                       Texto del Botón
                     </label>
                     <input
                       type="text"
                       value={config.cta_button?.text || ''}
                       onChange={(e) => updateCtaButton({ text: e.target.value })}
-                      className="w-full px-3 py-1.5 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg"
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                    <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                       Enlace de Destino (URL)
                     </label>
                     <input
@@ -880,7 +880,7 @@ export function EmailEditorSidebar({
                       value={config.cta_button?.url || ''}
                       onChange={(e) => updateCtaButton({ url: e.target.value })}
                       placeholder="https://scherry.click"
-                      className="w-full px-3 py-1.5 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg"
+                      className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg"
                     />
                   </div>
                 </div>
@@ -888,31 +888,31 @@ export function EmailEditorSidebar({
             </div>
 
             {/* FOOTER & SOCIAL LINKS */}
-            <div className="p-4 bg-gray-50 dark:bg-zinc-900/60 rounded-xl border border-gray-200 dark:border-zinc-800 space-y-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-800 dark:text-gray-200 flex items-center gap-2">
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-800 flex items-center gap-2">
                 <Globe className="w-3.5 h-3.5 text-gray-500" /> Pie de Página y Redes Sociales
               </span>
               <div className="space-y-3 pt-1">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                     Texto de Pie de Página
                   </label>
                   <input
                     type="text"
                     value={config.footer?.text || ''}
                     onChange={(e) => updateFooter({ text: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg"
+                    className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 uppercase mb-1">
+                  <label className="block text-[11px] font-bold text-gray-600 uppercase mb-1">
                     Derechos de Autor (Copyright)
                   </label>
                   <input
                     type="text"
                     value={config.footer?.copyright_text || ''}
                     onChange={(e) => updateFooter({ copyright_text: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs bg-white dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 rounded-lg"
+                    className="w-full px-3 py-1.5 text-xs bg-white border border-gray-300 rounded-lg"
                   />
                 </div>
               </div>

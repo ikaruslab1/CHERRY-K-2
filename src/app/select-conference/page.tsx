@@ -27,7 +27,7 @@ export default function SelectConferencePage() {
               <div 
                 key={conf.id}
                 onClick={() => selectConference(conf)}
-                className="group bg-white dark:bg-[#111111] rounded-xl p-6 border border-border dark:border-zinc-800 cursor-pointer hover:border-black dark:hover:border-[var(--color-acid)] transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden"
+                className="group bg-white rounded-xl p-6 border border-border cursor-pointer hover:border-[var(--color-acid)] transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden"
               >
                 {/* Decorative Accent */}
                 <div className="absolute top-0 left-0 w-1 h-full bg-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

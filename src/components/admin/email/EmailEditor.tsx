@@ -132,14 +132,14 @@ export function EmailEditor() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center bg-white dark:bg-zinc-950">
+      <div className="flex h-full items-center justify-center bg-white">
         <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-950 overflow-hidden relative">
+    <div className="flex flex-col h-full bg-white overflow-hidden relative">
       {/* Mobile Guard Warning */}
       <DesktopRequiredWarning
         title="Editor de Correos de Registro"
@@ -148,7 +148,7 @@ export function EmailEditor() {
       />
 
       {/* Top Action Header Bar */}
-      <div className="h-16 bg-white dark:bg-zinc-950 border-b border-gray-200 dark:border-zinc-800 px-6 flex items-center justify-between z-20 shadow-sm">
+      <div className="h-16 bg-white border-b border-gray-200 px-6 flex items-center justify-between z-20 shadow-sm">
         {/* Title & Global Accent Branding */}
         <div className="flex items-center gap-3">
           <div
@@ -158,13 +158,13 @@ export function EmailEditor() {
             <Mail className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-base font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
+            <h1 className="text-base font-extrabold tracking-tight text-gray-900 flex items-center gap-2">
               <span>Personalización de Correo de Registro</span>
-              <span className="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/20 uppercase">
+              <span className="text-[10px] font-mono font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200 uppercase">
                 Admin & Owner
               </span>
             </h1>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400">
+            <p className="text-[11px] text-gray-500">
               Personaliza el formato, la agenda y las credenciales enviadas automáticamente al registrarse.
             </p>
           </div>
@@ -173,8 +173,8 @@ export function EmailEditor() {
         {/* Header Actions */}
         <div className="flex items-center gap-3">
           {/* Custom Email Active Toggle */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800">
-            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-xl border border-gray-200">
+            <span className="text-xs font-bold text-gray-700">
               Correo Personalizado
             </span>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -184,14 +184,14 @@ export function EmailEditor() {
                 onChange={(e) => setEnabled(e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black dark:peer-checked:bg-white"></div>
+              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
             </label>
           </div>
 
           {/* Reset Button */}
           <button
             onClick={handleResetDefault}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white bg-gray-100 dark:bg-zinc-800 rounded-xl transition-all hover:bg-gray-200 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all cursor-pointer"
             title="Restablecer plantilla a los valores originales"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -201,7 +201,7 @@ export function EmailEditor() {
           {/* Send Test Email Modal Trigger */}
           <button
             onClick={() => setTestEmailModal(true)}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-xl transition-all cursor-pointer border border-gray-200 dark:border-zinc-700"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all cursor-pointer border border-gray-200"
           >
             <Send className="w-3.5 h-3.5" />
             <span>Probar Envíos</span>
@@ -246,9 +246,9 @@ export function EmailEditor() {
       {/* Test Email Modal */}
       {testEmailModal && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-2xl p-6 shadow-2xl border border-gray-200 dark:border-zinc-800 space-y-4">
+          <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl border border-gray-200 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-gray-900 dark:text-white flex items-center gap-2">
+              <h3 className="text-base font-black text-gray-900 flex items-center gap-2">
                 <Send className="w-4 h-4 text-amber-500" />
                 <span>Enviar Correo de Prueba</span>
               </h3>
@@ -265,7 +265,7 @@ export function EmailEditor() {
             </p>
 
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300">
+              <label className="block text-xs font-bold text-gray-700">
                 Correo de Destino
               </label>
               <input
@@ -273,21 +273,21 @@ export function EmailEditor() {
                 value={testRecipient}
                 onChange={(e) => setTestRecipient(e.target.value)}
                 placeholder="Dejar en blanco para usar tu email de sesión"
-                className="w-full px-3 py-2 text-xs bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-3 py-2 text-xs bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
 
             <div className="flex items-center gap-3 pt-2">
               <button
                 onClick={() => setTestEmailModal(false)}
-                className="flex-1 py-2.5 px-4 text-xs font-bold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-zinc-800 rounded-xl"
+                className="flex-1 py-2.5 px-4 text-xs font-bold text-gray-600 bg-gray-100 rounded-xl"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSendTestEmail}
                 disabled={sendingTest}
-                className="flex-1 py-2.5 px-4 text-xs font-bold text-white bg-black dark:bg-white dark:text-black rounded-xl flex items-center justify-center gap-2 shadow-md cursor-pointer"
+                className="flex-1 py-2.5 px-4 text-xs font-bold text-white bg-black rounded-xl flex items-center justify-center gap-2 shadow-md cursor-pointer"
               >
                 {sendingTest ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

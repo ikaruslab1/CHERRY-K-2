@@ -156,10 +156,10 @@ export function DownloadParticipantsModal({ isOpen, onClose, conference }: Downl
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="bg-white dark:bg-[#111111] rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 flex flex-col max-h-[90vh]"
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-200 flex flex-col max-h-[90vh]"
           >
         {/* Header */}
-        <div className="p-6 border-b border-gray-100 dark:border-zinc-800 flex justify-between items-center bg-gray-50/50 dark:bg-zinc-900/50">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
           <div className="flex items-center gap-3">
             <div 
               className="p-2.5 rounded-xl shadow-lg transition-colors"
@@ -172,13 +172,13 @@ export function DownloadParticipantsModal({ isOpen, onClose, conference }: Downl
               <Download className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-[#373737] dark:text-white">Descargar Base de Datos</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Exportación de participantes y organizadores.</p>
+              <h3 className="text-xl font-bold text-gray-900">Descargar Base de Datos</h3>
+              <p className="text-xs text-gray-500 font-medium">Exportación de participantes y organizadores.</p>
             </div>
           </div>
           <button 
             onClick={onClose} 
-            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all"
+            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
           >
             <X className="h-6 w-6" />
           </button>
@@ -188,15 +188,15 @@ export function DownloadParticipantsModal({ isOpen, onClose, conference }: Downl
           {/* Section 1: DB Selection */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <Database className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-              <label className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Base de Datos</label>
+              <Database className="h-4 w-4 text-gray-400" />
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Base de Datos</label>
             </div>
             <div className="grid grid-cols-2 gap-4">
                <motion.button 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setDbType('organizers')}
-                className={`p-4 rounded-2xl border-2 transition-colors flex flex-col items-center gap-2 ${dbType === 'organizers' ? 'border-[var(--color-acid)] bg-[rgb(var(--color-acid-rgb)/0.15)] text-black dark:text-white shadow-none' : 'border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/60 text-gray-500 dark:text-gray-400 hover:border-gray-200 dark:hover:border-zinc-700'}`}
+                className={`p-4 rounded-2xl border-2 transition-colors flex flex-col items-center gap-2 ${dbType === 'organizers' ? 'border-[var(--color-acid)] bg-[rgb(var(--color-acid-rgb)/0.15)] text-black shadow-none' : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300'}`}
                >
                  <span className="font-bold text-sm">Organizadores</span>
                  <span className="text-[10px] opacity-60">Admin, Staff, Propietarios</span>
@@ -205,7 +205,7 @@ export function DownloadParticipantsModal({ isOpen, onClose, conference }: Downl
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setDbType('users')}
-                className={`p-4 rounded-2xl border-2 transition-colors flex flex-col items-center gap-2 ${dbType === 'users' ? 'border-[var(--color-acid)] bg-[rgb(var(--color-acid-rgb)/0.15)] text-black dark:text-white shadow-none' : 'border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/60 text-gray-500 dark:text-gray-400 hover:border-gray-200 dark:hover:border-zinc-700'}`}
+                className={`p-4 rounded-2xl border-2 transition-colors flex flex-col items-center gap-2 ${dbType === 'users' ? 'border-[var(--color-acid)] bg-[rgb(var(--color-acid-rgb)/0.15)] text-black shadow-none' : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300'}`}
                >
                  <span className="font-bold text-sm">Participantes</span>
                  <span className="text-[10px] opacity-60">Asistentes, Ponentes, VIP</span>
@@ -216,8 +216,8 @@ export function DownloadParticipantsModal({ isOpen, onClose, conference }: Downl
           {/* Section 2: Fields Selection */}
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-              <label className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Campos a incluir</label>
+              <CheckCircle className="h-4 w-4 text-gray-400" />
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Campos a incluir</label>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -237,10 +237,10 @@ export function DownloadParticipantsModal({ isOpen, onClose, conference }: Downl
                    whileTap={{ scale: 0.95 }}
                    key={f.id}
                    onClick={() => toggleField(f.id as any)}
-                   className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${fields[f.id as keyof typeof fields] ? 'bg-[rgb(var(--color-acid-rgb)/0.15)] border-[var(--color-acid)] text-black dark:text-white' : 'bg-white dark:bg-zinc-900/60 border-gray-100 dark:border-zinc-800 text-gray-500 dark:text-gray-400 hover:border-gray-200 dark:hover:border-zinc-700'}`}
+                   className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${fields[f.id as keyof typeof fields] ? 'bg-[rgb(var(--color-acid-rgb)/0.15)] border-[var(--color-acid)] text-black' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}
                  >
-                   <div className={`w-4 h-4 rounded border flex items-center justify-center ${fields[f.id as keyof typeof fields] ? 'bg-[var(--color-acid)] border-[var(--color-acid)]' : 'border-gray-300 dark:border-zinc-700'}`}>
-                     {fields[f.id as keyof typeof fields] && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-1.5 h-1.5 rounded-full bg-black/80 dark:bg-black" />}
+                   <div className={`w-4 h-4 rounded border flex items-center justify-center ${fields[f.id as keyof typeof fields] ? 'bg-[var(--color-acid)] border-[var(--color-acid)]' : 'border-gray-300'}`}>
+                     {fields[f.id as keyof typeof fields] && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-1.5 h-1.5 rounded-full bg-black/80" />}
                    </div>
                    <span className="text-[11px] font-bold uppercase tracking-tight">{f.label}</span>
                  </motion.button>
@@ -252,10 +252,10 @@ export function DownloadParticipantsModal({ isOpen, onClose, conference }: Downl
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => toggleField('constanciaGeneral')}
-                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${fields.constanciaGeneral ? 'bg-[rgb(var(--color-acid-rgb)/0.15)] border-[var(--color-acid)] text-black dark:text-white' : 'bg-white dark:bg-zinc-900/60 border-gray-100 dark:border-zinc-800 text-gray-500 dark:text-gray-400 hover:border-gray-200 dark:hover:border-zinc-700'}`}
+                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${fields.constanciaGeneral ? 'bg-[rgb(var(--color-acid-rgb)/0.15)] border-[var(--color-acid)] text-black' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}
                   >
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${fields.constanciaGeneral ? 'bg-[var(--color-acid)] border-[var(--color-acid)]' : 'border-gray-300 dark:border-zinc-700'}`}>
-                      {fields.constanciaGeneral && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-1.5 h-1.5 rounded-full bg-black/80 dark:bg-black" />}
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${fields.constanciaGeneral ? 'bg-[var(--color-acid)] border-[var(--color-acid)]' : 'border-gray-300'}`}>
+                      {fields.constanciaGeneral && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-1.5 h-1.5 rounded-full bg-black/80" />}
                     </div>
                     <span className="text-[11px] font-bold uppercase tracking-tight">Constancia General</span>
                   </motion.button>
@@ -268,10 +268,10 @@ export function DownloadParticipantsModal({ isOpen, onClose, conference }: Downl
                     whileTap={{ scale: 0.95 }}
                     key={input.id}
                     onClick={() => toggleCustomField(input.id)}
-                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${customFields[input.id] ? 'bg-[rgb(var(--color-acid-rgb)/0.15)] border-[var(--color-acid)] text-black dark:text-white' : 'bg-white dark:bg-zinc-900/60 border-gray-100 dark:border-zinc-800 text-gray-500 dark:text-gray-400 hover:border-gray-200 dark:hover:border-zinc-700'}`}
+                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${customFields[input.id] ? 'bg-[rgb(var(--color-acid-rgb)/0.15)] border-[var(--color-acid)] text-black' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}
                   >
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${customFields[input.id] ? 'bg-[var(--color-acid)] border-[var(--color-acid)]' : 'border-gray-300 dark:border-zinc-700'}`}>
-                      {customFields[input.id] && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-1.5 h-1.5 rounded-full bg-black/80 dark:bg-black" />}
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${customFields[input.id] ? 'bg-[var(--color-acid)] border-[var(--color-acid)]' : 'border-gray-300'}`}>
+                      {customFields[input.id] && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-1.5 h-1.5 rounded-full bg-black/80" />}
                     </div>
                     <span className="text-[11px] font-bold uppercase tracking-tight truncate" title={input.label}>{input.label}</span>
                   </motion.button>
@@ -282,8 +282,8 @@ export function DownloadParticipantsModal({ isOpen, onClose, conference }: Downl
           {/* Section 3: Export Format */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <Table className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-              <label className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Formato de Exportación</label>
+              <Table className="h-4 w-4 text-gray-400" />
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Formato de Exportación</label>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -291,14 +291,14 @@ export function DownloadParticipantsModal({ isOpen, onClose, conference }: Downl
                   onClick={() => handleDownload('json')} 
                   disabled={downloading}
                   variant="outline"
-                  className="w-full h-14 bg-white dark:bg-[#111111] border-gray-200 dark:border-zinc-800 text-[#373737] dark:text-white hover:bg-gray-50 dark:hover:bg-zinc-800 gap-3 rounded-2xl shadow-sm"
+                  className="w-full h-14 bg-white border-gray-200 text-gray-800 hover:bg-gray-50 gap-3 rounded-2xl shadow-sm"
                 >
-                  <div className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-lg">
+                  <div className="p-2 bg-gray-100 rounded-lg">
                     <FileJson className="h-4 w-4" />
                   </div>
                   <div className="text-left flex-1">
                     <p className="text-xs font-bold leading-none">JSON</p>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1 truncate">Crudo</p>
+                    <p className="text-[10px] text-gray-400 mt-1 truncate">Crudo</p>
                   </div>
                 </Button>
               </motion.div>
@@ -324,7 +324,7 @@ export function DownloadParticipantsModal({ isOpen, onClose, conference }: Downl
                 <Button 
                   onClick={() => handleDownload('csv')} 
                   disabled={downloading}
-                  className="w-full h-14 bg-[#373737] text-white hover:bg-black gap-3 rounded-2xl shadow-lg border-2 border-[var(--color-acid)]"
+                  className="w-full h-14 bg-gray-900 text-white hover:bg-black gap-3 rounded-2xl shadow-lg border-2 border-[var(--color-acid)]"
                 >
                   <div className="p-2 bg-white/10 rounded-lg">
                     {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Table className="h-4 w-4" />}

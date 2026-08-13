@@ -212,19 +212,19 @@ export function GlobalCertUsersView() {
                   <th className="px-6 py-3 text-center">Eventos</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-zinc-800 bg-white dark:bg-[#111111]">
+              <tbody className="divide-y divide-gray-100 bg-white">
                 {users.map((user, idx) => (
-                  <tr key={user.user_id} className="hover:bg-gray-50/60 dark:hover:bg-zinc-800/50 transition-colors">
-                    <td className="px-6 py-3 text-gray-400 dark:text-gray-500 font-mono text-xs">{idx + 1}</td>
+                  <tr key={user.user_id} className="hover:bg-gray-50/60 transition-colors">
+                    <td className="px-6 py-3 text-gray-400 font-mono text-xs">{idx + 1}</td>
                     <td className="px-6 py-3">
-                      <span className="font-semibold text-[#373737] dark:text-white">
+                      <span className="font-semibold text-gray-900">
                         {user.first_name} {user.last_name}
                       </span>
                     </td>
-                    <td className="px-6 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs break-all">
+                    <td className="px-6 py-3 text-gray-500 font-mono text-xs break-all">
                       {user.email || '—'}
                     </td>
-                    <td className="px-6 py-3 text-gray-500 dark:text-gray-400 text-xs">
+                    <td className="px-6 py-3 text-gray-500 text-xs">
                       {user.degree || '—'}
                     </td>
                     <td className="px-6 py-3 text-center">

@@ -48,8 +48,8 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
     // Active Item: Acid Green Background, Black Text (Brand Identity) - Flat, no shadow
     const itemActive = "bg-[var(--color-acid)] text-black font-bold";
     
-    // Inactive Item: Gray Text, Hover to Light Gray with Black/White Text
-    const itemInactive = "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-black dark:hover:text-white transition-colors duration-200";
+    // Inactive Item: Gray Text, Hover to Light Gray with Black Text
+    const itemInactive = "text-gray-500 hover:bg-gray-100 hover:text-black transition-colors duration-200";
 
     const [isVisible, setIsVisible] = useState(true);
     const lastScrollYRef = useRef(0);
@@ -128,7 +128,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                                 </div>
                                  <button 
                                      onClick={() => setIsMobileOpen(false)}
-                                     className="p-2 transition-colors rounded-lg shrink-0 hover:bg-gray-100 dark:hover:bg-zinc-800 text-[var(--foreground)] opacity-70 hover:opacity-100"
+                                     className="p-2 transition-colors rounded-lg shrink-0 hover:bg-gray-100 text-[var(--foreground)] opacity-70 hover:opacity-100"
                                  >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -171,7 +171,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                             </nav>
 
                             {/* Footer Mobile */}
-                            <div className="pt-6 border-t border-gray-100 dark:border-zinc-800 mt-auto space-y-3">
+                            <div className="pt-6 border-t border-gray-100 mt-auto space-y-3">
                                 {currentConference?.enable_translation && <LanguageToggle mobile />}
                                 <ThemeToggle />
                                 <InstallPWAButton />
@@ -325,7 +325,7 @@ export function ResponsiveNav({ items, activeTab, setActiveTab, handleSignOut, o
                 {/* Footer Desktop */}
                 <motion.div 
                     layout
-                    className="p-3 border-t border-gray-100 dark:border-zinc-800 space-y-2"
+                    className="p-3 border-t border-gray-100 space-y-2"
                 >
                     {currentConference?.enable_translation && <LanguageToggle collapsed={isDesktopCollapsed} />}
                     <ThemeToggle collapsed={isDesktopCollapsed} />

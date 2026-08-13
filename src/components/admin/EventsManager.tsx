@@ -514,15 +514,15 @@ export function EventsManager() {
           ) : (
           <>
             {events.map(event => (
-              <div key={event.id} className="bg-white dark:bg-[#111111] p-4 xs:p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center group transition-all gap-3 xs:gap-4 border border-gray-100 dark:border-zinc-800 shadow-sm hover:shadow-md">
+              <div key={event.id} className="bg-white p-4 xs:p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center group transition-all gap-3 xs:gap-4 border border-gray-200 shadow-sm hover:shadow-md">
                   <div className="w-full sm:flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-md">{event.type}</span>
-                        <span className="text-xs text-gray-400 dark:text-gray-500 font-mono">{formatMexicoDate(event.date, {weekday: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">{event.type}</span>
+                        <span className="text-xs text-gray-400 font-mono">{formatMexicoDate(event.date, {weekday: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'})}</span>
                       </div>
-                      <h4 className="font-bold text-base xs:text-lg text-[#373737] dark:text-white leading-tight mb-1">{event.title}</h4>
+                      <h4 className="font-bold text-base xs:text-lg text-gray-900 leading-tight mb-1">{event.title}</h4>
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs xs:text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5 truncate max-w-full">
+                        <p className="text-xs xs:text-sm text-gray-500 flex items-center gap-1.5 truncate max-w-full">
                           <span 
                             className="w-1.5 h-1.5 rounded-full shrink-0"
                             style={{ backgroundColor: 'var(--color-acid)' }}
@@ -543,7 +543,7 @@ export function EventsManager() {
                         )}
                       </div>
                   </div>
-                  <div className="flex gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 border-gray-100 dark:border-zinc-800 pt-2.5 sm:pt-0 shrink-0">
+                  <div className="flex gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 border-gray-100 pt-2.5 sm:pt-0 shrink-0">
                       {(event.speaker_id || (event.speakers && event.speakers.length > 0)) && (
                           <Button size="sm" variant="ghost" onClick={() => handleOpenCertificate(event)} className="text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl" title="Ver Constancia de Ponente">
                               <Eye className="h-4 w-4" />

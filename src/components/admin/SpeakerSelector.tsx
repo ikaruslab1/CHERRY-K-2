@@ -83,14 +83,14 @@ export function SpeakerSelector({ users, selectedSpeakerId, onSelect }: SpeakerS
                 </div>
 
                 {isSpeakerOpen && (
-                    <div className="absolute z-20 w-full mt-2 bg-white dark:bg-[#111111] border border-gray-100 dark:border-zinc-800 rounded-xl shadow-2xl max-h-[300px] overflow-y-auto animate-in fade-in slide-in-from-top-2">
+                    <div className="absolute z-20 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-[300px] overflow-y-auto animate-in fade-in slide-in-from-top-2">
                         {filteredUsers.length === 0 ? (
-                            <div className="p-4 text-center text-sm text-gray-400 dark:text-gray-500">No se encontraron usuarios.</div>
+                            <div className="p-4 text-center text-sm text-gray-400">No se encontraron usuarios.</div>
                         ) : (
                             <div className="py-2">
                                 {ponentes.length > 0 && (
                                     <div>
-                                        <div className="px-4 py-2 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider bg-gray-50 dark:bg-zinc-900 sticky top-0 border-b border-gray-100 dark:border-zinc-800">Ponentes</div>
+                                        <div className="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50 sticky top-0 border-b border-gray-100">Ponentes</div>
                                         {ponentes.map(user => (
                                             <div 
                                                 key={user.id}
@@ -99,13 +99,13 @@ export function SpeakerSelector({ users, selectedSpeakerId, onSelect }: SpeakerS
                                                     setSpeakerSearch('');
                                                     setIsSpeakerOpen(false);
                                                 }}
-                                                className={`px-4 py-3 hover:bg-[#DBF227]/10 cursor-pointer flex items-center justify-between group transition-colors ${selectedSpeakerId === user.id ? 'bg-[#DBF227]/5' : ''}`}
+                                                className={`px-4 py-3 hover:bg-[var(--color-acid)]/10 cursor-pointer flex items-center justify-between group transition-colors ${selectedSpeakerId === user.id ? 'bg-[var(--color-acid)]/5' : ''}`}
                                             >
                                                 <div>
-                                                    <div className="font-bold text-[#373737] dark:text-white text-sm group-hover:text-black dark:group-hover:text-[var(--color-acid)]">{user.first_name} {user.last_name}</div>
-                                                    <div className="text-xs text-gray-400 dark:text-gray-500">{user.email}</div>
+                                                    <div className="font-bold text-gray-900 text-sm group-hover:text-black">{user.first_name} {user.last_name}</div>
+                                                    <div className="text-xs text-gray-400">{user.email}</div>
                                                 </div>
-                                                {selectedSpeakerId === user.id && <Check className="h-4 w-4 text-[#aacc00]" />}
+                                                {selectedSpeakerId === user.id && <Check className="h-4 w-4 text-[var(--color-acid)]" />}
                                             </div>
                                         ))}
                                     </div>

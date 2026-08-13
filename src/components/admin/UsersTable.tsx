@@ -194,23 +194,23 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
     <div className="space-y-6">
       <div className="flex flex-col xs:flex-row gap-4">
         <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input 
                 placeholder="Buscar por nombre o ID..." 
                 value={search} 
                 onChange={e => setSearch(e.target.value)} 
-                className="pl-10 bg-white dark:bg-[#111111] border-gray-200 dark:border-zinc-800 text-[#373737] dark:text-white focus:ring-[#DBF227]"
+                className="pl-10 bg-white border-gray-200 text-gray-900 focus:ring-[var(--color-acid)]"
             />
         </div>
         <div className="flex gap-2 w-full xs:w-auto">
-            <Button onClick={() => { mutateUsers(); mutatePlatformUsers(); }} disabled={loading} className="bg-[#373737] dark:bg-zinc-800 text-white hover:bg-black dark:hover:bg-zinc-700 flex-1 xs:flex-initial">
+            <Button onClick={() => { mutateUsers(); mutatePlatformUsers(); }} disabled={loading} className="bg-gray-900 text-white hover:bg-black flex-1 xs:flex-initial">
                 {'Buscar'}
             </Button>
             {(currentUserRole === 'admin' || currentUserRole === 'owner') && (
                 <Button 
                     onClick={() => setIsDownloadModalOpen(true)} 
                     variant="outline" 
-                    className="border-gray-200 dark:border-zinc-800 text-[#373737] dark:text-white hover:bg-gray-50 dark:hover:bg-zinc-800 gap-2 flex-1 xs:flex-initial shadow-sm"
+                    className="border-gray-200 text-gray-900 hover:bg-gray-50 gap-2 flex-1 xs:flex-initial shadow-sm"
                     title="Descargar Base de Datos"
                 >
                     <Download className="h-4 w-4" />
@@ -242,11 +242,11 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                     if (userList.length === 0) return null;
                     return (
                         <div className="space-y-3">
-                            <h3 className="text-lg font-bold text-[#373737] dark:text-white px-1">{title}</h3>
+                            <h3 className="text-lg font-bold text-gray-900 px-1">{title}</h3>
                             {/* Desktop Table View */}
-                            <div className="hidden md:block rounded-xl overflow-hidden bg-white dark:bg-[#111111] border border-gray-100 dark:border-zinc-800 shadow-sm">
+                            <div className="hidden md:block rounded-xl overflow-hidden bg-white border border-gray-200 shadow-sm">
                                 <table className="w-full text-sm text-left">
-                                    <thead className="bg-gray-50 dark:bg-zinc-900 text-gray-500 dark:text-gray-400 font-medium">
+                                    <thead className="bg-gray-50 text-gray-500 font-medium">
                                         <tr>
                                             <th className="p-4 w-16">QR</th>
                                             <th className="p-4 w-24">ID</th>
@@ -256,7 +256,7 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                                             {!readOnly && <th className="p-4 text-right">Acciones</th>}
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
+                                    <tbody className="divide-y divide-gray-100">
                                         {userList.map(user => {
                                             const isTargetOwner = user.role === 'owner';
                                             const isTargetAdmin = user.role === 'admin';
@@ -291,7 +291,7 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                                                 <td className="p-4 font-mono text-gray-600 font-medium">
                                                     {canViewDetails ? user.short_id : '••••••'}
                                                 </td>
-                                                <td className="p-4 text-[#373737] font-semibold">{user.first_name} {user.last_name}</td>
+                                                <td className="p-4 text-gray-900 font-semibold">{user.first_name} {user.last_name}</td>
                                                 <td className="p-4 text-gray-500">{user.degree}</td>
                                                 <td className="p-4">
                                                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${getRoleBadgeClasses(user.role)} capitalize`}>
@@ -330,15 +330,15 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                                     if (isTargetAdmin && (!isCurrentOwner && !isCurrentAdmin)) canViewDetails = false;
 
                                     return (
-                                    <div key={user.id} className="bg-white dark:bg-[#111111] p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm flex flex-col gap-3">
+                                    <div key={user.id} className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-3">
                                         <div className="flex justify-between items-start">
                                             <div className="flex items-center gap-3 min-w-0">
-                                                <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-gray-700 dark:text-gray-200 font-bold shrink-0 text-sm">
+                                                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 font-bold shrink-0 text-sm">
                                                     {user.first_name.charAt(0)}{user.last_name.charAt(0)}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <h4 className="font-bold text-[#373737] dark:text-white text-sm truncate">{user.first_name} {user.last_name}</h4>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                                                    <h4 className="font-bold text-gray-900 text-sm truncate">{user.first_name} {user.last_name}</h4>
+                                                    <p className="text-xs text-gray-500 font-mono">
                                                         {canViewDetails ? user.short_id : '••••••'}
                                                     </p>
                                                 </div>
@@ -348,18 +348,18 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                                             </span>
                                         </div>
                                         
-                                        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-zinc-800/80">
-                                            <span className="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[150px]">{user.degree || 'Sin grado'}</span>
+                                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                            <span className="text-xs text-gray-400 truncate max-w-[150px]">{user.degree || 'Sin grado'}</span>
                                             <div className="flex gap-2 shrink-0">
                                                 {canViewDetails ? (
                                                     <button
                                                         onClick={() => setSelectedQrUser(user)}
-                                                        className="p-2 bg-gray-50 dark:bg-zinc-900 hover:bg-[#DBF227]/20 text-gray-400 dark:text-gray-400 hover:text-[#373737] dark:hover:text-white rounded-lg transition-colors border border-gray-200 dark:border-zinc-800 cursor-pointer"
+                                                        className="p-2 bg-gray-50 hover:bg-[#DBF227]/20 text-gray-400 hover:text-[#373737] rounded-lg transition-colors border border-gray-200 cursor-pointer"
                                                     >
                                                         <QrCode className="h-4 w-4" />
                                                     </button>
                                                 ) : (
-                                                    <div className="p-2 text-gray-200 dark:text-zinc-700 cursor-not-allowed border border-transparent">
+                                                    <div className="p-2 text-gray-200 cursor-not-allowed border border-transparent">
                                                         <QrCode className="h-4 w-4" />
                                                     </div>
                                                 )}
@@ -390,7 +390,7 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                         <UserList title="Usuarios de la plataforma" userList={platformUsers} />
                         
                         {users.length === 0 && platformUsers.length === 0 && !loading && !loadingPlatform && (
-                            <div className="p-8 text-center text-gray-400 dark:text-gray-500 bg-white dark:bg-[#111111] rounded-xl border border-gray-100 dark:border-zinc-800">
+                            <div className="p-8 text-center text-gray-400 bg-white rounded-xl border border-gray-200">
                                 No se encontraron usuarios.
                             </div>
                         )}
@@ -404,29 +404,29 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
       {/* User Management Modal */}
       {selectedUser && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-              <div className="bg-white dark:bg-[#111111] border border-gray-100 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
                   {/* Header */}
-                  <div className="p-5 border-b border-gray-100 dark:border-zinc-800 flex justify-between items-start bg-gray-50/50 dark:bg-zinc-900/50">
+                  <div className="p-5 border-b border-gray-100 flex justify-between items-start bg-gray-50">
                       <div>
-                          <h3 className="text-lg font-bold text-[#373737] dark:text-white flex items-center gap-2">
-                             <UserCog className="h-5 w-5 text-[#DBF227]" />
+                          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                             <UserCog className="h-5 w-5 text-[var(--color-acid)]" />
                              Gestionar Usuario
                           </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{selectedUser.first_name} {selectedUser.last_name}</p>
+                          <p className="text-sm text-gray-500 mt-0.5">{selectedUser.first_name} {selectedUser.last_name}</p>
                       </div>
-                      <button onClick={closeModal} className="text-gray-400 hover:text-red-500 transition-colors rounded-lg p-1 hover:bg-red-50 dark:hover:bg-red-900/20">
+                      <button onClick={closeModal} className="text-gray-400 hover:text-red-500 transition-colors rounded-lg p-1 hover:bg-red-50">
                           <X className="h-5 w-5" />
                       </button>
                   </div>
 
                   {/* Tab Nav */}
-                  <div className="flex border-b border-gray-100 dark:border-zinc-800 bg-gray-50/60 dark:bg-zinc-900/30">
+                  <div className="flex border-b border-gray-100 bg-gray-50">
                       <button
                           onClick={() => setActiveTab('data')}
                           className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold transition-all ${
                               activeTab === 'data'
-                                  ? 'text-[#373737] dark:text-white border-b-2 border-[#DBF227] bg-white dark:bg-[#111111]'
-                                  : 'text-gray-400 hover:text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-zinc-800'
+                                  ? 'text-gray-900 border-b-2 border-[var(--color-acid)] bg-white'
+                                  : 'text-gray-400 hover:text-gray-600 hover:bg-white/60'
                           }`}
                       >
                           <User className="h-4 w-4" />
@@ -436,8 +436,8 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                           onClick={() => setActiveTab('role')}
                           className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold transition-all ${
                               activeTab === 'role'
-                                  ? 'text-[#373737] dark:text-white border-b-2 border-[#DBF227] bg-white dark:bg-[#111111]'
-                                  : 'text-gray-400 hover:text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-zinc-800'
+                                  ? 'text-gray-900 border-b-2 border-[var(--color-acid)] bg-white'
+                                  : 'text-gray-400 hover:text-gray-600 hover:bg-white/60'
                           }`}
                       >
                           <ShieldCheck className="h-4 w-4" />
@@ -448,8 +448,8 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                               onClick={() => setActiveTab('delete')}
                               className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold transition-all ${
                                   activeTab === 'delete'
-                                      ? 'text-red-600 border-b-2 border-red-400 bg-white dark:bg-[#111111]'
-                                      : 'text-gray-400 hover:text-red-500 hover:bg-white/60 dark:hover:bg-zinc-800'
+                                      ? 'text-red-600 border-b-2 border-red-400 bg-white'
+                                      : 'text-gray-400 hover:text-red-500 hover:bg-white/60'
                               }`}
                           >
                               <Trash2 className="h-4 w-4" />
@@ -639,13 +639,13 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
       {/* QR Code Modal */}
       {selectedQrUser && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
-              <div className="bg-white dark:bg-[#111111] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200 dark:border-zinc-800">
-                  <div className="p-4 border-b border-gray-100 dark:border-zinc-800 flex justify-between items-center bg-gray-50 dark:bg-zinc-900">
-                      <h3 className="font-bold text-[#373737] dark:text-white flex items-center gap-2">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-200">
+                  <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
                          <QrCode className="h-4 w-4" />
                          Código de Acceso
                       </h3>
-                      <button onClick={closeQrModal} className="text-gray-400 hover:text-red-500 transition-colors p-1 hover:bg-white dark:hover:bg-zinc-800 rounded-full">
+                      <button onClick={closeQrModal} className="text-gray-400 hover:text-red-500 transition-colors p-1 hover:bg-white rounded-full">
                           <X className="h-5 w-5" />
                       </button>
                   </div>
@@ -654,10 +654,10 @@ import { DownloadParticipantsModal } from './modals/DownloadParticipantsModal';
                       
                       {/* User Info */}
                       <div className="space-y-2">
-                          <div className="h-16 w-16 rounded-full bg-[#DBF227]/20 flex items-center justify-center text-[#373737] dark:text-white font-bold text-2xl mx-auto mb-3">
+                          <div className="h-16 w-16 rounded-full bg-[var(--color-acid)]/20 flex items-center justify-center text-gray-900 font-bold text-2xl mx-auto mb-3">
                               {selectedQrUser.first_name.charAt(0)}{selectedQrUser.last_name.charAt(0)}
                           </div>
-                          <h4 className="text-xl font-bold text-[#373737] leading-tight">
+                          <h4 className="text-xl font-bold text-gray-900 leading-tight">
                               {selectedQrUser.first_name} {selectedQrUser.last_name}
                           </h4>
                           <p className="text-sm text-gray-500 font-medium">

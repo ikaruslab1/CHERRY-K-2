@@ -38,20 +38,20 @@ export function MetricsView() {
       {/* Header + Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-xl font-bold text-[#373737] dark:text-white">Dashboard de Métricas</h3>
+          <h3 className="text-xl font-bold text-gray-900">Dashboard de Métricas</h3>
           {showGlobalCertTab && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Selecciona una vista para explorar los datos.</p>
+            <p className="text-xs text-gray-500 mt-0.5">Selecciona una vista para explorar los datos.</p>
           )}
         </div>
 
         {showGlobalCertTab && (
-          <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-zinc-900 rounded-xl self-start sm:self-auto border border-transparent dark:border-zinc-800">
+          <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl self-start sm:self-auto border border-gray-200">
             <button
               onClick={() => setActiveTab('events')}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 activeTab === 'events'
-                  ? 'bg-white dark:bg-[#111111] text-[#373737] dark:text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-900'
               }`}
             >
               <BarChart2 className="h-4 w-4" />
@@ -62,7 +62,7 @@ export function MetricsView() {
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                 activeTab === 'global-cert'
                   ? 'text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white'
+                  : 'text-gray-500 hover:text-gray-900'
               }`}
               style={
                 activeTab === 'global-cert'

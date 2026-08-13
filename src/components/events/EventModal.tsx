@@ -322,7 +322,7 @@ export function EventModal({
           
           {/* Title & Tags */}
           <div className="space-y-4">
-             <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white leading-[0.95] tracking-tight uppercase break-words text-balance">
+             <h2 className="text-3xl md:text-4xl font-bold text-black leading-[0.95] tracking-tight uppercase break-words text-balance">
                {getTranslatedField(event, 'title', language)}
              </h2>
 

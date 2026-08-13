@@ -125,22 +125,22 @@ export function FAQView({ defaultRole = 'users' }: { defaultRole?: string }) {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-2xl font-black text-black dark:text-white uppercase tracking-tight flex items-center gap-3">
+                    <h2 className="text-2xl font-black text-black uppercase tracking-tight flex items-center gap-3">
                         <HelpCircle className="w-8 h-8 text-[var(--color-acid)]" />
                         Centro de Ayuda
                     </h2>
-                    <p className="text-gray-500 dark:text-gray-400 font-medium mt-2">
+                    <p className="text-gray-500 font-medium mt-2">
                         Respuestas a las preguntas más frecuentes sobre el uso de la plataforma.
                     </p>
                 </div>
                 
                 {/* Search */}
                 <div className="relative w-full md:w-80">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input 
                         type="text" 
                         placeholder="Buscar pregunta..." 
-                        className="w-full bg-white dark:bg-[#111111] border border-gray-200 dark:border-zinc-800 text-black dark:text-white pl-10 pr-4 py-2.5 rounded-xl text-sm font-medium focus:outline-none focus:border-black/20 dark:focus:border-zinc-700 focus:ring-4 focus:ring-gray-50 dark:focus:ring-zinc-800 transition-all"
+                        className="w-full bg-white border border-gray-200 text-black pl-10 pr-4 py-2.5 rounded-xl text-sm font-medium focus:outline-none focus:border-[var(--color-acid)] focus:ring-4 focus:ring-gray-100 transition-all"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -157,13 +157,13 @@ export function FAQView({ defaultRole = 'users' }: { defaultRole?: string }) {
                             key={category.id}
                             onClick={() => setSelectedCategory(category.id)}
                             className={cn(
-                                "flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all whitespace-nowrap borderSelect cursor-pointer",
+                                "flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all whitespace-nowrap cursor-pointer",
                                 isSelected 
-                                    ? "bg-black dark:bg-[var(--color-acid)] text-white dark:text-black shadow-lg scale-105" 
-                                    : "bg-white dark:bg-[#111111] text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-900"
+                                    ? "bg-[var(--color-acid)] text-black shadow-lg scale-105" 
+                                    : "bg-white text-gray-600 border border-gray-200 hover:border-gray-300 hover:text-black hover:bg-gray-50"
                             )}
                         >
-                            <Icon className={cn("w-4 h-4", isSelected ? "text-[var(--color-acid)]" : "text-current")} />
+                            <Icon className={cn("w-4 h-4", isSelected ? "text-black" : "text-gray-400")} />
                             {category.label}
                         </button>
                     );
@@ -176,7 +176,7 @@ export function FAQView({ defaultRole = 'users' }: { defaultRole?: string }) {
                     {filteredData.filter(c => searchQuery ? true : c.id === selectedCategory).map((category) => (
                         <div key={category.id} className="space-y-4">
                             {searchQuery && (
-                                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-8 mb-4 border-b border-gray-100 dark:border-zinc-800 pb-2">
+                                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-8 mb-4 border-b border-gray-100 pb-2">
                                     {category.label}
                                 </h3>
                             )}
@@ -191,13 +191,13 @@ export function FAQView({ defaultRole = 'users' }: { defaultRole?: string }) {
                         <motion.div 
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="text-center py-20 bg-gray-50 dark:bg-zinc-900/40 rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800"
+                            className="text-center py-20 bg-gray-50 rounded-2xl border border-dashed border-gray-200"
                         >
-                            <Search className="w-12 h-12 text-gray-300 dark:text-zinc-700 mx-auto mb-4" />
-                            <p className="text-gray-500 dark:text-gray-400 font-medium">No se encontraron resultados para "{searchQuery}"</p>
+                            <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                            <p className="text-gray-500 font-medium">No se encontraron resultados para "{searchQuery}"</p>
                             <button 
                                 onClick={() => setSearchQuery('')}
-                                className="mt-4 text-sm font-bold text-black dark:text-white border-b border-black dark:border-white hover:opacity-70 transition-opacity cursor-pointer"
+                                className="mt-4 text-sm font-bold text-black border-b border-black hover:opacity-70 transition-opacity cursor-pointer"
                             >
                                 Limpiar búsqueda
                             </button>
@@ -219,22 +219,22 @@ function FAQItemComponent({ item }: { item: FAQItem }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             className={cn(
-                "bg-white dark:bg-[#111111] rounded-xl border transition-all duration-300 overflow-hidden",
-                isOpen ? "border-[#DBF227] shadow-md ring-1 ring-[#DBF227]/50" : "border-gray-100 dark:border-zinc-800 hover:border-gray-200 dark:hover:border-zinc-750 hover:shadow-sm"
+                "bg-white rounded-xl border transition-all duration-300 overflow-hidden",
+                isOpen ? "border-[var(--color-acid)] shadow-md ring-1 ring-[var(--color-acid)]/50" : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
             )}
         >
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full flex items-center justify-between p-5 text-left gap-4 cursor-pointer"
             >
-                <span className={cn("font-bold text-lg transition-colors", isOpen ? "text-black dark:text-[var(--color-acid)]" : "text-[#373737] dark:text-gray-200")}>
+                <span className={cn("font-bold text-lg transition-colors", isOpen ? "text-black" : "text-gray-800")}>
                     {item.question}
                 </span>
                 <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center transition-all bg-gray-50 dark:bg-zinc-900", 
-                    isOpen && "bg-[#DBF227] rotate-180"
+                    "w-8 h-8 rounded-full flex items-center justify-center transition-all bg-gray-50", 
+                    isOpen && "bg-[var(--color-acid)] rotate-180"
                 )}>
-                    <ChevronDown className={cn("w-5 h-5 transition-colors", isOpen ? "text-black" : "text-gray-400 dark:text-gray-550")} />
+                    <ChevronDown className={cn("w-5 h-5 transition-colors", isOpen ? "text-black" : "text-gray-400")} />
                 </div>
             </button>
             
@@ -247,11 +247,11 @@ function FAQItemComponent({ item }: { item: FAQItem }) {
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
                         <div className="px-5 pb-6 pt-0">
-                            <div className="h-px w-full bg-gray-100 dark:bg-zinc-800 mb-4" />
+                            <div className="h-px w-full bg-gray-100 mb-4" />
                             <div 
-                                className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none"
+                                className="text-gray-600 text-sm leading-relaxed max-w-none"
                                 dangerouslySetInnerHTML={{ 
-                                    __html: item.answer.replace(/\*\*(.*?)\*\*/g, '<strong class="text-black dark:text-white font-bold">$1</strong>') 
+                                    __html: item.answer.replace(/\*\*(.*?)\*\*/g, '<strong class="text-black font-bold">$1</strong>') 
                                 }}
                             />
                         </div>

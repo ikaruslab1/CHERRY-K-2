@@ -169,10 +169,10 @@ export function EventMetricsDetail({ eventId, onBack }: EventMetricsDetailProps)
           </Button>
       </div>
 
-      <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
          <div className="overflow-x-auto">
              <table className="w-full text-sm text-left">
-                 <thead className="bg-gray-50/50 dark:bg-zinc-900/50 text-gray-500 dark:text-gray-400 font-medium border-b border-gray-100 dark:border-zinc-800">
+                 <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-100">
                      <tr>
                          <th className="px-6 py-4 w-1/3">Asistente</th>
                          <th className="px-6 py-4 w-24 text-center">Estado</th>
@@ -298,10 +298,10 @@ export function EventMetricsDetail({ eventId, onBack }: EventMetricsDetailProps)
           </Button>
       </div>
 
-      <div className="bg-white dark:bg-[#111111] rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
          <div className="overflow-x-auto">
              <table className="w-full text-sm text-left">
-                 <thead className="bg-gray-50/50 dark:bg-zinc-900/50 text-gray-500 dark:text-gray-400 font-medium border-b border-gray-100 dark:border-zinc-800">
+                 <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-100">
                      <tr>
                          <th className="px-6 py-4">Usuario</th>
                          <th className="px-6 py-4">Email</th>

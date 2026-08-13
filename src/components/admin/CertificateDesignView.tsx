@@ -73,9 +73,9 @@ export function CertificateDesignView() {
                 recommendedResolution="1280px+ (Escritorio)"
             />
 
-            <div className="flex items-center gap-4 mb-2 pb-2 border-b border-gray-100 dark:border-zinc-800 px-4 lg:px-6">
-                <h2 className="font-bold text-lg truncate text-gray-900 dark:text-white">
-                    Diseño Global del Evento: <span className="text-[#373737] dark:text-gray-300">{currentConference.title}</span>
+            <div className="flex items-center gap-4 mb-2 pb-2 border-b border-gray-100 px-4 lg:px-6">
+                <h2 className="font-bold text-lg truncate text-gray-900">
+                    Diseño Global del Evento: <span className="text-gray-700">{currentConference.title}</span>
                 </h2>
             </div>
             <div className="flex-1 overflow-hidden">

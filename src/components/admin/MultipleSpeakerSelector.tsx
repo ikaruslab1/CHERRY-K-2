@@ -81,12 +81,12 @@ export function MultipleSpeakerSelector({
                         {selectedUsers.map((user, index) => (
                             <div 
                                 key={user.id}
-                                className="flex items-center justify-between gap-2 bg-white dark:bg-zinc-900 px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-zinc-800 text-xs group transition-all animate-in zoom-in-95 duration-200"
+                                className="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs group transition-all animate-in zoom-in-95 duration-200"
                                 style={{ '--hover-border-color': 'rgb(var(--color-acid-rgb) / 0.5)' } as any}
                             >
                                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 shrink-0">#{index + 1}</span>
-                                    <span className="font-semibold text-[#373737] dark:text-white truncate">
+                                    <span className="text-[10px] font-bold text-gray-400 shrink-0">#{index + 1}</span>
+                                    <span className="font-semibold text-gray-900 truncate">
                                         {user.first_name} {user.last_name}
                                     </span>
                                 </div>
@@ -112,13 +112,13 @@ export function MultipleSpeakerSelector({
             {/* Search Input */}
             <div className="relative">
                 <div className="relative">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <input
                         type="text"
                         value={speakerSearch}
                         placeholder={selectedSpeakerIds.length >= maxSpeakers ? `Máximo ${maxSpeakers} ponentes` : "Buscar y agregar ponente..."}
                         disabled={selectedSpeakerIds.length >= maxSpeakers}
-                        className="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 dark:border-zinc-800 text-[#373737] dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent bg-gray-50/50 dark:bg-zinc-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent bg-gray-50/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ '--tw-ring-color': 'var(--color-acid)' } as any}
                         onFocus={() => {
                             if (selectedSpeakerIds.length < maxSpeakers) {
@@ -140,9 +140,9 @@ export function MultipleSpeakerSelector({
 
                 {/* Dropdown */}
                 {isSpeakerOpen && selectedSpeakerIds.length < maxSpeakers && (
-                    <div className="absolute z-20 w-full mt-2 bg-white dark:bg-[#111111] border border-gray-100 dark:border-zinc-800 rounded-xl shadow-2xl max-h-[300px] overflow-y-auto animate-in fade-in slide-in-from-top-2">
+                    <div className="absolute z-20 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-[300px] overflow-y-auto animate-in fade-in slide-in-from-top-2">
                         {filteredUsers.length === 0 ? (
-                            <div className="p-4 text-center text-sm text-gray-400 dark:text-gray-500">
+                            <div className="p-4 text-center text-sm text-gray-400">
                                 {speakerSearch ? 'No se encontraron usuarios.' : 'Todos los usuarios ya están agregados.'}
                             </div>
                         ) : (

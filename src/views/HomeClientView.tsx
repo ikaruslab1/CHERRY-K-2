@@ -48,11 +48,11 @@ export default function HomeClientView({ initialConferences }: HomeClientViewPro
                   </div>
                   
                   <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground mt-auto pt-4 border-t border-border/50">
-                    <span className="px-2 py-1 rounded-full bg-blue-100/10 text-blue-600 dark:text-blue-400">
+                    <span className="px-2 py-1 rounded-full bg-blue-50 text-blue-600">
                       {new Date(conf.start_date).toLocaleDateString()}
                     </span>
                     <span>-</span>
-                    <span className="px-2 py-1 rounded-full bg-violet-100/10 text-violet-600 dark:text-violet-400">
+                    <span className="px-2 py-1 rounded-full bg-violet-50 text-violet-600">
                       {new Date(conf.end_date).toLocaleDateString()}
                     </span>
                   </div>
@@ -69,7 +69,7 @@ export default function HomeClientView({ initialConferences }: HomeClientViewPro
         <div className="flex gap-4 mt-8">
             <button 
                 onClick={() => router.push('/login')}
-                className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity bg-black text-white dark:bg-white dark:text-black"
+                className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity bg-black text-white"
             >
                 Iniciar Sesión
             </button>
