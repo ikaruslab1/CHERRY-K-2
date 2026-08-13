@@ -139,6 +139,7 @@ export async function registerUser(data: {
         firstName: data.firstName,
         username: cleanUsername,
         shortId,
+        conferenceId: data.conferenceId,
       });
 
       if (!emailResult.success) {

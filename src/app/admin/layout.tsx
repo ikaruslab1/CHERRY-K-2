@@ -16,7 +16,8 @@ import {
   QrCode, 
   User, 
   HelpCircle,
-  ArrowLeft
+  ArrowLeft,
+  Mail
 } from 'lucide-react';
 import { ResponsiveNav } from '@/components/layout/ResponsiveNav';
 import { SidebarAwareContainer } from '@/components/layout/SidebarAwareContainer';
@@ -51,6 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname.startsWith('/admin/users')) return 'users';
     if (pathname.startsWith('/admin/certificates')) return 'design-certificates';
     if (pathname.startsWith('/admin/landing')) return 'landing-editor';
+    if (pathname.startsWith('/admin/email')) return 'email-editor';
     if (pathname.startsWith('/admin/embeddings')) return 'embeddings';
     if (pathname.startsWith('/admin/scanner')) return 'attendance';
     return '';
@@ -115,6 +117,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       icon: <Palette className="w-5 h-5" />, 
       show: isAdmin,
       onClick: () => router.push('/admin/landing')
+    },
+    { 
+      id: 'email-editor', 
+      label: t('nav.design_emails'), 
+      icon: <Mail className="w-5 h-5" />, 
+      show: isAdmin,
+      onClick: () => router.push('/admin/email')
     }
   ];
 
@@ -126,7 +135,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { id: 'metrics', label: 'Métricas', icon: <LayoutDashboard className="w-5 h-5" />, show: isAdmin },
     { id: 'embeddings', label: 'Embeddings', icon: <Code className="w-5 h-5" />, show: isAdmin },
     { id: 'design-certificates', label: 'Constancias', icon: <Award className="w-5 h-5" />, show: isAdmin },
-    { id: 'landing-editor', label: 'Landing', icon: <Palette className="w-5 h-5" />, show: isAdmin }
+    { id: 'landing-editor', label: 'Landing', icon: <Palette className="w-5 h-5" />, show: isAdmin },
+    { id: 'email-editor', label: 'Correos', icon: <Mail className="w-5 h-5" />, show: isAdmin }
   ];
 
   if (loading) {
@@ -145,7 +155,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   // Check if we are on a full-width visual editor page
-  const isFullWidthPage = pathname.startsWith('/admin/certificates') || pathname.startsWith('/admin/landing');
+  const isFullWidthPage = pathname.startsWith('/admin/certificates') || pathname.startsWith('/admin/landing') || pathname.startsWith('/admin/email');
 
   const handleBottomNavAction = (id: string) => {
     if (id === 'profile_link') router.push('/profile');
@@ -156,6 +166,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     else if (id === 'embeddings') router.push('/admin/embeddings');
     else if (id === 'design-certificates') router.push('/admin/certificates');
     else if (id === 'landing-editor') router.push('/admin/landing');
+    else if (id === 'email-editor') router.push('/admin/email');
   };
 
   if (isFullWidthPage) {

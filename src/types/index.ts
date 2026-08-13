@@ -132,6 +132,8 @@ export interface Conference {
   deliver_global_certificate?: boolean; // If false, show email banner instead of certificate
   custom_landing_enabled?: boolean;
   conference_landing_config?: ConferenceLandingConfig | null;
+  custom_email_enabled?: boolean;
+  registration_email_config?: RegistrationEmailConfig | null;
 }
 
 // --- New Modular Landing Types ---
@@ -230,3 +232,70 @@ export interface EventInterest {
   user_id: string;
   created_at?: string;
 }
+
+// --- Registration Email Personalization Types ---
+
+export interface RegistrationEmailConfig {
+  enabled?: boolean;
+  subject: string;
+  preheader?: string;
+  logo?: {
+    type: 'preset' | 'custom' | 'text' | 'none';
+    value: string; // Preset name (e.g. 'unam'), custom URL, or text string
+    height?: number; // Height in px (default ~48)
+    alignment?: 'left' | 'center' | 'right';
+  };
+  styles: {
+    font_family: string;
+    font_size_body: string;
+    text_color: string;
+    background_color: string;
+    card_background: string;
+    accent_color: string;
+    border_radius: string;
+    border_color?: string;
+  };
+  header_banner?: {
+    show: boolean;
+    title?: string;
+    subtitle?: string;
+    background_type?: 'accent' | 'solid' | 'gradient' | 'image';
+    background_value?: string;
+    text_color?: string;
+  };
+  body_html: string;
+  credentials_box?: {
+    show: boolean;
+    title?: string;
+    background_color?: string;
+    border_color?: string;
+    show_username?: boolean;
+    show_password?: boolean;
+    show_role?: boolean;
+    show_email?: boolean;
+  };
+  agenda_section?: {
+    show: boolean;
+    title?: string;
+    selected_event_ids?: string[];
+  };
+  cta_button?: {
+    show: boolean;
+    text?: string;
+    url?: string;
+    bg_color?: string;
+    text_color?: string;
+    border_radius?: string;
+    alignment?: 'left' | 'center' | 'right';
+  };
+  footer?: {
+    text?: string;
+    copyright_text?: string;
+    show_socials?: boolean;
+    website_url?: string;
+    twitter_url?: string;
+    instagram_url?: string;
+    linkedin_url?: string;
+  };
+}
+
