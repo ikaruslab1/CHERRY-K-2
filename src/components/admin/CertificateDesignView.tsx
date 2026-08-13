@@ -65,7 +65,7 @@ export function CertificateDesignView() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-60px)] relative">
+        <div className="flex flex-col h-full relative">
             {/* Desktop View Recommended Warning Overlay for Mobile */}
             <DesktopRequiredWarning
                 title="Editor de Constancias"

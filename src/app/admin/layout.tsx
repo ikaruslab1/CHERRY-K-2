@@ -179,9 +179,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           handleSignOut={handleSignOut}
           hideMobileToggle={true}
         />
-        <div className="mt-12 md:mt-0 h-[calc(100vh-48px)] md:h-screen">
+        <SidebarAwareContainer className="h-[calc(100vh-48px)] md:h-screen overflow-hidden">
           {children}
-        </div>
+        </SidebarAwareContainer>
         <BottomNav 
           items={bottomNavItems}
           activeTab={activeTab}
